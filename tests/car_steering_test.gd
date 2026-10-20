@@ -74,6 +74,12 @@ func run() -> void:
 	ride(game, 40)
 	check(player.steer_angle > 0.08, "Front wheels steer left (%.2f rad)" % player.steer_angle)
 	for pivot in car.front_pivots: check(absf(pivot.rotation.y) > 0.05, "%s yaws with the steering" % pivot.name)
+	# Rear wheels never steer.
+	for pivot in player.steer_pivots: check(not str(pivot.name).begins_with("SteerRear"), "No rear pivot is steered (%s)" % pivot.name)
+	for w in car.axle_nodes:
+		if str(w.name).begins_with("WheelRear"):
+			var fwd: Vector3 = (car.global_transform.affine_inverse() * w.global_transform).basis.z
+			check(absf(atan2(fwd.x, fwd.z)) < 0.02, "%s stays straight while steering (%.3f rad)" % [w.name, atan2(fwd.x, fwd.z)])
 	var sw: Node3D = car.steering_wheels[0]
 	var rest: Transform3D = sw.get_meta("rest")
 	var turned := rest.basis.inverse() * sw.transform.basis

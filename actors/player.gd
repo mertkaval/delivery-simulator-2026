@@ -59,7 +59,9 @@ func replace_vehicle(at: Vector3) -> void:
 	steering_pivot = bicycle.find_child("SteeringPivot", true, false) as Node3D
 	steer_pivots.clear()
 	for node in bicycle.find_children("Steer*", "Node3D", true, false):
-		if not node is MeshInstance3D and not str(node.name).begins_with("SteeringWheel"):
+		# Only front-axle pivots steer: the Jetta also has SteerRear* pivots (rear hubs), which
+		# must stay straight.
+		if not node is MeshInstance3D and not str(node.name).begins_with("SteeringWheel") and not str(node.name).begins_with("SteerRear"):
 			if not node.has_meta("rest"): node.set_meta("rest", node.transform)
 			steer_pivots.append(node)
 	if steering_pivot != null and not steer_pivots.has(steering_pivot): steer_pivots.append(steering_pivot)
