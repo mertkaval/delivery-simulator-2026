@@ -1,0 +1,254 @@
+{
+  "citizen_0": {
+    "triangles": 7992,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ]
+  },
+  "citizen_0_lod1": {
+    "triangles": 3836,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ]
+  },
+  "citizen_0_lod2": {
+    "triangles": 1591,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ]
+  },
+  "citizen_1": {
+    "triangles": 8948,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ]
+  },
+  "citizen_1_lod1": {
+    "triangles": 4294,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ]
+  },
+  "citizen_1_lod2": {
+    "triangles": 1784,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ]
+  },
+  "citizen_2": {
+    "triangles": 8100,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ]
+  },
+  "citizen_2_lod1": {
+    "triangles": 3888,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ]
+  },
+  "citizen_2_lod2": {
+    "triangles": 1613,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ]
+  },
+  "citizen_3": {
+    "triangles": 8180,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ]
+  },
+  "citizen_3_lod1": {
+    "triangles": 3926,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ]
+  },
+  "citizen_3_lod2": {
+    "triangles": 1629,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ]
+  },
+  "citizen_4": {
+    "triangles": 8760,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ]
+  },
+  "citizen_4_lod1": {
+    "triangles": 4204,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ]
+  },
+  "citizen_4_lod2": {
+    "triangles": 1746,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ]
+  },
+  "citizen_5": {
+    "triangles": 8048,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ]
+  },
+  "citizen_5_lod1": {
+    "triangles": 3862,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ]
+  },
+  "citizen_5_lod2": {
+    "triangles": 1603,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ]
+  }
+}

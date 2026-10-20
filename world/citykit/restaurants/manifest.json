@@ -1,0 +1,1038 @@
+{
+ "rs_floor": {
+  "near": {
+   "triangles": 10,
+   "materials": [
+    "KitTerrazzo"
+   ]
+  },
+  "far": {
+   "triangles": 10,
+   "materials": [
+    "KitTerrazzo"
+   ]
+  }
+ },
+ "rs_floor_wood": {
+  "near": {
+   "triangles": 10,
+   "materials": [
+    "KitWoodFloor"
+   ]
+  },
+  "far": {
+   "triangles": 10,
+   "materials": [
+    "KitWoodFloor"
+   ]
+  }
+ },
+ "rs_floor_kitchen": {
+  "near": {
+   "triangles": 22,
+   "materials": [
+    "KitSubwayTile",
+    "KitSteelDark"
+   ]
+  },
+  "far": {
+   "triangles": 10,
+   "materials": [
+    "KitSubwayTile"
+   ]
+  }
+ },
+ "rs_ceiling": {
+  "near": {
+   "triangles": 32,
+   "materials": [
+    "KitPlaster",
+    "KitLampGlow"
+   ]
+  },
+  "far": {
+   "triangles": 32,
+   "materials": [
+    "KitPlaster",
+    "KitLampGlow"
+   ]
+  }
+ },
+ "rs_wall": {
+  "near": {
+   "triangles": 24,
+   "materials": [
+    "KitCini",
+    "KitWallPaint",
+    "KitOak"
+   ]
+  },
+  "far": {
+   "triangles": 24,
+   "materials": [
+    "KitCini",
+    "KitWallPaint",
+    "KitOak"
+   ]
+  }
+ },
+ "rs_wall_wood": {
+  "near": {
+   "triangles": 24,
+   "materials": [
+    "KitOak",
+    "KitWallPaint"
+   ]
+  },
+  "far": {
+   "triangles": 24,
+   "materials": [
+    "KitOak",
+    "KitWallPaint"
+   ]
+  }
+ },
+ "rs_wall_kitchen": {
+  "near": {
+   "triangles": 2,
+   "materials": [
+    "KitSubwayTile"
+   ]
+  },
+  "far": {
+   "triangles": 2,
+   "materials": [
+    "KitSubwayTile"
+   ]
+  }
+ },
+ "rs_back": {
+  "near": {
+   "triangles": 2,
+   "materials": [
+    "KitSubwayTile"
+   ]
+  },
+  "far": {
+   "triangles": 2,
+   "materials": [
+    "KitSubwayTile"
+   ]
+  }
+ },
+ "rs_pass": {
+  "near": {
+   "triangles": 118,
+   "materials": [
+    "KitCini",
+    "KitWallPaint",
+    "KitSubwayTile",
+    "KitOak",
+    "KitSteel",
+    "KitSteelDark",
+    "KitLampGlow",
+    "KitAccentPaint"
+   ]
+  },
+  "far": {
+   "triangles": 58,
+   "materials": [
+    "KitCini",
+    "KitWallPaint",
+    "KitSubwayTile",
+    "KitOak",
+    "KitSteel"
+   ]
+  }
+ },
+ "rs_door": {
+  "near": {
+   "triangles": 92,
+   "materials": [
+    "KitCini",
+    "KitWallPaint",
+    "KitSubwayTile",
+    "KitOak",
+    "KitSteelDark",
+    "KitClearGlass",
+    "KitChalkboard"
+   ]
+  },
+  "far": {
+   "triangles": 46,
+   "materials": [
+    "KitCini",
+    "KitWallPaint",
+    "KitSubwayTile",
+    "KitOak",
+    "KitSteelDark"
+   ]
+  }
+ },
+ "rs_plain": {
+  "near": {
+   "triangles": 8,
+   "materials": [
+    "KitCini",
+    "KitWallPaint",
+    "KitSubwayTile"
+   ]
+  },
+  "far": {
+   "triangles": 8,
+   "materials": [
+    "KitCini",
+    "KitWallPaint",
+    "KitSubwayTile"
+   ]
+  }
+ },
+ "rs_counter": {
+  "near": {
+   "triangles": 204,
+   "materials": [
+    "KitRubber",
+    "KitAccentPaint",
+    "KitCounterStone",
+    "KitOak",
+    "KitSteel"
+   ]
+  },
+  "far": {
+   "triangles": 32,
+   "materials": [
+    "KitRubber",
+    "KitAccentPaint",
+    "KitCounterStone"
+   ]
+  }
+ },
+ "rs_register": {
+  "near": {
+   "triangles": 88,
+   "materials": [
+    "KitRubber",
+    "KitSteelDark",
+    "KitChalkboard",
+    "KitCeramic",
+    "KitClearGlass"
+   ]
+  },
+  "far": {
+   "triangles": 48,
+   "materials": [
+    "KitRubber",
+    "KitSteelDark",
+    "KitChalkboard"
+   ]
+  }
+ },
+ "rs_pickup_shelf": {
+  "near": {
+   "triangles": 200,
+   "materials": [
+    "KitSteel",
+    "KitAccentPaint",
+    "KitLampGlow",
+    "KitPaperBag"
+   ]
+  },
+  "far": {
+   "triangles": 68,
+   "materials": [
+    "KitSteel",
+    "KitAccentPaint"
+   ]
+  }
+ },
+ "rs_menu_board": {
+  "near": {
+   "triangles": 96,
+   "materials": [
+    "KitChalkboard",
+    "KitBrass",
+    "KitMeatRoast",
+    "KitBread",
+    "KitLettuce"
+   ]
+  },
+  "far": {
+   "triangles": 60,
+   "materials": [
+    "KitChalkboard",
+    "KitBrass"
+   ]
+  }
+ },
+ "rs_table2": {
+  "near": {
+   "triangles": 260,
+   "materials": [
+    "KitOak",
+    "KitSteelDark",
+    "KitCeramic",
+    "KitTeaGlass"
+   ]
+  },
+  "far": {
+   "triangles": 192,
+   "materials": [
+    "KitOak",
+    "KitSteelDark"
+   ]
+  }
+ },
+ "rs_table4": {
+  "near": {
+   "triangles": 436,
+   "materials": [
+    "KitOak",
+    "KitSteelDark",
+    "KitCeramic",
+    "KitClearGlass"
+   ]
+  },
+  "far": {
+   "triangles": 308,
+   "materials": [
+    "KitOak",
+    "KitSteelDark"
+   ]
+  }
+ },
+ "rs_booth": {
+  "near": {
+   "triangles": 132,
+   "materials": [
+    "KitOak",
+    "KitUpholstery",
+    "KitSteelDark",
+    "KitCeramic"
+   ]
+  },
+  "far": {
+   "triangles": 116,
+   "materials": [
+    "KitOak",
+    "KitUpholstery",
+    "KitSteelDark"
+   ]
+  }
+ },
+ "rs_bar_ledge": {
+  "near": {
+   "triangles": 372,
+   "materials": [
+    "KitOak",
+    "KitSteelDark",
+    "KitUpholstery"
+   ]
+  },
+  "far": {
+   "triangles": 232,
+   "materials": [
+    "KitOak",
+    "KitSteelDark",
+    "KitUpholstery"
+   ]
+  }
+ },
+ "rs_condiments": {
+  "near": {
+   "triangles": 160,
+   "materials": [
+    "KitAccentPaint",
+    "KitCounterStone",
+    "KitSteel",
+    "KitTomato",
+    "KitLemon",
+    "KitCream",
+    "KitSteelDark",
+    "KitRubber"
+   ]
+  },
+  "far": {
+   "triangles": 22,
+   "materials": [
+    "KitAccentPaint",
+    "KitCounterStone"
+   ]
+  }
+ },
+ "rs_drink_fridge": {
+  "near": {
+   "triangles": 408,
+   "materials": [
+    "KitSteelDark",
+    "KitRubber",
+    "KitAccentPaint",
+    "KitClearGlass",
+    "KitSteel",
+    "KitLampGlow",
+    "KitCream",
+    "KitMeatRaw",
+    "KitTomato"
+   ]
+  },
+  "far": {
+   "triangles": 40,
+   "materials": [
+    "KitSteelDark",
+    "KitRubber",
+    "KitAccentPaint",
+    "KitClearGlass",
+    "KitSteel",
+    "KitLampGlow"
+   ]
+  }
+ },
+ "rs_ayran_machine": {
+  "near": {
+   "triangles": 232,
+   "materials": [
+    "KitSteel",
+    "KitClearGlass",
+    "KitCream",
+    "KitSteelDark"
+   ]
+  },
+  "far": {
+   "triangles": 208,
+   "materials": [
+    "KitSteel",
+    "KitClearGlass",
+    "KitCream",
+    "KitSteelDark"
+   ]
+  }
+ },
+ "rs_tea_station": {
+  "near": {
+   "triangles": 272,
+   "materials": [
+    "KitSteel",
+    "KitCopper",
+    "KitBrass",
+    "KitTeaGlass",
+    "KitCeramic"
+   ]
+  },
+  "far": {
+   "triangles": 104,
+   "materials": [
+    "KitSteel",
+    "KitCopper",
+    "KitBrass"
+   ]
+  }
+ },
+ "rs_pendant": {
+  "near": {
+   "triangles": 52,
+   "materials": [
+    "KitRubber",
+    "KitBrass",
+    "KitLampGlow"
+   ]
+  },
+  "far": {
+   "triangles": 52,
+   "materials": [
+    "KitRubber",
+    "KitBrass",
+    "KitLampGlow"
+   ]
+  }
+ },
+ "rs_plant": {
+  "near": {
+   "triangles": 152,
+   "materials": [
+    "KitCeramic",
+    "KitSoil",
+    "KitBark",
+    "KitFoliage"
+   ]
+  },
+  "far": {
+   "triangles": 110,
+   "materials": [
+    "KitCeramic",
+    "KitSoil",
+    "KitBark",
+    "KitFoliage"
+   ]
+  }
+ },
+ "rs_range": {
+  "near": {
+   "triangles": 220,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitCharcoal",
+    "KitSoup"
+   ]
+  },
+  "far": {
+   "triangles": 122,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitCharcoal"
+   ]
+  }
+ },
+ "rs_grill": {
+  "near": {
+   "triangles": 668,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitEmber",
+    "KitMeatRoast"
+   ]
+  },
+  "far": {
+   "triangles": 34,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitEmber"
+   ]
+  }
+ },
+ "rs_fryer": {
+  "near": {
+   "triangles": 112,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitPastry",
+    "KitRubber"
+   ]
+  },
+  "far": {
+   "triangles": 58,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitPastry"
+   ]
+  }
+ },
+ "rs_prep": {
+  "near": {
+   "triangles": 248,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitOak",
+    "KitTomato",
+    "KitLettuce",
+    "KitCream",
+    "KitLemon",
+    "KitCeramic"
+   ]
+  },
+  "far": {
+   "triangles": 22,
+   "materials": [
+    "KitSteel"
+   ]
+  }
+ },
+ "rs_sink": {
+  "near": {
+   "triangles": 168,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitCeramic"
+   ]
+  },
+  "far": {
+   "triangles": 42,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark"
+   ]
+  }
+ },
+ "rs_fridge": {
+  "near": {
+   "triangles": 58,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitChalkboard"
+   ]
+  },
+  "far": {
+   "triangles": 10,
+   "materials": [
+    "KitSteel"
+   ]
+  }
+ },
+ "rs_hood": {
+  "near": {
+   "triangles": 94,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitLampGlow"
+   ]
+  },
+  "far": {
+   "triangles": 22,
+   "materials": [
+    "KitSteel"
+   ]
+  }
+ },
+ "rs_shelf": {
+  "near": {
+   "triangles": 264,
+   "materials": [
+    "KitSteel",
+    "KitCopper",
+    "KitTomato",
+    "KitLemon",
+    "KitPistachio",
+    "KitPastry"
+   ]
+  },
+  "far": {
+   "triangles": 24,
+   "materials": [
+    "KitSteel"
+   ]
+  }
+ },
+ "rs_doner": {
+  "near": {
+   "triangles": 84,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitEmber",
+    "KitOak"
+   ]
+  },
+  "far": {
+   "triangles": 60,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitEmber"
+   ]
+  }
+ },
+ "rs_doner_cone": {
+  "near": {
+   "triangles": 164,
+   "materials": [
+    "KitMeatRoast",
+    "KitSteel"
+   ]
+  },
+  "far": {
+   "triangles": 164,
+   "materials": [
+    "KitMeatRoast",
+    "KitSteel"
+   ]
+  }
+ },
+ "rs_kokorec": {
+  "near": {
+   "triangles": 124,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitEmber",
+    "KitOak",
+    "KitBread"
+   ]
+  },
+  "far": {
+   "triangles": 46,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitEmber"
+   ]
+  }
+ },
+ "rs_kokorec_roll": {
+  "near": {
+   "triangles": 372,
+   "materials": [
+    "KitMeatRoast",
+    "KitPastry",
+    "KitSteel"
+   ]
+  },
+  "far": {
+   "triangles": 48,
+   "materials": [
+    "KitMeatRoast",
+    "KitSteel"
+   ]
+  }
+ },
+ "rs_pide_oven": {
+  "near": {
+   "triangles": 228,
+   "materials": [
+    "KitBrickRed",
+    "KitCini",
+    "KitEmber",
+    "KitLimestone",
+    "KitSteelDark",
+    "KitOak"
+   ]
+  },
+  "far": {
+   "triangles": 204,
+   "materials": [
+    "KitBrickRed",
+    "KitCini",
+    "KitEmber",
+    "KitLimestone",
+    "KitSteelDark"
+   ]
+  }
+ },
+ "rs_fish_display": {
+  "near": {
+   "triangles": 912,
+   "materials": [
+    "KitSteel",
+    "KitIce",
+    "KitClearGlass",
+    "KitFishSilver",
+    "KitLemon"
+   ]
+  },
+  "far": {
+   "triangles": 24,
+   "materials": [
+    "KitSteel",
+    "KitIce",
+    "KitClearGlass"
+   ]
+  }
+ },
+ "rs_dessert_vitrine": {
+  "near": {
+   "triangles": 390,
+   "materials": [
+    "KitAccentPaint",
+    "KitCounterStone",
+    "KitClearGlass",
+    "KitSteel",
+    "KitLampGlow",
+    "KitPastry",
+    "KitMeatRoast",
+    "KitPistachio",
+    "KitCream"
+   ]
+  },
+  "far": {
+   "triangles": 42,
+   "materials": [
+    "KitAccentPaint",
+    "KitCounterStone",
+    "KitClearGlass",
+    "KitSteel"
+   ]
+  }
+ },
+ "rs_soup_station": {
+  "near": {
+   "triangles": 274,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitSoup",
+    "KitCopper",
+    "KitPastry",
+    "KitCream",
+    "KitOak",
+    "KitBread"
+   ]
+  },
+  "far": {
+   "triangles": 178,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitSoup",
+    "KitCopper",
+    "KitPastry",
+    "KitCream"
+   ]
+  }
+ },
+ "rs_bain_marie": {
+  "near": {
+   "triangles": 120,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitSoup",
+    "KitPastry",
+    "KitLettuce",
+    "KitTomato",
+    "KitCream",
+    "KitMeatRoast",
+    "KitPotato",
+    "KitPistachio",
+    "KitClearGlass"
+   ]
+  },
+  "far": {
+   "triangles": 120,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitSoup",
+    "KitPastry",
+    "KitLettuce",
+    "KitTomato",
+    "KitCream",
+    "KitMeatRoast",
+    "KitPotato",
+    "KitPistachio",
+    "KitClearGlass"
+   ]
+  }
+ },
+ "rs_cigkofte_station": {
+  "near": {
+   "triangles": 454,
+   "materials": [
+    "KitAccentPaint",
+    "KitCounterStone",
+    "KitCopper",
+    "KitMeatRaw",
+    "KitOak",
+    "KitLettuce",
+    "KitBread",
+    "KitMeatRoast"
+   ]
+  },
+  "far": {
+   "triangles": 128,
+   "materials": [
+    "KitAccentPaint",
+    "KitCounterStone",
+    "KitCopper",
+    "KitMeatRaw"
+   ]
+  }
+ },
+ "rs_crepe_griddle": {
+  "near": {
+   "triangles": 412,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitCharcoal",
+    "KitPastry",
+    "KitCeramic",
+    "KitOak"
+   ]
+  },
+  "far": {
+   "triangles": 170,
+   "materials": [
+    "KitSteel",
+    "KitSteelDark",
+    "KitCharcoal"
+   ]
+  }
+ },
+ "rs_kumpir_bar": {
+  "near": {
+   "triangles": 432,
+   "materials": [
+    "KitSteel",
+    "KitClearGlass",
+    "KitLampGlow",
+    "KitPotato",
+    "KitLemon",
+    "KitCharcoal",
+    "KitPistachio",
+    "KitTomato",
+    "KitMeatRoast",
+    "KitLettuce",
+    "KitCream",
+    "KitPastry"
+   ]
+  },
+  "far": {
+   "triangles": 432,
+   "materials": [
+    "KitSteel",
+    "KitClearGlass",
+    "KitLampGlow",
+    "KitPotato",
+    "KitLemon",
+    "KitCharcoal",
+    "KitPistachio",
+    "KitTomato",
+    "KitMeatRoast",
+    "KitLettuce",
+    "KitCream",
+    "KitPastry"
+   ]
+  }
+ },
+ "rs_dairy_display": {
+  "near": {
+   "triangles": 518,
+   "materials": [
+    "KitAccentPaint",
+    "KitSteel",
+    "KitClearGlass",
+    "KitLampGlow",
+    "KitCeramic",
+    "KitCream",
+    "KitPastry"
+   ]
+  },
+  "far": {
+   "triangles": 414,
+   "materials": [
+    "KitAccentPaint",
+    "KitSteel",
+    "KitClearGlass",
+    "KitLampGlow",
+    "KitCeramic",
+    "KitCream"
+   ]
+  }
+ },
+ "rs_simit_rack": {
+  "near": {
+   "triangles": 1052,
+   "materials": [
+    "KitOak",
+    "KitBread"
+   ]
+  },
+  "far": {
+   "triangles": 1052,
+   "materials": [
+    "KitOak",
+    "KitBread"
+   ]
+  }
+ },
+ "rs_bar": {
+  "near": {
+   "triangles": 1158,
+   "materials": [
+    "KitOak",
+    "KitCounterStone",
+    "KitClearGlass",
+    "KitBottleGreen"
+   ]
+  },
+  "far": {
+   "triangles": 60,
+   "materials": [
+    "KitOak",
+    "KitCounterStone",
+    "KitClearGlass"
+   ]
+  }
+ },
+ "rs_barrel": {
+  "near": {
+   "triangles": 220,
+   "materials": [
+    "KitOak",
+    "KitSteelDark"
+   ]
+  },
+  "far": {
+   "triangles": 124,
+   "materials": [
+    "KitOak"
+   ]
+  }
+ },
+ "rs_blade_sign": {
+  "near": {
+   "triangles": 72,
+   "materials": [
+    "KitRailBlack",
+    "KitAccentPaint",
+    "KitBrass"
+   ]
+  },
+  "far": {
+   "triangles": 72,
+   "materials": [
+    "KitRailBlack",
+    "KitAccentPaint",
+    "KitBrass"
+   ]
+  }
+ },
+ "rs_sidewalk_set": {
+  "near": {
+   "triangles": 272,
+   "materials": [
+    "KitOak",
+    "KitSteelDark",
+    "KitAccentPaint"
+   ]
+  },
+  "far": {
+   "triangles": 232,
+   "materials": [
+    "KitOak",
+    "KitSteelDark",
+    "KitAccentPaint"
+   ]
+  }
+ },
+ "rs_aframe": {
+  "near": {
+   "triangles": 28,
+   "materials": [
+    "KitOak",
+    "KitChalkboard"
+   ]
+  },
+  "far": {
+   "triangles": 24,
+   "materials": [
+    "KitOak"
+   ]
+  }
+ },
+ "rs_planter": {
+  "near": {
+   "triangles": 166,
+   "materials": [
+    "KitAccentPaint",
+    "KitSoil",
+    "KitFoliage"
+   ]
+  },
+  "far": {
+   "triangles": 166,
+   "materials": [
+    "KitAccentPaint",
+    "KitSoil",
+    "KitFoliage"
+   ]
+  }
+ }
+}

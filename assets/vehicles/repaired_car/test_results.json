@@ -1,0 +1,117 @@
+{
+	"barrier_stop_z": -52.6038360595703,
+	"bounds": "[P: (-0.999464, 0.0, -2.144476), S: (1.998546, 1.469547, 4.288887)]",
+	"checks": 74,
+	"failures": 0,
+	"forward_distance_m": 14.4800004959106,
+	"forward_speed_ms": 9.6,
+	"lod0_triangles": 82111,
+	"materials": [
+		{
+			"albedo": "(1.0, 1.0, 1.0, 1.0)",
+			"metallic": 0.479999989271164,
+			"name": "Car_DetailedTrim.004",
+			"roughness": 0.340000003576279,
+			"texture": "(2048.0, 2048.0)"
+		},
+		{
+			"albedo": "(0.1718, 0.2348, 0.2528, 1.0)",
+			"metallic": 0.25,
+			"name": "Car_SmokedGlass",
+			"roughness": 0.140000000596046,
+			"texture": "none"
+		},
+		{
+			"albedo": "(0.1121, 0.1334, 0.1473, 1.0)",
+			"metallic": 0.100000001490116,
+			"name": "Car_BlackTrim",
+			"roughness": 0.430000007152557,
+			"texture": "none"
+		},
+		{
+			"albedo": "(0.7287, 0.7484, 0.7736, 1.0)",
+			"metallic": 0.899999976158142,
+			"name": "Car_MachinedAlloy",
+			"roughness": 0.219999998807907,
+			"texture": "none"
+		},
+		{
+			"albedo": "(0.1428, 0.1559, 0.168, 1.0)",
+			"metallic": 0.0,
+			"name": "Car_TireRubber",
+			"roughness": 0.819999992847443,
+			"texture": "none"
+		},
+		{
+			"albedo": "(0.4366, 0.4492, 0.4614, 1.0)",
+			"metallic": 0.800000011920929,
+			"name": "Car_BrakeSteel",
+			"roughness": 0.430000007152557,
+			"texture": "none"
+		},
+		{
+			"albedo": "(0.7287, 0.7484, 0.7736, 1.0)",
+			"metallic": 0.899999976158142,
+			"name": "Car_MachinedAlloy",
+			"roughness": 0.219999998807907,
+			"texture": "none"
+		},
+		{
+			"albedo": "(0.1428, 0.1559, 0.168, 1.0)",
+			"metallic": 0.0,
+			"name": "Car_TireRubber",
+			"roughness": 0.819999992847443,
+			"texture": "none"
+		},
+		{
+			"albedo": "(0.4366, 0.4492, 0.4614, 1.0)",
+			"metallic": 0.800000011920929,
+			"name": "Car_BrakeSteel",
+			"roughness": 0.430000007152557,
+			"texture": "none"
+		},
+		{
+			"albedo": "(0.7287, 0.7484, 0.7736, 1.0)",
+			"metallic": 0.899999976158142,
+			"name": "Car_MachinedAlloy",
+			"roughness": 0.219999998807907,
+			"texture": "none"
+		},
+		{
+			"albedo": "(0.1428, 0.1559, 0.168, 1.0)",
+			"metallic": 0.0,
+			"name": "Car_TireRubber",
+			"roughness": 0.819999992847443,
+			"texture": "none"
+		},
+		{
+			"albedo": "(0.4366, 0.4492, 0.4614, 1.0)",
+			"metallic": 0.800000011920929,
+			"name": "Car_BrakeSteel",
+			"roughness": 0.430000007152557,
+			"texture": "none"
+		},
+		{
+			"albedo": "(0.7287, 0.7484, 0.7736, 1.0)",
+			"metallic": 0.899999976158142,
+			"name": "Car_MachinedAlloy",
+			"roughness": 0.219999998807907,
+			"texture": "none"
+		},
+		{
+			"albedo": "(0.1428, 0.1559, 0.168, 1.0)",
+			"metallic": 0.0,
+			"name": "Car_TireRubber",
+			"roughness": 0.819999992847443,
+			"texture": "none"
+		},
+		{
+			"albedo": "(0.4366, 0.4492, 0.4614, 1.0)",
+			"metallic": 0.800000011920929,
+			"name": "Car_BrakeSteel",
+			"roughness": 0.430000007152557,
+			"texture": "none"
+		}
+	],
+	"reverse_speed_ms": -3.0
+}

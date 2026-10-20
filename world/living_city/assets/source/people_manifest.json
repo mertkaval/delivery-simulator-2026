@@ -1,0 +1,758 @@
+{
+  "citizen_2": {
+    "triangles": 9284,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.77,
+    "outfit": [
+      "hoodie",
+      "jeans",
+      "sneakers"
+    ],
+    "hair": "curly"
+  },
+  "citizen_2_lod1": {
+    "triangles": 4456,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.77,
+    "outfit": [
+      "hoodie",
+      "jeans",
+      "sneakers"
+    ],
+    "hair": "curly"
+  },
+  "citizen_2_lod2": {
+    "triangles": 1850,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.77,
+    "outfit": [
+      "hoodie",
+      "jeans",
+      "sneakers"
+    ],
+    "hair": "curly"
+  },
+  "citizen_1": {
+    "triangles": 8668,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.66,
+    "outfit": [
+      "long_coat",
+      "trousers",
+      "shoes"
+    ],
+    "hair": "ponytail"
+  },
+  "citizen_1_lod1": {
+    "triangles": 4159,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.66,
+    "outfit": [
+      "long_coat",
+      "trousers",
+      "shoes"
+    ],
+    "hair": "ponytail"
+  },
+  "citizen_1_lod2": {
+    "triangles": 1726,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.66,
+    "outfit": [
+      "long_coat",
+      "trousers",
+      "shoes"
+    ],
+    "hair": "ponytail"
+  },
+  "citizen_3": {
+    "triangles": 9220,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.62,
+    "outfit": [
+      "puffer",
+      "jeans",
+      "sneakers"
+    ],
+    "hair": "bob"
+  },
+  "citizen_3_lod1": {
+    "triangles": 4425,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.62,
+    "outfit": [
+      "puffer",
+      "jeans",
+      "sneakers"
+    ],
+    "hair": "bob"
+  },
+  "citizen_3_lod2": {
+    "triangles": 1835,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.62,
+    "outfit": [
+      "puffer",
+      "jeans",
+      "sneakers"
+    ],
+    "hair": "bob"
+  },
+  "citizen_5": {
+    "triangles": 8996,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.7,
+    "outfit": [
+      "blazer",
+      "skirt",
+      "shoes"
+    ],
+    "hair": "bun"
+  },
+  "citizen_5_lod1": {
+    "triangles": 4317,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.7,
+    "outfit": [
+      "blazer",
+      "skirt",
+      "shoes"
+    ],
+    "hair": "bun"
+  },
+  "citizen_5_lod2": {
+    "triangles": 1792,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.7,
+    "outfit": [
+      "blazer",
+      "skirt",
+      "shoes"
+    ],
+    "hair": "bun"
+  },
+  "citizen_0": {
+    "triangles": 8164,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.8,
+    "outfit": [
+      "hivis",
+      "trousers",
+      "boots"
+    ],
+    "hair": "crop"
+  },
+  "citizen_0_lod1": {
+    "triangles": 3917,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.8,
+    "outfit": [
+      "hivis",
+      "trousers",
+      "boots"
+    ],
+    "hair": "crop"
+  },
+  "citizen_0_lod2": {
+    "triangles": 1627,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.8,
+    "outfit": [
+      "hivis",
+      "trousers",
+      "boots"
+    ],
+    "hair": "crop"
+  },
+  "citizen_4": {
+    "triangles": 8304,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.71,
+    "outfit": [
+      "jacket",
+      "trousers",
+      "shoes"
+    ],
+    "hair": "receding"
+  },
+  "citizen_4_lod1": {
+    "triangles": 3981,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.71,
+    "outfit": [
+      "jacket",
+      "trousers",
+      "shoes"
+    ],
+    "hair": "receding"
+  },
+  "citizen_4_lod2": {
+    "triangles": 1652,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.71,
+    "outfit": [
+      "jacket",
+      "trousers",
+      "shoes"
+    ],
+    "hair": "receding"
+  },
+  "citizen_6": {
+    "triangles": 9000,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.86,
+    "outfit": [
+      "shirt",
+      "trousers",
+      "shoes"
+    ],
+    "hair": "swept"
+  },
+  "citizen_6_lod1": {
+    "triangles": 4319,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.86,
+    "outfit": [
+      "shirt",
+      "trousers",
+      "shoes"
+    ],
+    "hair": "swept"
+  },
+  "citizen_6_lod2": {
+    "triangles": 1794,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.86,
+    "outfit": [
+      "shirt",
+      "trousers",
+      "shoes"
+    ],
+    "hair": "swept"
+  },
+  "citizen_7": {
+    "triangles": 8636,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.58,
+    "outfit": [
+      "long_coat",
+      "trousers",
+      "shoes"
+    ],
+    "hair": "bob"
+  },
+  "citizen_7_lod1": {
+    "triangles": 4142,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.58,
+    "outfit": [
+      "long_coat",
+      "trousers",
+      "shoes"
+    ],
+    "hair": "bob"
+  },
+  "citizen_7_lod2": {
+    "triangles": 1717,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.58,
+    "outfit": [
+      "long_coat",
+      "trousers",
+      "shoes"
+    ],
+    "hair": "bob"
+  },
+  "citizen_8": {
+    "triangles": 8784,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.74,
+    "outfit": [
+      "tshirt",
+      "jeans",
+      "sneakers"
+    ],
+    "hair": "cap"
+  },
+  "citizen_8_lod1": {
+    "triangles": 4215,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.74,
+    "outfit": [
+      "tshirt",
+      "jeans",
+      "sneakers"
+    ],
+    "hair": "cap"
+  },
+  "citizen_8_lod2": {
+    "triangles": 1749,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.74,
+    "outfit": [
+      "tshirt",
+      "jeans",
+      "sneakers"
+    ],
+    "hair": "cap"
+  },
+  "citizen_9": {
+    "triangles": 8776,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.68,
+    "outfit": [
+      "denim",
+      "jeans",
+      "sneakers"
+    ],
+    "hair": "afro"
+  },
+  "citizen_9_lod1": {
+    "triangles": 4211,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.68,
+    "outfit": [
+      "denim",
+      "jeans",
+      "sneakers"
+    ],
+    "hair": "afro"
+  },
+  "citizen_9_lod2": {
+    "triangles": 1746,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.68,
+    "outfit": [
+      "denim",
+      "jeans",
+      "sneakers"
+    ],
+    "hair": "afro"
+  },
+  "citizen_10": {
+    "triangles": 8444,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.79,
+    "outfit": [
+      "jacket",
+      "jeans",
+      "boots"
+    ],
+    "hair": "bald"
+  },
+  "citizen_10_lod1": {
+    "triangles": 4053,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.79,
+    "outfit": [
+      "jacket",
+      "jeans",
+      "boots"
+    ],
+    "hair": "bald"
+  },
+  "citizen_10_lod2": {
+    "triangles": 1682,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.79,
+    "outfit": [
+      "jacket",
+      "jeans",
+      "boots"
+    ],
+    "hair": "bald"
+  },
+  "citizen_11": {
+    "triangles": 9484,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.64,
+    "outfit": [
+      "hoodie",
+      "leggings",
+      "sneakers"
+    ],
+    "hair": "long"
+  },
+  "citizen_11_lod1": {
+    "triangles": 4552,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.64,
+    "outfit": [
+      "hoodie",
+      "leggings",
+      "sneakers"
+    ],
+    "hair": "long"
+  },
+  "citizen_11_lod2": {
+    "triangles": 1887,
+    "bones": 14,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Brisk",
+      "Wait",
+      "Talk",
+      "Sit",
+      "Carry",
+      "Cycle"
+    ],
+    "height": 1.64,
+    "outfit": [
+      "hoodie",
+      "leggings",
+      "sneakers"
+    ],
+    "hair": "long"
+  }
+}

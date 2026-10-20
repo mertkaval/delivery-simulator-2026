@@ -1,0 +1,201 @@
+{
+ "component_id": "player_sedan.body_shell",
+ "gate": "G3",
+ "version": "g3_body_v3.1 (v3 + QA conditions P2-1/P2-2 and P3 3-7; renders g3_body_v3_1)",
+ "generated": "2026-10-19 (v3.1)",
+ "owner": "Body Surface Engineer",
+ "source_script": "world/vehicles/sedan_body.py + world/vehicles/build_sedan_v2.py (renders: qa_render.py, arch_crops.py, new zebra_render.py) + detail_crops.py (833 px/m A-pillar corner / tail-lamp crops)",
+ "source_blend": "world/vehicles/production/wip/sedan_v2_body.blend",
+ "export_path": "world/vehicles/production/wip/sedan_v2_body.glb",
+ "build_report": "world/vehicles/production/wip/sedan_v2_body_build_report.json",
+ "units": "m",
+ "coordinate_system": "Blender: origin on the ground at the wheelbase centre, +Y front, +Z up, +X right (= dimension-sheet frame). Exported Y-up (export_yup=True), so Godot -Z is the car front.",
+ "bounds_m": {
+  "min": [
+   -0.929,
+   -2.475,
+   0.0
+  ],
+  "max": [
+   0.929,
+   2.325,
+   1.448
+  ],
+  "size": [
+   1.857,
+   4.8,
+   1.448
+  ],
+  "note": "with placeholder wheels; body shell alone z 0.165..1.448. Nose 2.325 / tail -2.475 are on the sheet to the mm."
+ },
+ "triangle_count": {
+  "Body": 76214,
+  "Glass": 7509,
+  "BPillar": 960,
+  "BumperSkirt": 3300,
+  "ArchLiner x4": 756,
+  "Tyre x4 (placeholder)": 2240,
+  "Rim x4 (placeholder)": 560,
+  "total_in_glb": 91539,
+  "body_shell_only (Body+Glass+BPillar+BumperSkirt+liners)": 88739
+ },
+ "material_slots": {
+  "Body": [
+   "VehiclePaint",
+   "BlackTrim (window-surround walls, aperture floors and walls)"
+  ],
+  "Glass": [
+   "Glass",
+   "BlackTrim (ceramic band, one boundary face row 15-35 mm)"
+  ],
+  "BPillar": [
+   "BlackTrim"
+  ],
+  "BumperSkirt": [
+   "BlackTrim",
+   "BlackTrim (lower-intake floor)"
+  ],
+  "ArchLiner": [
+   "ArchLiner"
+  ],
+  "placeholders": [
+   "Rubber",
+   "Alloy"
+  ]
+ },
+ "objects_and_insets": {
+  "Glass": "one object, 6 components: windscreen and rear screen 5 mm inboard along the shell normal, 4 side-glass panels 12 mm inboard; side glass trimmed by the raked A-pillar line (belt y 0.82 -> cant y 0.18, now continuous into the cant rail: boundary y falls monotonically 0.653 @ z1.14 -> 0.163 @ z1.38 -> corner at 1.39) and the forward-leaning C-pillar line; windscreen plan line x 0.72 (base) -> 0.56 (header) leaving a 50-80 mm painted A pillar to the side-glass cant edge; rear screen 0.66 -> 0.56. Ceramic band: parallel plane cuts 15 mm inboard of every straight boundary run, faces within 15 mm -> BlackTrim (constant 15 mm strip; 458 faces).",
+  "BPillar": "band y -0.309..-0.226 (83 mm incl. the 14 mm normal inset; cage +-25 mm, subdivision smooths the station loops outward), belt to cant rail, 14 mm inboard, BlackTrim.",
+  "window_surround": "728 rim edges of the daylight opening extruded inboard (5 mm at the screens, 12 mm at the side glass, 14 mm at the pillar), BlackTrim, sharp edges.",
+  "apertures (sheet frame, inset floor on BlackTrim)": {
+   "headlamp L/R": "y 1.84 .. nose, z 0.65..0.80, |x| >= 0.48, wraps the corner onto the nose face; nose-face upper inner edge now at |x| 0.479 (HOOD_X_NOSE 0.46, hood gap ends there); 9 mm floor",
+   "grille": "|x| < 0.48, z 0.56..0.72 on the nose face; 9 mm floor",
+   "lower_intake": "|x| < 0.50, z 0.25..0.39 on the BumperSkirt; 9 mm floor",
+   "tail_lamp L/R": "y -2.011 .. tail (-2.47), z 0.789..0.951, |x| 0.32 .. quarter skin (0.894): wraps the corner onto the quarter like the headlamp; 9 mm floor",
+   "fuel_flap (left)": "x < -0.80, y -1.77..-1.55, z 0.78..0.93; 2 mm recess",
+   "mirror_pad L/R": "|x| > 0.78, y 0.72..0.88, z 0.98..1.03 (sail area ahead of the A-pillar glass line); 2 mm recess"
+  }
+ },
+ "surface_changes_vs_G2_v2p": [
+  "P2-1: front lower chamfer applied along the corner normal (part of the lift becomes an inward pull in x for |x|/(W/2) > 0.55) - corner rolls, no diagonal fold in clay_front / clay_front_34 / zebra_hood",
+  "P2-2: arch-wall foot raised to the sill-bottom height (FLOOR_Z+0.045) and the liner kept 50-90 mm inside the subdivided wall - no tabs below the sill in arch_front_left / arch_rear_left (833 px/m)",
+  "P2-3: shoulder line 0.80 (y 2.0) -> 0.83 (y 0, front handle) -> 0.865 (y -1.15, rear handle) -> 0.95 (y -2.0); measured on the mesh at max-x: 0.799 / 0.831 / 0.865 / 0.947",
+  "P3-4: nose 2.325 (end stations pinned; the subdivided end sits on the last ring station)",
+  "P3-11: all stations now measured from the sheet nose (Y_NOSE), shut lines at y 0.96 / -0.27 / -1.34 exactly",
+  "P3-7/8: greenhouse ring parametrisation blended into the hood/trunk layout over the last 0.30 m before the cowl and behind the screen base (no cage twist at the station boundary)",
+  "P3-12: trunk lid falls continuously 1.10 -> 1.02 (t^1.2) with a creased lid lip 0.17 m from the tail",
+  "hood: power dome, two soft ridges at x = +-0.15, ~7 mm, cowl to 0.3 m behind the nose; hood leading-edge gap moved to y 2.08 and terminated on the headlamp cut",
+  "DLO: recessed glass with black window surround, A/B/C pillars as geometry",
+  "v3.1: A-pillar glass line continuous to the cant rail (windscreen zone no longer claims the side-glass G1..CANT faces), tail lamps extended onto the quarter, constant 15 mm ceramic band by parallel cuts, aperture floors sunk along smooth shell normals (grille lower edge centre/side 0.5608/0.5591), hood narrowed at the nose so the headlamp inner edge is 0.479, B pillar 83 mm"
+ ],
+ "reference_ids": [
+  "production/references/dimension_sheet.json (stations, DLO, apertures, handles, shoulder line, b_pillar_y, door edges)",
+  "production/references/dimension_sheet.md",
+  "production/reports/G2_visual_qa_v2p.md (conditions P2-1..3, P3 list)",
+  "production/approved/G2_v2p/ (starting point)"
+ ],
+ "renders": {
+  "final_set": "production/renders/g3_body_v3_1/",
+  "clay_7_views": [
+   "clay_front.png",
+   "clay_rear.png",
+   "clay_left.png",
+   "clay_right.png",
+   "clay_top.png",
+   "clay_front_34.png",
+   "clay_rear_34.png"
+  ],
+  "arch_closeups_833px_per_m": [
+   "arch_front_left.png",
+   "arch_rear_left.png"
+  ],
+  "zebra_reflection_strips": [
+   "zebra_left.png (5 strips along the car, ortho left)",
+   "zebra_hood.png (5 strips across the car, front-left above)"
+  ],
+  "iterations": [
+   "production/renders/g3_body_v1/ (build 2)",
+   "production/renders/g3_body_v2/ (build 3)",
+   "production/renders/g3_body_v3/ (approved G3_v3)"
+  ],
+  "metrics": "production/renders/g3_body_v3/metrics.json",
+  "detail_crops_833px_per_m": [
+   "apillar_corner_left.png",
+   "apillar_corner_right.png",
+   "tail_lamp_left.png"
+  ]
+ },
+ "known_defects": [
+  "Rear-door glass top-rear corner: ~50 mm hook where the door-shut groove ends at the cant rail and meets the recessed glass corner (clay_rear_34 x~690-715 y~300-330; mirrored) - unchanged from v3 (P3).",
+  "Grille lower edge at the cap pole: 1.7 mm rise (z 0.5608 vs 0.5591) with a faint shading mark at x 0 (clay_front x~590 y~440) - reduced from 4-5 mm.",
+  "B-pillar band 83 mm (brief 60-80; cage +-25 mm, station loops smooth outward under subdivision).",
+  "Plane cuts leave n-gons on Body/Glass/BumperSkirt before export (export is triangulated); weighted normals with sharp aperture/surround edges - G7 cleanup.",
+  "Rear screen 21.7-23 deg (sheet landmarks themselves give 21.7 deg); not changed.",
+  "Faint tone break at the C-pillar foot / trunk shut line junction (QA P3-8) - not addressed.",
+  "Windscreen/rear-screen recess (5 mm) and side glass (12 mm) are by construction along stored shell normals, not re-measured on the export.",
+  "Placeholder wheels/rims remain for proportion; the G4 wheel assembly replaces them."
+ ],
+ "QA_status": "pending",
+ "tests_run": [
+  {
+   "name": "build",
+   "detail": "headless Blender 5.2 build x4 (+1 slot-only rebuild), no errors; export GLB + save blend",
+   "passed": true
+  },
+  {
+   "name": "shoulder_line_heights",
+   "detail": "max-x vertex per station on the built Body mesh: y2.0 0.799, y1.0 0.816, y0 0.831, y-0.5 0.845, y-1.15 0.865, y-1.6 0.909, y-2.0 0.947 (targets 0.80/0.83/0.865/0.95)",
+   "passed": true
+  },
+  {
+   "name": "stations_sheet_frame",
+   "detail": "build report: door gaps 0.96/-0.27/-1.34, cowl 1.075, ws top 0.075, roof end -1.095, trunk -1.925, B pillar -0.27",
+   "passed": true
+  },
+  {
+   "name": "symmetry",
+   "detail": "400 sampled Body vertices mirrored: mean 0.11 mm, max 17 mm (the single-sided fuel flap recess)",
+   "passed": true
+  },
+  {
+   "name": "visual_inspection_renders",
+   "detail": "all 11 renders of g3_body_v3 inspected by the engineer (plus 4x/5x crops of the A-pillar base, C-pillar top, rear-screen corner, grille centre and windscreen edge in builds 2-3)",
+   "passed": true
+  },
+  {
+   "name": "godot_import",
+   "detail": "NOT run (G8 scope)",
+   "passed": null
+  },
+  {
+   "name": "clean_blender_reimport",
+   "detail": "qa_render.py/arch_crops.py/zebra_render.py import the exported GLB into a fresh factory scene for every render set",
+   "passed": true
+  },
+  {
+   "name": "bounds_on_sheet",
+   "detail": "metrics.json v3.1: nose 2.325, tail -2.475, width 1.857, height 1.448",
+   "passed": true
+  },
+  {
+   "name": "aperture_face_counts",
+   "detail": "headlamp 445/445, grille 760, intake 70, tail 274/276 (now incl. the quarter portion), fuel flap 67, mirror pads 37/37",
+   "passed": true
+  },
+  {
+   "name": "glass_components",
+   "detail": "6 components: 2 screens (1312, 1119 faces) + 4 side panels (393, 393, 279, 279)",
+   "passed": true
+  },
+  {
+   "name": "v3.1_mesh_checks",
+   "detail": "front side-glass boundary max-y per 1 cm z band monotone from z 1.14 (y 0.653) to the cant corner at z 1.39 (no vertical segment); tail lamp L bounds y -2.47..-2.011, x -0.894..-0.32, z 0.789..0.951; headlamp nose upper inner x 0.479; grille lower edge z 0.5608 (centre) / 0.5591 (side); BPillar y -0.309..-0.226",
+   "passed": true
+  },
+  {
+   "name": "visual_inspection_renders",
+   "detail": "all 14 renders of g3_body_v3_1 inspected (7 clay, 2 arch, 2 zebra, 3 detail crops)",
+   "passed": true
+  }
+ ]
+}

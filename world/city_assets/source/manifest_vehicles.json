@@ -1,0 +1,26 @@
+{
+  "sedan": {
+    "triangles": 14136,
+    "meshes": 20
+  },
+  "hatchback": {
+    "triangles": 14136,
+    "meshes": 20
+  },
+  "suv": {
+    "triangles": 14136,
+    "meshes": 20
+  },
+  "van": {
+    "triangles": 14460,
+    "meshes": 20
+  },
+  "pickup": {
+    "triangles": 14568,
+    "meshes": 20
+  },
+  "bicycle": {
+    "triangles": 7500,
+    "meshes": 12
+  }
+}

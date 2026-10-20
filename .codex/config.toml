@@ -1,0 +1,23 @@
+[mcp_servers.blender]
+command = 'C:\blender_MCP\server-venv\Scripts\mcp-for-blender.exe'
+
+[mcp_servers.blender.env]
+DISABLE_TELEMETRY = "true"
+
+[mcp_servers.blender.tools.execute_blender_code]
+approval_mode = "approve"
+
+[mcp_servers.blender.tools.look]
+approval_mode = "approve"
+
+[mcp_servers.godot]
+command = "node"
+args = ['C:\godot_MCP\godot-mcp\build\index.js']
+
+[mcp_servers.godot.env]
+GODOT_PATH = 'C:\Godot\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-stable_win64.exe'
+DEBUG = "false"
+
+[mcp_servers.sfx-forge]
+command = 'C:\sfx_forge\venv\Scripts\python.exe'
+args = ['C:\GodotProjects\delivery-simulator-2026\tools\sfx_forge\server.py']

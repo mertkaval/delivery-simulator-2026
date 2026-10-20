@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "blender": {
+      "type": "stdio",
+      "command": "C:\\blender_MCP\\server-venv\\Scripts\\mcp-for-blender.exe",
+      "args": [],
+      "env": {
+        "DISABLE_TELEMETRY": "true"
+      }
+    },
+    "sfx-forge": {
+      "type": "stdio",
+      "command": "C:\\sfx_forge\\venv\\Scripts\\python.exe",
+      "args": ["C:\\GodotProjects\\delivery-simulator-2026\\tools\\sfx_forge\\server.py"]
+    },
+    "godot": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["C:\\godot_MCP\\godot-mcp\\build\\index.js"],
+      "env": {
+        "GODOT_PATH": "C:\\Godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64.exe",
+        "DEBUG": "false"
+      }
+    }
+  }
+}

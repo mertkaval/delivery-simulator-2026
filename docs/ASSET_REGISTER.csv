@@ -1,0 +1,5 @@
+asset_id,creator_url,license,local_source,runtime_path,modifications
+graybox_generated,local,original,res://world/neighborhood.gd,res://world,procedural primitive graybox
+city_detail_kit,local,original,res://world/neighborhood.gd,res://world,house shutters gables flowers benches bins storefronts and apartment blocks
+traffic_car_kit,local,original,res://world/traffic.gd,res://world,six procedural car variants and crossing signals
+surface_library,local,original,res://world/surface.gdshader,res://world,nine reusable procedural surface types with physically based roughness and metal response

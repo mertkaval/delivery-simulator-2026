@@ -1,0 +1,62 @@
+{
+  "service_counter": {
+    "triangles_near": 864,
+    "triangles_far": 272,
+    "materials": 5,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": [
+      2.62,
+      1.4,
+      0.78
+    ]
+  },
+  "mailboxes": {
+    "triangles_near": 3468,
+    "triangles_far": 1108,
+    "materials": 3,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": [
+      1.35,
+      1.4,
+      0.3
+    ]
+  },
+  "unit_door": {
+    "triangles_near": 688,
+    "triangles_far": 219,
+    "materials": 3,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": [
+      1.13,
+      2.3,
+      0.15
+    ]
+  },
+  "grocery_shelf": {
+    "triangles_near": 2484,
+    "triangles_far": 792,
+    "materials": 3,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": [
+      1.6,
+      2,
+      0.5
+    ]
+  },
+  "pallet_supplies": {
+    "triangles_near": 1728,
+    "triangles_far": 552,
+    "materials": 3,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": [
+      1.2,
+      0.75,
+      1.1
+    ]
+  }
+}

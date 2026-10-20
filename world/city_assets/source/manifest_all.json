@@ -1,0 +1,74 @@
+{
+  "sedan": {
+    "triangles": 14008,
+    "meshes": 20
+  },
+  "hatchback": {
+    "triangles": 14008,
+    "meshes": 20
+  },
+  "suv": {
+    "triangles": 14008,
+    "meshes": 20
+  },
+  "van": {
+    "triangles": 14332,
+    "meshes": 20
+  },
+  "pickup": {
+    "triangles": 14440,
+    "meshes": 20
+  },
+  "bicycle": {
+    "triangles": 7500,
+    "meshes": 12
+  },
+  "maple": {
+    "triangles": 15718,
+    "meshes": 2
+  },
+  "birch": {
+    "triangles": 15718,
+    "meshes": 2
+  },
+  "conifer": {
+    "triangles": 28738,
+    "meshes": 2
+  },
+  "grass_clump": {
+    "triangles": 54,
+    "meshes": 1
+  },
+  "park_bench": {
+    "triangles": 1420,
+    "meshes": 3
+  },
+  "fountain": {
+    "triangles": 2104,
+    "meshes": 1
+  },
+  "citizen": {
+    "triangles": 4896,
+    "meshes": 20
+  },
+  "restaurant_0": {
+    "triangles": 18148,
+    "meshes": 11
+  },
+  "restaurant_1": {
+    "triangles": 18148,
+    "meshes": 11
+  },
+  "restaurant_2": {
+    "triangles": 18364,
+    "meshes": 11
+  },
+  "apartment_0": {
+    "triangles": 41752,
+    "meshes": 6
+  },
+  "apartment_1": {
+    "triangles": 66160,
+    "meshes": 5
+  }
+}

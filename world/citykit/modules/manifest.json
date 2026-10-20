@@ -1,0 +1,859 @@
+{
+ "bay_apartment_0": {
+  "near": {
+   "triangles": 240,
+   "materials": [
+    "KitBrickRed",
+    "KitFrameDark",
+    "KitGlass",
+    "KitLimestone"
+   ]
+  },
+  "far": {
+   "triangles": 6,
+   "materials": [
+    "KitBrickRed",
+    "KitGlass"
+   ]
+  }
+ },
+ "bay_office_0": {
+  "near": {
+   "triangles": 108,
+   "materials": [
+    "KitBrickRed",
+    "KitFrameDark",
+    "KitGlass",
+    "KitLimestone"
+   ]
+  },
+  "far": {
+   "triangles": 4,
+   "materials": [
+    "KitBrickRed",
+    "KitGlass"
+   ]
+  }
+ },
+ "storefront_0": {
+  "near": {
+   "triangles": 94,
+   "materials": [
+    "KitBrickRed",
+    "KitPaintGreen",
+    "KitLimestone",
+    "KitFrameDark",
+    "KitGlass"
+   ]
+  },
+  "far": {
+   "triangles": 8,
+   "materials": [
+    "KitPaintGreen",
+    "KitBrickRed",
+    "KitGlass"
+   ]
+  }
+ },
+ "entrance_0": {
+  "near": {
+   "triangles": 224,
+   "materials": [
+    "KitBrickRed",
+    "KitPaintGreen",
+    "KitLimestone",
+    "KitFrameDark",
+    "KitGlass",
+    "KitFrameLight"
+   ]
+  },
+  "far": {
+   "triangles": 8,
+   "materials": [
+    "KitPaintGreen",
+    "KitBrickRed",
+    "KitGlass"
+   ]
+  }
+ },
+ "bay_apartment_1": {
+  "near": {
+   "triangles": 206,
+   "materials": [
+    "KitLimestone",
+    "KitFrameBronze",
+    "KitGlass",
+    "KitConcrete",
+    "KitRail"
+   ]
+  },
+  "far": {
+   "triangles": 4,
+   "materials": [
+    "KitLimestone",
+    "KitGlass"
+   ]
+  }
+ },
+ "bay_office_1": {
+  "near": {
+   "triangles": 82,
+   "materials": [
+    "KitLimestone",
+    "KitFrameBronze",
+    "KitGlass"
+   ]
+  },
+  "far": {
+   "triangles": 4,
+   "materials": [
+    "KitLimestone",
+    "KitGlass"
+   ]
+  }
+ },
+ "storefront_1": {
+  "near": {
+   "triangles": 94,
+   "materials": [
+    "KitLimestone",
+    "KitPaintNavy",
+    "KitConcrete",
+    "KitFrameBronze",
+    "KitGlass"
+   ]
+  },
+  "far": {
+   "triangles": 8,
+   "materials": [
+    "KitPaintNavy",
+    "KitLimestone",
+    "KitGlass"
+   ]
+  }
+ },
+ "entrance_1": {
+  "near": {
+   "triangles": 224,
+   "materials": [
+    "KitLimestone",
+    "KitPaintNavy",
+    "KitConcrete",
+    "KitFrameBronze",
+    "KitGlass",
+    "KitFrameLight"
+   ]
+  },
+  "far": {
+   "triangles": 8,
+   "materials": [
+    "KitPaintNavy",
+    "KitLimestone",
+    "KitGlass"
+   ]
+  }
+ },
+ "bay_apartment_2": {
+  "near": {
+   "triangles": 134,
+   "materials": [
+    "KitBrickCharcoal",
+    "KitFrameLight",
+    "KitGlass",
+    "KitMetalPanel",
+    "KitConcrete"
+   ]
+  },
+  "far": {
+   "triangles": 4,
+   "materials": [
+    "KitBrickCharcoal",
+    "KitGlass"
+   ]
+  }
+ },
+ "bay_office_2": {
+  "near": {
+   "triangles": 34,
+   "materials": [
+    "KitGlass",
+    "KitSpandrel",
+    "KitFrameLight"
+   ]
+  },
+  "far": {
+   "triangles": 4,
+   "materials": [
+    "KitGlass",
+    "KitSpandrel"
+   ]
+  }
+ },
+ "storefront_2": {
+  "near": {
+   "triangles": 94,
+   "materials": [
+    "KitBrickCharcoal",
+    "KitMetalPanel",
+    "KitConcrete",
+    "KitFrameLight",
+    "KitGlass"
+   ]
+  },
+  "far": {
+   "triangles": 8,
+   "materials": [
+    "KitMetalPanel",
+    "KitBrickCharcoal",
+    "KitGlass"
+   ]
+  }
+ },
+ "entrance_2": {
+  "near": {
+   "triangles": 224,
+   "materials": [
+    "KitBrickCharcoal",
+    "KitMetalPanel",
+    "KitConcrete",
+    "KitFrameLight",
+    "KitGlass"
+   ]
+  },
+  "far": {
+   "triangles": 8,
+   "materials": [
+    "KitMetalPanel",
+    "KitBrickCharcoal",
+    "KitGlass"
+   ]
+  }
+ },
+ "blank_wall": {
+  "near": {
+   "triangles": 12,
+   "materials": [
+    "KitPartyBrick"
+   ]
+  },
+  "far": {
+   "triangles": 10,
+   "materials": [
+    "KitPartyBrick"
+   ]
+  }
+ },
+ "roof_slab": {
+  "near": {
+   "triangles": 12,
+   "materials": [
+    "KitConcrete",
+    "KitRoofGravel"
+   ]
+  },
+  "far": {
+   "triangles": 12,
+   "materials": [
+    "KitConcrete",
+    "KitRoofGravel"
+   ]
+  }
+ },
+ "parapet": {
+  "near": {
+   "triangles": 14,
+   "materials": [
+    "KitConcrete",
+    "KitFrameDark"
+   ]
+  },
+  "far": {
+   "triangles": 14,
+   "materials": [
+    "KitConcrete",
+    "KitFrameDark"
+   ]
+  }
+ },
+ "balcony": {
+  "near": {
+   "triangles": 180,
+   "materials": [
+    "KitConcrete",
+    "KitFrameDark",
+    "KitRail"
+   ]
+  },
+  "far": {
+   "triangles": 14,
+   "materials": [
+    "KitConcrete",
+    "KitRail"
+   ]
+  }
+ },
+ "canopy": {
+  "near": {
+   "triangles": 46,
+   "materials": [
+    "KitFrameDark",
+    "KitGlass"
+   ]
+  },
+  "far": {
+   "triangles": 22,
+   "materials": [
+    "KitFrameDark",
+    "KitGlass"
+   ]
+  }
+ },
+ "awning": {
+  "near": {
+   "triangles": 28,
+   "materials": [
+    "KitAwning",
+    "KitFrameDark"
+   ]
+  },
+  "far": {
+   "triangles": 4,
+   "materials": [
+    "KitAwning"
+   ]
+  }
+ },
+ "interior_slab": {
+  "near": {
+   "triangles": 12,
+   "materials": [
+    "KitConcrete",
+    "KitLimestone"
+   ]
+  },
+  "far": {
+   "triangles": 12,
+   "materials": [
+    "KitConcrete",
+    "KitLimestone"
+   ]
+  }
+ },
+ "plain_wall_0": {
+  "near": {
+   "triangles": 10,
+   "materials": [
+    "KitBrickRed"
+   ]
+  },
+  "far": {
+   "triangles": 10,
+   "materials": [
+    "KitBrickRed"
+   ]
+  }
+ },
+ "ground_residential_0": {
+  "near": {
+   "triangles": 124,
+   "materials": [
+    "KitBrickRed",
+    "KitFrameDark",
+    "KitGlass",
+    "KitLimestone"
+   ]
+  },
+  "far": {
+   "triangles": 4,
+   "materials": [
+    "KitBrickRed",
+    "KitGlass"
+   ]
+  }
+ },
+ "entrance_residential_0": {
+  "near": {
+   "triangles": 198,
+   "materials": [
+    "KitBrickRed",
+    "KitLimestone",
+    "KitFrameDark",
+    "KitGlass"
+   ]
+  },
+  "far": {
+   "triangles": 4,
+   "materials": [
+    "KitBrickRed",
+    "KitDoor"
+   ]
+  }
+ },
+ "cornice_0": {
+  "near": {
+   "triangles": 92,
+   "materials": [
+    "KitBrickRed",
+    "KitLimestone"
+   ]
+  },
+  "far": {
+   "triangles": 92,
+   "materials": [
+    "KitBrickRed",
+    "KitLimestone"
+   ]
+  }
+ },
+ "th_ground_0": {
+  "near": {
+   "triangles": 358,
+   "materials": [
+    "KitBrickRed",
+    "KitPaintGreen",
+    "KitFrameLight",
+    "KitGlass",
+    "KitLimestone",
+    "KitFrameDark"
+   ]
+  },
+  "far": {
+   "triangles": 6,
+   "materials": [
+    "KitBrickRed",
+    "KitPaintGreen",
+    "KitGlass"
+   ]
+  }
+ },
+ "th_upper_0": {
+  "near": {
+   "triangles": 240,
+   "materials": [
+    "KitBrickRed",
+    "KitFrameLight",
+    "KitGlass",
+    "KitLimestone"
+   ]
+  },
+  "far": {
+   "triangles": 6,
+   "materials": [
+    "KitBrickRed",
+    "KitGlass"
+   ]
+  }
+ },
+ "th_roof_0": {
+  "near": {
+   "triangles": 64,
+   "materials": [
+    "KitSlate",
+    "KitFrameLight",
+    "KitFrameDark"
+   ]
+  },
+  "far": {
+   "triangles": 4,
+   "materials": [
+    "KitSlate"
+   ]
+  }
+ },
+ "th_roof_dormer_0": {
+  "near": {
+   "triangles": 148,
+   "materials": [
+    "KitSlate",
+    "KitFrameLight",
+    "KitFrameDark",
+    "KitBrickRed",
+    "KitGlass"
+   ]
+  },
+  "far": {
+   "triangles": 4,
+   "materials": [
+    "KitSlate"
+   ]
+  }
+ },
+ "th_gable_0": {
+  "near": {
+   "triangles": 29,
+   "materials": [
+    "KitBrickRed",
+    "KitGlass",
+    "KitLimestone"
+   ]
+  },
+  "far": {
+   "triangles": 7,
+   "materials": [
+    "KitBrickRed"
+   ]
+  }
+ },
+ "th_chimney_0": {
+  "near": {
+   "triangles": 44,
+   "materials": [
+    "KitBrickRed",
+    "KitLimestone"
+   ]
+  },
+  "far": {
+   "triangles": 20,
+   "materials": [
+    "KitBrickRed",
+    "KitLimestone"
+   ]
+  }
+ },
+ "plain_wall_1": {
+  "near": {
+   "triangles": 10,
+   "materials": [
+    "KitLimestone"
+   ]
+  },
+  "far": {
+   "triangles": 10,
+   "materials": [
+    "KitLimestone"
+   ]
+  }
+ },
+ "ground_residential_1": {
+  "near": {
+   "triangles": 124,
+   "materials": [
+    "KitLimestone",
+    "KitFrameBronze",
+    "KitGlass",
+    "KitConcrete"
+   ]
+  },
+  "far": {
+   "triangles": 4,
+   "materials": [
+    "KitLimestone",
+    "KitGlass"
+   ]
+  }
+ },
+ "entrance_residential_1": {
+  "near": {
+   "triangles": 198,
+   "materials": [
+    "KitLimestone",
+    "KitConcrete",
+    "KitFrameBronze",
+    "KitGlass",
+    "KitFrameDark"
+   ]
+  },
+  "far": {
+   "triangles": 4,
+   "materials": [
+    "KitLimestone",
+    "KitDoor"
+   ]
+  }
+ },
+ "cornice_1": {
+  "near": {
+   "triangles": 18,
+   "materials": [
+    "KitLimestone",
+    "KitConcrete"
+   ]
+  },
+  "far": {
+   "triangles": 18,
+   "materials": [
+    "KitLimestone",
+    "KitConcrete"
+   ]
+  }
+ },
+ "th_ground_1": {
+  "near": {
+   "triangles": 246,
+   "materials": [
+    "KitStucco",
+    "KitPaintNavy",
+    "KitFrameLight",
+    "KitGlass",
+    "KitLimestone",
+    "KitMetalPanel",
+    "KitFrameDark"
+   ]
+  },
+  "far": {
+   "triangles": 6,
+   "materials": [
+    "KitStucco",
+    "KitPaintNavy",
+    "KitGlass"
+   ]
+  }
+ },
+ "th_upper_1": {
+  "near": {
+   "triangles": 274,
+   "materials": [
+    "KitStucco",
+    "KitFrameLight",
+    "KitGlass",
+    "KitLimestone"
+   ]
+  },
+  "far": {
+   "triangles": 6,
+   "materials": [
+    "KitStucco",
+    "KitGlass"
+   ]
+  }
+ },
+ "th_roof_1": {
+  "near": {
+   "triangles": 64,
+   "materials": [
+    "KitSlate",
+    "KitStucco",
+    "KitFrameDark"
+   ]
+  },
+  "far": {
+   "triangles": 4,
+   "materials": [
+    "KitSlate"
+   ]
+  }
+ },
+ "th_roof_dormer_1": {
+  "near": {
+   "triangles": 148,
+   "materials": [
+    "KitSlate",
+    "KitStucco",
+    "KitFrameDark",
+    "KitFrameLight",
+    "KitGlass"
+   ]
+  },
+  "far": {
+   "triangles": 4,
+   "materials": [
+    "KitSlate"
+   ]
+  }
+ },
+ "th_gable_1": {
+  "near": {
+   "triangles": 29,
+   "materials": [
+    "KitStucco",
+    "KitGlass",
+    "KitLimestone"
+   ]
+  },
+  "far": {
+   "triangles": 7,
+   "materials": [
+    "KitStucco"
+   ]
+  }
+ },
+ "th_chimney_1": {
+  "near": {
+   "triangles": 44,
+   "materials": [
+    "KitStucco",
+    "KitLimestone",
+    "KitBrickRed"
+   ]
+  },
+  "far": {
+   "triangles": 20,
+   "materials": [
+    "KitStucco",
+    "KitLimestone"
+   ]
+  }
+ },
+ "plain_wall_2": {
+  "near": {
+   "triangles": 10,
+   "materials": [
+    "KitBrickCharcoal"
+   ]
+  },
+  "far": {
+   "triangles": 10,
+   "materials": [
+    "KitBrickCharcoal"
+   ]
+  }
+ },
+ "ground_residential_2": {
+  "near": {
+   "triangles": 124,
+   "materials": [
+    "KitBrickCharcoal",
+    "KitFrameLight",
+    "KitGlass",
+    "KitConcrete"
+   ]
+  },
+  "far": {
+   "triangles": 4,
+   "materials": [
+    "KitBrickCharcoal",
+    "KitGlass"
+   ]
+  }
+ },
+ "entrance_residential_2": {
+  "near": {
+   "triangles": 198,
+   "materials": [
+    "KitBrickCharcoal",
+    "KitConcrete",
+    "KitFrameLight",
+    "KitGlass",
+    "KitFrameDark"
+   ]
+  },
+  "far": {
+   "triangles": 4,
+   "materials": [
+    "KitBrickCharcoal",
+    "KitDoor"
+   ]
+  }
+ },
+ "cornice_2": {
+  "near": {
+   "triangles": 12,
+   "materials": [
+    "KitMetalPanel",
+    "KitFrameLight"
+   ]
+  },
+  "far": {
+   "triangles": 12,
+   "materials": [
+    "KitMetalPanel",
+    "KitFrameLight"
+   ]
+  }
+ },
+ "th_ground_2": {
+  "near": {
+   "triangles": 350,
+   "materials": [
+    "KitBrickCharcoal",
+    "KitDoor",
+    "KitFrameDark",
+    "KitGlass",
+    "KitFrameLight",
+    "KitConcrete"
+   ]
+  },
+  "far": {
+   "triangles": 6,
+   "materials": [
+    "KitBrickCharcoal",
+    "KitDoor",
+    "KitGlass"
+   ]
+  }
+ },
+ "th_upper_2": {
+  "near": {
+   "triangles": 142,
+   "materials": [
+    "KitCedar",
+    "KitFrameDark",
+    "KitGlass",
+    "KitMetalPanel"
+   ]
+  },
+  "far": {
+   "triangles": 4,
+   "materials": [
+    "KitCedar",
+    "KitGlass"
+   ]
+  }
+ },
+ "th_roof_2": {
+  "near": {
+   "triangles": 30,
+   "materials": [
+    "KitRoofGravel",
+    "KitCedar",
+    "KitFrameLight"
+   ]
+  },
+  "far": {
+   "triangles": 30,
+   "materials": [
+    "KitRoofGravel",
+    "KitCedar",
+    "KitFrameLight"
+   ]
+  }
+ },
+ "th_roof_dormer_2": {
+  "near": {
+   "triangles": 30,
+   "materials": [
+    "KitRoofGravel",
+    "KitCedar",
+    "KitFrameLight"
+   ]
+  },
+  "far": {
+   "triangles": 30,
+   "materials": [
+    "KitRoofGravel",
+    "KitCedar",
+    "KitFrameLight"
+   ]
+  }
+ },
+ "th_gable_2": {
+  "near": {
+   "triangles": 6,
+   "materials": [
+    "KitCedar"
+   ]
+  },
+  "far": {
+   "triangles": 6,
+   "materials": [
+    "KitCedar"
+   ]
+  }
+ },
+ "th_chimney_2": {
+  "near": {
+   "triangles": 44,
+   "materials": [
+    "KitBrickRed",
+    "KitLimestone"
+   ]
+  },
+  "far": {
+   "triangles": 20,
+   "materials": [
+    "KitBrickRed",
+    "KitLimestone"
+   ]
+  }
+ }
+}

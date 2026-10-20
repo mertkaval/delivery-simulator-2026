@@ -1,0 +1,102 @@
+{
+ "bus_body": {
+  "near": {
+   "triangles": 754,
+   "materials": [
+    "KitAccentPaint",
+    "KitBusBody",
+    "KitBusGlass",
+    "KitRubber",
+    "KitLedPanel",
+    "KitHeadLight",
+    "KitRailBlack",
+    "KitTailLight",
+    "KitSteel"
+   ]
+  },
+  "far": {
+   "triangles": 200,
+   "materials": [
+    "KitAccentPaint",
+    "KitBusBody",
+    "KitBusGlass",
+    "KitRubber",
+    "KitLedPanel",
+    "KitHeadLight",
+    "KitTailLight"
+   ]
+  }
+ },
+ "bus_wheel": {
+  "near": {
+   "triangles": 132,
+   "materials": [
+    "KitTyre",
+    "KitSteel",
+    "KitSteelDark"
+   ]
+  },
+  "far": {
+   "triangles": 60,
+   "materials": [
+    "KitTyre"
+   ]
+  }
+ },
+ "bus_door": {
+  "near": {
+   "triangles": 60,
+   "materials": [
+    "KitBusGlass",
+    "KitRailBlack"
+   ]
+  },
+  "far": {
+   "triangles": 60,
+   "materials": [
+    "KitBusGlass",
+    "KitRailBlack"
+   ]
+  }
+ },
+ "bus_shelter": {
+  "near": {
+   "triangles": 204,
+   "materials": [
+    "KitSteelDark",
+    "KitLampGlow",
+    "KitClearGlass",
+    "KitOak",
+    "KitTrimPaint",
+    "KitAccentPaint"
+   ]
+  },
+  "far": {
+   "triangles": 142,
+   "materials": [
+    "KitSteelDark",
+    "KitLampGlow",
+    "KitClearGlass",
+    "KitOak"
+   ]
+  }
+ },
+ "bus_stop_pole": {
+  "near": {
+   "triangles": 114,
+   "materials": [
+    "KitSteelDark",
+    "KitAccentPaint",
+    "KitTrimPaint"
+   ]
+  },
+  "far": {
+   "triangles": 70,
+   "materials": [
+    "KitSteelDark",
+    "KitAccentPaint",
+    "KitTrimPaint"
+   ]
+  }
+ }
+}

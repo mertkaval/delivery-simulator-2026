@@ -1,0 +1,99 @@
+{
+ "version": "g3",
+ "stations": {
+  "Y_NOSE": 2.325,
+  "Y_FRONT_cage": 2.345,
+  "Y_REAR_cage": -2.4949999999999997,
+  "Y_COWL": 1.0750000000000002,
+  "Y_WS_TOP": 0.07500000000000018,
+  "Y_ROOF_END": -1.0949999999999998,
+  "Y_TRUNK": -1.9249999999999998,
+  "Y_A_PILLAR": 0.9199999999999999,
+  "Y_B_PILLAR": -0.27,
+  "Y_C_PILLAR": -1.6749999999999998,
+  "door_gaps": [
+   0.96,
+   -0.27,
+   -1.3399999999999999
+  ],
+  "hood_front_gap": 2.1,
+  "hood_rear_gap": 1.0550000000000002,
+  "trunk_gaps": [
+   -1.9149999999999998,
+   -2.135
+  ]
+ },
+ "checks": {
+  "dlo_rim_edges": 700
+ },
+ "apertures": {
+  "headlamp_R": 438,
+  "headlamp_L": 438,
+  "grille": 758,
+  "tail_lamp_R": 268,
+  "tail_lamp_L": 268,
+  "fuel_flap_L": 67,
+  "mirror_pad_R": 36,
+  "mirror_pad_L": 36,
+  "lower_intake": 70
+ },
+ "glass_components": [
+  {
+   "faces": 1312,
+   "screen": true,
+   "centre_y": -1.522
+  },
+  {
+   "faces": 393,
+   "screen": false,
+   "centre_y": -0.784
+  },
+  {
+   "faces": 393,
+   "screen": false,
+   "centre_y": -0.784
+  },
+  {
+   "faces": 279,
+   "screen": false,
+   "centre_y": 0.168
+  },
+  {
+   "faces": 279,
+   "screen": false,
+   "centre_y": 0.168
+  },
+  {
+   "faces": 1119,
+   "screen": true,
+   "centre_y": 0.804
+  }
+ ],
+ "shoulder_z_cage": {
+  "2.0": 0.8,
+  "1.0": 0.815,
+  "0.0": 0.83,
+  "-1.15": 0.865,
+  "-2.0": 0.95
+ },
+ "body_vertices": 38584,
+ "objects": {
+  "Body": 76214,
+  "Glass": 7509,
+  "BPillar": 960,
+  "BumperSkirt": 3300,
+  "ArchLiner": 189,
+  "ArchLiner.001": 189,
+  "ArchLiner.002": 189,
+  "ArchLiner.003": 189,
+  "Tyre": 560,
+  "Rim": 140,
+  "Tyre.001": 560,
+  "Rim.001": 140,
+  "Tyre.002": 560,
+  "Rim.002": 140,
+  "Tyre.003": 560,
+  "Rim.003": 140
+ },
+ "triangles_total": 91539
+}

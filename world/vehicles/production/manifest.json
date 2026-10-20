@@ -1,0 +1,28 @@
+{
+  "project": "Delivery Simulator 2026",
+  "vehicle": "player_sedan",
+  "description": "Fictional mid-size sedan, realistic, game-ready (Godot 4.7.2, GLB)",
+  "version": "2.0-wip",
+  "units": "m",
+  "frame": "Blender: +Y front, +Z up, +X right, origin on the ground at the wheelbase centre; glTF export -> Godot -Z forward, Y up",
+  "engine": {"name": "Godot", "version": "4.7.2", "renderer": "Forward+", "export": "GLB (glTF 2.0)"},
+  "budgets": {"lod0_triangles": 60000, "lod1_triangles": 20000, "lod2_triangles": 6000, "texture_memory_mb": 24, "draw_calls_lod0": 14},
+  "contract": {
+    "wheel_empties": ["WheelFrontL", "WheelFrontR", "WheelRearL", "WheelRearR"],
+    "steer_empties": ["SteerFrontL", "SteerFrontR"],
+    "steering_wheel_empty": "SteeringWheel",
+    "paint_mesh_name_token": "VehiclePaint",
+    "root_extras": ["wheelbase", "collision_lift"],
+    "tests": ["tests/car_steering_test.gd"]
+  },
+  "sources": {
+    "references": "production/references/ref_{front,rear,left_side,right_side}.webp",
+    "dimension_sheet": "production/references/dimension_sheet.json",
+    "body_module": "sedan_body.py",
+    "build_script": "build_sedan_v2.py",
+    "qa_render": "qa_render.py",
+    "legacy_v1": "build_player_car.py -> player_sedan.glb (in game until v2 passes G8)",
+    "scan_reference_only": "car_model.glb"
+  },
+  "gates": {"G0": "done", "G1": "done", "G2": "PASS WITH CONDITIONS (v2p, reports/G2_visual_qa_v2p.md)", "G3": "PASS WITH CONDITIONS (v3, reports/G3_visual_qa_v3.md)", "G4": "wheel assembly PASS WITH CONDITIONS (v0.6); exterior details pending G3", "G5": "pending", "G6": "pending", "G7": "pending", "G8": "pending"}
+}

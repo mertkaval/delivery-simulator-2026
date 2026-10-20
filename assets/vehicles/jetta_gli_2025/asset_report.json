@@ -1,0 +1,334 @@
+{
+  "source": "C:/GodotProjects/delivery-simulator-2026/volkswagen-jetta-gli-2025/source/jetta_gli_my25_lights_on.glb",
+  "source_sha256": "01b7a426162e7ad466b770024ef583164c8e43806023e97d1595e3f92706e2e9",
+  "source_triangles": 384955,
+  "removed_objects": [
+    "Int_Airbag_Driver#Airbags",
+    "Int_Airbag_Driver_Seat#Airbags",
+    "Int_Airbag_Passenger#Airbags",
+    "Int_Airbag_Passenger_Seat#Airbags",
+    "Int_Airbag_Side_L#Airbags",
+    "Int_Airbag_Side_R#Airbags",
+    "Int_Window_Rear_L#Windows",
+    "Int_Window_Rear_R#Windows",
+    "Int_Window_Rear_Windshield#Windows",
+    "Int_Window_Windshield#Windows",
+    "Int_Door_FL#Windows",
+    "Int_Door_FR#Windows",
+    "Int_Door_RL#Windows",
+    "Int_Door_RR#Windows"
+  ],
+  "wheels": {
+    "FL": {
+      "center_blender": [
+        -0.7755128741264343,
+        1.4548966884613037,
+        0.330398291349411
+      ],
+      "radius_m": 0.330398291349411
+    },
+    "FR": {
+      "center_blender": [
+        0.776517391204834,
+        1.4548442363739014,
+        0.330398291349411
+      ],
+      "radius_m": 0.330398291349411
+    },
+    "RL": {
+      "center_blender": [
+        -0.7705132365226746,
+        -1.2254810333251953,
+        0.33039864897727966
+      ],
+      "radius_m": 0.330398291349411
+    },
+    "RR": {
+      "center_blender": [
+        0.7705172300338745,
+        -1.2254652976989746,
+        0.33039864897727966
+      ],
+      "radius_m": 0.330398291349411
+    }
+  },
+  "wheelbase_m": 2.6803436279296875,
+  "wheel_radius_m": 0.330398291349411,
+  "lods": [
+    {
+      "level": 0,
+      "triangles": 129682,
+      "meshes": 8,
+      "surfaces": 60,
+      "missing_uv": []
+    },
+    {
+      "level": 1,
+      "triangles": 49756,
+      "meshes": 8,
+      "surfaces": 60,
+      "missing_uv": []
+    },
+    {
+      "level": 2,
+      "triangles": 17362,
+      "meshes": 8,
+      "surfaces": 60,
+      "missing_uv": []
+    }
+  ],
+  "textures": [
+    {
+      "file": "textures/YVA69T_n2_001.png",
+      "size": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "textures/SWStitches_n_001.png",
+      "size": [
+        32,
+        32
+      ]
+    },
+    {
+      "file": "textures/TFBCA9_d_001.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "file": "textures/FKLSX4_n_001.png",
+      "size": [
+        128,
+        128
+      ]
+    },
+    {
+      "file": "textures/MaterialAtlas_ORM_001.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "file": "textures/BPE6C3_n_001.png",
+      "size": [
+        128,
+        128
+      ]
+    },
+    {
+      "file": "textures/LineReflector_N_001.png",
+      "size": [
+        32,
+        32
+      ]
+    },
+    {
+      "file": "textures/Sound_B_d_001.png",
+      "size": [
+        32,
+        32
+      ]
+    },
+    {
+      "file": "textures/MaterialAtlas_C_001.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "file": "textures/Tire_245_45_R20_C_001.png",
+      "size": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "textures/Tire_245_45_R20_ORM_001.png",
+      "size": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "textures/Tire_245_45_R20_N_001.png",
+      "size": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "textures/K3DRM5_n_001.png",
+      "size": [
+        32,
+        32
+      ]
+    },
+    {
+      "file": "textures/YVA69T_white_d_001.png",
+      "size": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "textures/Display_VW_001.png",
+      "size": [
+        1024,
+        512
+      ]
+    },
+    {
+      "file": "textures/TGB041_d_001.png",
+      "size": [
+        64,
+        8
+      ]
+    },
+    {
+      "file": "textures/SWStitches_d_001.png",
+      "size": [
+        32,
+        32
+      ]
+    },
+    {
+      "file": "textures/YVA69T_d_001.png",
+      "size": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "textures/Stitches_d_1_white_001.png",
+      "size": [
+        16,
+        32
+      ]
+    },
+    {
+      "file": "textures/Reflector_N_001.png",
+      "size": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "textures/K2982V_Dot_Normal_001.png",
+      "size": [
+        32,
+        32
+      ]
+    },
+    {
+      "file": "textures/MaterialAtlasAR_C_001.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "file": "textures/TGB041_orm_001.png",
+      "size": [
+        64,
+        8
+      ]
+    },
+    {
+      "file": "textures/TFD07N_d_001.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "file": "textures/Reflector2_N_001.png",
+      "size": [
+        32,
+        32
+      ]
+    },
+    {
+      "file": "textures/Ambilight_001.png",
+      "size": [
+        256,
+        128
+      ]
+    },
+    {
+      "file": "textures/pzvvxt3s_001.png",
+      "size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "textures/Sound_n_001.png",
+      "size": [
+        32,
+        32
+      ]
+    },
+    {
+      "file": "textures/Display_Radio_ES_001.png",
+      "size": [
+        1024,
+        512
+      ]
+    },
+    {
+      "file": "textures/TGB041_n_001.png",
+      "size": [
+        256,
+        32
+      ]
+    },
+    {
+      "file": "textures/Stitches_n_1_001.png",
+      "size": [
+        16,
+        32
+      ]
+    },
+    {
+      "file": "textures/be9eb77d_001.png",
+      "size": [
+        128,
+        128
+      ]
+    },
+    {
+      "file": "textures/AOWheelhouse_001.png",
+      "size": [
+        128,
+        128
+      ]
+    },
+    {
+      "file": "textures/Abraded_ORM_001.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "file": "textures/TPDRN3_n_001.png",
+      "size": [
+        32,
+        64
+      ]
+    },
+    {
+      "file": "textures/Stitches_d_1_red_001.png",
+      "size": [
+        16,
+        32
+      ]
+    }
+  ]
+}

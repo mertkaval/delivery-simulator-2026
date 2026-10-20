@@ -1,0 +1,604 @@
+{
+ "component_id": "player_sedan.wheel_assembly.R",
+ "gate": "G4",
+ "version": "0.4",
+ "generated": "2026-10-19 15:57:49",
+ "source_script": "vehicles/wheel_assembly.py",
+ "source_blend": "vehicles/production/wip/wheel_assembly.blend",
+ "export_path": "vehicles/production/wip/wheel_assembly.glb",
+ "units": "m",
+ "coordinate_system": "Blender local: axle = +X, right-wheel face at +X, origin at hub centre, spin about local X. Exported Y-up (export_yup=True): X axis preserved, so Godot spins about local X as well. LOD1 root offset +1 m Blender Y (= -1 m Godot Z).",
+ "parameters": {
+  "tyre_od": 0.66,
+  "tyre_width": 0.225,
+  "rim_dia": 0.432,
+  "rim_width": 0.19,
+  "face_inset": 0.02,
+  "spoke_pairs": 5,
+  "blade_w_rim": 0.042,
+  "blade_w_hub": 0.032,
+  "pair_gap": 0.022,
+  "blade_dish": 0.02,
+  "hub_plate_r": 0.11,
+  "lug_count": 5,
+  "lug_pcd": 0.114,
+  "lug_af": 0.021,
+  "disc_dia": 0.3,
+  "disc_thick": 0.028,
+  "caliper_height": 0.17,
+  "caliper_depth": 0.07,
+  "shield_r": 0.14
+ },
+ "lod0": {
+  "bounds_m": {
+   "min": [
+    -0.1125,
+    -0.33,
+    -0.33
+   ],
+   "max": [
+    0.1125,
+    0.33,
+    0.33
+   ],
+   "size": [
+    0.225,
+    0.66,
+    0.66
+   ]
+  },
+  "triangles": {
+   "Caliper": {
+    "triangles": 136,
+    "material": [
+     "CaliperDark"
+    ],
+    "parent": "HubStatic",
+    "centre_yz_offset_mm": [
+     -131.3,
+     0.0
+    ],
+    "x_range": [
+     -0.029,
+     0.045
+    ],
+    "radius_max": 0.088,
+    "boundary_edges": 0,
+    "edges_with_3plus_faces": 0,
+    "ngons": 0
+   },
+   "DustShield": {
+    "triangles": 260,
+    "material": [
+     "Rubber"
+    ],
+    "parent": "HubStatic",
+    "centre_yz_offset_mm": [
+     0.0,
+     0.0
+    ],
+    "x_range": [
+     -0.108,
+     -0.013
+    ],
+    "radius_max": 0.14,
+    "boundary_edges": 0,
+    "edges_with_3plus_faces": 0,
+    "ngons": 0
+   },
+   "BrakeDisc": {
+    "triangles": 1008,
+    "material": [
+     "SteelDisc"
+    ],
+    "parent": "WheelPivot",
+    "centre_yz_offset_mm": [
+     0.0,
+     0.0
+    ],
+    "x_range": [
+     -0.008,
+     0.048
+    ],
+    "radius_max": 0.15,
+    "boundary_edges": 0,
+    "edges_with_3plus_faces": 0,
+    "ngons": 0
+   },
+   "CentreCap": {
+    "triangles": 144,
+    "material": [
+     "Chrome"
+    ],
+    "parent": "WheelPivot",
+    "centre_yz_offset_mm": [
+     0.0,
+     0.0
+    ],
+    "x_range": [
+     0.0645,
+     0.0735
+    ],
+    "radius_max": 0.03,
+    "boundary_edges": 0,
+    "edges_with_3plus_faces": 0,
+    "ngons": 0
+   },
+   "LugNuts": {
+    "triangles": 160,
+    "material": [
+     "Chrome"
+    ],
+    "parent": "WheelPivot",
+    "centre_yz_offset_mm": [
+     0.0,
+     -5.44
+    ],
+    "x_range": [
+     0.0565,
+     0.1042
+    ],
+    "radius_max": 0.0663,
+    "boundary_edges": 0,
+    "edges_with_3plus_faces": 0,
+    "ngons": 0
+   },
+   "RimBarrel": {
+    "triangles": 1344,
+    "material": [
+     "RimWell"
+    ],
+    "parent": "WheelPivot",
+    "centre_yz_offset_mm": [
+     0.0,
+     0.0
+    ],
+    "x_range": [
+     -0.0975,
+     0.0917
+    ],
+    "radius_max": 0.2302,
+    "boundary_edges": 0,
+    "edges_with_3plus_faces": 0,
+    "ngons": 0
+   },
+   "RimFace": {
+    "triangles": 1216,
+    "material": [
+     "Alloy"
+    ],
+    "parent": "WheelPivot",
+    "centre_yz_offset_mm": [
+     0.0,
+     8.4
+    ],
+    "x_range": [
+     0.0345,
+     0.0885
+    ],
+    "radius_max": 0.225,
+    "boundary_edges": 0,
+    "edges_with_3plus_faces": 0,
+    "ngons": 0
+   },
+   "Tyre": {
+    "triangles": 3456,
+    "material": [
+     "Rubber",
+     "RubberCut"
+    ],
+    "parent": "WheelPivot",
+    "centre_yz_offset_mm": [
+     0.0,
+     0.0
+    ],
+    "x_range": [
+     -0.1125,
+     0.1125
+    ],
+    "radius_max": 0.33,
+    "boundary_edges": 384,
+    "edges_with_3plus_faces": 0,
+    "ngons": 0
+   }
+  },
+  "triangles_total": 7724,
+  "budgets": {
+   "tyre": {
+    "triangles": 3456,
+    "limit": 3500,
+    "ok": true
+   },
+   "rim": {
+    "triangles": 2864,
+    "limit": 3500,
+    "ok": true
+   },
+   "brake": {
+    "triangles": 1404,
+    "limit": 1500,
+    "ok": true
+   },
+   "total": {
+    "triangles": 7724,
+    "limit": 9000,
+    "ok": true
+   }
+  }
+ },
+ "lod1": {
+  "bounds_m": {
+   "min": [
+    -0.1125,
+    -0.33,
+    -0.33
+   ],
+   "max": [
+    0.1125,
+    0.33,
+    0.33
+   ],
+   "size": [
+    0.225,
+    0.66,
+    0.66
+   ]
+  },
+  "triangles": {
+   "Caliper_LOD1": {
+    "triangles": 44,
+    "material": [
+     "CaliperDark"
+    ],
+    "parent": "HubStatic_LOD1",
+    "centre_yz_offset_mm": [
+     -129.96,
+     0.0
+    ],
+    "x_range": [
+     -0.029,
+     0.041
+    ],
+    "radius_max": 0.9134,
+    "boundary_edges": 0,
+    "edges_with_3plus_faces": 0,
+    "ngons": 0
+   },
+   "DustShield_LOD1": {
+    "triangles": 160,
+    "material": [
+     "Rubber"
+    ],
+    "parent": "HubStatic_LOD1",
+    "centre_yz_offset_mm": [
+     0.0,
+     0.0
+    ],
+    "x_range": [
+     -0.108,
+     -0.013
+    ],
+    "radius_max": 1.14,
+    "boundary_edges": 0,
+    "edges_with_3plus_faces": 0,
+    "ngons": 0
+   },
+   "BrakeDisc_LOD1": {
+    "triangles": 320,
+    "material": [
+     "SteelDisc"
+    ],
+    "parent": "WheelPivot_LOD1",
+    "centre_yz_offset_mm": [
+     0.0,
+     0.0
+    ],
+    "x_range": [
+     -0.008,
+     0.048
+    ],
+    "radius_max": 1.15,
+    "boundary_edges": 0,
+    "edges_with_3plus_faces": 0,
+    "ngons": 0
+   },
+   "CentreCap_LOD1": {
+    "triangles": 60,
+    "material": [
+     "Chrome"
+    ],
+    "parent": "WheelPivot_LOD1",
+    "centre_yz_offset_mm": [
+     0.0,
+     0.0
+    ],
+    "x_range": [
+     0.0645,
+     0.0735
+    ],
+    "radius_max": 1.03,
+    "boundary_edges": 0,
+    "edges_with_3plus_faces": 0,
+    "ngons": 0
+   },
+   "LugNuts_LOD1": {
+    "triangles": 130,
+    "material": [
+     "Chrome"
+    ],
+    "parent": "WheelPivot_LOD1",
+    "centre_yz_offset_mm": [
+     1.16,
+     -5.44
+    ],
+    "x_range": [
+     0.0565,
+     0.1042
+    ],
+    "radius_max": 1.0663,
+    "boundary_edges": 0,
+    "edges_with_3plus_faces": 0,
+    "ngons": 0
+   },
+   "RimBarrel_LOD1": {
+    "triangles": 336,
+    "material": [
+     "RimWell"
+    ],
+    "parent": "WheelPivot_LOD1",
+    "centre_yz_offset_mm": [
+     0.0,
+     0.0
+    ],
+    "x_range": [
+     -0.0975,
+     0.0925
+    ],
+    "radius_max": 1.228,
+    "boundary_edges": 0,
+    "edges_with_3plus_faces": 0,
+    "ngons": 0
+   },
+   "RimFace_LOD1": {
+    "triangles": 240,
+    "material": [
+     "Alloy"
+    ],
+    "parent": "WheelPivot_LOD1",
+    "centre_yz_offset_mm": [
+     0.0,
+     8.4
+    ],
+    "x_range": [
+     0.0345,
+     0.0885
+    ],
+    "radius_max": 1.2246,
+    "boundary_edges": 0,
+    "edges_with_3plus_faces": 0,
+    "ngons": 0
+   },
+   "Tyre_LOD1": {
+    "triangles": 1024,
+    "material": [
+     "Rubber",
+     "RubberCut"
+    ],
+    "parent": "WheelPivot_LOD1",
+    "centre_yz_offset_mm": [
+     0.0,
+     0.0
+    ],
+    "x_range": [
+     -0.1125,
+     0.1125
+    ],
+    "radius_max": 1.33,
+    "boundary_edges": 0,
+    "edges_with_3plus_faces": 0,
+    "ngons": 0
+   }
+  },
+  "triangles_total": 2314,
+  "budgets": {
+   "tyre": {
+    "triangles": 1024,
+    "limit": null,
+    "ok": true
+   },
+   "rim": {
+    "triangles": 766,
+    "limit": null,
+    "ok": true
+   },
+   "brake": {
+    "triangles": 524,
+    "limit": null,
+    "ok": true
+   },
+   "total": {
+    "triangles": 2314,
+    "limit": 2500,
+    "ok": true
+   }
+  }
+ },
+ "material_slots": [
+  "Alloy",
+  "CaliperDark",
+  "Chrome",
+  "RimWell",
+  "Rubber",
+  "RubberCut",
+  "SteelDisc"
+ ],
+ "pivot": {
+  "WheelPivot": "empty at the hub centre; children Tyre, RimBarrel, RimFace, CentreCap, LugNuts, BrakeDisc spin about local X",
+  "HubStatic": "sibling empty at the same origin; children Caliper (rear / -Y position) and DustShield stay fixed",
+  "root": "WheelR (LOD0) and WheelR_LOD1 (+1 m Y)"
+ },
+ "reference_ids": [
+  "production/references/dimension_sheet.json (tyre_diameter, tyre_width, rim_diameter)",
+  "production/references/ref_left_side.webp (twin-spoke styling)",
+  "production/references/ref_front.webp (tyre shoulder / tread)"
+ ],
+ "renders": {
+  "face": "vehicles/production/renders/g4_wheel/wheel_face.png",
+  "three_quarter": "vehicles/production/renders/g4_wheel/wheel_34.png",
+  "rear_brake": "vehicles/production/renders/g4_wheel/wheel_rear_brake.png",
+  "tread_closeup": "vehicles/production/renders/g4_wheel/wheel_tread_closeup.png",
+  "spoke_closeup": "vehicles/production/renders/g4_wheel/wheel_spoke_closeup.png",
+  "lod1_three_quarter": "vehicles/production/renders/g4_wheel/wheel_lod1_34.png"
+ },
+ "known_defects": [
+  "Transverse block cuts are 96 dark decal quads (RubberCut slot) lying 0.4 mm above the tread facets of the two outer ribs, not cut geometry; they are loose faces (384 boundary edges in Tyre by design). Circumferential grooves are real geometry.",
+  "Lug pockets are made with an EXACT boolean on the hub plate (n-gons triangulated); the blades interpenetrate the plate and the rolled lip rather than being unioned, each blade is its own closed shell.",
+  "Alloy/Chrome/SteelDisc look flat grey under the uniform grey studio world (no HDRI); re-check materials in Godot.",
+  "DustShield is parented to HubStatic (fixed) rather than WheelPivot: radially symmetric, no visual difference.",
+  "Lettering is two plain raised ribs on the outer (+X) sidewall only; the tyre is not mirror-symmetric in X.",
+  "Tyre revolve is 48 segments (7.5 deg) to stay under 3,500 tris with the richer profile; silhouette chord error 0.7 mm."
+ ],
+ "QA_status": "pending",
+ "tests_run": [
+  {
+   "name": "triangle_budgets",
+   "result": {
+    "tyre": {
+     "triangles": 3456,
+     "limit": 3500,
+     "ok": true
+    },
+    "rim": {
+     "triangles": 2864,
+     "limit": 3500,
+     "ok": true
+    },
+    "brake": {
+     "triangles": 1404,
+     "limit": 1500,
+     "ok": true
+    },
+    "total": {
+     "triangles": 7724,
+     "limit": 9000,
+     "ok": true
+    }
+   },
+   "passed": true
+  },
+  {
+   "name": "concentricity_bbox",
+   "detail": "max |bbox centre Y/Z| over the revolved meshes Tyre, RimBarrel, CentreCap, BrakeDisc, DustShield (mm); RimFace/LugNuts/Caliper are not rotationally symmetric so their bbox centre is legitimately off-axis",
+   "value_mm": 0.0,
+   "passed": true
+  },
+  {
+   "name": "tyre_dimensions",
+   "detail": {
+    "od_m": 0.66,
+    "width_m": 0.225,
+    "rim_face_x": 0.0917,
+    "tyre_outer_x": 0.1125,
+    "face_inset_m": 0.0208
+   },
+   "passed": true
+  },
+  {
+   "name": "manifold_ngons",
+   "detail": {
+    "Caliper": {
+     "boundary_edges": 0,
+     "edges_with_3plus_faces": 0,
+     "ngons": 0
+    },
+    "DustShield": {
+     "boundary_edges": 0,
+     "edges_with_3plus_faces": 0,
+     "ngons": 0
+    },
+    "BrakeDisc": {
+     "boundary_edges": 0,
+     "edges_with_3plus_faces": 0,
+     "ngons": 0
+    },
+    "CentreCap": {
+     "boundary_edges": 0,
+     "edges_with_3plus_faces": 0,
+     "ngons": 0
+    },
+    "LugNuts": {
+     "boundary_edges": 0,
+     "edges_with_3plus_faces": 0,
+     "ngons": 0
+    },
+    "RimBarrel": {
+     "boundary_edges": 0,
+     "edges_with_3plus_faces": 0,
+     "ngons": 0
+    },
+    "RimFace": {
+     "boundary_edges": 0,
+     "edges_with_3plus_faces": 0,
+     "ngons": 0
+    },
+    "Tyre": {
+     "boundary_edges": 384,
+     "edges_with_3plus_faces": 0,
+     "ngons": 0
+    }
+   },
+   "note": "boundary edges are allowed only on Tyre (decal cut quads); every other mesh must be closed",
+   "passed": true
+  },
+  {
+   "name": "glb_reimport",
+   "passed": true,
+   "detail": {
+    "missing": [],
+    "caliper_parent": "HubStatic",
+    "tyre_parent": "WheelPivot",
+    "lod1_root_location_blender": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "lod0_bounds_after_reimport": {
+     "min": [
+      -0.1125,
+      -0.33,
+      -0.33
+     ],
+     "max": [
+      0.1125,
+      0.33,
+      0.33
+     ]
+    },
+    "hierarchy": [
+     "WheelR [EMPTY] loc=[0.0, 0.0, 0.0]",
+     "  HubStatic [EMPTY] loc=[0.0, 0.0, 0.0]",
+     "    Caliper [MESH] tris=136 mat=['CaliperDark']",
+     "    DustShield [MESH] tris=260 mat=['Rubber']",
+     "  WheelPivot [EMPTY] loc=[0.0, 0.0, 0.0]",
+     "    BrakeDisc [MESH] tris=1008 mat=['SteelDisc']",
+     "    CentreCap [MESH] tris=144 mat=['Chrome']",
+     "    LugNuts [MESH] tris=160 mat=['Chrome']",
+     "    RimBarrel [MESH] tris=1344 mat=['RimWell']",
+     "    RimFace [MESH] tris=1216 mat=['Alloy']",
+     "    Tyre [MESH] tris=3456 mat=['Rubber', 'RubberCut']",
+     "WheelR_LOD1 [EMPTY] loc=[0.0, 1.0, 0.0]",
+     "  HubStatic_LOD1 [EMPTY] loc=[0.0, 0.0, 0.0]",
+     "    Caliper_LOD1 [MESH] tris=44 mat=['CaliperDark']",
+     "    DustShield_LOD1 [MESH] tris=160 mat=['Rubber']",
+     "  WheelPivot_LOD1 [EMPTY] loc=[0.0, 0.0, 0.0]",
+     "    BrakeDisc_LOD1 [MESH] tris=320 mat=['SteelDisc']",
+     "    CentreCap_LOD1 [MESH] tris=60 mat=['Chrome']",
+     "    LugNuts_LOD1 [MESH] tris=130 mat=['Chrome']",
+     "    RimBarrel_LOD1 [MESH] tris=336 mat=['RimWell']",
+     "    RimFace_LOD1 [MESH] tris=240 mat=['Alloy']",
+     "    Tyre_LOD1 [MESH] tris=1024 mat=['Rubber']"
+    ]
+   }
+  }
+ ]
+}

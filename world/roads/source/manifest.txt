@@ -1,0 +1,8 @@
+avenue_deck: 30 tris, materials=['Asphalt', 'GutterConcrete', 'CurbConcrete']
+street_deck: 30 tris, materials=['Asphalt', 'GutterConcrete', 'CurbConcrete']
+junction_pad: 2 tris, materials=['Asphalt']
+avenue_marks_half: 6 tris, materials=['PaintYellow', 'PaintWhite', 'BikeLaneGreen']
+street_marks_half: 6 tris, materials=['PaintYellow', 'PaintWhite', 'BikeLaneGreen']
+bike_symbol: 133 tris, materials=['PaintWhite']
+paint_white_tile: 2 tris, materials=['PaintWhite']
+bike_conflict_tile: 2 tris, materials=['BikeLaneGreen']

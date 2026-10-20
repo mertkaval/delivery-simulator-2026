@@ -1,0 +1,161 @@
+{
+ "asset": "C:/GodotProjects/delivery-simulator-2026/world/vehicles/production/wip/sedan_v2_body.glb",
+ "objects": [
+  {
+   "name": "ArchLiner",
+   "triangles": 189,
+   "flat_faces": 0,
+   "materials": [
+    "ArchLiner"
+   ]
+  },
+  {
+   "name": "ArchLiner.001",
+   "triangles": 189,
+   "flat_faces": 0,
+   "materials": [
+    "ArchLiner"
+   ]
+  },
+  {
+   "name": "ArchLiner.002",
+   "triangles": 189,
+   "flat_faces": 0,
+   "materials": [
+    "ArchLiner"
+   ]
+  },
+  {
+   "name": "ArchLiner.003",
+   "triangles": 189,
+   "flat_faces": 0,
+   "materials": [
+    "ArchLiner"
+   ]
+  },
+  {
+   "name": "Body",
+   "triangles": 74564,
+   "flat_faces": 2095,
+   "materials": [
+    "VehiclePaint",
+    "BlackTrim"
+   ]
+  },
+  {
+   "name": "BPillar",
+   "triangles": 1152,
+   "flat_faces": 0,
+   "materials": [
+    "BlackTrim"
+   ]
+  },
+  {
+   "name": "BumperSkirt",
+   "triangles": 3002,
+   "flat_faces": 201,
+   "materials": [
+    "BlackTrim"
+   ]
+  },
+  {
+   "name": "Glass",
+   "triangles": 7448,
+   "flat_faces": 0,
+   "materials": [
+    "Glass",
+    "BlackTrim"
+   ]
+  },
+  {
+   "name": "Rim",
+   "triangles": 140,
+   "flat_faces": 135,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Rim.001",
+   "triangles": 140,
+   "flat_faces": 135,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Rim.002",
+   "triangles": 140,
+   "flat_faces": 135,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Rim.003",
+   "triangles": 140,
+   "flat_faces": 135,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Tyre",
+   "triangles": 560,
+   "flat_faces": 0,
+   "materials": [
+    "Rubber"
+   ]
+  },
+  {
+   "name": "Tyre.001",
+   "triangles": 560,
+   "flat_faces": 0,
+   "materials": [
+    "Rubber"
+   ]
+  },
+  {
+   "name": "Tyre.002",
+   "triangles": 560,
+   "flat_faces": 0,
+   "materials": [
+    "Rubber"
+   ]
+  },
+  {
+   "name": "Tyre.003",
+   "triangles": 560,
+   "flat_faces": 0,
+   "materials": [
+    "Rubber"
+   ]
+  }
+ ],
+ "materials": [
+  "Alloy",
+  "ArchLiner",
+  "BlackTrim",
+  "Glass",
+  "Rubber",
+  "VehiclePaint"
+ ],
+ "bounds_m": {
+  "min": [
+   -0.929,
+   -2.475,
+   0.0
+  ],
+  "max": [
+   0.929,
+   2.305,
+   1.448
+  ],
+  "size": [
+   1.857,
+   4.78,
+   1.448
+  ]
+ },
+ "triangles_total": 89722
+}

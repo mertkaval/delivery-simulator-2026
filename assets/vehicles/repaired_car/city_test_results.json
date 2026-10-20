@@ -1,0 +1,12 @@
+{
+	"draw_calls": 1536.0,
+	"median_frame_ms": 8.256,
+	"moved_m": 4.75222015380859,
+	"p95_frame_ms": 9.756,
+	"pass": true,
+	"primitives": 1148438.0,
+	"resolution": "(1280, 720)",
+	"save_enabled": false,
+	"stopped_speed_ms": 0.0,
+	"texture_memory_mib": 458.078125
+}

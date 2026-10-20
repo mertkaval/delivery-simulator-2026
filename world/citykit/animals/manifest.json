@@ -1,0 +1,215 @@
+{
+ "dog_body": {
+  "near": {
+   "triangles": 380,
+   "materials": [
+    "KitFur",
+    "KitFurLight",
+    "KitAccentPaint"
+   ]
+  },
+  "far": {
+   "triangles": 352,
+   "materials": [
+    "KitFur",
+    "KitFurLight"
+   ]
+  }
+ },
+ "dog_head": {
+  "near": {
+   "triangles": 234,
+   "materials": [
+    "KitFur",
+    "KitFurLight",
+    "KitNose",
+    "KitEye"
+   ]
+  },
+  "far": {
+   "triangles": 234,
+   "materials": [
+    "KitFur",
+    "KitFurLight",
+    "KitNose",
+    "KitEye"
+   ]
+  }
+ },
+ "dog_leg": {
+  "near": {
+   "triangles": 78,
+   "materials": [
+    "KitFur",
+    "KitFurLight"
+   ]
+  },
+  "far": {
+   "triangles": 78,
+   "materials": [
+    "KitFur",
+    "KitFurLight"
+   ]
+  }
+ },
+ "dog_tail": {
+  "near": {
+   "triangles": 24,
+   "materials": [
+    "KitFur",
+    "KitFurLight"
+   ]
+  },
+  "far": {
+   "triangles": 24,
+   "materials": [
+    "KitFur",
+    "KitFurLight"
+   ]
+  }
+ },
+ "cat_body": {
+  "near": {
+   "triangles": 170,
+   "materials": [
+    "KitFur",
+    "KitFurLight"
+   ]
+  },
+  "far": {
+   "triangles": 170,
+   "materials": [
+    "KitFur",
+    "KitFurLight"
+   ]
+  }
+ },
+ "cat_head": {
+  "near": {
+   "triangles": 244,
+   "materials": [
+    "KitFur",
+    "KitFurLight",
+    "KitNose",
+    "KitEye"
+   ]
+  },
+  "far": {
+   "triangles": 196,
+   "materials": [
+    "KitFur",
+    "KitFurLight",
+    "KitNose",
+    "KitEye"
+   ]
+  }
+ },
+ "cat_leg": {
+  "near": {
+   "triangles": 52,
+   "materials": [
+    "KitFur",
+    "KitFurLight"
+   ]
+  },
+  "far": {
+   "triangles": 52,
+   "materials": [
+    "KitFur",
+    "KitFurLight"
+   ]
+  }
+ },
+ "cat_tail": {
+  "near": {
+   "triangles": 48,
+   "materials": [
+    "KitFur"
+   ]
+  },
+  "far": {
+   "triangles": 48,
+   "materials": [
+    "KitFur"
+   ]
+  }
+ },
+ "pigeon_body": {
+  "near": {
+   "triangles": 308,
+   "materials": [
+    "KitFeather",
+    "KitNeckSheen",
+    "KitBeak",
+    "KitEye",
+    "KitFeatherTip"
+   ]
+  },
+  "far": {
+   "triangles": 308,
+   "materials": [
+    "KitFeather",
+    "KitNeckSheen",
+    "KitBeak",
+    "KitEye",
+    "KitFeatherTip"
+   ]
+  }
+ },
+ "crow_body": {
+  "near": {
+   "triangles": 260,
+   "materials": [
+    "KitFeather",
+    "KitBeak",
+    "KitEye",
+    "KitFeatherTip"
+   ]
+  },
+  "far": {
+   "triangles": 260,
+   "materials": [
+    "KitFeather",
+    "KitBeak",
+    "KitEye",
+    "KitFeatherTip"
+   ]
+  }
+ },
+ "gull_body": {
+  "near": {
+   "triangles": 260,
+   "materials": [
+    "KitFeather",
+    "KitBeak",
+    "KitEye",
+    "KitFeatherTip"
+   ]
+  },
+  "far": {
+   "triangles": 260,
+   "materials": [
+    "KitFeather",
+    "KitBeak",
+    "KitEye",
+    "KitFeatherTip"
+   ]
+  }
+ },
+ "bird_wing": {
+  "near": {
+   "triangles": 6,
+   "materials": [
+    "KitFeather",
+    "KitFeatherTip"
+   ]
+  },
+  "far": {
+   "triangles": 6,
+   "materials": [
+    "KitFeather",
+    "KitFeatherTip"
+   ]
+  }
+ }
+}

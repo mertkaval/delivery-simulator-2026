@@ -1,0 +1,30 @@
+{
+  "maple": {
+    "triangles": 15718,
+    "meshes": 2
+  },
+  "birch": {
+    "triangles": 15718,
+    "meshes": 2
+  },
+  "conifer": {
+    "triangles": 28738,
+    "meshes": 2
+  },
+  "grass_clump": {
+    "triangles": 54,
+    "meshes": 1
+  },
+  "park_bench": {
+    "triangles": 1420,
+    "meshes": 3
+  },
+  "fountain": {
+    "triangles": 2104,
+    "meshes": 1
+  },
+  "park_garden": {
+    "triangles": 8828,
+    "meshes": 6
+  }
+}

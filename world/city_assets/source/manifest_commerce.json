@@ -1,0 +1,42 @@
+{
+  "scooter": {
+    "triangles": 4780,
+    "meshes": 10
+  },
+  "delivery_bag": {
+    "triangles": 540,
+    "meshes": 3
+  },
+  "backpack": {
+    "triangles": 540,
+    "meshes": 3
+  },
+  "gloves": {
+    "triangles": 1160,
+    "meshes": 1
+  },
+  "store_equipment": {
+    "triangles": 2856,
+    "meshes": 7
+  },
+  "store_bikes": {
+    "triangles": 2208,
+    "meshes": 7
+  },
+  "store_cars": {
+    "triangles": 2208,
+    "meshes": 7
+  },
+  "store_scooters": {
+    "triangles": 2208,
+    "meshes": 7
+  },
+  "store_wc": {
+    "triangles": 4252,
+    "meshes": 9
+  },
+  "gear_kiosk": {
+    "triangles": 2736,
+    "meshes": 3
+  }
+}

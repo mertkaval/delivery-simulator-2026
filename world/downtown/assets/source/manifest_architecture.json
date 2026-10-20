@@ -1,0 +1,306 @@
+{
+  "bay_apartment_0": {
+    "triangles_near": 1296,
+    "triangles_far": 412,
+    "materials": 4,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "bay_office_0": {
+    "triangles_near": 972,
+    "triangles_far": 308,
+    "materials": 4,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "storefront_0": {
+    "triangles_near": 1188,
+    "triangles_far": 376,
+    "materials": 5,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "entrance_0": {
+    "triangles_near": 2160,
+    "triangles_far": 686,
+    "materials": 5,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "bay_apartment_1": {
+    "triangles_near": 1296,
+    "triangles_far": 412,
+    "materials": 4,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "bay_office_1": {
+    "triangles_near": 972,
+    "triangles_far": 308,
+    "materials": 4,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "storefront_1": {
+    "triangles_near": 1188,
+    "triangles_far": 376,
+    "materials": 4,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "entrance_1": {
+    "triangles_near": 2160,
+    "triangles_far": 686,
+    "materials": 4,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "bay_apartment_2": {
+    "triangles_near": 1404,
+    "triangles_far": 446,
+    "materials": 3,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "bay_office_2": {
+    "triangles_near": 972,
+    "triangles_far": 308,
+    "materials": 3,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "storefront_2": {
+    "triangles_near": 1188,
+    "triangles_far": 378,
+    "materials": 3,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "entrance_2": {
+    "triangles_near": 2160,
+    "triangles_far": 688,
+    "materials": 3,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "blank_wall": {
+    "triangles_near": 108,
+    "triangles_far": 34,
+    "materials": 1,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": [
+      4,
+      3.2,
+      0.3
+    ]
+  },
+  "corner_return": {
+    "triangles_near": 324,
+    "triangles_far": 102,
+    "materials": 1,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "roof_slab": {
+    "triangles_near": 108,
+    "triangles_far": 34,
+    "materials": 1,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "parapet": {
+    "triangles_near": 216,
+    "triangles_far": 68,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "balcony": {
+    "triangles_near": 544,
+    "triangles_far": 166,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "canopy": {
+    "triangles_near": 272,
+    "triangles_far": 86,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "awning": {
+    "triangles_near": 166,
+    "triangles_far": 90,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "hvac": {
+    "triangles_near": 2436,
+    "triangles_far": 778,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": [
+      2.4,
+      1.3,
+      1.7
+    ]
+  },
+  "pipe": {
+    "triangles_near": 644,
+    "triangles_far": 252,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "vent": {
+    "triangles_near": 864,
+    "triangles_far": 274,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "loading_door": {
+    "triangles_near": 2268,
+    "triangles_far": 724,
+    "materials": 3,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "garage_entry": {
+    "triangles_near": 432,
+    "triangles_far": 136,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "parking_bay": {
+    "triangles_near": 544,
+    "triangles_far": 172,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "fire_escape": {
+    "triangles_near": 2768,
+    "triangles_far": 884,
+    "materials": 1,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "antenna": {
+    "triangles_near": 120,
+    "triangles_far": 38,
+    "materials": 1,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "sign_0": {
+    "triangles_near": 600,
+    "triangles_far": 191,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "sign_1": {
+    "triangles_near": 776,
+    "triangles_far": 247,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "sign_2": {
+    "triangles_near": 464,
+    "triangles_far": 147,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "sign_3": {
+    "triangles_near": 860,
+    "triangles_far": 273,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "sign_4": {
+    "triangles_near": 780,
+    "triangles_far": 249,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "sign_5": {
+    "triangles_near": 524,
+    "triangles_far": 167,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "sign_6": {
+    "triangles_near": 864,
+    "triangles_far": 274,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "sign_7": {
+    "triangles_near": 904,
+    "triangles_far": 288,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "sign_8": {
+    "triangles_near": 812,
+    "triangles_far": 259,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  },
+  "sign_9": {
+    "triangles_near": 624,
+    "triangles_far": 199,
+    "materials": 2,
+    "uv": "Smart UV, .02 margin",
+    "metres": true,
+    "collision": null
+  }
+}

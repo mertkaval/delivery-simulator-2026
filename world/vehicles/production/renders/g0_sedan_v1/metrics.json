@@ -1,0 +1,1264 @@
+{
+ "asset": "C:\\GodotProjects\\delivery-simulator-2026\\world\\vehicles\\player_sedan.glb",
+ "objects": [
+  {
+   "name": "ArchLiner",
+   "triangles": 118,
+   "flat_faces": 0,
+   "materials": [
+    "ArchLiner"
+   ]
+  },
+  {
+   "name": "ArchLiner.001",
+   "triangles": 118,
+   "flat_faces": 0,
+   "materials": [
+    "ArchLiner"
+   ]
+  },
+  {
+   "name": "ArchLiner.002",
+   "triangles": 118,
+   "flat_faces": 0,
+   "materials": [
+    "ArchLiner"
+   ]
+  },
+  {
+   "name": "ArchLiner.003",
+   "triangles": 118,
+   "flat_faces": 0,
+   "materials": [
+    "ArchLiner"
+   ]
+  },
+  {
+   "name": "Badge",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Chrome"
+   ]
+  },
+  {
+   "name": "Body_VehiclePaint",
+   "triangles": 27757,
+   "flat_faces": 105,
+   "materials": [
+    "VehiclePaint",
+    "ArchLiner"
+   ]
+  },
+  {
+   "name": "CabinFloor",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Interior"
+   ]
+  },
+  {
+   "name": "CentreScreen",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "Cluster",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "Console",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Interior"
+   ]
+  },
+  {
+   "name": "Cowl",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "BlackTrim"
+   ]
+  },
+  {
+   "name": "Dashboard",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Interior"
+   ]
+  },
+  {
+   "name": "DashTop",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Interior"
+   ]
+  },
+  {
+   "name": "DoorCard",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Interior"
+   ]
+  },
+  {
+   "name": "DoorCard.001",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Interior"
+   ]
+  },
+  {
+   "name": "DoorHandle.001_VehiclePaint",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "VehiclePaint"
+   ]
+  },
+  {
+   "name": "DoorHandle.002_VehiclePaint",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "VehiclePaint"
+   ]
+  },
+  {
+   "name": "DoorHandle.003_VehiclePaint",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "VehiclePaint"
+   ]
+  },
+  {
+   "name": "DoorHandle_VehiclePaint",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "VehiclePaint"
+   ]
+  },
+  {
+   "name": "DoorSeam",
+   "triangles": 20,
+   "flat_faces": 20,
+   "materials": [
+    "BlackTrim"
+   ]
+  },
+  {
+   "name": "DoorSeam.001",
+   "triangles": 20,
+   "flat_faces": 18,
+   "materials": [
+    "BlackTrim"
+   ]
+  },
+  {
+   "name": "DoorSeam.002",
+   "triangles": 20,
+   "flat_faces": 20,
+   "materials": [
+    "BlackTrim"
+   ]
+  },
+  {
+   "name": "Exhaust",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Chrome"
+   ]
+  },
+  {
+   "name": "Exhaust.001",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Chrome"
+   ]
+  },
+  {
+   "name": "FogBezel",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "BlackTrim"
+   ]
+  },
+  {
+   "name": "FogBezel.001",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "BlackTrim"
+   ]
+  },
+  {
+   "name": "FogLamp",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "HeadLamp"
+   ]
+  },
+  {
+   "name": "FogLamp.001",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "HeadLamp"
+   ]
+  },
+  {
+   "name": "FrontPlate",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Plate"
+   ]
+  },
+  {
+   "name": "FrontSeatBack",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Seat"
+   ]
+  },
+  {
+   "name": "FrontSeatBack.001",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Seat"
+   ]
+  },
+  {
+   "name": "FrontSeatBase",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Seat"
+   ]
+  },
+  {
+   "name": "FrontSeatBase.001",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Seat"
+   ]
+  },
+  {
+   "name": "FrontSeatHeadrest",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Seat"
+   ]
+  },
+  {
+   "name": "FrontSeatHeadrest.001",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Seat"
+   ]
+  },
+  {
+   "name": "FrontSkirt",
+   "triangles": 208,
+   "flat_faces": 159,
+   "materials": [
+    "BlackTrim"
+   ]
+  },
+  {
+   "name": "Glass",
+   "triangles": 5696,
+   "flat_faces": 0,
+   "materials": [
+    "Glass"
+   ]
+  },
+  {
+   "name": "GrilleBar",
+   "triangles": 184,
+   "flat_faces": 144,
+   "materials": [
+    "Chrome"
+   ]
+  },
+  {
+   "name": "GrilleBar.001",
+   "triangles": 184,
+   "flat_faces": 137,
+   "materials": [
+    "Chrome"
+   ]
+  },
+  {
+   "name": "GrilleBar.002",
+   "triangles": 184,
+   "flat_faces": 137,
+   "materials": [
+    "Chrome"
+   ]
+  },
+  {
+   "name": "GrilleField",
+   "triangles": 184,
+   "flat_faces": 140,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "HeadLamp",
+   "triangles": 48,
+   "flat_faces": 35,
+   "materials": [
+    "HeadLamp"
+   ]
+  },
+  {
+   "name": "HeadLamp.001",
+   "triangles": 48,
+   "flat_faces": 36,
+   "materials": [
+    "HeadLamp"
+   ]
+  },
+  {
+   "name": "HeadLampTrim",
+   "triangles": 48,
+   "flat_faces": 38,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "HeadLampTrim.001",
+   "triangles": 48,
+   "flat_faces": 37,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "Intake",
+   "triangles": 224,
+   "flat_faces": 170,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "IntakeLip",
+   "triangles": 224,
+   "flat_faces": 175,
+   "materials": [
+    "Chrome"
+   ]
+  },
+  {
+   "name": "MirrorArm.001_VehiclePaint",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "VehiclePaint"
+   ]
+  },
+  {
+   "name": "MirrorArm_VehiclePaint",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "VehiclePaint"
+   ]
+  },
+  {
+   "name": "MirrorHead.001_VehiclePaint",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "VehiclePaint"
+   ]
+  },
+  {
+   "name": "MirrorHead_VehiclePaint",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "VehiclePaint"
+   ]
+  },
+  {
+   "name": "MirrorLens",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Chrome"
+   ]
+  },
+  {
+   "name": "MirrorLens.001",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Chrome"
+   ]
+  },
+  {
+   "name": "Projector",
+   "triangles": 52,
+   "flat_faces": 0,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "Projector.001",
+   "triangles": 52,
+   "flat_faces": 0,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "Projector.002",
+   "triangles": 52,
+   "flat_faces": 0,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "Projector.003",
+   "triangles": 52,
+   "flat_faces": 0,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "Projector.004",
+   "triangles": 52,
+   "flat_faces": 0,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "Projector.005",
+   "triangles": 52,
+   "flat_faces": 0,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "RearBadge",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Chrome"
+   ]
+  },
+  {
+   "name": "RearDiffuser",
+   "triangles": 160,
+   "flat_faces": 122,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "RearPlate",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Plate"
+   ]
+  },
+  {
+   "name": "RearReflector",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "TailLamp"
+   ]
+  },
+  {
+   "name": "RearReflector.001",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "TailLamp"
+   ]
+  },
+  {
+   "name": "RearSeatBack",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Seat"
+   ]
+  },
+  {
+   "name": "RearSeatBack.001",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Seat"
+   ]
+  },
+  {
+   "name": "RearSeatBase",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Seat"
+   ]
+  },
+  {
+   "name": "RearSeatBase.001",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Seat"
+   ]
+  },
+  {
+   "name": "RearSeatHeadrest",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Seat"
+   ]
+  },
+  {
+   "name": "RearSeatHeadrest.001",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Seat"
+   ]
+  },
+  {
+   "name": "RearShelf",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Interior"
+   ]
+  },
+  {
+   "name": "RearSkirt",
+   "triangles": 208,
+   "flat_faces": 158,
+   "materials": [
+    "BlackTrim"
+   ]
+  },
+  {
+   "name": "SharkFin_VehiclePaint",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "VehiclePaint"
+   ]
+  },
+  {
+   "name": "Sill",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "BlackTrim"
+   ]
+  },
+  {
+   "name": "Sill.001",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "BlackTrim"
+   ]
+  },
+  {
+   "name": "Barrel_FrontL",
+   "triangles": 288,
+   "flat_faces": 0,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Cap_FrontL",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Chrome"
+   ]
+  },
+  {
+   "name": "Disc_FrontL",
+   "triangles": 92,
+   "flat_faces": 0,
+   "materials": [
+    "Reflector"
+   ]
+  },
+  {
+   "name": "Hub_FrontL",
+   "triangles": 76,
+   "flat_faces": 0,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "RimFace_FrontL",
+   "triangles": 140,
+   "flat_faces": 0,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "Spoke_FrontL",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_FrontL.001",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_FrontL.002",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_FrontL.003",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_FrontL.004",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_FrontL.005",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_FrontL.006",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_FrontL.007",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_FrontL.008",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_FrontL.009",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Tyre_FrontL",
+   "triangles": 504,
+   "flat_faces": 0,
+   "materials": [
+    "Rubber"
+   ]
+  },
+  {
+   "name": "Barrel_FrontR",
+   "triangles": 288,
+   "flat_faces": 0,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Cap_FrontR",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Chrome"
+   ]
+  },
+  {
+   "name": "Disc_FrontR",
+   "triangles": 92,
+   "flat_faces": 0,
+   "materials": [
+    "Reflector"
+   ]
+  },
+  {
+   "name": "Hub_FrontR",
+   "triangles": 76,
+   "flat_faces": 0,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "RimFace_FrontR",
+   "triangles": 140,
+   "flat_faces": 0,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "Spoke_FrontR",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_FrontR.001",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_FrontR.002",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_FrontR.003",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_FrontR.004",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_FrontR.005",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_FrontR.006",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_FrontR.007",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_FrontR.008",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_FrontR.009",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Tyre_FrontR",
+   "triangles": 504,
+   "flat_faces": 0,
+   "materials": [
+    "Rubber"
+   ]
+  },
+  {
+   "name": "SteeringColumn",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Interior"
+   ]
+  },
+  {
+   "name": "WheelHub",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Interior"
+   ]
+  },
+  {
+   "name": "WheelRim",
+   "triangles": 448,
+   "flat_faces": 0,
+   "materials": [
+    "Seat"
+   ]
+  },
+  {
+   "name": "WheelSpoke",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Interior"
+   ]
+  },
+  {
+   "name": "WheelSpoke.001",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Interior"
+   ]
+  },
+  {
+   "name": "WheelSpoke.002",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Interior"
+   ]
+  },
+  {
+   "name": "TailInner",
+   "triangles": 24,
+   "flat_faces": 18,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "TailInner.001",
+   "triangles": 24,
+   "flat_faces": 18,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "TailLamp",
+   "triangles": 40,
+   "flat_faces": 27,
+   "materials": [
+    "TailLamp"
+   ]
+  },
+  {
+   "name": "TailLamp.001",
+   "triangles": 40,
+   "flat_faces": 30,
+   "materials": [
+    "TailLamp"
+   ]
+  },
+  {
+   "name": "Vent",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "Vent.001",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "Barrel_RearL",
+   "triangles": 288,
+   "flat_faces": 0,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Cap_RearL",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Chrome"
+   ]
+  },
+  {
+   "name": "Disc_RearL",
+   "triangles": 92,
+   "flat_faces": 0,
+   "materials": [
+    "Reflector"
+   ]
+  },
+  {
+   "name": "Hub_RearL",
+   "triangles": 76,
+   "flat_faces": 0,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "RimFace_RearL",
+   "triangles": 140,
+   "flat_faces": 0,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "Spoke_RearL",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_RearL.001",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_RearL.002",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_RearL.003",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_RearL.004",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_RearL.005",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_RearL.006",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_RearL.007",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_RearL.008",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_RearL.009",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Tyre_RearL",
+   "triangles": 504,
+   "flat_faces": 0,
+   "materials": [
+    "Rubber"
+   ]
+  },
+  {
+   "name": "Barrel_RearR",
+   "triangles": 288,
+   "flat_faces": 0,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Cap_RearR",
+   "triangles": 60,
+   "flat_faces": 0,
+   "materials": [
+    "Chrome"
+   ]
+  },
+  {
+   "name": "Disc_RearR",
+   "triangles": 92,
+   "flat_faces": 0,
+   "materials": [
+    "Reflector"
+   ]
+  },
+  {
+   "name": "Hub_RearR",
+   "triangles": 76,
+   "flat_faces": 0,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "RimFace_RearR",
+   "triangles": 140,
+   "flat_faces": 0,
+   "materials": [
+    "GlossBlack"
+   ]
+  },
+  {
+   "name": "Spoke_RearR",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_RearR.001",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_RearR.002",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_RearR.003",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_RearR.004",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_RearR.005",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_RearR.006",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_RearR.007",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_RearR.008",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Spoke_RearR.009",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "Alloy"
+   ]
+  },
+  {
+   "name": "Tyre_RearR",
+   "triangles": 504,
+   "flat_faces": 0,
+   "materials": [
+    "Rubber"
+   ]
+  },
+  {
+   "name": "Wiper",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "BlackTrim"
+   ]
+  },
+  {
+   "name": "Wiper.001",
+   "triangles": 12,
+   "flat_faces": 12,
+   "materials": [
+    "BlackTrim"
+   ]
+  }
+ ],
+ "materials": [
+  "Alloy",
+  "ArchLiner",
+  "BlackTrim",
+  "Chrome",
+  "Glass",
+  "GlossBlack",
+  "HeadLamp",
+  "Interior",
+  "Plate",
+  "Reflector",
+  "Rubber",
+  "Seat",
+  "TailLamp",
+  "VehiclePaint"
+ ],
+ "bounds_m": {
+  "min": [
+   -0.961,
+   -2.417,
+   -0.1
+  ],
+  "max": [
+   1.078,
+   2.387,
+   1.503
+  ],
+  "size": [
+   2.039,
+   4.805,
+   1.603
+  ]
+ },
+ "triangles_total": 44057
+}

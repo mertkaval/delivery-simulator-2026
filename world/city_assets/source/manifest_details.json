@@ -1,0 +1,18 @@
+{
+  "street_lamp": {
+    "triangles": 744,
+    "meshes": 3
+  },
+  "mailbox": {
+    "triangles": 504,
+    "meshes": 4
+  },
+  "garden_planter": {
+    "triangles": 1932,
+    "meshes": 3
+  },
+  "helmet": {
+    "triangles": 620,
+    "meshes": 2
+  }
+}

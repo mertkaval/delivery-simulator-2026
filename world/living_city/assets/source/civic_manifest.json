@@ -1,0 +1,58 @@
+{
+  "hospital": {
+    "triangles": 38824,
+    "meshes": 8
+  },
+  "fire_station": {
+    "triangles": 11352,
+    "meshes": 7
+  },
+  "school": {
+    "triangles": 26856,
+    "meshes": 9
+  },
+  "rain_garden": {
+    "triangles": 5368,
+    "meshes": 5
+  },
+  "stop": {
+    "triangles": 1268,
+    "meshes": 3
+  },
+  "speed": {
+    "triangles": 1112,
+    "meshes": 3
+  },
+  "school_zone": {
+    "triangles": 2816,
+    "meshes": 3
+  },
+  "cycle_sign": {
+    "triangles": 1624,
+    "meshes": 3
+  },
+  "hospital_sign": {
+    "triangles": 188,
+    "meshes": 3
+  },
+  "taxi_sign": {
+    "triangles": 272,
+    "meshes": 3
+  },
+  "cycle_lane": {
+    "triangles": 36,
+    "meshes": 2
+  },
+  "cycle_stencil": {
+    "triangles": 400,
+    "meshes": 1
+  },
+  "cycle_separator": {
+    "triangles": 164,
+    "meshes": 3
+  },
+  "garden_lawn": {
+    "triangles": 2,
+    "meshes": 1
+  }
+}

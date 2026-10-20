@@ -1,0 +1,541 @@
+{
+ "house_craftsman": {
+  "near": {
+   "triangles": 2870,
+   "materials": [
+    "KitConcrete",
+    "KitTrimPaint",
+    "KitGlass",
+    "KitLapSiding",
+    "KitDoorWood",
+    "KitRailBlack",
+    "KitDoorPaint",
+    "KitAsphaltShingles",
+    "KitDeckBoards",
+    "KitLampGlow"
+   ]
+  },
+  "far": {
+   "triangles": 802,
+   "materials": [
+    "KitConcrete",
+    "KitTrimPaint",
+    "KitGlass",
+    "KitLapSiding",
+    "KitDoorWood",
+    "KitDoorPaint",
+    "KitAsphaltShingles",
+    "KitDeckBoards"
+   ]
+  }
+ },
+ "house_special": {
+  "near": {
+   "triangles": 2540,
+   "materials": [
+    "KitBrickRed",
+    "KitTrimPaint",
+    "KitHouseStucco",
+    "KitFrameBronze",
+    "KitGlass",
+    "KitGaragePaint",
+    "KitLimestone",
+    "KitDoorPaint",
+    "KitRailBlack",
+    "KitConcrete",
+    "KitLampGlow",
+    "KitAsphaltShingles"
+   ]
+  },
+  "far": {
+   "triangles": 1190,
+   "materials": [
+    "KitBrickRed",
+    "KitTrimPaint",
+    "KitHouseStucco",
+    "KitGlass",
+    "KitGaragePaint",
+    "KitLimestone",
+    "KitDoorPaint",
+    "KitConcrete",
+    "KitAsphaltShingles",
+    "KitRailBlack"
+   ]
+  }
+ },
+ "house_modern": {
+  "near": {
+   "triangles": 1534,
+   "materials": [
+    "KitCedar",
+    "KitTrimPaint",
+    "KitFrameDark",
+    "KitGlass",
+    "KitDoorPaint",
+    "KitRailBlack",
+    "KitMetalPanel",
+    "KitLampGlow"
+   ]
+  },
+  "far": {
+   "triangles": 824,
+   "materials": [
+    "KitCedar",
+    "KitTrimPaint",
+    "KitGlass",
+    "KitDoorPaint",
+    "KitMetalPanel",
+    "KitFrameDark"
+   ]
+  }
+ },
+ "house_foursquare": {
+  "near": {
+   "triangles": 4128,
+   "materials": [
+    "KitConcrete",
+    "KitTrimPaint",
+    "KitShingleSiding",
+    "KitGlass",
+    "KitDoorWood",
+    "KitRailBlack",
+    "KitDoorPaint",
+    "KitAsphaltShingles",
+    "KitDeckBoards",
+    "KitLampGlow",
+    "KitBrickRed"
+   ]
+  },
+  "far": {
+   "triangles": 1348,
+   "materials": [
+    "KitConcrete",
+    "KitShingleSiding",
+    "KitTrimPaint",
+    "KitGlass",
+    "KitDoorWood",
+    "KitDoorPaint",
+    "KitAsphaltShingles",
+    "KitDeckBoards",
+    "KitBrickRed"
+   ]
+  }
+ },
+ "house_splitlevel": {
+  "near": {
+   "triangles": 1710,
+   "materials": [
+    "KitBrickRed",
+    "KitTrimPaint",
+    "KitHouseStucco",
+    "KitGlass",
+    "KitConcrete",
+    "KitDoorPaint",
+    "KitRailBlack",
+    "KitLampGlow",
+    "KitFrameBronze",
+    "KitAsphaltShingles"
+   ]
+  },
+  "far": {
+   "triangles": 864,
+   "materials": [
+    "KitBrickRed",
+    "KitTrimPaint",
+    "KitHouseStucco",
+    "KitGlass",
+    "KitConcrete",
+    "KitDoorPaint",
+    "KitAsphaltShingles"
+   ]
+  }
+ },
+ "house_laneway": {
+  "near": {
+   "triangles": 1090,
+   "materials": [
+    "KitCedar",
+    "KitTrimPaint",
+    "KitBoardBatten",
+    "KitFrameDark",
+    "KitGlass",
+    "KitMetalPanel",
+    "KitDeckBoards",
+    "KitRailBlack",
+    "KitLampGlow"
+   ]
+  },
+  "far": {
+   "triangles": 544,
+   "materials": [
+    "KitCedar",
+    "KitTrimPaint",
+    "KitBoardBatten",
+    "KitGlass",
+    "KitMetalPanel",
+    "KitDeckBoards"
+   ]
+  }
+ },
+ "house_bungalow": {
+  "near": {
+   "triangles": 2512,
+   "materials": [
+    "KitHouseStucco",
+    "KitTrimPaint",
+    "KitGlass",
+    "KitLapSiding",
+    "KitDoorPaint",
+    "KitRailBlack",
+    "KitDeckBoards",
+    "KitLampGlow",
+    "KitAsphaltShingles",
+    "KitBrickRed",
+    "KitConcrete"
+   ]
+  },
+  "far": {
+   "triangles": 840,
+   "materials": [
+    "KitHouseStucco",
+    "KitTrimPaint",
+    "KitGlass",
+    "KitLapSiding",
+    "KitDoorPaint",
+    "KitDeckBoards",
+    "KitAsphaltShingles",
+    "KitBrickRed",
+    "KitConcrete"
+   ]
+  }
+ },
+ "fence_privacy": {
+  "near": {
+   "triangles": 72,
+   "materials": [
+    "KitCedar"
+   ]
+  },
+  "far": {
+   "triangles": 12,
+   "materials": [
+    "KitCedar"
+   ]
+  }
+ },
+ "fence_lattice": {
+  "near": {
+   "triangles": 300,
+   "materials": [
+    "KitCedar"
+   ]
+  },
+  "far": {
+   "triangles": 12,
+   "materials": [
+    "KitCedar"
+   ]
+  }
+ },
+ "fence_picket": {
+  "near": {
+   "triangles": 168,
+   "materials": [
+    "KitTrimPaint"
+   ]
+  },
+  "far": {
+   "triangles": 168,
+   "materials": [
+    "KitTrimPaint"
+   ]
+  }
+ },
+ "hedge": {
+  "near": {
+   "triangles": 22,
+   "materials": [
+    "KitHedge"
+   ]
+  },
+  "far": {
+   "triangles": 12,
+   "materials": [
+    "KitHedge"
+   ]
+  }
+ },
+ "garden_bed": {
+  "near": {
+   "triangles": 208,
+   "materials": [
+    "KitSoil",
+    "KitFoliage"
+   ]
+  },
+  "far": {
+   "triangles": 136,
+   "materials": [
+    "KitSoil",
+    "KitFoliage"
+   ]
+  }
+ },
+ "raised_bed": {
+  "near": {
+   "triangles": 456,
+   "materials": [
+    "KitCedar",
+    "KitSoil",
+    "KitFoliage"
+   ]
+  },
+  "far": {
+   "triangles": 60,
+   "materials": [
+    "KitCedar",
+    "KitSoil"
+   ]
+  }
+ },
+ "patio_set": {
+  "near": {
+   "triangles": 360,
+   "materials": [
+    "KitConcrete",
+    "KitDeckBoards",
+    "KitRailBlack"
+   ]
+  },
+  "far": {
+   "triangles": 360,
+   "materials": [
+    "KitConcrete",
+    "KitDeckBoards",
+    "KitRailBlack"
+   ]
+  }
+ },
+ "bbq": {
+  "near": {
+   "triangles": 48,
+   "materials": [
+    "KitRailBlack",
+    "KitFrameLight"
+   ]
+  },
+  "far": {
+   "triangles": 48,
+   "materials": [
+    "KitRailBlack",
+    "KitFrameLight"
+   ]
+  }
+ },
+ "bins_trio": {
+  "near": {
+   "triangles": 144,
+   "materials": [
+    "KitBinBlack",
+    "KitRailBlack",
+    "KitBinBlue",
+    "KitBinGreen"
+   ]
+  },
+  "far": {
+   "triangles": 72,
+   "materials": [
+    "KitBinBlack",
+    "KitBinBlue",
+    "KitBinGreen"
+   ]
+  }
+ },
+ "garage_single": {
+  "near": {
+   "triangles": 316,
+   "materials": [
+    "KitBoardBatten",
+    "KitTrimPaint",
+    "KitGaragePaint",
+    "KitGlass",
+    "KitAsphaltShingles",
+    "KitRailBlack",
+    "KitLampGlow"
+   ]
+  },
+  "far": {
+   "triangles": 104,
+   "materials": [
+    "KitBoardBatten",
+    "KitTrimPaint",
+    "KitGaragePaint",
+    "KitAsphaltShingles"
+   ]
+  }
+ },
+ "shed": {
+  "near": {
+   "triangles": 148,
+   "materials": [
+    "KitCedar",
+    "KitTrimPaint",
+    "KitDoorPaint",
+    "KitAsphaltShingles"
+   ]
+  },
+  "far": {
+   "triangles": 40,
+   "materials": [
+    "KitCedar",
+    "KitTrimPaint",
+    "KitDoorPaint",
+    "KitAsphaltShingles"
+   ]
+  }
+ },
+ "utility_pole": {
+  "near": {
+   "triangles": 106,
+   "materials": [
+    "KitPoleWood",
+    "KitInsulator",
+    "KitRailBlack"
+   ]
+  },
+  "far": {
+   "triangles": 22,
+   "materials": [
+    "KitPoleWood"
+   ]
+  }
+ },
+ "utility_pole_transformer": {
+  "near": {
+   "triangles": 130,
+   "materials": [
+    "KitPoleWood",
+    "KitInsulator",
+    "KitRailBlack",
+    "KitFrameLight"
+   ]
+  },
+  "far": {
+   "triangles": 22,
+   "materials": [
+    "KitPoleWood"
+   ]
+  }
+ },
+ "tree_fir": {
+  "near": {
+   "triangles": 204,
+   "materials": [
+    "KitBark",
+    "KitConifer"
+   ]
+  },
+  "far": {
+   "triangles": 84,
+   "materials": [
+    "KitBark",
+    "KitConifer"
+   ]
+  }
+ },
+ "tree_cedar": {
+  "near": {
+   "triangles": 216,
+   "materials": [
+    "KitBark",
+    "KitConifer"
+   ]
+  },
+  "far": {
+   "triangles": 84,
+   "materials": [
+    "KitBark",
+    "KitConifer"
+   ]
+  }
+ },
+ "street_sign": {
+  "near": {
+   "triangles": 94,
+   "materials": [
+    "KitFrameLight",
+    "KitSignGreen",
+    "KitTrimPaint"
+   ]
+  },
+  "far": {
+   "triangles": 46,
+   "materials": [
+    "KitFrameLight",
+    "KitSignGreen"
+   ]
+  }
+ },
+ "park_sign": {
+  "near": {
+   "triangles": 68,
+   "materials": [
+    "KitCedar",
+    "KitSignGreen"
+   ]
+  },
+  "far": {
+   "triangles": 68,
+   "materials": [
+    "KitCedar",
+    "KitSignGreen"
+   ]
+  }
+ },
+ "statue_bust": {
+  "near": {
+   "triangles": 448,
+   "materials": [
+    "KitLimestone",
+    "KitBronze"
+   ]
+  },
+  "far": {
+   "triangles": 328,
+   "materials": [
+    "KitLimestone",
+    "KitBronze"
+   ]
+  }
+ },
+ "monument_plinth": {
+  "near": {
+   "triangles": 76,
+   "materials": [
+    "KitLimestone",
+    "KitBronze"
+   ]
+  },
+  "far": {
+   "triangles": 76,
+   "materials": [
+    "KitLimestone",
+    "KitBronze"
+   ]
+  }
+ },
+ "statue_figure": {
+  "near": {
+   "triangles": 532,
+   "materials": [
+    "KitBronze"
+   ]
+  },
+  "far": {
+   "triangles": 532,
+   "materials": [
+    "KitBronze"
+   ]
+  }
+ }
+}

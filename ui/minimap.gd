@@ -1,0 +1,91 @@
+extends Control
+## North-up local radar; every route and road segment is clipped to the circle.
+var player: CourierPlayer
+var session: DeliverySession
+var world: CedarNeighborhood
+var range_metres := 75.0
+func radius() -> float: return minf(size.x, size.y) * 0.5 - 9
+func point(p: Vector3) -> Vector2:
+	return size * 0.5 + Vector2(p.x - player.position.x, p.z - player.position.z) * radius() / range_metres
+func _process(_delta: float) -> void: queue_redraw()
+func segment(a: Vector3, b: Vector3, color: Color, width: float) -> void:
+	var start := point(a) - size * 0.5
+	var end := point(b) - size * 0.5
+	var d := end - start
+	var r := radius() - width * 0.5 - 2
+	var aa := d.length_squared()
+	if aa < 0.0001: return
+	var bb := 2 * start.dot(d)
+	var cc := start.length_squared() - r * r
+	var disc := bb * bb - 4 * aa * cc
+	if disc < 0: return
+	var low := maxf(0, (-bb - sqrt(disc)) / (2 * aa))
+	var high := minf(1, (-bb + sqrt(disc)) / (2 * aa))
+	if low <= high: draw_line(size * 0.5 + start + d * low, size * 0.5 + start + d * high, color, width, true)
+func road(a: Vector3, b: Vector3, width: float = 10) -> void:
+	segment(a, b, Color("34434b"), width * radius() / range_metres)
+func _draw() -> void:
+	if not is_instance_valid(player) or session == null or not is_instance_valid(world): return
+	var center := size * 0.5
+	draw_circle(center, radius() + 7, Color(0.02, 0.04, 0.055, 0.95))
+	draw_circle(center, radius(), Color("253c36"))
+	draw_arc(center, radius() + 3, 0, TAU, 96, Color("77948c"), 1.5, true)
+	road(Vector3(0, 0, -690), Vector3(0, 0, 50), 12)
+	for x in [-64, 64]: road(Vector3(x, 0, -678), Vector3(x, 0, -258))
+	for z in CityCatalog.CROSS_STREETS + [48]: road(Vector3(-69, 0, z), Vector3(69, 0, z))
+	for x in DowntownCatalog.STREET_X: road(Vector3(x,0,-258),Vector3(x,0,-678),18 if x==252 else 14)
+	for z in DowntownCatalog.STREET_Z: road(Vector3(64,0,z),Vector3(630,0,z),14)
+	road(Vector3(520,0,-258),Vector3(520,0,-678),14)
+	for site in CivicCampus.SITES:
+		road(Vector3(520,0,site.at.z),site.at,8)
+		var at := point(site.at)
+		if at.distance_to(center)<radius()-10:
+			draw_rect(Rect2(at-Vector2(5,7),Vector2(10,14)),Color("9cbdcf"))
+	for block in DowntownCatalog.blocks(): road(Vector3(block.position.x,0,block.get_center().y),Vector3(block.end.x,0,block.get_center().y),8)
+	if world.has_meta("curved_roads"):
+		for path in world.get_meta("curved_roads"):
+			for i in range(1, path.size()): road(path[i - 1], path[i], 8)
+	for p in world.doors:
+		var map_pos := point(p + Vector3(0, 0, -4))
+		if map_pos.distance_to(center) < radius() - 8: draw_rect(Rect2(map_pos - Vector2(5, 4), Vector2(10, 8)), Color("91a699"))
+	for p in world.scenery_houses:
+		var at := point(Vector3(p.x, 0, p.y))
+		if at.distance_to(center) < radius() - 7: draw_rect(Rect2(at - Vector2(4, 4), Vector2(8, 8)), Color("899c92"))
+	for index in range(CityCatalog.PICKUPS.size()):
+		var at := point(CityCatalog.PICKUPS[index])
+		if at.distance_to(center) < radius() - 8: draw_circle(at, 4, Color("eec782"))
+	for shop in ShopCatalog.LOCATIONS.values():
+		var at := point(shop)
+		if at.distance_to(center) < radius() - 8: draw_rect(Rect2(at - Vector2(3, 3), Vector2(6, 6)), Color("93bff5"))
+	for x in [-92,92]:
+		for z in [-110,-190]:
+			var at := point(Vector3(x,0,z))
+			if at.distance_to(center)<radius()-12: draw_rect(Rect2(at-Vector2(7,7),Vector2(14,14)),Color("a8aaa0"))
+	var route := route_points()
+	for i in range(1, route.size()): segment(route[i - 1], route[i], Color("69ebbb"), 3)
+	if route.size() > 1:
+		var destination := point(route[-1]) - center
+		if destination.length() > radius() - 12: destination = destination.normalized() * (radius() - 12)
+		draw_circle(center + destination, 5, Color("69ebbb"))
+	var arrow := PackedVector2Array()
+	for p in [Vector2(0, -9), Vector2(6, 7), Vector2(0, 4), Vector2(-6, 7)]: arrow.append(center + p.rotated(-player.rotation.y))
+	draw_colored_polygon(arrow, Color.WHITE)
+	draw_string(ThemeDB.fallback_font, Vector2(center.x - 5, 21), "N", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
+var _nav_cache := PackedVector3Array()
+var _nav_from := Vector3(INF, 0, INF)
+var _nav_goal := Vector3(INF, 0, INF)
+func route_points() -> PackedVector3Array:
+	var state: String = session.order.get("state", "")
+	if state not in ["ACCEPTED", "CARRYING"]:
+		# Destination picked on the city map (M).
+		if CityNavigation.target.is_empty(): return PackedVector3Array()
+		var goal: Vector3 = CityNavigation.target.at
+		if goal != _nav_goal or player.position.distance_to(_nav_from) > 3.0:
+			_nav_goal = goal
+			_nav_from = player.position
+			_nav_cache = CityNavigation.route(player.position, goal)
+		var live := _nav_cache.duplicate()
+		if live.size() > 0: live[0] = Vector3(player.position.x, 0, player.position.z)
+		return live
+	var destination: Vector3 = session.pickup_position() if state == "ACCEPTED" else world.doors[int(session.order.address)]
+	return CityCatalog.route(player.position, destination, state == "ACCEPTED")
