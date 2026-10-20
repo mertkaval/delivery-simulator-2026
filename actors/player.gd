@@ -104,7 +104,8 @@ func apply_vehicle_camera() -> void:
 		body_collision.shape = bounds
 		body_collision.position.y = bounds.size.y / 2 + vehicle_collision_lift()
 	else:
-		camera.position = Vector3(0, 1.85 if mounted else 1.65, 0)
+		# Riding eye height: a seated cyclist leaning forward sees from about 1.5 m, lower than walking.
+		camera.position = Vector3(0, 1.5 if mounted else 1.65, 0)
 		var capsule := CapsuleShape3D.new()
 		capsule.radius = 0.3
 		capsule.height = 1.8
@@ -162,7 +163,7 @@ func toggle_bicycle() -> String:
 	return "Mounted · W pedal · A/D or mouse steer · Space brake · Q bell · E dismount"
 
 func _ready() -> void:
-	collision_mask = 1 | 4
+	collision_mask = 1 | 4 | 16   # 16: traffic-circle islands (ignored by AI traffic rays)
 	var shape := CollisionShape3D.new()
 	body_collision = shape
 	var capsule := CapsuleShape3D.new()

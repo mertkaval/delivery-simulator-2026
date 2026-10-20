@@ -12,7 +12,7 @@ var walk_phase := 0.0
 ## Beyond this distance the citizen is hidden and not animated (indoor people use less).
 var max_distance := 105.0
 func attach_helmet() -> void:
-	if name=="SketchupCitizen": return   # converted rigs use other bone scales; no helmet prop
+	if name in ["SketchupCitizen", "HumanoidCitizen"]: return   # converted rigs use other bone scales; no helmet prop
 	for variant in variants:
 		var skeleton: Skeleton3D=variant.find_children("*","Skeleton3D",true,false)[0]
 		var index := skeleton.find_bone("Head")

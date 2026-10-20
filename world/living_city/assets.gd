@@ -56,15 +56,68 @@ static func sketchup_person(id: String) -> LivingCitizen:
 
 ## A standing person for a fixed spot (guard at a door, staff at a counter).
 static func standing_person(index: int) -> LivingCitizen:
-	var person := sketchup_person(STANDING[index%STANDING.size()])
+	# Guards keep their uniform model; clerks and other standing staff are realistic humanoids.
+	var person: LivingCitizen = sketchup_person(STANDING[0]) if index%STANDING.size()==0 else humanoid(index)
 	person.max_distance=70.0
 	return person
+
+## Realistic townspeople (tools/prepare_characters.py) animated with the CC0 Quaternius
+## Universal Animation Library through Godot humanoid retargeting (tools/setup_retarget.gd):
+## every library clip drives "%GeneralSkeleton:<ProfileBone>", so it plays on any of them.
+const HUMANOIDS := ["casual_male_tshirt", "business_man_eric", "sophia", "casual_female", "casual_male_2"]
+const UAL := "res://assets/animations/ual/ual_standard.glb"
+## Game clip name -> library clip.
+const CLIPS := {"Idle": "Idle", "Walk": "Walk", "Brisk": "Walk", "Run": "Jog_Fwd", "Wait": "Idle",
+	"Talk": "Idle_Talking", "Sit": "Sitting_Idle", "SitTalk": "Sitting_Talking", "Cycle": "Sitting_Idle",
+	"Interact": "Interact", "PickUp": "PickUp_Table", "Push": "Push"}
+static var clip_library: AnimationLibrary
+
+static func game_clips() -> AnimationLibrary:
+	if clip_library == null:
+		var source: Node = load(UAL).instantiate()
+		var full: AnimationLibrary = (source.find_child("AnimationPlayer", true, false) as AnimationPlayer).get_animation_library("")
+		clip_library = AnimationLibrary.new()
+		for game_name in CLIPS:
+			var anim: Animation = full.get_animation(CLIPS[game_name])
+			if anim != null: clip_library.add_animation(game_name, anim)
+		source.free()
+	return clip_library
+
+static func humanoid(index: int) -> LivingCitizen:
+	var id: String = HUMANOIDS[index%HUMANOIDS.size()]
+	if not people_scenes.has(id): people_scenes[id]=load(SKETCHUP_PEOPLE%id)
+	var model := LivingCitizen.new()
+	model.name="HumanoidCitizen"
+	var body: Node3D=people_scenes[id].instantiate()
+	# Retarget convention faces +Z; the game's people face -Z.
+	body.rotation.y=PI
+	# Small height variation so repeated people do not read as clones.
+	body.scale=Vector3.ONE*(0.95+0.1*fposmod(index*0.618,1.0))
+	model.add_child(body)
+	model.variants.append(body)
+	var animator := AnimationPlayer.new()
+	animator.name="AnimationPlayer"
+	body.add_child(animator)
+	animator.root_node=NodePath("..")
+	animator.add_animation_library("",game_clips())
+	animator.play("Idle")
+	animator.seek(fposmod(index*1.37,2.0),true)
+	model.players.append(animator)
+	for joint in ["HipL","HipR","KneeL","KneeR","ShoulderL","ShoulderR","ElbowL","ElbowR"]:
+		var proxy := Node3D.new()
+		proxy.name=joint
+		model.add_child(proxy)
+	return model
 
 static func citizen(index: int=-1) -> Node3D:
 	if index<0:
 		index=citizen_index
 		citizen_index+=1
-	if index%WALKER_EVERY==1 and ResourceLoader.exists(SKETCHUP_PEOPLE%WALKER): return sketchup_person(WALKER)
+	if ResourceLoader.exists(SKETCHUP_PEOPLE%HUMANOIDS[0]): return humanoid(index)
+	return classic_citizen(index)
+
+## The earlier procedural citizens (kept for cyclists: they carry a pedalling clip).
+static func classic_citizen(index: int) -> Node3D:
 	var model := LivingCitizen.new()
 	model.name="SkinnedCitizen"
 	for level in range(3):

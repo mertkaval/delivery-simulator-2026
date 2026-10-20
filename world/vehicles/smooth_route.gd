@@ -83,6 +83,8 @@ static func shuttle(a: Vector3, b: Vector3, lane: float, bulb: float, swing := 9
 	return r
 
 func _resample(raw: PackedVector3Array) -> void:
+	# Drive round neighbourhood traffic circles instead of through their islands.
+	raw = TrafficCircles.bend(raw)
 	# Remove duplicates and resample at even spacing for constant-speed sampling.
 	var clean := PackedVector3Array()
 	for p in raw:

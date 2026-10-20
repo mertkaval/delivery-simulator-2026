@@ -7,6 +7,9 @@ extends Node3D
 ## Instanced as MultiMeshes per (asset, piece, 64 m cell); small colliders keep them solid.
 
 const RANGE := 120.0
+## Older kit pieces replaced by the converted realistic props (PropKit) where one exists.
+const SWAP := {"hydrant": "fire_hydrant", "trash_bin": "litter_bin_green", "recycle_bin": "wheelie_bin_blue",
+	"cone": "traffic_cone", "barrier": "water_barrier_orange"}
 var groups := {}
 var body: StaticBody3D
 var placed: Array[Dictionary] = [] ## {"asset", "at"} for tests
@@ -20,12 +23,16 @@ func _ready() -> void:
 	restaurants()
 	parks()
 	road_works()
+	benches()
+	traffic_signs()
+	shopfronts()
 	flush()
 
 func put(asset: String, at: Vector3, yaw: float, solid: Vector3 = Vector3.ZERO, end: float = RANGE) -> void:
 	var t := Transform3D(Basis(Vector3.UP, yaw), at)
 	var cell := Vector2i(floori(at.x / 64.0), floori(at.z / 64.0))
-	var parts := UrbanKit.get_parts(asset)
+	var id: String = SWAP.get(asset, asset)
+	var parts := PropKit.get_parts(id) if PropKit.has(id) else UrbanKit.get_parts(asset)
 	for i in range(parts.size()):
 		var key := "%s|%d|%d_%d" % [asset, i, cell.x, cell.y]
 		if not groups.has(key): groups[key] = {"piece": parts[i], "end": end, "items": []}
@@ -120,6 +127,69 @@ func road_works() -> void:
 	label.rotation.y = PI * 0.5
 	label.visibility_range_end = 50.0
 	add_child(label)
+
+## Atatürk Avenue sidewalks: benches facing the road with a litter bin beside each, along the
+## inner (property-line) edge so the walking line at ~8.4 m stays free.
+func benches() -> void:
+	if not PropKit.has("bench_wood"): return
+	var k := 0
+	for z in range(-640, 30, 48):
+		for side in [-1.0, 1.0]:
+			var at := Vector3(side * 9.65, 0.05, float(z) + 13.0 + side * 6.0)
+			k += 1
+			if not clear(at, 1.8) or not clear(at + Vector3(0, 0, 1.4), 1.0): continue
+			put("bench_wood", at, -side * PI * 0.5, Vector3(0.6, 0.9, 1.4))
+			put("litter_bin_red" if k % 2 else "litter_bin_green", at + Vector3(0, 0, 1.25), 0.0, Vector3(0.6, 0.9, 0.6))
+
+## Real traffic signs (face toward the traffic they address; prop fronts face +Z):
+## stop signs where cross streets meet the avenue, roundabout signs on every traffic-circle and
+## park-roundabout approach, pedestrian-crossing signs before the avenue's mid-block crossings.
+func traffic_signs() -> void:
+	if not PropKit.has("sign_stop"): return
+	var pole := Vector3(0.18, 2.8, 0.18)
+	for z in CityCatalog.CROSS_STREETS:
+		if z != -538: put("sign_stop", Vector3(-8.6, 0.04, z + 6.2), -PI * 0.5, pole)   # eastbound approach
+		put("sign_stop", Vector3(8.6, 0.04, z - 6.2), PI * 0.5, pole)                  # westbound approach
+	for c in TrafficCircles.CENTERS:
+		var at: Vector3 = c
+		if at.z > -670.0: put("sign_roundabout", at + Vector3(-6.4, 0.04, -6.6), PI, pole)  # from the north
+		put("sign_roundabout", at + Vector3(6.4, 0.04, 6.6), 0.0, pole)                     # from the south
+		put("sign_roundabout", at + Vector3(-6.6, 0.04, 6.4), -PI * 0.5, pole)              # from the west
+		put("sign_roundabout", at + Vector3(6.6, 0.04, -6.4), PI * 0.5, pole)               # from the east
+	for x in [-64.0, 64.0]:
+		put("sign_roundabout", Vector3(x - 5.4, 0.15, -176.0), PI, pole)
+		put("sign_roundabout", Vector3(x + 5.4, 0.15, -114.0), 0.0, pole)
+	for z in [17.0, -93.0, -177.0]:
+		put("sign_pedestrian_crossing", Vector3(7.2, 0.04, z + 9.0), 0.0, pole)
+		put("sign_pedestrian_crossing", Vector3(-7.2, 0.04, z - 9.0), PI, pole)
+	put("sign_speed_limit_50", Vector3(7.2, 0.04, -24.0), 0.0, pole)
+	put("sign_speed_limit_50", Vector3(-7.2, 0.04, -232.0), PI, pole)
+
+## Shop forecourts and restaurant frontages: planters, a post box and delivery parcels.
+func shopfronts() -> void:
+	if not PropKit.has("planter_bamboo_square"): return
+	var k := 0
+	for id in ShopCatalog.LOCATIONS:
+		var at: Vector3 = ShopCatalog.LOCATIONS[id]
+		put("planter_bamboo_square", at + Vector3(-7.2, 0.08, 6.0), 0.0, Vector3(0.9, 1.0, 0.9))
+		put("planter_bamboo_square", at + Vector3(7.2, 0.08, 6.0), 0.0, Vector3(0.9, 1.0, 0.9))
+		put("cardboard_box_large", at + Vector3(5.6, 0.08, 6.0), 0.3, Vector3(0.5, 0.95, 0.5))
+		put("cardboard_box_medium", at + Vector3(5.0, 0.08, 6.2), -0.2)
+		put("cardboard_box_small", at + Vector3(5.3, 0.08, 6.7), 0.6)
+		if k == 0: put("post_box_red", at + Vector3(-6.2, 0.08, 12.0), 0.0, Vector3(0.6, 1.1, 0.45))
+		k += 1
+	var flowers := ["planter_geranium_red", "planter_geranium_pink", "planter_geranium_orange", "planter_geranium_purple"]
+	var i := 0
+	for b in RestaurantCatalog.corridor_buildings():
+		var t := RestaurantCatalog.frame(b)
+		var xl := -int(b.bays) * 2.0
+		var xr := xl + RestaurantCatalog.restaurant_width(b)
+		put(flowers[i % 4], t * Vector3(xl + 0.45, 0.06, 0.55), t.basis.get_euler().y)
+		put(flowers[(i + 1) % 4], t * Vector3(xr - 0.45, 0.06, 0.55), t.basis.get_euler().y)
+		i += 1
+	for p in range(3):
+		var at: Vector3 = CityCatalog.PICKUPS[p] - Vector3.UP
+		put(flowers[p % 4], at + Vector3(2.6, 0.04, 4.4), 0.0)
 
 func flush() -> void:
 	for data: Dictionary in groups.values():

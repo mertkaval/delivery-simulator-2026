@@ -33,25 +33,38 @@ func _ready() -> void:
 			light.material_override = StandardMaterial3D.new()
 			add_child(light)
 			signals.append(light)
-	# Smooth routes: the avenue shuttle turns round with bulb U-turns at both ends; the side-road
-	# loop and the two roundabouts have rounded corners (SmoothRoute).
-	var avenue := SmoothRoute.shuttle(Vector3(0, 0, 38), Vector3(0, 0, -242), 1.95, 4.4)
-	var north := SmoothRoute.from_corners(PackedVector3Array([Vector3(-62.36, 0, -259.64), Vector3(-62.36, 0, -676.36), Vector3(62.36, 0, -676.36), Vector3(62.36, 0, -259.64)]), 9.0)
-	var circles: Array[SmoothRoute] = []
-	for center_x in [-64.0, 64.0]:
-		var ring := PackedVector3Array()
-		for sample in range(48):
-			var a := -TAU * sample / 48.0
-			ring.append(Vector3(center_x + 20 * cos(a), 0, -145 + 20 * sin(a)))
-		circles.append(SmoothRoute.from_corners(ring, 30.0))
+	# Closed circuits, right-hand traffic, no U-turns anywhere: two loops share the avenue (one
+	# northbound, one southbound) and close through Refet Bele Street, the estate roads with their
+	# park roundabouts (driven counter-clockwise) and Nezahat Onbaşı Street. The north loop runs
+	# the side streets and passes the traffic circles (SmoothRoute bends round each island).
+	var east := PackedVector3Array([Vector3(1.95, 0, 46), Vector3(1.95, 0, -256.36), Vector3(62, 0, -256.36), Vector3(62, 0, -172)])
+	east.append_array(ring_arc(Vector3(64, 0, -145), 22.0, -PI / 2 - 0.3, -3 * PI / 2 + 0.3))
+	east.append_array(PackedVector3Array([Vector3(62, 0, -118), Vector3(62, 0, 46)]))
+	var west := PackedVector3Array([Vector3(-1.95, 0, -256.36), Vector3(-1.95, 0, 46), Vector3(-62, 0, 46), Vector3(-62, 0, -118)])
+	west.append_array(ring_arc(Vector3(-64, 0, -145), 22.0, PI / 2 - 0.3, -PI / 2 + 0.3))
+	west.append_array(PackedVector3Array([Vector3(-62, 0, -172), Vector3(-62, 0, -256.36)]))
+	var loops: Array[SmoothRoute] = [SmoothRoute.from_corners(east, 8.0), SmoothRoute.from_corners(west, 8.0),
+		SmoothRoute.from_corners(PackedVector3Array([Vector3(-62.36, 0, -259.64), Vector3(-62.36, 0, -676.36), Vector3(62.36, 0, -676.36), Vector3(62.36, 0, -259.64)]), 9.0)]
 	for i in range(16):
-		var route: SmoothRoute = avenue if i < 6 else (north if i < 14 else circles[i - 14])
-		var start := route.total * (float(i % 6) / 6.0 if i < 6 else (float(i - 6) / 8.0 if i < 14 else 0.0))
-		var car := TrafficDriver.spawn(self, VehicleCatalog.next_traffic_id(), "TrafficCar%d" % i, route, start, 4.2 if i >= 14 else 8.0, 1 | 4)
+		var li := 0 if i < 5 else (1 if i < 10 else 2)
+		var count := 5 if li < 2 else 6
+		var slot := i - (0 if li == 0 else (5 if li == 1 else 10))
+		var route: SmoothRoute = loops[li]
+		var car := TrafficDriver.spawn(self, VehicleCatalog.next_traffic_id(), "TrafficCar%d" % i, route, route.total * float(slot) / count, 8.0, 1 | 4)
 		drivers.append(car)
 		cars.append(car.body)
 		car_dimensions.append(car.size)
 		speeds.append(0)
+
+## Points on a circle from angle a0 to a1 (radians, either direction), every ~2 m.
+static func ring_arc(centre: Vector3, radius: float, a0: float, a1: float) -> PackedVector3Array:
+	var out := PackedVector3Array()
+	var steps := maxi(2, ceili(absf(a1 - a0) * radius / 2.0))
+	for k in range(steps + 1):
+		var a := lerpf(a0, a1, float(k) / steps)
+		out.append(centre + Vector3(cos(a) * radius, 0, sin(a) * radius))
+	return out
+
 func part(car: Node3D, position: Vector3, dimensions: Vector3, color: Color) -> void:
 	var visual := MeshInstance3D.new()
 	var mesh := BoxMesh.new()

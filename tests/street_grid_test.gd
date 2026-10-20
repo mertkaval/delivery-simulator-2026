@@ -49,18 +49,23 @@ func run() -> void:
 	var traffic: Node = game.world.get_node("CityTraffic")
 	check(is_equal_approx(absf(traffic.LOOP[0].x), StreetGrid.AVENUE.lane), "Cedar Lane traffic uses lane centre")
 	# Straight stretches of the side-road loop run on lane centres (corners are smooth arcs).
-	var side_route: SmoothRoute = traffic.drivers[6].route
+	var side_route: SmoothRoute = traffic.drivers[10].route
 	for p in side_route.points:
 		var on_side_road := absf(absf(p.x) - 64.0)
 		var on_cross := minf(absf(p.z + 678.0), absf(p.z + 258.0))
 		var in_corner := absf(absf(p.x) - 64.0) < 12.0 and on_cross < 12.0
-		if in_corner: continue
+		if in_corner or TrafficCircles.near_circle(p, 4.0): continue
 		check(absf(on_side_road - StreetGrid.STREET.lane) < 0.01 or absf(on_cross - StreetGrid.STREET.lane) < 0.01, "Side-road route on lane centre")
 	# The avenue shuttle never turns tighter than a car can (bulb U-turns, no kinks).
 	var avenue: SmoothRoute = traffic.drivers[0].route
 	var sharpest := 0.0
 	for k in range(0, int(avenue.total), 2): sharpest = maxf(sharpest, avenue.curvature(float(k)))
-	check(sharpest < 1.0 / 4.0, "Avenue traffic turning radius stays above 4 m (%.1f m)" % (1.0 / maxf(sharpest, 0.001)))
+	# No U-turns: the avenue loops never reverse direction on a road.
+	var reversals := 0
+	for k in range(0, int(avenue.total), 5):
+		if (avenue.at(float(k) + 2.0) - avenue.at(float(k))).dot(avenue.at(float(k) + 12.0) - avenue.at(float(k) + 10.0)) < -0.5: reversals += 1
+	check(reversals == 0, "Avenue traffic makes no U-turns (%d reversals)" % reversals)
+	check(sharpest < 1.0 / 4.0, "Avenue loop turning radius stays above 4 m (%.1f m)" % (1.0 / maxf(sharpest, 0.001)))
 	var life: Node = game.world.get_node("CityLife")
 	for rider in life.cyclists:
 		var x := absf(rider.body.position.x)

@@ -1,0 +1,1191 @@
+{
+ "convention": {
+  "units": "metres",
+  "up": "Blender +Z / Godot +Y",
+  "origin": "centre of the footprint on the ground (bbox centre in the horizontal plane, lowest point at 0)",
+  "front": "front (sign face, bench seat, post-box slot, lamp arm over the road) faces Blender -Y = Godot +Z",
+  "size": "[x_width, y_height_up, z_depth] in Godot axes, metres",
+  "mesh": "single static MeshInstance per prop, one surface per material, transforms applied",
+  "alpha": "foliage uses alpha scissor (glTF MASK, cutoff 0.5); glass uses alpha blend",
+  "metadata": "glTF node extras on the prop node: prop_id, category, collision, suggested_use, source",
+  "collision": "true = give it a static collider (box/cylinder from size); false = decorative, no collider"
+ },
+ "props": [
+  {
+   "id": "bench_wood",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/bench_wood.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    1.36,
+    0.915,
+    0.632
+   ],
+   "tris": 464,
+   "suggested_use": "sidewalk bench",
+   "collision": true
+  },
+  {
+   "id": "bollard_concrete",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/bollard_concrete.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    0.329,
+    0.77,
+    0.329
+   ],
+   "tris": 128,
+   "suggested_use": "pedestrian bollard",
+   "collision": true
+  },
+  {
+   "id": "bollard_metal",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/bollard_metal.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    0.125,
+    0.799,
+    0.125
+   ],
+   "tris": 64,
+   "suggested_use": "pedestrian bollard",
+   "collision": true
+  },
+  {
+   "id": "bollard_yellow",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/bollard_yellow.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    0.305,
+    0.621,
+    0.305
+   ],
+   "tris": 80,
+   "suggested_use": "parking bollard",
+   "collision": true
+  },
+  {
+   "id": "cardboard_box_handles",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/cardboard_box_handles.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    0.4,
+    0.4,
+    0.575
+   ],
+   "tris": 324,
+   "suggested_use": "delivery parcel",
+   "collision": false
+  },
+  {
+   "id": "cardboard_box_large",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/cardboard_box_large.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    0.494,
+    0.494,
+    0.94
+   ],
+   "tris": 152,
+   "suggested_use": "delivery parcel",
+   "collision": true
+  },
+  {
+   "id": "cardboard_box_medium",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/cardboard_box_medium.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    0.494,
+    0.494,
+    0.67
+   ],
+   "tris": 152,
+   "suggested_use": "delivery parcel",
+   "collision": false
+  },
+  {
+   "id": "cardboard_box_small",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/cardboard_box_small.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    0.4,
+    0.4,
+    0.4
+   ],
+   "tris": 84,
+   "suggested_use": "delivery parcel",
+   "collision": false
+  },
+  {
+   "id": "dumpster_large",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/dumpster_large.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    2.125,
+    1.334,
+    1.335
+   ],
+   "tris": 2282,
+   "suggested_use": "alley / restaurant back-door dumpster",
+   "collision": true
+  },
+  {
+   "id": "fire_hydrant",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/fire_hydrant.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    0.464,
+    0.924,
+    0.439
+   ],
+   "tris": 2423,
+   "suggested_use": "kerb-side fire hydrant",
+   "collision": true
+  },
+  {
+   "id": "litter_bin_green",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/litter_bin_green.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    0.609,
+    0.916,
+    0.609
+   ],
+   "tris": 576,
+   "suggested_use": "sidewalk litter bin",
+   "collision": true
+  },
+  {
+   "id": "litter_bin_red",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/litter_bin_red.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    0.609,
+    0.916,
+    0.609
+   ],
+   "tris": 576,
+   "suggested_use": "sidewalk litter bin",
+   "collision": true
+  },
+  {
+   "id": "path_lamp",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/path_lamp.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    0.39,
+    4.078,
+    2.067
+   ],
+   "tris": 720,
+   "suggested_use": "park / footpath lamp",
+   "collision": true
+  },
+  {
+   "id": "post_box_red",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/post_box_red.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    0.675,
+    1.1,
+    0.462
+   ],
+   "tris": 148,
+   "suggested_use": "sidewalk post box",
+   "collision": true
+  },
+  {
+   "id": "trash_bag",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/trash_bag.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    0.544,
+    0.479,
+    0.543
+   ],
+   "tris": 324,
+   "suggested_use": "kerb-side rubbish bag",
+   "collision": false
+  },
+  {
+   "id": "wheelie_bin_blue",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/wheelie_bin_blue.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    0.566,
+    1.121,
+    0.686
+   ],
+   "tris": 946,
+   "suggested_use": "kerb-side wheelie bin",
+   "collision": true
+  },
+  {
+   "id": "wheelie_bin_green",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/wheelie_bin_green.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    0.566,
+    1.121,
+    0.686
+   ],
+   "tris": 970,
+   "suggested_use": "kerb-side wheelie bin",
+   "collision": true
+  },
+  {
+   "id": "concrete_barrier",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/concrete_barrier.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    1.9,
+    0.796,
+    0.426
+   ],
+   "tris": 156,
+   "suggested_use": "road-works / lane barrier",
+   "collision": true
+  },
+  {
+   "id": "delineator_post",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/delineator_post.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    0.506,
+    1.149,
+    0.506
+   ],
+   "tris": 268,
+   "suggested_use": "lane delineator post",
+   "collision": true
+  },
+  {
+   "id": "guardrail_2m",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/guardrail_2m.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    2.05,
+    0.75,
+    0.258
+   ],
+   "tris": 2424,
+   "suggested_use": "roadside guardrail segment",
+   "collision": true
+  },
+  {
+   "id": "guardrail_double_2m",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/guardrail_double_2m.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    2.05,
+    0.814,
+    0.258
+   ],
+   "tris": 2910,
+   "suggested_use": "roadside guardrail segment",
+   "collision": true
+  },
+  {
+   "id": "guardrail_end",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/guardrail_end.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.531,
+    0.801,
+    0.277
+   ],
+   "tris": 1682,
+   "suggested_use": "guardrail end piece",
+   "collision": true
+  },
+  {
+   "id": "sign_ahead_only",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_ahead_only.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.596,
+    2.819,
+    0.193
+   ],
+   "tris": 404,
+   "suggested_use": "junction sign",
+   "collision": true
+  },
+  {
+   "id": "sign_bus_stop",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_bus_stop.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.5,
+    2.821,
+    0.193
+   ],
+   "tris": 388,
+   "suggested_use": "bus stop sign",
+   "collision": true
+  },
+  {
+   "id": "sign_give_way",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_give_way.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.698,
+    2.821,
+    0.193
+   ],
+   "tris": 216,
+   "suggested_use": "junction give-way sign",
+   "collision": true
+  },
+  {
+   "id": "sign_hospital",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_hospital.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.5,
+    2.821,
+    0.193
+   ],
+   "tris": 388,
+   "suggested_use": "hospital direction sign",
+   "collision": true
+  },
+  {
+   "id": "sign_no_entry",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_no_entry.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.596,
+    2.819,
+    0.193
+   ],
+   "tris": 404,
+   "suggested_use": "one-way street end sign",
+   "collision": true
+  },
+  {
+   "id": "sign_no_right_turn",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_no_right_turn.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.596,
+    2.819,
+    0.193
+   ],
+   "tris": 404,
+   "suggested_use": "junction sign",
+   "collision": true
+  },
+  {
+   "id": "sign_no_u_turn",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_no_u_turn.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.596,
+    2.819,
+    0.193
+   ],
+   "tris": 404,
+   "suggested_use": "junction sign",
+   "collision": true
+  },
+  {
+   "id": "sign_no_vehicles",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_no_vehicles.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.596,
+    2.819,
+    0.193
+   ],
+   "tris": 404,
+   "suggested_use": "pedestrian zone sign",
+   "collision": true
+  },
+  {
+   "id": "sign_one_way",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_one_way.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.5,
+    2.821,
+    0.193
+   ],
+   "tris": 388,
+   "suggested_use": "one-way street sign",
+   "collision": true
+  },
+  {
+   "id": "sign_parking",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_parking.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.5,
+    2.821,
+    0.193
+   ],
+   "tris": 388,
+   "suggested_use": "parking area sign",
+   "collision": true
+  },
+  {
+   "id": "sign_pedestrian_crossing",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_pedestrian_crossing.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.5,
+    2.821,
+    0.193
+   ],
+   "tris": 388,
+   "suggested_use": "zebra crossing sign",
+   "collision": true
+  },
+  {
+   "id": "sign_restaurant",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_restaurant.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.5,
+    2.821,
+    0.193
+   ],
+   "tris": 388,
+   "suggested_use": "restaurant sign",
+   "collision": true
+  },
+  {
+   "id": "sign_roundabout",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_roundabout.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.596,
+    2.819,
+    0.193
+   ],
+   "tris": 404,
+   "suggested_use": "roundabout sign",
+   "collision": true
+  },
+  {
+   "id": "sign_speed_limit_50",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_speed_limit_50.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.596,
+    2.819,
+    0.193
+   ],
+   "tris": 404,
+   "suggested_use": "speed limit sign",
+   "collision": true
+  },
+  {
+   "id": "sign_stop",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_stop.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.6,
+    2.821,
+    0.193
+   ],
+   "tris": 356,
+   "suggested_use": "junction stop sign",
+   "collision": true
+  },
+  {
+   "id": "sign_warning_children",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_warning_children.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.6,
+    2.821,
+    0.193
+   ],
+   "tris": 380,
+   "suggested_use": "school zone sign",
+   "collision": true
+  },
+  {
+   "id": "sign_warning_crossroad",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_warning_crossroad.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.6,
+    2.821,
+    0.193
+   ],
+   "tris": 380,
+   "suggested_use": "warning sign before junction",
+   "collision": true
+  },
+  {
+   "id": "sign_warning_pedestrians",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_warning_pedestrians.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.6,
+    2.821,
+    0.193
+   ],
+   "tris": 380,
+   "suggested_use": "warning sign near crossing",
+   "collision": true
+  },
+  {
+   "id": "sign_warning_traffic_lights",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_warning_traffic_lights.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.6,
+    2.821,
+    0.193
+   ],
+   "tris": 380,
+   "suggested_use": "warning sign before lights",
+   "collision": true
+  },
+  {
+   "id": "sign_warning_winding_road",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/sign_warning_winding_road.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.6,
+    2.821,
+    0.193
+   ],
+   "tris": 380,
+   "suggested_use": "warning sign before bends",
+   "collision": true
+  },
+  {
+   "id": "street_light",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/street_light.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.663,
+    8.06,
+    4.571
+   ],
+   "tris": 3066,
+   "suggested_use": "kerb-side street light",
+   "collision": true
+  },
+  {
+   "id": "street_light_double",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/street_light_double.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.663,
+    8.06,
+    8.428
+   ],
+   "tris": 3454,
+   "suggested_use": "median street light",
+   "collision": true
+  },
+  {
+   "id": "traffic_cone",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/traffic_cone.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    0.261,
+    0.5,
+    0.261
+   ],
+   "tris": 464,
+   "suggested_use": "road-works cone",
+   "collision": true
+  },
+  {
+   "id": "traffic_cone_small",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/traffic_cone_small.glb",
+   "source": "pbr_street_props_pack_game_ready.glb",
+   "size": [
+    0.261,
+    0.327,
+    0.261
+   ],
+   "tris": 464,
+   "suggested_use": "road-works cone",
+   "collision": false
+  },
+  {
+   "id": "traffic_light",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/traffic_light.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    0.732,
+    5.791,
+    3.266
+   ],
+   "tris": 2990,
+   "suggested_use": "junction traffic light (static prop)",
+   "collision": true
+  },
+  {
+   "id": "water_barrier_orange",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/water_barrier_orange.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    1.233,
+    0.808,
+    0.61
+   ],
+   "tris": 2040,
+   "suggested_use": "road-works water barrier",
+   "collision": true
+  },
+  {
+   "id": "water_barrier_white",
+   "category": "road",
+   "path": "res://assets/sketchup/props/road/water_barrier_white.glb",
+   "source": "road_pack_not_including_the_road.glb",
+   "size": [
+    1.233,
+    0.808,
+    0.61
+   ],
+   "tris": 2040,
+   "suggested_use": "road-works water barrier",
+   "collision": true
+  },
+  {
+   "id": "planter_bamboo_round",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/planter_bamboo_round.glb",
+   "source": "optimized_potted_plants.glb",
+   "size": [
+    0.906,
+    1.956,
+    0.894
+   ],
+   "tris": 148,
+   "suggested_use": "shop-front planter",
+   "collision": false
+  },
+  {
+   "id": "planter_bamboo_square",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/planter_bamboo_square.glb",
+   "source": "optimized_potted_plants.glb",
+   "size": [
+    0.906,
+    2.066,
+    0.894
+   ],
+   "tris": 48,
+   "suggested_use": "shop-front planter",
+   "collision": false
+  },
+  {
+   "id": "planter_box_grass",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/planter_box_grass.glb",
+   "source": "optimized_potted_plants.glb",
+   "size": [
+    2.496,
+    1.454,
+    1.511
+   ],
+   "tris": 178,
+   "suggested_use": "sidewalk planter box",
+   "collision": true
+  },
+  {
+   "id": "planter_geranium_bowl",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/planter_geranium_bowl.glb",
+   "source": "geranium_flowering_plants_free.glb",
+   "size": [
+    0.738,
+    0.704,
+    0.689
+   ],
+   "tris": 1884,
+   "suggested_use": "doorstep plant",
+   "collision": false
+  },
+  {
+   "id": "planter_geranium_orange",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/planter_geranium_orange.glb",
+   "source": "geranium_flowering_plants_free.glb",
+   "size": [
+    0.776,
+    0.963,
+    0.794
+   ],
+   "tris": 1692,
+   "suggested_use": "doorstep plant",
+   "collision": false
+  },
+  {
+   "id": "planter_geranium_pink",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/planter_geranium_pink.glb",
+   "source": "geranium_flowering_plants_free.glb",
+   "size": [
+    0.823,
+    1.061,
+    0.773
+   ],
+   "tris": 1644,
+   "suggested_use": "doorstep plant",
+   "collision": false
+  },
+  {
+   "id": "planter_geranium_purple",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/planter_geranium_purple.glb",
+   "source": "geranium_flowering_plants_free.glb",
+   "size": [
+    0.782,
+    1.051,
+    0.8
+   ],
+   "tris": 1692,
+   "suggested_use": "doorstep plant",
+   "collision": false
+  },
+  {
+   "id": "planter_geranium_red",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/planter_geranium_red.glb",
+   "source": "geranium_flowering_plants_free.glb",
+   "size": [
+    0.823,
+    0.945,
+    0.773
+   ],
+   "tris": 1836,
+   "suggested_use": "doorstep plant",
+   "collision": false
+  },
+  {
+   "id": "planter_grass_round",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/planter_grass_round.glb",
+   "source": "optimized_potted_plants.glb",
+   "size": [
+    1.101,
+    1.46,
+    1.067
+   ],
+   "tris": 158,
+   "suggested_use": "shop-front planter",
+   "collision": false
+  },
+  {
+   "id": "planter_grass_square",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/planter_grass_square.glb",
+   "source": "optimized_potted_plants.glb",
+   "size": [
+    1.335,
+    1.729,
+    1.293
+   ],
+   "tris": 58,
+   "suggested_use": "shop-front planter",
+   "collision": false
+  },
+  {
+   "id": "planter_haworthia",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/planter_haworthia.glb",
+   "source": "low_poly_plants_pack.glb",
+   "size": [
+    0.412,
+    0.576,
+    0.416
+   ],
+   "tris": 3880,
+   "suggested_use": "doorstep planter",
+   "collision": false
+  },
+  {
+   "id": "potted_aloe",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/potted_aloe.glb",
+   "source": "house-plants.zip (Sketchfab_2023_04_19_23_25_22.blend)",
+   "size": [
+    0.488,
+    0.461,
+    0.526
+   ],
+   "tris": 3508,
+   "suggested_use": "windowsill / doorstep plant",
+   "collision": false
+  },
+  {
+   "id": "potted_cactus",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/potted_cactus.glb",
+   "source": "house-plants.zip (Sketchfab_2023_04_19_23_25_22.blend)",
+   "size": [
+    0.285,
+    0.389,
+    0.285
+   ],
+   "tris": 3879,
+   "suggested_use": "windowsill / doorstep plant",
+   "collision": false
+  },
+  {
+   "id": "potted_fern",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/potted_fern.glb",
+   "source": "low_poly_plants_pack.glb",
+   "size": [
+    1.077,
+    1.02,
+    1.071
+   ],
+   "tris": 3880,
+   "suggested_use": "doorstep plant",
+   "collision": false
+  },
+  {
+   "id": "potted_mint",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/potted_mint.glb",
+   "source": "house-plants.zip (Sketchfab_2023_04_19_23_25_22.blend)",
+   "size": [
+    0.294,
+    0.313,
+    0.277
+   ],
+   "tris": 1671,
+   "suggested_use": "windowsill herb pot",
+   "collision": false
+  },
+  {
+   "id": "potted_money_tree",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/potted_money_tree.glb",
+   "source": "house-plants.zip (Sketchfab_2023_04_19_23_25_22.blend)",
+   "size": [
+    0.516,
+    0.824,
+    0.475
+   ],
+   "tris": 2242,
+   "suggested_use": "doorstep plant",
+   "collision": false
+  },
+  {
+   "id": "potted_orchid",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/potted_orchid.glb",
+   "source": "house-plants.zip (Sketchfab_2023_04_19_23_25_22.blend)",
+   "size": [
+    0.601,
+    0.702,
+    0.291
+   ],
+   "tris": 3678,
+   "suggested_use": "windowsill plant",
+   "collision": false
+  },
+  {
+   "id": "potted_palm",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/potted_palm.glb",
+   "source": "low_poly_plants_pack.glb",
+   "size": [
+    1.139,
+    1.765,
+    1.382
+   ],
+   "tris": 3880,
+   "suggested_use": "doorstep plant",
+   "collision": false
+  },
+  {
+   "id": "potted_pothos",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/potted_pothos.glb",
+   "source": "low_poly_plants_pack.glb",
+   "size": [
+    1.193,
+    0.589,
+    1.27
+   ],
+   "tris": 3879,
+   "suggested_use": "doorstep plant",
+   "collision": false
+  },
+  {
+   "id": "potted_snake_plant",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/potted_snake_plant.glb",
+   "source": "low_poly_plants_pack.glb",
+   "size": [
+    0.909,
+    1.431,
+    0.816
+   ],
+   "tris": 3880,
+   "suggested_use": "doorstep plant",
+   "collision": false
+  },
+  {
+   "id": "potted_spider_plant",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/potted_spider_plant.glb",
+   "source": "low_poly_plants_pack.glb",
+   "size": [
+    1.277,
+    0.786,
+    1.207
+   ],
+   "tris": 3880,
+   "suggested_use": "windowsill / doorstep plant",
+   "collision": false
+  },
+  {
+   "id": "window_flower_box",
+   "category": "plants",
+   "path": "res://assets/sketchup/props/plants/window_flower_box.glb",
+   "source": "house-plants.zip (Sketchfab_2023_04_19_23_25_22.blend)",
+   "size": [
+    1.017,
+    0.42,
+    0.391
+   ],
+   "tris": 625,
+   "suggested_use": "window-sill flower box",
+   "collision": false
+  },
+  {
+   "id": "donut_display",
+   "category": "restaurant",
+   "path": "res://assets/sketchup/props/restaurant/donut_display.glb",
+   "source": "low_poly_psx_style_restaurant_props_-_asset_pack.glb",
+   "size": [
+    1.171,
+    0.437,
+    0.501
+   ],
+   "tris": 2910,
+   "suggested_use": "counter-top display case",
+   "collision": false
+  },
+  {
+   "id": "drinks_fridge",
+   "category": "restaurant",
+   "path": "res://assets/sketchup/props/restaurant/drinks_fridge.glb",
+   "source": "low_poly_psx_style_restaurant_props_-_asset_pack.glb",
+   "size": [
+    1.598,
+    1.951,
+    0.84
+   ],
+   "tris": 436,
+   "suggested_use": "restaurant kitchen fridge",
+   "collision": true
+  },
+  {
+   "id": "jukebox",
+   "category": "restaurant",
+   "path": "res://assets/sketchup/props/restaurant/jukebox.glb",
+   "source": "low_poly_psx_style_restaurant_props_-_asset_pack.glb",
+   "size": [
+    1.01,
+    1.829,
+    0.498
+   ],
+   "tris": 849,
+   "suggested_use": "restaurant interior prop",
+   "collision": true
+  },
+  {
+   "id": "kitchen_counter",
+   "category": "restaurant",
+   "path": "res://assets/sketchup/props/restaurant/kitchen_counter.glb",
+   "source": "low_poly_psx_style_restaurant_props_-_asset_pack.glb",
+   "size": [
+    2.773,
+    0.802,
+    0.82
+   ],
+   "tris": 604,
+   "suggested_use": "restaurant kitchen counter",
+   "collision": true
+  },
+  {
+   "id": "kitchen_oven",
+   "category": "restaurant",
+   "path": "res://assets/sketchup/props/restaurant/kitchen_oven.glb",
+   "source": "low_poly_psx_style_restaurant_props_-_asset_pack.glb",
+   "size": [
+    2.773,
+    0.802,
+    0.844
+   ],
+   "tris": 2020,
+   "suggested_use": "restaurant kitchen oven",
+   "collision": true
+  },
+  {
+   "id": "parking_lot_lamp",
+   "category": "restaurant",
+   "path": "res://assets/sketchup/props/restaurant/parking_lot_lamp.glb",
+   "source": "low_poly_psx_style_restaurant_props_-_asset_pack.glb",
+   "size": [
+    0.121,
+    3.613,
+    1.389
+   ],
+   "tris": 144,
+   "suggested_use": "restaurant car-park lamp",
+   "collision": true
+  },
+  {
+   "id": "restaurant_booth",
+   "category": "restaurant",
+   "path": "res://assets/sketchup/props/restaurant/restaurant_booth.glb",
+   "source": "low_poly_psx_style_restaurant_props_-_asset_pack.glb",
+   "size": [
+    2.802,
+    1.533,
+    2.483
+   ],
+   "tris": 328,
+   "suggested_use": "restaurant table",
+   "collision": true
+  },
+  {
+   "id": "restaurant_dumpster",
+   "category": "restaurant",
+   "path": "res://assets/sketchup/props/restaurant/restaurant_dumpster.glb",
+   "source": "low_poly_psx_style_restaurant_props_-_asset_pack.glb",
+   "size": [
+    1.487,
+    2.206,
+    1.247
+   ],
+   "tris": 1400,
+   "suggested_use": "restaurant back-door dumpster",
+   "collision": true
+  },
+  {
+   "id": "restaurant_stool",
+   "category": "restaurant",
+   "path": "res://assets/sketchup/props/restaurant/restaurant_stool.glb",
+   "source": "low_poly_psx_style_restaurant_props_-_asset_pack.glb",
+   "size": [
+    0.28,
+    0.773,
+    0.28
+   ],
+   "tris": 316,
+   "suggested_use": "restaurant bar stool",
+   "collision": true
+  },
+  {
+   "id": "restaurant_trash_bag",
+   "category": "restaurant",
+   "path": "res://assets/sketchup/props/restaurant/restaurant_trash_bag.glb",
+   "source": "low_poly_psx_style_restaurant_props_-_asset_pack.glb",
+   "size": [
+    0.548,
+    0.992,
+    0.548
+   ],
+   "tris": 294,
+   "suggested_use": "back-door rubbish bag",
+   "collision": false
+  },
+  {
+   "id": "vegetable_counter",
+   "category": "restaurant",
+   "path": "res://assets/sketchup/props/restaurant/vegetable_counter.glb",
+   "source": "low_poly_psx_style_restaurant_props_-_asset_pack.glb",
+   "size": [
+    1.736,
+    0.807,
+    0.832
+   ],
+   "tris": 1820,
+   "suggested_use": "restaurant kitchen counter",
+   "collision": true
+  },
+  {
+   "id": "wall_poster_food",
+   "category": "restaurant",
+   "path": "res://assets/sketchup/props/restaurant/wall_poster_food.glb",
+   "source": "low_poly_psx_style_restaurant_props_-_asset_pack.glb",
+   "size": [
+    0.534,
+    0.807,
+    0.026
+   ],
+   "tris": 26,
+   "suggested_use": "restaurant wall poster",
+   "collision": false
+  },
+  {
+   "id": "wet_floor_sign",
+   "category": "restaurant",
+   "path": "res://assets/sketchup/props/restaurant/wet_floor_sign.glb",
+   "source": "low_poly_psx_style_restaurant_props_-_asset_pack.glb",
+   "size": [
+    0.304,
+    0.7,
+    0.201
+   ],
+   "tris": 385,
+   "suggested_use": "restaurant entrance sign",
+   "collision": false
+  }
+ ]
+}

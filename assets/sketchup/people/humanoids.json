@@ -1,0 +1,80 @@
+[
+  {
+    "id": "casual_male_tshirt",
+    "path": "res://assets/sketchup/people/casual_male_tshirt.glb",
+    "height": 1.815,
+    "tris": 14593,
+    "rest_pose": "T",
+    "rest_arm_angle_deg": 2.6,
+    "bones_mapped": 55,
+    "bones_total": 61,
+    "missing_humanoid_bones": [
+      "Jaw"
+    ],
+    "clips": [],
+    "rig": "source",
+    "facing": "-Y blender / +Z godot (humanoid retarget convention)"
+  },
+  {
+    "id": "business_man_eric",
+    "path": "res://assets/sketchup/people/business_man_eric.glb",
+    "height": 1.864,
+    "tris": 14500,
+    "rest_pose": "A",
+    "rest_arm_angle_deg": 45.0,
+    "bones_mapped": 56,
+    "bones_total": 70,
+    "missing_humanoid_bones": [],
+    "clips": [],
+    "rig": "source",
+    "facing": "-Y blender / +Z godot (humanoid retarget convention)"
+  },
+  {
+    "id": "sophia",
+    "path": "res://assets/sketchup/people/sophia.glb",
+    "height": 1.722,
+    "tris": 14499,
+    "rest_pose": "T",
+    "rest_arm_angle_deg": 0.0,
+    "bones_mapped": 56,
+    "bones_total": 70,
+    "missing_humanoid_bones": [],
+    "clips": [
+      "Idle"
+    ],
+    "rig": "source",
+    "facing": "-Y blender / +Z godot (humanoid retarget convention)"
+  },
+  {
+    "id": "casual_female",
+    "path": "res://assets/sketchup/people/casual_female.glb",
+    "height": 1.819,
+    "tris": 11926,
+    "rest_pose": "T",
+    "rest_arm_angle_deg": 1.6,
+    "bones_mapped": 55,
+    "bones_total": 55,
+    "missing_humanoid_bones": [
+      "Jaw"
+    ],
+    "clips": [],
+    "rig": "auto (fitted humanoid, ARMATURE_AUTO, 7 verts patched)",
+    "facing": "-Y blender / +Z godot (humanoid retarget convention)"
+  },
+  {
+    "id": "casual_male_2",
+    "path": "res://assets/sketchup/people/casual_male_2.glb",
+    "height": 1.806,
+    "tris": 11916,
+    "rest_pose": "T",
+    "rest_arm_angle_deg": -0.2,
+    "bones_mapped": 55,
+    "bones_total": 55,
+    "missing_humanoid_bones": [
+      "Jaw"
+    ],
+    "clips": [],
+    "rig": "auto (fitted humanoid, ARMATURE_AUTO after weld/normals repair, 0 verts patched)",
+    "facing": "-Y blender / +Z godot (humanoid retarget convention)"
+  }
+]

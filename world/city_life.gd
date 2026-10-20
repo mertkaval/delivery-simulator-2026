@@ -91,7 +91,7 @@ func add_cyclist(index: int) -> void:
 	var bike := CityAssets.create("bicycle", 100)
 	body.add_child(bike)
 	# Riders use the designed citizens: the converted walker has no cycling pose.
-	var rider: Node3D = LivingAssets.citizen(LivingAssets.WALKER_EVERY * (index + 10))
+	var rider: Node3D = LivingAssets.classic_citizen(index + 10)
 	body.add_child(rider)
 	rider.position = Vector3(0, 0.07, 0.46)
 	rider.rotation.x = -0.2

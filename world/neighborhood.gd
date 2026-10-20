@@ -188,6 +188,9 @@ func _ready() -> void:
 	streets = StreetGrid.new()
 	streets.name = "StreetGrid"
 	add_child(streets)
+	var circles := TrafficCircles.new()
+	circles.name = "TrafficCircles"
+	add_child(circles)
 	for run in sidewalk_runs(-690, 50):
 		for side in [-1, 1]:
 			box(Vector3(side * 8, 0.025, (run.x + run.y) * 0.5), Vector3(4, 0.05, run.y - run.x), "bdc2b8", false)
@@ -556,9 +559,13 @@ func ribbon(path: PackedVector3Array, width: float, height: float, surface: Mate
 func build_estate() -> void:
 	var roads := CityCatalog.estate_roads()
 	set_meta("curved_roads",roads)
+	# Modular curved streets: asphalt, raised sidewalks with kerbs, centre/edge markings.
+	var curved := CurvedRoads.new()
+	curved.name="CurvedRoads"
 	for path in roads:
-		ribbon(path,13,.08,material("bdc2b8"))
-		ribbon(path,8,.095,material("3a4249"))
+		var ring: bool = path.size()>8 and path[0].distance_to(path[-1])<0.5
+		curved.specs.append({"path":path,"width":8.0,"walk":2.4,"ring":ring})
+	add_child(curved)
 	for x in [-64,64]:
 		build_park(Vector3(x,0,-145))
 	for id in ShopCatalog.LOCATIONS:

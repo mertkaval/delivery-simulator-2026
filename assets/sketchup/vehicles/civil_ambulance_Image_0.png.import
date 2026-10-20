@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://5p6gl1febq42"
-path="res://.godot/imported/civil_ambulance_Image_0.png-1469020fc7b9d7bdfce22ab483411177.ctex"
+path.s3tc="res://.godot/imported/civil_ambulance_Image_0.png-1469020fc7b9d7bdfce22ab483411177.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "42333ec4011757f1b2b7211694292492"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/sketchup/vehicles/civil_ambulance_Image_0.png"
-dest_files=["res://.godot/imported/civil_ambulance_Image_0.png-1469020fc7b9d7bdfce22ab483411177.ctex"]
+dest_files=["res://.godot/imported/civil_ambulance_Image_0.png-1469020fc7b9d7bdfce22ab483411177.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0
