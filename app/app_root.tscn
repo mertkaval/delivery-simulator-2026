@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://app/app_root.gd" id="1"]
 [ext_resource type="Script" path="res://world/neighborhood.gd" id="2"]
 [ext_resource type="Script" path="res://actors/player.gd" id="3"]
+[ext_resource type="Script" path="res://world/editor_preview/editor_preview.gd" id="4"]
 
 [node name="DeliverySimulator" type="Node3D"]
 script = ExtResource("1")
@@ -12,3 +13,6 @@ script = ExtResource("2")
 
 [node name="CourierPlayer" type="CharacterBody3D" parent="."]
 script = ExtResource("3")
+
+[node name="EditorPreview" type="Node3D" parent="."]
+script = ExtResource("4")

@@ -9,3 +9,6 @@
 *.blend2
 # Local tool settings
 .claude/settings.local.json
+
+# Baked editor preview of the city (regenerate: tools/bake_editor_preview.gd)
+/world/editor_preview/city_preview.scn
