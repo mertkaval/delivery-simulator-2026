@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bc1l7p8e5btnm"
-path="res://.godot/imported/sophia_Image_0.jpg-0f7fadc423f5fa0cc5ffb7ce3c7c3c28.ctex"
+path.s3tc="res://.godot/imported/sophia_Image_0.jpg-0f7fadc423f5fa0cc5ffb7ce3c7c3c28.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "67edc45aba274c9980a978945a5878e7"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/sketchup/people/sophia_Image_0.jpg"
-dest_files=["res://.godot/imported/sophia_Image_0.jpg-0f7fadc423f5fa0cc5ffb7ce3c7c3c28.ctex"]
+dest_files=["res://.godot/imported/sophia_Image_0.jpg-0f7fadc423f5fa0cc5ffb7ce3c7c3c28.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

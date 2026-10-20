@@ -69,7 +69,9 @@ func configure(scene: String, skeleton_path: String, map_path: String, library: 
 		"retarget/rest_fixer/normalize_position_tracks": true,
 		"retarget/rest_fixer/overwrite_axis": true,
 		"retarget/rest_fixer/reset_all_bone_poses_after_import": true,
-		"retarget/rest_fixer/fix_silhouette/enable": true,
+		# Off: tools/match_ual_rest.py already gives every character the library's exact rest; the
+		# silhouette fixer would straighten some rests (necks) and not others, tilting heads.
+		"retarget/rest_fixer/fix_silhouette/enable": false,
 		"retarget/remove_tracks/except_bone_transform": false,
 		"retarget/remove_tracks/unimportant_positions": false,
 		"retarget/remove_tracks/unmapped_bones": false,  # true trips a Godot import bug that drops most tracks

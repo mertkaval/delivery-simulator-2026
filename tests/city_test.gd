@@ -73,6 +73,14 @@ func run() -> void:
 	first.s = (first.route as SmoothRoute).project(Vector3(1.95, 0, -79))
 	first.speed = 7.0
 	TrafficDriver.place(first)
+	# Spread the rest of this loop's cars well ahead so none queues in front of the test car.
+	var k := 1
+	for d in traffic.drivers:
+		if d != first and d.route == first.route:
+			d.s = float(first.s) + 120.0 * k
+			d.speed = 0.0
+			TrafficDriver.place(d)
+			k += 1
 	traffic.speeds[0] = 7
 	traffic.elapsed = 16
 	await physics_frame

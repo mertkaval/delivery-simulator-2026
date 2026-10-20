@@ -157,8 +157,8 @@ func traffic_signs() -> void:
 		put("sign_roundabout", at + Vector3(-6.6, 0.04, 6.4), -PI * 0.5, pole)              # from the west
 		put("sign_roundabout", at + Vector3(6.6, 0.04, -6.4), PI * 0.5, pole)               # from the east
 	for x in [-64.0, 64.0]:
-		put("sign_roundabout", Vector3(x - 5.4, 0.15, -176.0), PI, pole)
-		put("sign_roundabout", Vector3(x + 5.4, 0.15, -114.0), 0.0, pole)
+		put("sign_roundabout", Vector3(x - 5.4, 0.1, -176.0), PI, pole)
+		put("sign_roundabout", Vector3(x + 5.4, 0.1, -114.0), 0.0, pole)
 	for z in [17.0, -93.0, -177.0]:
 		put("sign_pedestrian_crossing", Vector3(7.2, 0.04, z + 9.0), 0.0, pole)
 		put("sign_pedestrian_crossing", Vector3(-7.2, 0.04, z - 9.0), PI, pole)

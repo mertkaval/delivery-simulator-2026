@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://o4yhhlu4p0h2"
-path="res://.godot/imported/pbr_street_props_pack_game_ready_44.png-630535c3945f129e77ee176bc2cbe411.ctex"
+path.s3tc="res://.godot/imported/pbr_street_props_pack_game_ready_44.png-630535c3945f129e77ee176bc2cbe411.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d245e9d00909b0aee321ca3a7091893d"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://sketchup_assets/pbr_street_props_pack_game_ready_44.png"
-dest_files=["res://.godot/imported/pbr_street_props_pack_game_ready_44.png-630535c3945f129e77ee176bc2cbe411.ctex"]
+dest_files=["res://.godot/imported/pbr_street_props_pack_game_ready_44.png-630535c3945f129e77ee176bc2cbe411.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

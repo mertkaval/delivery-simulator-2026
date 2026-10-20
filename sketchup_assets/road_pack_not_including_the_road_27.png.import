@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dwoh15avkvivc"
-path="res://.godot/imported/road_pack_not_including_the_road_27.png-83471f4f723c4112a6a92b5bb38d9547.ctex"
+path.s3tc="res://.godot/imported/road_pack_not_including_the_road_27.png-83471f4f723c4112a6a92b5bb38d9547.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d37cd4e865fa0187c3041b07fa983152"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://sketchup_assets/road_pack_not_including_the_road_27.png"
-dest_files=["res://.godot/imported/road_pack_not_including_the_road_27.png-83471f4f723c4112a6a92b5bb38d9547.ctex"]
+dest_files=["res://.godot/imported/road_pack_not_including_the_road_27.png-83471f4f723c4112a6a92b5bb38d9547.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

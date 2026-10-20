@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://5fliv2mdchj2"
-path="res://.godot/imported/low_poly_psx_style_restaurant_props_-_asset_pack_19.png-e63bbc9abe00ae4e8334eaae4c8c9f18.ctex"
+path.s3tc="res://.godot/imported/low_poly_psx_style_restaurant_props_-_asset_pack_19.png-e63bbc9abe00ae4e8334eaae4c8c9f18.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "9c1449586b87e4c6d696caa894f4b5b6"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://sketchup_assets/low_poly_psx_style_restaurant_props_-_asset_pack_19.png"
-dest_files=["res://.godot/imported/low_poly_psx_style_restaurant_props_-_asset_pack_19.png-e63bbc9abe00ae4e8334eaae4c8c9f18.ctex"]
+dest_files=["res://.godot/imported/low_poly_psx_style_restaurant_props_-_asset_pack_19.png-e63bbc9abe00ae4e8334eaae4c8c9f18.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c7iu4a7hm35pa"
-path="res://.godot/imported/sophia_animated_003_-_animated_3d_woman_0.jpg-719e37f6ad9502f3b8652353ba76fd17.ctex"
+path.s3tc="res://.godot/imported/sophia_animated_003_-_animated_3d_woman_0.jpg-719e37f6ad9502f3b8652353ba76fd17.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "413b93fee870a1663a90c384805f3477"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://sketchup_assets/sophia_animated_003_-_animated_3d_woman_0.jpg"
-dest_files=["res://.godot/imported/sophia_animated_003_-_animated_3d_woman_0.jpg-719e37f6ad9502f3b8652353ba76fd17.ctex"]
+dest_files=["res://.godot/imported/sophia_animated_003_-_animated_3d_woman_0.jpg-719e37f6ad9502f3b8652353ba76fd17.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

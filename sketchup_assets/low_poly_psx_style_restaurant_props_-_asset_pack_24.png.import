@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://6sovwlf5k2xe"
-path="res://.godot/imported/low_poly_psx_style_restaurant_props_-_asset_pack_24.png-3f06cdf92718d9aaf9234c705e7bf5eb.ctex"
+path.s3tc="res://.godot/imported/low_poly_psx_style_restaurant_props_-_asset_pack_24.png-3f06cdf92718d9aaf9234c705e7bf5eb.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "593f18bf1706f2e93e952db5c7ce5064"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://sketchup_assets/low_poly_psx_style_restaurant_props_-_asset_pack_24.png"
-dest_files=["res://.godot/imported/low_poly_psx_style_restaurant_props_-_asset_pack_24.png-3f06cdf92718d9aaf9234c705e7bf5eb.ctex"]
+dest_files=["res://.godot/imported/low_poly_psx_style_restaurant_props_-_asset_pack_24.png-3f06cdf92718d9aaf9234c705e7bf5eb.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

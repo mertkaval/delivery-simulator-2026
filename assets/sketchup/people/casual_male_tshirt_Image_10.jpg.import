@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://3chtt6nw753p"
-path="res://.godot/imported/casual_male_tshirt_Image_10.jpg-88feed9a9ab4098d5f06a7b8f22c4b8d.ctex"
+path.s3tc="res://.godot/imported/casual_male_tshirt_Image_10.jpg-88feed9a9ab4098d5f06a7b8f22c4b8d.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0d63de628e26b31af4d6ae5eef845ce0"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/sketchup/people/casual_male_tshirt_Image_10.jpg"
-dest_files=["res://.godot/imported/casual_male_tshirt_Image_10.jpg-88feed9a9ab4098d5f06a7b8f22c4b8d.ctex"]
+dest_files=["res://.godot/imported/casual_male_tshirt_Image_10.jpg-88feed9a9ab4098d5f06a7b8f22c4b8d.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

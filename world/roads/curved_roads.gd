@@ -8,9 +8,11 @@ extends Node3D
 ## Paths that overlap at junctions each sit a few millimetres apart (no z-fighting) and markings
 ## stop short of path ends so they never paint across a junction.
 
-const ROAD_Y := 0.095
-const KERB := 0.11         ## kerb height above the carriageway
-const STEP := 0.004        ## height step between overlapping paths
+## Heights match the street grid (deck at 0.03) and the ground the traffic (0.04) and people
+## (0.1) stand on, so wheels and feet sit on the surface instead of inside it.
+const ROAD_Y := 0.036
+const KERB := 0.064        ## kerb height above the carriageway (sidewalk top ~0.10)
+const STEP := 0.0025       ## height step between overlapping paths
 
 ## spec: {"path": PackedVector3Array, "width": carriageway width, "walk": sidewalk width,
 ##        "ring": bool (closed one-way loop), "centre_line": bool}
@@ -31,10 +33,51 @@ func _ready() -> void:
 	_concrete = CityMaterials.get_surface("c4c2b8")
 	_yellow = paint(Color("e3b43a"))
 	_white = paint(Color("efede4"))
+	extend_into_junctions()
 	for spec in specs: spec.path = densify(spec.path, 1.0)
 	for i in range(specs.size()):
 		build(specs[i], i)
 	street_lights()
+
+## A road that ends on another road's centreline (an L corner or a T) stops halfway across it,
+## leaving a notch of grass where the outer corner should be. Carry such ends on to the far
+## kerb plus the sidewalk, so asphalt and sidewalk close the corner.
+func extend_into_junctions() -> void:
+	for i in range(specs.size()):
+		var spec: Dictionary = specs[i]
+		var path: PackedVector3Array = spec.path
+		if spec.get("ring", false) or path.size() < 2: continue
+		for end in [0, path.size() - 1]:
+			var p := path[end]
+			var inward := path[1] - path[0] if end == 0 else path[end - 1] - path[end]
+			inward = inward.normalized()
+			for j in range(specs.size()):
+				if j == i: continue
+				var other: PackedVector3Array = specs[j].path
+				var half: float = float(specs[j].get("width", 8.0)) * 0.5
+				var on_it := false
+				for k in range(1, other.size()):
+					if Geometry3D.get_closest_point_to_segment(p, other[k - 1], other[k]).distance_to(p) < 0.6: on_it = true
+				if on_it:
+					var walk: float = float(specs[j].get("walk", 2.4))
+					var reach: float = half + walk
+					if end == 0: path.insert(0, p - inward * reach)
+					else: path.append(p - inward * reach)
+					# Asphalt stops at the far kerb; only the sidewalks run on through the corner.
+					spec["trim_start" if end == 0 else "trim_end"] = walk
+					break
+		spec.path = path
+
+static func trim(path: PackedVector3Array, from_start: float, from_end: float) -> PackedVector3Array:
+	if from_start <= 0.0 and from_end <= 0.0: return path
+	var acc := PackedFloat32Array([0.0])
+	for i in range(1, path.size()): acc.append(acc[-1] + path[i].distance_to(path[i - 1]))
+	var total: float = acc[-1]
+	var out := PackedVector3Array([sample(path, acc, from_start)])
+	for i in range(path.size()):
+		if acc[i] > from_start and acc[i] < total - from_end: out.append(path[i])
+	out.append(sample(path, acc, total - from_end))
+	return out
 
 static func densify(path: PackedVector3Array, step: float) -> PackedVector3Array:
 	var out := PackedVector3Array()
@@ -55,6 +98,21 @@ func on_other_carriageway(p: Vector3, own: int) -> bool:
 		var half: float = float(specs[j].get("width", 8.0)) * 0.5 + 0.25
 		for i in range(1, path.size()):
 			if Geometry3D.get_closest_point_to_segment(p, path[i - 1], path[i]).distance_to(p) < half: return true
+	return false
+
+## True when p is within `margin` metres of another road's carriageway edge (junction zone).
+func near_other_road(p: Vector3, own: int, margin: float) -> bool:
+	for j in range(specs.size()):
+		if j == own: continue
+		var path: PackedVector3Array = specs[j].path
+		var reach: float = float(specs[j].get("width", 8.0)) * 0.5 + margin
+		for i in range(1, path.size()):
+			if Geometry3D.get_closest_point_to_segment(p, path[i - 1], path[i]).distance_to(p) < reach: return true
+	# Also the straight street grid (avenue, side roads, cross streets).
+	for road in StreetGrid.roads():
+		var a := Vector3(road.a.x, 0, road.a.y)
+		var b := Vector3(road.b.x, 0, road.b.y)
+		if Geometry3D.get_closest_point_to_segment(p, a, b).distance_to(p) < float(road.profile.half) + margin: return true
 	return false
 
 ## Split `path` into runs where the lateral offsets [from, to] stay off other carriageways.
@@ -86,8 +144,8 @@ func build(spec: Dictionary, index: int) -> void:
 	var walk: float = spec.get("walk", 2.2)
 	var y := ROAD_Y + STEP * (index % 6)
 	var ring: bool = spec.get("ring", false)
-	# Carriageway.
-	add_strip(path, -half, half, y, y, _asphalt)
+	# Carriageway (trimmed back to the far kerb where the road was carried through a junction).
+	add_strip(trim(path, float(spec.get("trim_start", 0.0)), float(spec.get("trim_end", 0.0))), -half, half, y, y, _asphalt)
 	# Sidewalks with kerb faces on both sides, open wherever another road joins.
 	for side: float in [-1.0, 1.0]:
 		var inner := half * side
@@ -132,7 +190,8 @@ func street_lights() -> void:
 			var side := 1.0 if ring else (1.0 if k % 2 == 0 else -1.0)
 			k += 1
 			var at := Vector3(path[i].x, 0.0, path[i].z) + x * side * (half + 0.55)
-			if on_other_carriageway(at, index) or on_other_carriageway(at + x * side * 1.5, index): continue
+			# Keep poles well clear of junctions: long vehicles' rear wheels cut the inner corner.
+			if near_other_road(at, index, 9.0): continue
 			# Front (+Z) must point back over the road: towards -x*side.
 			var face := -x * side
 			var basis := Basis(Vector3.UP, atan2(face.x, face.z))

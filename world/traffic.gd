@@ -43,7 +43,8 @@ func _ready() -> void:
 	var west := PackedVector3Array([Vector3(-1.95, 0, -256.36), Vector3(-1.95, 0, 46), Vector3(-62, 0, 46), Vector3(-62, 0, -118)])
 	west.append_array(ring_arc(Vector3(-64, 0, -145), 22.0, PI / 2 - 0.3, -PI / 2 + 0.3))
 	west.append_array(PackedVector3Array([Vector3(-62, 0, -172), Vector3(-62, 0, -256.36)]))
-	var loops: Array[SmoothRoute] = [SmoothRoute.from_corners(east, 8.0), SmoothRoute.from_corners(west, 8.0),
+	# 11 m corner arcs: wide enough that 5 m pickups and vans do not cut the inner kerb.
+	var loops: Array[SmoothRoute] = [SmoothRoute.from_corners(east, 11.0), SmoothRoute.from_corners(west, 11.0),
 		SmoothRoute.from_corners(PackedVector3Array([Vector3(-62.36, 0, -259.64), Vector3(-62.36, 0, -676.36), Vector3(62.36, 0, -676.36), Vector3(62.36, 0, -259.64)]), 9.0)]
 	for i in range(16):
 		var li := 0 if i < 5 else (1 if i < 10 else 2)
