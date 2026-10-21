@@ -1,0 +1,335 @@
+{
+ "civil_taxi": {
+  "wheels": [
+   "WheelFrontL",
+   "WheelFrontR",
+   "WheelRearR",
+   "WheelRearL"
+  ],
+  "axles": 2,
+  "wheelbase": 2.778,
+  "wheel_radius": 0.342,
+  "length": 5.085,
+  "width": 1.999,
+  "height": 1.504,
+  "front_overhang": 1.022,
+  "rear_overhang": 1.286,
+  "textures": [
+   "Image_36 1024x1024",
+   "Image_37 1024x1024",
+   "Image_38 1024x1024",
+   "Image_39 1024x1024",
+   "Image_4 512x512",
+   "Image_40 512x128"
+  ],
+  "tris_source": 7282,
+  "tris": 7282,
+  "glb_bytes": 2700124
+ },
+ "ace11": {
+  "wheels": [
+   "WheelFrontR",
+   "WheelFrontL",
+   "WheelRearR",
+   "WheelRearL"
+  ],
+  "axles": 2,
+  "wheelbase": 2.405,
+  "wheel_radius": 0.298,
+  "length": 3.843,
+  "width": 1.832,
+  "height": 1.445,
+  "front_overhang": 0.819,
+  "rear_overhang": 0.619,
+  "steering_wheel": {
+   "centre": [
+    -0.348,
+    0.379,
+    0.927
+   ],
+   "column": [
+    -0.0,
+    0.939,
+    -0.345
+   ],
+   "tilt_deg": 20.2
+  },
+  "textures": [
+   "Image_0 1024x1024",
+   "Image_1 1024x1024",
+   "Image_10 512x512",
+   "Image_11 1024x1024",
+   "Image_2 512x512",
+   "Image_3 512x512",
+   "Image_4 512x512",
+   "Image_5 512x512",
+   "Image_6 1024x1024",
+   "Image_7 1024x1024",
+   "Image_8 512x512",
+   "Image_9 512x512"
+  ],
+  "tris_source": 18432,
+  "tris": 15399,
+  "glb_bytes": 5822616
+ },
+ "civil_ambulance": {
+  "wheels": [
+   "WheelFrontL",
+   "WheelFrontR",
+   "WheelRearR",
+   "WheelRearL",
+   "WheelRearR_2",
+   "WheelRearL_2"
+  ],
+  "axles": 2,
+  "wheelbase": 4.002,
+  "wheel_radius": 0.365,
+  "length": 6.9,
+  "width": 2.59,
+  "height": 2.574,
+  "front_overhang": 0.883,
+  "rear_overhang": 2.015,
+  "textures": [
+   "Image_0 1024x1024",
+   "Image_1 1024x1024",
+   "Image_2 1024x1024",
+   "Image_3 512x512",
+   "Image_4 512x512"
+  ],
+  "tris_source": 9404,
+  "tris": 9404,
+  "glb_bytes": 2178424
+ },
+ "civil_citybus": {
+  "wheels": [
+   "WheelFrontL",
+   "WheelFrontR",
+   "WheelRearL",
+   "WheelRearR",
+   "WheelRearL_2",
+   "WheelRearR_2"
+  ],
+  "axles": 2,
+  "wheelbase": 6.041,
+  "wheel_radius": 0.434,
+  "length": 9.951,
+  "width": 2.535,
+  "height": 2.516,
+  "front_overhang": 1.913,
+  "rear_overhang": 1.997,
+  "textures": [
+   "Image_4 512x512",
+   "Image_5 1024x1024",
+   "Image_6 1024x1024",
+   "Image_7 1024x1024",
+   "Image_8 1024x1024",
+   "Image_9 512x512"
+  ],
+  "tris_source": 9062,
+  "tris": 9062,
+  "glb_bytes": 2346200
+ },
+ "civil_fire_truck": {
+  "wheels": [
+   "WheelFrontR",
+   "WheelFrontL",
+   "WheelRearR",
+   "WheelRearL",
+   "WheelRearR_2",
+   "WheelRearL_2"
+  ],
+  "axles": 2,
+  "wheelbase": 4.117,
+  "wheel_radius": 0.509,
+  "length": 8.355,
+  "width": 2.59,
+  "height": 2.933,
+  "front_overhang": 1.968,
+  "rear_overhang": 2.27,
+  "textures": [
+   "Image_10 1024x1024",
+   "Image_11 1024x1024",
+   "Image_12 1024x1024",
+   "Image_13 1024x1024",
+   "Image_14 1024x1024",
+   "Image_15 512x512",
+   "Image_4 512x512"
+  ],
+  "tris_source": 12110,
+  "tris": 12110,
+  "glb_bytes": 3813492
+ },
+ "civil_garbage_truck": {
+  "wheels": [
+   "WheelFrontR",
+   "WheelFrontL",
+   "WheelRearR",
+   "WheelRearL",
+   "WheelRearR_2",
+   "WheelRearL_2",
+   "WheelRear2R",
+   "WheelRear2L",
+   "WheelRear2R_2",
+   "WheelRear2L_2"
+  ],
+  "axles": 3,
+  "wheelbase": 3.971,
+  "wheel_radius": 0.464,
+  "length": 7.656,
+  "width": 2.62,
+  "height": 2.831,
+  "front_overhang": 1.274,
+  "rear_overhang": 1.878,
+  "textures": [
+   "Image_16 1024x1024",
+   "Image_17 1024x1024",
+   "Image_18 1024x1024",
+   "Image_19 1024x1024",
+   "Image_4 512x512"
+  ],
+  "tris_source": 12746,
+  "tris": 12746,
+  "glb_bytes": 3046908
+ },
+ "civil_police_sedan": {
+  "wheels": [
+   "WheelFrontL",
+   "WheelFrontR",
+   "WheelRearR",
+   "WheelRearL"
+  ],
+  "axles": 2,
+  "wheelbase": 2.778,
+  "wheel_radius": 0.342,
+  "length": 5.172,
+  "width": 1.999,
+  "height": 1.878,
+  "front_overhang": 1.103,
+  "rear_overhang": 1.291,
+  "textures": [
+   "Image_20 1024x1024",
+   "Image_21 1024x1024",
+   "Image_22 1024x1024",
+   "Image_23 1024x1024",
+   "Image_24 1024x1024",
+   "Image_25 512x512",
+   "Image_4 512x512"
+  ],
+  "tris_source": 8430,
+  "tris": 8430,
+  "glb_bytes": 2615836
+ },
+ "civil_postvan": {
+  "wheels": [
+   "WheelFrontL",
+   "WheelFrontR",
+   "WheelRearR",
+   "WheelRearL"
+  ],
+  "axles": 2,
+  "wheelbase": 3.234,
+  "wheel_radius": 0.374,
+  "length": 5.347,
+  "width": 2.186,
+  "height": 1.978,
+  "front_overhang": 0.973,
+  "rear_overhang": 1.139,
+  "textures": [
+   "Image_4 512x512",
+   "Image_46 1024x1024",
+   "Image_47 1024x1024",
+   "Image_48 1024x1024",
+   "Image_49 512x256"
+  ],
+  "tris_source": 6029,
+  "tris": 6029,
+  "glb_bytes": 1871224
+ },
+ "civil_rdservtruck": {
+  "wheels": [
+   "WheelFrontL",
+   "WheelFrontR",
+   "WheelRearR",
+   "WheelRearL",
+   "WheelRearR_2",
+   "WheelRearL_2"
+  ],
+  "axles": 2,
+  "wheelbase": 2.983,
+  "wheel_radius": 0.394,
+  "length": 5.323,
+  "width": 2.268,
+  "height": 2.194,
+  "front_overhang": 0.9,
+  "rear_overhang": 1.44,
+  "textures": [
+   "Image_26 1024x1024",
+   "Image_27 1024x1024",
+   "Image_28 1024x1024",
+   "Image_29 1024x1024",
+   "Image_30 512x128",
+   "Image_4 512x512"
+  ],
+  "tris_source": 8216,
+  "tris": 8216,
+  "glb_bytes": 2789780
+ },
+ "civil_school_bus": {
+  "wheels": [
+   "WheelFrontR",
+   "WheelFrontL",
+   "WheelRearL",
+   "WheelRearR",
+   "WheelRearL_2",
+   "WheelRearR_2"
+  ],
+  "axles": 2,
+  "wheelbase": 4.591,
+  "wheel_radius": 0.435,
+  "length": 7.921,
+  "width": 2.552,
+  "height": 2.67,
+  "front_overhang": 0.925,
+  "rear_overhang": 2.404,
+  "textures": [
+   "Image_31 1024x1024",
+   "Image_32 1024x1024",
+   "Image_33 1024x1024",
+   "Image_34 1024x1024",
+   "Image_35 512x512",
+   "Image_4 512x512"
+  ],
+  "tris_source": 11472,
+  "tris": 11472,
+  "glb_bytes": 2561348
+ },
+ "civil_towtruck": {
+  "wheels": [
+   "WheelFrontR",
+   "WheelFrontL",
+   "WheelRearR",
+   "WheelRearL",
+   "WheelRearR_2",
+   "WheelRearL_2"
+  ],
+  "axles": 2,
+  "wheelbase": 3.59,
+  "wheel_radius": 0.372,
+  "length": 6.942,
+  "width": 2.376,
+  "height": 2.394,
+  "front_overhang": 1.116,
+  "rear_overhang": 2.236,
+  "textures": [
+   "Image_4 512x512",
+   "Image_41 1024x1024",
+   "Image_42 1024x1024",
+   "Image_43 1024x1024",
+   "Image_44 1024x1024",
+   "Image_45 1024x1024"
+  ],
+  "tris_source": 7953,
+  "tris": 7953,
+  "glb_bytes": 3661824
+ }
+}

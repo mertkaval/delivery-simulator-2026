@@ -19,6 +19,8 @@ const STEP := 0.0025       ## height step between overlapping paths
 var specs: Array[Dictionary] = []
 ## Paved forecourts (x/z rects): a road that runs into one ends at its edge.
 var keep_out: Array[Rect2] = []
+## Shared prop placement (CedarNeighborhood.placer); a private one when built standalone.
+var placer: PropPlacer
 var _asphalt: ShaderMaterial
 var _concrete: Material
 var _yellow: StandardMaterial3D
@@ -190,7 +192,10 @@ func build(spec: Dictionary, index: int) -> void:
 
 ## Street lights every LIGHT_SPACING metres on the outer sidewalk, alternating sides on two-way
 ## roads and on the outside of rings, arm over the carriageway; batched into one MultiMesh per
-## mesh piece, with a thin pole collider. Skipped where another road joins.
+## mesh piece, with a thin pole collider. Each pole asks the PropPlacer for its spot: one that
+## is off every carriageway (rings, frontage driveways, the street grid), 9 m clear of junctions,
+## clear of house walks and forecourts and 8 m from other lights; when the regular spot is not
+## valid the pole slides along the road (1 m steps, up to 8 m either way) or is dropped.
 const LIGHT_SPACING := 30.0
 const POLE_BACK := 1.93   ## street_light.glb: pole base sits 1.93 m behind the footprint centre
 func street_lights() -> void:
@@ -199,7 +204,10 @@ func street_lights() -> void:
 	var transforms: Array[Transform3D] = []
 	var body := StaticBody3D.new()
 	body.name = "StreetLightPoles"
+	body.set_meta("prop", "street_light")
 	add_child(body)
+	if placer == null: placer = PropPlacer.new()
+	var requested := 0
 	for index in range(specs.size()):
 		var spec: Dictionary = specs[index]
 		var path: PackedVector3Array = spec.path
@@ -212,12 +220,31 @@ func street_lights() -> void:
 			travelled += path[i].distance_to(path[i - 1])
 			if travelled < next: continue
 			next += LIGHT_SPACING
-			var x := across(path, i)
 			var side := 1.0 if ring else (1.0 if k % 2 == 0 else -1.0)
 			k += 1
-			var at := Vector3(path[i].x, 0.0, path[i].z) + x * side * (half + 0.55)
 			# Keep poles well clear of junctions: long vehicles' rear wheels cut the inner corner.
-			if near_other_road(at, index, 9.0): continue
+			# (A light whose regular spot is in a junction zone is left out, as before.)
+			var regular := PropPlacer.kerb_spot(path[i], across(path, i) * side, half, 0.55)
+			if near_other_road(regular, index, 9.0): continue
+			requested += 1
+			var at := Vector3.ZERO
+			var x := Vector3.ZERO
+			var found := false
+			for step in [0, 1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6, -6, 7, -7, 8, -8]:
+				var j: int = i + step
+				if j < 1 or j >= path.size(): continue
+				x = across(path, j)
+				at = PropPlacer.kerb_spot(path[j], x * side, half, 0.55)
+				if near_other_road(at, index, 9.0): continue
+				if placer.problem("street_light", at, 0.2, {"spacing": 8.0, "walk": 1.2, "gap": 0.4}) != "": continue
+				found = true
+				break
+			if not found:
+				placer.rejected.append({"kind": "street_light", "at": regular, "reason": placer.problem("street_light", regular, 0.2, {"spacing": 8.0, "walk": 1.2, "gap": 0.4})})
+				continue
+			if at.distance_to(regular) > 0.01:
+				placer.relocated += 1
+			placer.record("street_light", at, 0.2, "curved_road")
 			# Front (+Z) must point back over the road: towards -x*side.
 			var face := -x * side
 			var basis := Basis(Vector3.UP, atan2(face.x, face.z))
@@ -242,6 +269,7 @@ func street_lights() -> void:
 		node.visibility_range_end = 400.0
 		add_child(node)
 	set_meta("street_lights", transforms.size())
+	set_meta("street_lights_requested", requested)
 
 ## Lateral frame at each point (tangent x up), averaged over neighbours for smooth curves.
 static func across(path: PackedVector3Array, i: int) -> Vector3:

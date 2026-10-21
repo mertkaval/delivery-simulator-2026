@@ -225,8 +225,9 @@ func _physics_process(delta: float) -> void:
 		if bicycle.has_method("update_driving_visuals"):
 			bicycle.update_driving_visuals(get_position_delta().dot(-global_basis.z), steer_angle, brake)
 		else:
+			var radius := float(bicycle.get_meta("wheel_radius", 0.35))   # per-model (Ace 11: 0.298 m)
 			for wheel in wheels:
-				wheel.rotate_x(-get_position_delta().length() / 0.35 * signf(riding_speed))
+				wheel.rotate_x(-get_position_delta().length() / radius * signf(riding_speed))
 		var fatigue := (0.0 if powered else absf(riding_speed) * 0.15) * (0.85 if session.owns("gloves") else 1.0)
 		session.energy = clampf(session.energy + (2.0 if absf(riding_speed) < 0.1 else -fatigue) * delta, 0, 100)
 		return

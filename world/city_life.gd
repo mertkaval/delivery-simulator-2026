@@ -5,6 +5,8 @@ var cyclists: Array[Dictionary] = []
 var staff: Array[Node3D] = []
 var traffic: Node
 var elapsed := 0.0
+## Where a citizen rider's hips sit on the gray bicycle (saddle centre is 0.30 m behind the origin).
+const CITIZEN_SADDLE_Z := 0.44
 
 func person(index: int) -> Node3D:
 	var model := CityAssets.create("citizen", 75)
@@ -90,12 +92,23 @@ func add_cyclist(index: int) -> void:
 	body.add_child(collider)
 	var bike := CityAssets.create("bicycle", 100)
 	body.add_child(bike)
-	# Riders use the designed citizens: the converted walker has no cycling pose.
-	var rider: Node3D = LivingAssets.classic_citizen(index + 10)
-	body.add_child(rider)
-	rider.position = Vector3(0, 0.07, 0.46)
-	rider.rotation.x = -0.2
-	if rider is LivingCitizen: rider.attach_helmet()
+	var rider: Node3D
+	if index % 2 == 0:
+		# The supplied model's own rider, sitting exactly on the gray bike (static pose; the
+		# wheels spin). Joint proxies keep the shared pedalling code valid.
+		rider = CityAssets.create("bicycle_rider", 100)
+		body.add_child(rider)
+		for joint in ["HipL", "HipR", "KneeL", "KneeR", "ShoulderL", "ShoulderR", "ElbowL", "ElbowR"]:
+			var proxy := Node3D.new()
+			proxy.name = joint
+			rider.add_child(proxy)
+	else:
+		# Designed citizens with the pedalling clip (the converted walkers have no cycling pose).
+		rider = LivingAssets.classic_citizen(index + 10)
+		body.add_child(rider)
+		rider.position = Vector3(0, 0.07, CITIZEN_SADDLE_Z)
+		rider.rotation.x = -0.2
+		if rider is LivingCitizen: rider.attach_helmet()
 	var pose := joints(rider)
 	for s in ["L", "R"]:
 		pose["Hip" + s].rotation.x = 1.1

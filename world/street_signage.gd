@@ -61,7 +61,13 @@ func junction_sign(j: Dictionary) -> void:
 			blade_text(j.z_street, origin + Vector3(0, 3.02, side * 0.026), 0.0 if side > 0 else PI)
 			blade_text(j.x_street, origin + Vector3(side * 0.026, 2.74, 0), side * PI * 0.5)
 		signs.append({"at": origin, "x_street": j.x_street, "z_street": j.z_street})
+		record_prop("street_sign", origin, 0.1)
 		return
+
+## Registers a placed sign with the city's PropPlacer so later furniture keeps clear of it.
+func record_prop(kind: String, at: Vector3, radius: float) -> void:
+	var placer: Variant = get_parent().get("placer") if get_parent() != null else null
+	if placer is PropPlacer: (placer as PropPlacer).record(kind, at, radius, "signage")
 
 func blade_text(words: String, at: Vector3, yaw: float) -> void:
 	var label := Label3D.new()
@@ -81,6 +87,7 @@ func park(centre: Vector3, title: String) -> void:
 	var sign_at := centre + Vector3(0, 0, 15.2)
 	add("park_sign", Transform3D(Basis.IDENTITY, sign_at), {}, 90.0)
 	box_collider(sign_at + Vector3(0, 0.75, 0), Vector3(2.4, 1.5, 0.2), Basis.IDENTITY)
+	record_prop("park_sign", sign_at, 0.5)
 	for side in [1.0, -1.0]:
 		var label := Label3D.new()
 		label.text = title.to_upper()

@@ -6,11 +6,13 @@ Run headless (never in the user's live Blender, it resets the scene between asse
 
 Output (assets/delivery/):
   glyphs.glb              glyph_A..glyph_Z, glyph_0..glyph_9, glyph_dash/dot/slash/amp/space + number_plate
-  food_bag.glb            kraft takeaway bag
+  food_bag_s/m/l.glb      kraft SOS takeaway bag (top folded over, pinked edge) in three order sizes;
+                          food_bag.glb is the medium one
   pizza_box.glb           corrugated pizza box
   drink_carrier.glb       two-cup carrier box
-  delivery_bag.glb        insulated courier backpack, lid closed
-  delivery_bag_open.glb   same bag, lid open 110 deg, two removable dividers
+  delivery_bag.glb        black insulated courier backpack, front flap closed
+  delivery_bag_open.glb   same bag, front flap dropped open on its straps, foil shelves
+  archive/v1/             the previous orange top-lid bag and handled food bag
   qa/<name>.png           workbench front three-quarter renders (10 cm red reference cube), glyph sheet
   qa/build_report.json    tri counts, extras, glyph metrics
 
@@ -1019,36 +1021,52 @@ def logo_and_receipt(root, logo_c, logo_n, logo_up, logo_size, rec_c, rec_n, rec
     return package_extras(root, logo, logo_mid, Vector(logo_n), logo_size, rec, rec_mid, Vector(rec_n), (0.075, 0.13))
 
 
-def build_food_bag():
-    reset()
-    kraft = material("Kraft", (1, 1, 1), 0.88, 0.0,
-                     image_from("kraft", paper_rgb((0.80, 0.62, 0.43), 11, 256, 0.06, 0.03, 0.03)))
-    root = root_empty("FoodBag")
-    W, D, H = 0.26, 0.16, 0.31
-    G = 0.012
-    rng = np.random.default_rng(3)
+FOOD_BAG_SIZES = {          # W (x), D (gusset, y), H (z), folded flap depth
+    "s": (0.16, 0.10, 0.26, 0.050),
+    "m": (0.19, 0.12, 0.32, 0.055),
+    "l": (0.23, 0.14, 0.38, 0.060),
+}
 
-    def ring(z, inset=0.0, g=None, crease=0.0):
-        gz = G * min(1.0, z / 0.04) if g is None else g
-        hw, hd = W / 2 - inset - crease, D / 2 - inset - crease
+
+def build_food_bag(size_key="m"):
+    """Kraft SOS takeaway bag like a grocery lunch bag: flat bottom, side gussets with an inward V
+    crease, top flattened and folded once over the front, serrated (pinked) flap edge. No handles."""
+    reset()
+    kraft = material("Kraft", (1, 1, 1), 0.9, 0.0,
+                     image_from("kraft", paper_rgb((0.78, 0.60, 0.41), 11, 256, 0.06, 0.035, 0.03)))
+    W, D, H, F = FOOD_BAG_SIZES[size_key]
+    root = root_empty("FoodBag")
+    G = D * 0.16                 # gusset crease depth
+    TOP_D = D * 0.55             # flattened depth at the fold
+    TAPER = F * 0.75             # height over which the mouth flattens
+    rng = np.random.default_rng(3 + len(size_key) + int(W * 100))
+
+    def depth_at(z):
+        if z <= H - TAPER:
+            return D
+        t = (z - (H - TAPER)) / TAPER
+        return D + (TOP_D - D) * (t * t * (3 - 2 * t))
+
+    def ring(z, inset=0.0):
+        d = depth_at(z)
+        g = G * min(1.0, z / 0.03) * (1.0 - min(1.0, max(0.0, (z - (H - TAPER)) / TAPER)))
+        hw, hd = W / 2 - inset, d / 2 - inset
         return [(-hw, -hd), (-hw / 2, -hd), (0, -hd), (hw / 2, -hd), (hw, -hd),
-                (hw - gz / 2, -hd / 2), (hw - gz, 0), (hw - gz / 2, hd / 2),
+                (hw - g / 2, -hd / 2), (hw - g, 0), (hw - g / 2, hd / 2),
                 (hw, hd), (hw / 2, hd), (0, hd), (-hw / 2, hd), (-hw, hd),
-                (-hw + gz / 2, hd / 2), (-hw + gz, 0), (-hw + gz / 2, -hd / 2)]
+                (-hw + g / 2, hd / 2), (-hw + g, 0), (-hw + g / 2, -hd / 2)]
 
     P = Part("Bag")
     bm = P.bm
-    zs = [0.0, 0.035, 0.10, 0.17, 0.24, 0.274, 0.282, 0.292, H]
+    zs = [0.0, 0.012, 0.03] + [0.03 + (H - TAPER - 0.03) * k / 4 for k in range(1, 5)] + \
+         [H - TAPER + TAPER * k / 4 for k in range(1, 5)]
     rings = []
     for z in zs:
-        pts = ring(z, crease=0.0022 if abs(z - 0.282) < 1e-6 else 0.0)
+        pts = ring(z)
         ns = outline_normals(pts)
         row = []
         for j, ((x, y), n) in enumerate(zip(pts, ns)):
-            jitter = 0.0
-            front = j <= 4
-            if 0.0 < z < H and not front:
-                jitter = float(rng.normal(0.0, 0.0011))
+            jitter = float(rng.normal(0.0, 0.0008)) if 0.0 < z < H and j > 4 and j != 8 and j != 12 else 0.0   # front stays flat under the labels
             row.append(bm.verts.new((x + n.x * jitter, y + n.y * jitter, z)))
         rings.append(row)
     m = len(rings[0])
@@ -1058,53 +1076,58 @@ def build_food_bag():
         for j in range(m):
             bm.faces.new((a[j], a[(j + 1) % m], b[(j + 1) % m], b[j]))
     bm.faces.new(list(reversed(rings[0])))
-    # inside: short inner wall + floor so the open top does not show through
-    zi = H - 0.09
-    inner_top = [bm.verts.new((x, y, H)) for (x, y) in ring(H, 0.0015)]
-    inner_bot = [bm.verts.new((x, y, zi)) for (x, y) in ring(zi, 0.0015, g=G)]
-    for j in range(m):
-        k = (j + 1) % m
-        bm.faces.new((inner_bot[j], inner_top[j], inner_top[k], inner_bot[k]))
-        bm.faces.new((rings[-1][j], rings[-1][k], inner_top[k], inner_top[j]))
-    bm.faces.new(inner_bot)
+    # flattened top: a low ridge where front and back walls meet
+    top = rings[-1]
+    ridge = [bm.verts.new((x, 0.0, H + 0.004)) for x in (-W / 2, -W / 4, 0.0, W / 4, W / 2)]
+    front_ids, back_ids = [0, 1, 2, 3, 4], [12, 11, 10, 9, 8]
+    for k in range(4):
+        bm.faces.new((top[front_ids[k]], top[front_ids[k + 1]], ridge[k + 1], ridge[k]))
+        bm.faces.new((top[back_ids[k + 1]], top[back_ids[k]], ridge[k], ridge[k + 1]))
+    bm.faces.new((top[4], top[5], top[6], top[7], top[8], ridge[4]))
+    bm.faces.new((top[12], top[13], top[14], top[15], top[0], ridge[0]))
     fs = P.since(before)
+    bmesh.ops.recalc_face_normals(bm, faces=fs)
     box_uv(P, fs, 3.0)
-    # rolled lip around the rim
-    pts = ring(H)
-    ns = outline_normals(pts)
-    lip = [Vector((x + n.x * 0.0022, y + n.y * 0.0022, H - 0.0012)) for (x, y), n in zip(pts, ns)]
-    circ = [(0.0045 * math.cos(2 * math.pi * k / 6), 0.0045 * math.sin(2 * math.pi * k / 6)) for k in range(6)]
-    sweep(P, lip, circ, closed=True, up=(0, 0, 1), miter=True, v_scale=4.0)
-    # twisted paper handles (2-lobed profile rotating along the path)
-    lobed = [(0.003 * (1 + 0.32 * math.cos(2 * a)) * math.cos(a), 0.003 * (1 + 0.32 * math.cos(2 * a)) * math.sin(a))
-             for a in (2 * math.pi * k / 6 for k in range(6))]
-    for sgn in (-1, 1):
-        yy = sgn * (D / 2 - 0.0075)
-        raw = [Vector((-0.05, yy, 0.276)), Vector((-0.05, yy, H + 0.012))]
-        for k in range(1, 30):
-            th = math.pi - math.pi * k / 30
-            raw.append(Vector((0.05 * math.cos(th), yy, H + 0.012 + 0.06 * math.sin(th))))
-        raw += [Vector((0.05, yy, H + 0.012)), Vector((0.05, yy, 0.276))]
-        # resample uniformly
-        L = [0.0]
-        for i in range(1, len(raw)):
-            L.append(L[-1] + (raw[i] - raw[i - 1]).length)
-        nseg = 46
-        path = []
-        for k in range(nseg + 1):
-            t = L[-1] * k / nseg
-            i = max(1, next((i for i in range(1, len(L)) if L[i] >= t), len(L) - 1))
-            f = (t - L[i - 1]) / max(1e-9, L[i] - L[i - 1])
-            path.append(raw[i - 1].lerp(raw[i], f))
-        twist = [math.radians(45) * k for k in range(len(path))]
-        sweep(P, path, lobed, closed=False, cap=True, side=(0, 1, 0), twist=twist, v_scale=6.0)
-    body = to_object(P, [kraft], parent=root, smooth=50.0)
-    extras = logo_and_receipt(root, (0, -D / 2 - 0.001, 0.215), (0, -1, 0), (0, 0, 1), (0.16, 0.10),
-                              (0.06, -D / 2 - 0.001, 0.09), (0, -1, 0), (0, 0, 1))
-    info = export("food_bag")
+    # folded flap: lies over the ridge and down the front, pinked bottom edge
+    teeth = max(8, int(W / 0.009))
+    prof = [(TOP_D * 0.18, H + 0.0055), (0.0, H + 0.0065), (-TOP_D / 2 - 0.0035, H + 0.001)]
+    for k in range(1, 7):
+        z = H - F * k / 6
+        prof.append((-depth_at(z) / 2 - 0.0025, z))
+    before = P.mark()
+    grid = []
+    for r, (y, z) in enumerate(prof):
+        row = []
+        for c in range(teeth * 2 + 1):
+            x = -W / 2 - 0.0012 + (W + 0.0024) * c / (teeth * 2)
+            zz = z
+            if r == len(prof) - 1:
+                zz = z + (0.0045 if c % 2 == 0 else 0.0)        # zig-zag teeth
+            row.append(bm.verts.new((x, y, zz)))
+        grid.append(row)
+    for r in range(len(grid) - 1):
+        for c in range(len(grid[r]) - 1):
+            bm.faces.new((grid[r + 1][c], grid[r + 1][c + 1], grid[r][c + 1], grid[r][c]))
+    flap_faces = P.since(before)
+    box_uv(P, flap_faces, 3.0)
+    body = to_object(P, [kraft], parent=root, smooth=40.0)
+    # give the flap paper thickness so it reads from below
+    sel = body.modifiers.new("flap_thick", 'SOLIDIFY')
+    sel.thickness = 0.0007
+    sel.offset = 1.0
+    apply_modifiers(body)
+    # logo sticker on the front, receipt stapled lower right
+    zf = H - F
+    logo_w, logo_h = W * 0.78, min(0.055, zf * 0.2)
+    extras = logo_and_receipt(root, (0, -D / 2 - 0.0012, zf * 0.76), (0, -1, 0), (0, 0, 1), (logo_w, logo_h),
+                              (W * 0.2, -D / 2 - 0.0012, zf * 0.30), (0, -1, 0), (0, 0, 1))
+    name = "food_bag_" + size_key
+    info = export(name)
     info["extras"] = extras
-    REPORT["food_bag"] = info
-    qa_render("food_bag")
+    REPORT[name] = info
+    qa_render(name)
+    if size_key == "m":     # the default bag keeps its original file name
+        export("food_bag")
 
 
 def build_pizza_box():
@@ -1210,119 +1233,160 @@ def build_drink_carrier():
 
 
 # ----------------------------------------------------------------------------- 3. delivery bag
-BAG_W, BAG_D, BAG_HB, BAG_LID = 0.42, 0.34, 0.40, 0.04
+# Black insulated food-delivery backpack (reference: a cube courier backpack with a reflective band,
+# side pockets, a clear front pocket and a front flap that drops open on two straps to show the
+# silver foil-lined interior with removable shelves).
+BAG_W, BAG_D, BAG_HB = 0.44, 0.34, 0.46
 WALL = 0.02
-CORNER = 0.035
+CORNER = 0.03
+FLAP_T = 0.022
+FLAP_OPEN_DEG = 100.0
 
 
 def bag_materials():
-    return [material("BagFabric", (0.95, 0.33, 0.10), 0.78, 0.0),
-            material("Reflective", (0.78, 0.79, 0.81), 0.3, 0.6),
-            material("BagTrim", (0.035, 0.035, 0.04), 0.82, 0.0),
-            material("LogoPanel", (0.94, 0.93, 0.89), 0.6, 0.0)]
+    return [material("BagFabric", (0.035, 0.036, 0.04), 0.86, 0.0),
+            material("Reflective", (0.80, 0.81, 0.83), 0.28, 0.7),
+            material("BagTrim", (0.012, 0.012, 0.014), 0.72, 0.0),
+            material("LogoPanel", (0.94, 0.93, 0.89), 0.6, 0.0),
+            material("FoilLining", (1, 1, 1), 0.62, 0.1,        # crinkled insulating foil (matte: no mirror look)
+                     image_from("foil", paper_rgb((0.80, 0.81, 0.83), 23, 256, 0.16, 0.05, 0.08, ripple=0.06))),
+            material("Window", (0.13, 0.14, 0.15), 0.06, 0.0)]
+
+
+def rot_x(P, faces, angle, pivot=(0.0, 0.0, 0.0)):
+    verts = list({v for f in faces for v in f.verts})
+    bmesh.ops.rotate(P.bm, verts=verts, cent=Vector(pivot), matrix=Matrix.Rotation(angle, 3, 'X'))
+    P.bm.normal_update()
+
+
+def webbing(P, path, mat=2, half=0.0125, thick=0.0016, side=(1, 0, 0)):
+    prof = [(thick, -half), (thick, half), (-thick, half), (-thick, -half)]
+    sweep(P, path, prof, cap=True, side=side, mat=mat, v_scale=3.0)
+
+
+def line(a, b, n=8, sag=0.0):
+    a, b = Vector(a), Vector(b)
+    return [a.lerp(b, k / (n - 1)) - Vector((0, 0, sag * math.sin(math.pi * k / (n - 1)))) for k in range(n)]
 
 
 def build_bag(open_lid):
     reset()
     mats = bag_materials()
-    fabric, reflective, trim, logo_mat = mats
+    fabric, reflective, trim, logo_mat, foil, window = mats
     W, D, HB = BAG_W, BAG_D, BAG_HB
     root = root_empty("DeliveryBag")
-    # body: open rounded box, solidified inward (outer fabric, inner silver lining, rim trim)
+    # body: a box open at the front (-Y), solidified inward: black outside, silver foil inside
     P = Part("BagBody")
-    rbox(P, (W, D, HB), (0, 0), 0.0, rv=CORNER, sv=3, rb=0.03, sb=2, open_top=True, mat=0, uvscale=3.0)
-    body = to_object(P, [fabric, reflective, trim], parent=root, smooth=40.0)
+    fs = rbox(P, (W, HB, D), (0, HB / 2), -D / 2, rv=CORNER, sv=3, rb=0.025, sb=2, open_top=True, mat=0, uvscale=3.0)
+    rot_x(P, fs, math.radians(90))
+    body = to_object(P, mats, parent=root, smooth=40.0)
     md = body.modifiers.new("solid", 'SOLIDIFY')
     md.thickness = WALL
     md.offset = -1.0
     md.use_even_offset = True
     md.use_rim = True
-    md.material_offset = 1
+    md.material_offset = 4
     md.material_offset_rim = 2
     apply_modifiers(body)
     P = bm_from_object(body)
-    outline = rrect(W, D, CORNER, 3)
-    band(P, outline, 0.06, 0.08, 0.0003, 0.0016, mat=1)        # reflective strips
-    band(P, outline, 0.335, 0.355, 0.0003, 0.0016, mat=1)
-    band(P, outline, 0.387, 0.4, 0.0003, 0.0045, mat=2)        # zipper tape
-    rbox(P, (0.012, 0.004, 0.032), (0.135, -D / 2 - 0.004), 0.36, rv=0.002, sv=1, mat=2)   # zipper pull
-    rbox(P, (0.016, 0.005, 0.008), (0.135, -D / 2 - 0.004), 0.388, mat=1)
-    # shoulder straps on the back (+Y)
-    strap = [(0.007, -0.0235), (0.007, 0.0235), (0.003, 0.0275), (-0.003, 0.0275),
-             (-0.007, 0.0235), (-0.007, -0.0235), (-0.003, -0.0275), (0.003, -0.0275)]
+    # reflective band round the sides and back (not across the opening)
+    for z0, z1 in ((0.355, 0.382),):
+        fs = band(P, rrect(W, D, 0.012, 2), z0, z1, 0.0003, 0.0016, mat=1)
+        drop = [f for f in fs if f.calc_center_median().y < -D / 2 + 0.002]
+        bmesh.ops.delete(P.bm, geom=drop, context='FACES')
+    # piping round the front opening
+    rim = [Vector((x, -D / 2 - 0.001, z)) for (x, z) in rrect(W + 0.002, HB + 0.002, CORNER + 0.001, 3, 0, HB / 2)]
+    pipe = [(0.0042 * math.cos(2 * math.pi * k / 6), 0.0042 * math.sin(2 * math.pi * k / 6)) for k in range(6)]
+    sweep(P, rim, pipe, closed=True, up=(0, 1, 0), mat=2, miter=True, v_scale=3.0)
+    # padded grab handle on the top
+    hp = [Vector((-0.08 + 0.16 * k / 12, 0.0, HB + 0.002 + 0.036 * math.sin(math.pi * k / 12) ** 0.6)) for k in range(13)]
+    hprof = [(0.005, -0.016), (0.005, 0.016), (0.002, 0.018), (-0.002, 0.018),
+             (-0.005, 0.016), (-0.005, -0.016), (-0.002, -0.018), (0.002, -0.018)]
+    sweep(P, hp, hprof, cap=True, side=(0, 1, 0), mat=2, v_scale=3.0)
     for sx in (-1, 1):
-        x = sx * 0.1
+        rbox(P, (0.035, 0.05, 0.006), (sx * 0.085, 0.0), HB - 0.001, rv=0.005, sv=1, mat=2)
+    # shoulder straps on the back (+Y)
+    strap = [(0.008, -0.026), (0.008, 0.026), (0.003, 0.03), (-0.003, 0.03),
+             (-0.008, 0.026), (-0.008, -0.026), (-0.003, -0.03), (0.003, -0.03)]
+    for sx in (-1, 1):
+        x = sx * 0.105
         path = []
         for k in range(15):
             t = k / 14
-            z = 0.382 - t * 0.33
-            y = D / 2 + 0.006 + 0.05 * math.sin(math.pi * t) ** 1.3 * (1.15 - 0.3 * t)
-            path.append(Vector((x, y, z)))
+            path.append(Vector((x, D / 2 + 0.007 + 0.055 * math.sin(math.pi * t) ** 1.3 * (1.15 - 0.3 * t), HB - 0.03 - t * 0.37)))
         sweep(P, path, strap, cap=True, side=(1, 0, 0), mat=2, v_scale=3.0)
-        rbox(P, (0.06, 0.008, 0.035), (x, D / 2 + 0.002), 0.36, rv=0.003, sv=1, mat=2)      # top anchor
-        rbox(P, (0.05, 0.01, 0.03), (x, D / 2 + 0.003), 0.035, rv=0.004, sv=1, mat=2)       # buckle
-        rbox(P, (0.03, 0.006, 0.008), (x, D / 2 + 0.008), 0.047, mat=1)
+        rbox(P, (0.065, 0.008, 0.04), (x, D / 2 + 0.002), HB - 0.05, rv=0.003, sv=1, mat=2)
+        rbox(P, (0.05, 0.01, 0.03), (x, D / 2 + 0.003), 0.04, rv=0.004, sv=1, mat=2)
+        rbox(P, (0.03, 0.006, 0.008), (x, D / 2 + 0.008), 0.052, mat=1)
+        # side pocket with a flap and a reflective piping line
+        px = sx * (W / 2 + 0.024)
+        rbox(P, (0.05, 0.24, 0.2), (px, -0.01), 0.06, rv=0.014, sv=2, rb=0.01, sb=1, mat=0, uvscale=3.0)
+        rbox(P, (0.058, 0.25, 0.055), (sx * (W / 2 + 0.027), -0.01), 0.215, rv=0.016, sv=2, rb=0.008, sb=1, mat=0, uvscale=3.0)
+        rbox(P, (0.002, 0.22, 0.01), (sx * (W / 2 + 0.05), -0.01), 0.14, mat=1)
+        rbox(P, (0.004, 0.03, 0.03), (sx * (W / 2 + 0.057), -0.01), 0.225, rv=0.004, sv=1, mat=2)   # snap
     replace_mesh(body, P, smooth=40.0)
-    # lid: hinge on the back top edge, origin at the hinge
-    P = Part("Lid")
-    rbox(P, (W, D, BAG_LID), (0, -D / 2), 0.0, rv=CORNER, sv=3, rb=0.004, sb=1, rt=0.014, st=2, mat=0, uvscale=3.0)
-    P.bm.normal_update()
-    for f in P.bm.faces:
-        if f.normal.z < -0.9:
-            f.material_index = 1       # silver lining under the lid
-    pip = [Vector((x, y, 0.026)) for (x, y) in rrect(W + 0.001, D + 0.001, CORNER + 0.0005, 3, 0, -D / 2)]
-    circ = [(0.0035 * math.cos(2 * math.pi * k / 6), 0.0035 * math.sin(2 * math.pi * k / 6)) for k in range(6)]
-    sweep(P, pip, circ, closed=True, up=(0, 0, 1), mat=2, miter=True, v_scale=3.0)
-    # grab handle across the lid top
-    hp = []
-    for k in range(13):
-        t = k / 12
-        hp.append(Vector((-0.075 + 0.15 * t, -D / 2, BAG_LID + 0.003 + 0.032 * math.sin(math.pi * t) ** 0.6)))
-    hprof = [(0.004, -0.014), (0.004, 0.014), (0.0015, 0.016), (-0.0015, 0.016),
-             (-0.004, 0.014), (-0.004, -0.014), (-0.0015, -0.016), (0.0015, -0.016)]
-    sweep(P, hp, hprof, cap=True, side=(0, 1, 0), mat=2, v_scale=3.0)
-    for sx in (-1, 1):
-        rbox(P, (0.03, 0.04, 0.005), (sx * 0.08, -D / 2), BAG_LID - 0.001, rv=0.004, sv=1, mat=2)
-    lid = to_object(P, [fabric, reflective, trim], parent=root, smooth=40.0, location=(0, D / 2, HB))
-    lid.name = "Lid"
-    lid.data.name = "Lid"
-    if open_lid:
-        lid.rotation_euler = (math.radians(-110), 0, 0)
-    # logo panel on the front
-    logo_c = (0, -D / 2 - 0.001, 0.215)
-    logo, logo_mid = panel("LogoPanel", logo_mat, 0.26, 0.16, logo_c, (0, -1, 0), (0, 0, 1), parent=root)
+    # front flap, hinged on the bottom front edge; origin on the hinge
+    P = Part("Flap")
+    fs = rbox(P, (W, HB, FLAP_T), (0, HB / 2), 0.0, rv=CORNER, sv=3, rt=0.008, st=1, mat=0, uvscale=3.0)
+    rot_x(P, fs, math.radians(90))
+    for f in fs:
+        if f.normal.y > 0.9:
+            f.material_index = 4                                   # foil lining inside the flap
+    rbox(P, (W - 0.004, 0.003, 0.027), (0, -FLAP_T - 0.0012), 0.355, mat=1)          # reflective band
+    rbox(P, (0.32, 0.002, 0.15), (0, -FLAP_T - 0.0008), 0.045, rv=0.012, sv=2, mat=2)  # clear pocket frame
+    rbox(P, (0.30, 0.004, 0.13), (0, -FLAP_T - 0.0022), 0.055, rv=0.01, sv=2, mat=5)   # clear pocket
+    if not open_lid:
+        for sx in (-1, 1):   # compression straps down the closed front
+            x = sx * (W / 2 - 0.045)
+            webbing(P, line((x, -FLAP_T - 0.003, HB + 0.004), (x, -FLAP_T - 0.003, HB - 0.13), 4))
+            rbox(P, (0.034, 0.008, 0.022), (x, -FLAP_T - 0.005), HB - 0.11, rv=0.003, sv=1, mat=2)
+    flap = to_object(P, mats, parent=root, smooth=40.0, location=(0, -D / 2, 0.0))
+    flap.name = flap.data.name = "Flap"
+    bpy.context.view_layer.update()
+    logo_c = (0, -D / 2 - FLAP_T - 0.0015, 0.275)
+    logo, logo_mid = panel("LogoPanel", logo_mat, 0.26, 0.12, logo_c, (0, -1, 0), (0, 0, 1), parent=flap)
     root["logo_center"] = gd(logo_mid)
     root["logo_normal"] = gd((0, -1, 0))
-    root["logo_size"] = [0.26, 0.16]
-    root["lid_hinge"] = gd((0, D / 2, HB))
-    root["lid_open_deg"] = 110.0
+    root["logo_size"] = [0.26, 0.12]
+    root["flap_hinge"] = gd((0, -D / 2, 0.0))
+    root["flap_open_deg"] = FLAP_OPEN_DEG
     root["extras_space"] = "godot_local"
     extras = {k: list(root[k]) if hasattr(root[k], "__len__") and not isinstance(root[k], str) else root[k]
-              for k in ("logo_center", "logo_normal", "logo_size", "lid_hinge", "lid_open_deg")}
+              for k in ("logo_center", "logo_normal", "logo_size", "flap_hinge", "flap_open_deg")}
     name = "delivery_bag_open" if open_lid else "delivery_bag"
     if open_lid:
-        iw, idp = W - 2 * WALL, D - 2 * WALL
+        rot = Matrix.Rotation(math.radians(FLAP_OPEN_DEG), 4, 'X')
+        flap.rotation_euler = (math.radians(FLAP_OPEN_DEG), 0, 0)
+        # the two straps that hold the open flap, from the top front corners to the flap's far corners
+        P = Part("FlapStraps")
+        for sx in (-1, 1):
+            x = sx * (W / 2 - 0.045)
+            tip = Vector((0, -D / 2, 0)) + (rot @ Vector((x, -FLAP_T * 0.5, HB - 0.035)))
+            top = Vector((x, -D / 2 - 0.006, HB - 0.03))
+            webbing(P, line(top, tip, 10, sag=0.02), side=(1, 0, 0))
+            mid = top.lerp(tip, 0.35) - Vector((0, 0, 0.012))
+            rbox(P, (0.034, 0.012, 0.022), (mid.x, mid.y), mid.z - 0.011, rv=0.003, sv=1, mat=1)
+        to_object(P, [fabric, reflective, trim], parent=root, smooth=40.0)
+        # foil shelves: pizza drawer at the bottom, two middle bays, a big top compartment
+        iw, idp = W - 2 * WALL, D - WALL
+        cy = -WALL / 2
         floor = WALL
-        lower_z, upper_z, t = 0.08, 0.22, 0.012
-        rr = CORNER - WALL - 0.002
-        P = Part("DividerLower")
-        rbox(P, (iw - 0.004, idp - 0.004, t), (0, 0), lower_z, rv=rr, sv=2, mat=0, uvscale=3.0)
-        band(P, rrect(iw - 0.004, idp - 0.004, rr, 2), lower_z - 0.0005, lower_z + t + 0.0005, 0.0, 0.0015, mat=1)
-        rbox(P, (0.05, 0.004, 0.018), (0, -idp / 2 + 0.012), lower_z + t, rv=0.0015, sv=1, mat=1)   # pull tab
-        to_object(P, [reflective, trim], parent=root, smooth=40.0)
-        P = Part("DividerUpper")
-        rbox(P, (iw - 0.004, idp - 0.004, t), (0, 0), upper_z, rv=rr, sv=2, mat=0, uvscale=3.0)
-        band(P, rrect(iw - 0.004, idp - 0.004, rr, 2), upper_z - 0.0005, upper_z + t + 0.0005, 0.0, 0.0015, mat=1)
-        rbox(P, (t, idp - 0.004, upper_z - (lower_z + t)), (0, 0), lower_z + t, mat=0, uvscale=3.0)
-        rbox(P, (t + 0.003, 0.003, upper_z - (lower_z + t)), (0, -idp / 2 + 0.0035), lower_z + t, mat=1)
-        rbox(P, (0.05, 0.004, 0.018), (0, -idp / 2 + 0.012), upper_z + t, rv=0.0015, sv=1, mat=1)
-        to_object(P, [reflective, trim], parent=root, smooth=40.0)
+        lower_z, upper_z, t = 0.095, 0.255, 0.012
+        P = Part("Dividers")
+        for z in (lower_z, upper_z):
+            rbox(P, (iw - 0.004, idp - 0.008, t), (0, cy), z, rv=0.004, sv=1, mat=0, uvscale=3.0)
+            rbox(P, (iw - 0.004, 0.006, t + 0.002), (0, -D / 2 + 0.006), z - 0.001, mat=1)           # bound edge
+            rbox(P, (0.05, 0.004, 0.018), (0, -D / 2 + 0.002), z + t, rv=0.0015, sv=1, mat=1)    # pull tab
+        rbox(P, (t, idp - 0.008, upper_z - (lower_z + t)), (0, cy), lower_z + t, mat=0, uvscale=3.0)
+        rbox(P, (t + 0.003, 0.004, upper_z - (lower_z + t)), (0, -D / 2 + 0.005), lower_z + t, mat=1)
+        to_object(P, [foil, trim], parent=root, smooth=40.0)
         hx = (iw / 2 - t / 2) / 2 + t / 2
+        top_h = HB - WALL - upper_z - t
         comps = {
-            "bottom": ((0, 0, (floor + lower_z) / 2), (iw, idp, lower_z - floor)),
-            "middle_left": ((-hx, 0, (lower_z + t + upper_z) / 2), (iw / 2 - t / 2, idp, upper_z - lower_z - t)),
-            "middle_right": ((hx, 0, (lower_z + t + upper_z) / 2), (iw / 2 - t / 2, idp, upper_z - lower_z - t)),
-            "top": ((0, 0, (upper_z + t + HB) / 2), (iw, idp, HB - upper_z - t)),
+            "bottom": ((0, cy, (floor + lower_z) / 2), (iw, idp, lower_z - floor)),
+            "middle_left": ((-hx, cy, (lower_z + t + upper_z) / 2), (iw / 2 - t / 2, idp, upper_z - lower_z - t)),
+            "middle_right": ((hx, cy, (lower_z + t + upper_z) / 2), (iw / 2 - t / 2, idp, upper_z - lower_z - t)),
+            "top": ((0, cy, upper_z + t + top_h / 2), (iw, idp, top_h)),
         }
         comp_extras = {}
         for k, (c, sz) in comps.items():
@@ -1337,14 +1401,9 @@ def build_bag(open_lid):
     info["nodes"] = sorted(o.name for o in bpy.context.scene.objects)
     REPORT[name] = info
     if open_lid:
-        qa_render(name, views=(("", (0.9, -1.5, 1.5)), ("_back", (-1.1, 1.6, 1.0)), ("_top", (0.05, -0.35, 1.0))))
-        if DO_QA:   # cutaway: dividers and slots only
-            for o in bpy.context.scene.objects:
-                if o.name in ("BagBody", "Lid", "LogoPanel"):
-                    o.hide_render = True
-            qa_render(name + "_dividers", views=(("", (0.9, -1.5, 0.7)),))
+        qa_render(name, views=(("", (0.75, -1.6, 0.8)), ("_back", (-1.1, 1.6, 1.0)), ("_front", (0.0, -1.0, 0.35))))
     else:
-        qa_render(name)
+        qa_render(name, views=(("", (1.0, -1.7, 0.95)), ("_back", (-1.1, 1.6, 1.0))))
 
 
 # ----------------------------------------------------------------------------- main
@@ -1352,7 +1411,8 @@ def main():
     if wanted("glyphs"):
         build_glyphs()
     if wanted("food_bag"):
-        build_food_bag()
+        for size_key in FOOD_BAG_SIZES:
+            build_food_bag(size_key)
     if wanted("pizza_box"):
         build_pizza_box()
     if wanted("drink_carrier"):

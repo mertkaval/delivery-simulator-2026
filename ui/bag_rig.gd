@@ -1,12 +1,13 @@
 class_name BagRig
 extends Node3D
 ## The insulated delivery bag worn as a backpack, seen in first person.
-## F: the bag swings off your back into view in front of you with its lid open; packing an order
-## drops the held package into its compartment; closing swings the bag back onto your shoulders.
+## F: the bag swings off your back into view in front of you with its front flap dropped open
+## (black courier backpack, foil-lined shelves); packing an order slides the held package into its
+## compartment; closing swings the bag back onto your shoulders.
 ## Handing an order over at a door briefly brings the bag round and lifts the package out.
 
 const OPEN_MODEL := "res://assets/delivery/delivery_bag_open.glb"
-var SHOWN := Transform3D(Basis.from_euler(Vector3(0.75, 0.25, 0.0)), Vector3(-0.22, -0.5, -0.95))
+var SHOWN := Transform3D(Basis.from_euler(Vector3(0.12, 0.38, 0.0)), Vector3(-0.15, -0.42, -0.98))
 var HIDDEN := Transform3D(Basis.from_euler(Vector3(1.25, 0.0, 0.55)), Vector3(0.35, -1.25, -0.25))
 const SLOT_KEYS := {"top": "top", "left": "middle_left", "right": "middle_right", "bottom": "bottom"}
 
@@ -37,12 +38,38 @@ func animate(to: Transform3D, seconds: float, then: Callable = Callable()) -> vo
 	_tween.tween_property(self, "transform", to, seconds)
 	if then.is_valid(): _tween.tween_callback(then)
 
-## Swing the bag off the back into view (lid open).
+## Swing the bag off the back into view (flap open).
 func take_off() -> void:
 	if bag == null: return
 	visible = true
 	out = true
-	animate(SHOWN, 0.45)
+	animate(shown(), 0.45)
+
+## SHOWN, pulled towards the camera and scaled down by the same factor when a wall, shelf or
+## counter is close ahead, so the bag looks the same size but never pokes into the world.
+func shown() -> Transform3D:
+	var f := clearance_factor()
+	return Transform3D(SHOWN.basis.scaled(Vector3.ONE * f), SHOWN.origin * f)
+
+func clearance_factor() -> float:
+	var cam := get_parent() as Node3D
+	if cam == null or not is_inside_tree(): return 1.0
+	var space := get_world_3d().direct_space_state
+	var exclude: Array[RID] = []
+	var body := cam.get_parent() as CollisionObject3D
+	if body: exclude.append(body.get_rid())
+	var deepest := 1.0
+	# Rays to the far corners of the bag at full size (bag back ~0.36 m behind its front).
+	for corner: Vector3 in [Vector3(0.0, 0.0, -0.36), Vector3(-0.26, 0.0, -0.36), Vector3(0.26, 0.0, -0.36), Vector3(0.0, 0.5, -0.36), Vector3(0.26, 0.5, -0.36), Vector3(-0.26, 0.5, -0.36)]:
+		var local := SHOWN * corner
+		var from := cam.global_position
+		var to := cam.global_transform * local
+		var q := PhysicsRayQueryParameters3D.create(from, to + (to - from).normalized() * 0.08)
+		q.exclude = exclude
+		var hit := space.intersect_ray(q)
+		if not hit.is_empty():
+			deepest = minf(deepest, from.distance_to(hit.position) / (from.distance_to(to) + 0.08))
+	return clampf(deepest * 0.96, 0.25, 1.0)
 
 ## Swing it back onto the shoulders.
 func put_on() -> void:
@@ -60,13 +87,26 @@ func show_contents(package: Node3D, slot: String) -> void:
 	var c: Dictionary = compartments.get(SLOT_KEYS.get(slot, "top"), {})
 	var centre: Vector3 = vec(c.get("center", null), Vector3(0, 0.3, 0))
 	var size: Vector3 = vec(c.get("size", null), Vector3(0.38, 0.17, 0.3))
-	# Scale the package to sit inside the compartment (game-rule fit for the pizza drawer).
+	# Fit the package into the compartment: upright, or laid on its back when that fits better
+	# (a tall bag lies down in a low bay), scaled down only if it still does not fit.
 	var aabb := Vector3(0.27, 0.32, 0.17)
 	for mi in contents.find_children("*", "MeshInstance3D", true, false):
 		aabb = (mi as MeshInstance3D).get_aabb().size
 		break
-	var s := minf(1.0, minf(size.x / maxf(aabb.x, 0.01), minf(size.y / maxf(aabb.y, 0.01), size.z / maxf(aabb.z, 0.01))) * 0.92)
-	contents.transform = Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * s), centre - Vector3(0, size.y * 0.5, 0))
+	var upright := fit_scale(size, aabb)
+	var laid := fit_scale(size, Vector3(aabb.x, aabb.z, aabb.y))
+	var rot := Basis.IDENTITY
+	var lay := laid > upright + 0.02
+	if lay:
+		rot = Basis(Vector3.RIGHT, -PI / 2)      # front faces up, top towards the back wall
+		upright = laid
+	var s := minf(1.0, upright * 0.94)
+	var at := centre - Vector3(0, size.y * 0.5, 0)
+	if lay: at += Vector3(0, aabb.z * 0.5 * s, aabb.y * 0.5 * s)
+	contents.transform = Transform3D(rot.scaled(Vector3.ONE * s), at)
+
+static func fit_scale(room: Vector3, item: Vector3) -> float:
+	return minf(room.x / maxf(item.x, 0.01), minf(room.y / maxf(item.y, 0.01), room.z / maxf(item.z, 0.01)))
 
 ## Drop a package from the hands into the compartment (animated), then keep it there.
 func pack(package: Node3D, slot: String) -> void:
@@ -93,7 +133,7 @@ func handover() -> void:
 	_tween = create_tween()
 	_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_tween.tween_property(self, "transform", SHOWN, 0.4)
+	_tween.tween_property(self, "transform", shown(), 0.4)
 	if is_instance_valid(contents):
 		var lift := contents.transform.translated(Vector3(0, 0.45, 0.5))
 		_tween.tween_property(contents, "transform", lift, 0.5)

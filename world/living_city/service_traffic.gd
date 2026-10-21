@@ -28,8 +28,10 @@ func _ready() -> void:
 		elif i==2:
 			corners.append_array(PackedVector3Array([Vector3(east,0,-319),Vector3(547,0,-319),Vector3(547,0,-309),Vector3(east,0,-309)]))
 		corners.append(Vector3(east,0,-259.7))
-		# Big vehicles get wider corners; the route keeps every turn a smooth arc.
-		var route := SmoothRoute.from_corners(corners,9.0 if i in [2,3,4] else 8.0)
+		# Big vehicles get wider corners; the route keeps every turn a smooth arc. The school bus
+		# turns tighter (6 m) into its pull-in so its 7.9 m body clears the square's bollards
+		# (tests/traffic_long_vehicle_test.gd sweeps every service route).
+		var route := SmoothRoute.from_corners(corners,6.0 if i==4 else (9.0 if i in [2,3] else 8.0))
 		var start := route.total*float(i)/ROLES.size()
 		var car := TrafficDriver.spawn(self,MODELS[i],ROLES[i]+"_%d"%i,route,start,6.0 if i in [3,4] else 7.0)
 		var body: CharacterBody3D=car.body

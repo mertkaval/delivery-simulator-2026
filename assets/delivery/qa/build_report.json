@@ -661,27 +661,27 @@
  },
  "delivery_bag": {
   "file": "res://assets/delivery/delivery_bag.glb",
-  "tris": 1798,
+  "tris": 2024,
   "bbox_godot_size": [
-   0.42952,
-   0.479,
-   0.40949
+   0.558,
+   0.50776,
+   0.44099
   ],
   "bbox_blender_min": [
-   -0.2148,
-   -0.1765,
-   0.0
+   -0.279,
+   -0.201,
+   -0.0048
   ],
   "bbox_blender_max": [
-   0.2148,
-   0.233,
-   0.479
+   0.279,
+   0.24,
+   0.503
   ],
   "extras": {
    "logo_center": [
     0.0,
-    0.215,
-    0.171
+    0.275,
+    0.1935
    ],
    "logo_normal": [
     0.0,
@@ -690,45 +690,45 @@
    ],
    "logo_size": [
     0.26,
-    0.16
+    0.12
    ],
-   "lid_hinge": [
+   "flap_hinge": [
     0.0,
-    0.4,
-    -0.17
+    0.0,
+    0.17
    ],
-   "lid_open_deg": 110.0
+   "flap_open_deg": 100.0
   },
   "nodes": [
    "BagBody",
    "DeliveryBag",
-   "Lid",
+   "Flap",
    "LogoPanel"
   ]
  },
  "delivery_bag_open": {
   "file": "res://assets/delivery/delivery_bag_open.glb",
-  "tris": 2110,
+  "tris": 2280,
   "bbox_godot_size": [
-   0.42952,
-   0.71813,
-   0.49559
+   0.558,
+   0.60315,
+   0.863
   ],
   "bbox_blender_min": [
-   -0.2148,
-   -0.1765,
-   0.0
+   -0.279,
+   -0.623,
+   -0.1002
   ],
   "bbox_blender_max": [
-   0.2148,
-   0.3191,
-   0.7181
+   0.279,
+   0.24,
+   0.503
   ],
   "extras": {
    "logo_center": [
     0.0,
-    0.215,
-    0.171
+    0.275,
+    0.1935
    ],
    "logo_normal": [
     0.0,
@@ -737,61 +737,61 @@
    ],
    "logo_size": [
     0.26,
-    0.16
+    0.12
    ],
-   "lid_hinge": [
+   "flap_hinge": [
     0.0,
-    0.4,
-    -0.17
+    0.0,
+    0.17
    ],
-   "lid_open_deg": 110.0,
+   "flap_open_deg": 100.0,
    "compartments": {
     "bottom": {
      "center": [
       0.0,
-      0.05,
-      0.0
+      0.0575,
+      0.01
      ],
      "size": [
-      0.38,
-      0.06,
-      0.3
+      0.4,
+      0.075,
+      0.32
      ]
     },
     "middle_left": {
      "center": [
-      -0.098,
-      0.156,
-      0.0
+      -0.103,
+      0.181,
+      0.01
      ],
      "size": [
-      0.184,
-      0.128,
-      0.3
+      0.194,
+      0.148,
+      0.32
      ]
     },
     "middle_right": {
      "center": [
-      0.098,
-      0.156,
-      0.0
+      0.103,
+      0.181,
+      0.01
      ],
      "size": [
-      0.184,
-      0.128,
-      0.3
+      0.194,
+      0.148,
+      0.32
      ]
     },
     "top": {
      "center": [
       0.0,
-      0.316,
-      0.0
+      0.3535,
+      0.01
      ],
      "size": [
-      0.38,
-      0.168,
-      0.3
+      0.4,
+      0.173,
+      0.32
      ]
     }
    }
@@ -799,14 +799,161 @@
   "nodes": [
    "BagBody",
    "DeliveryBag",
-   "DividerLower",
-   "DividerUpper",
-   "Lid",
+   "Dividers",
+   "Flap",
+   "FlapStraps",
    "LogoPanel",
    "Slot_Bottom",
    "Slot_MiddleLeft",
    "Slot_MiddleRight",
    "Slot_Top"
   ]
+ },
+ "food_bag_s": {
+  "file": "res://assets/delivery/food_bag_s.glb",
+  "tris": 2026,
+  "bbox_godot_size": [
+   0.1624,
+   0.2692,
+   0.1091
+  ],
+  "bbox_blender_min": [
+   -0.0812,
+   -0.0572,
+   -0.002
+  ],
+  "bbox_blender_max": [
+   0.0812,
+   0.0519,
+   0.2672
+  ],
+  "extras": {
+   "logo_center": [
+    0.0,
+    0.1596,
+    0.0512
+   ],
+   "logo_normal": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "logo_size": [
+    0.12480000000000001,
+    0.04200000000000001
+   ],
+   "receipt_center": [
+    0.032,
+    0.063,
+    0.0527
+   ],
+   "receipt_normal": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "receipt_size": [
+    0.075,
+    0.13
+   ]
+  }
+ },
+ "food_bag_m": {
+  "file": "res://assets/delivery/food_bag_m.glb",
+  "tris": 2314,
+  "bbox_godot_size": [
+   0.1924,
+   0.32769,
+   0.12911
+  ],
+  "bbox_blender_min": [
+   -0.0962,
+   -0.0672,
+   -0.0005
+  ],
+  "bbox_blender_max": [
+   0.0962,
+   0.0619,
+   0.3272
+  ],
+  "extras": {
+   "logo_center": [
+    0.0,
+    0.2014,
+    0.0612
+   ],
+   "logo_normal": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "logo_size": [
+    0.1482,
+    0.053000000000000005
+   ],
+   "receipt_center": [
+    0.038,
+    0.0795,
+    0.0627
+   ],
+   "receipt_normal": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "receipt_size": [
+    0.075,
+    0.13
+   ]
+  }
+ },
+ "food_bag_l": {
+  "file": "res://assets/delivery/food_bag_l.glb",
+  "tris": 2602,
+  "bbox_godot_size": [
+   0.2324,
+   0.3877,
+   0.14892
+  ],
+  "bbox_blender_min": [
+   -0.1162,
+   -0.0772,
+   -0.0005
+  ],
+  "bbox_blender_max": [
+   0.1162,
+   0.0717,
+   0.3872
+  ],
+  "extras": {
+   "logo_center": [
+    0.0,
+    0.2432,
+    0.0712
+   ],
+   "logo_normal": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "logo_size": [
+    0.1794,
+    0.055
+   ],
+   "receipt_center": [
+    0.046,
+    0.096,
+    0.0727
+   ],
+   "receipt_normal": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "receipt_size": [
+    0.075,
+    0.13
+   ]
+  }
  }
 }

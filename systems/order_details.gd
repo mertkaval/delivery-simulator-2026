@@ -27,6 +27,13 @@ static func fits(kind: String, slot: String) -> bool:
 static func best_slot(kind: String) -> String:
 	return "bottom" if kind == "pizza" else ("left" if kind == "drinks" else "top")
 
+## Takeaway bag size from the number of portions: one dish a small bag, up to three a medium,
+## more a large one (assets/delivery/food_bag_s/m/l.glb).
+static func bag_size(items: Array) -> String:
+	var portions := 0
+	for it: Array in items: portions += int(it[1])
+	return "s" if portions <= 1 else ("m" if portions <= 3 else "l")
+
 ## Package kind by restaurant: pide/pizza places box, dessert/drinks places use the carrier.
 static func package_kind(restaurant_id: String) -> String:
 	var entry: Array = RestaurantCatalog.entry(restaurant_id)

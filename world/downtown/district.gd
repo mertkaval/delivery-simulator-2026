@@ -9,6 +9,20 @@ var proxy_materials := {}
 var lights: Array[OmniLight3D]=[]
 var population: Node3D
 var crossing_labels: Array[Label3D]=[]
+## The city's prop placement (CedarNeighborhood.placer), or a private one when built standalone.
+var placer: PropPlacer
+func city_placer() -> PropPlacer:
+	if placer==null:
+		var hood := get_parent()
+		placer=hood.get("placer") if hood!=null and hood.get("placer") is PropPlacer else PropPlacer.new()
+	return placer
+## Frontage prop at a building-local spot (x along the facade, z out towards the kerb): the
+## PropPlacer pulls it back towards the facade until it clears the kerb - the sidewalks of the
+## 18 m avenue are only 3 m deep, where lamps and trees used to stand on the kerb line.
+func kerbside(base: Transform3D,local: Vector3,kind: String,radius: float,yaw: float=0,scale_factor: Vector3=Vector3.ONE) -> Transform3D:
+	var wanted := base*Vector3(local.x,0,local.z)
+	var spot := city_placer().kerb_clear(kind,wanted,(base.basis*Vector3.FORWARD).normalized(),radius,1.5)
+	return base*pose(Vector3(local.x,local.y,local.z-wanted.distance_to(spot)),yaw,scale_factor)
 func set_time(_hour: float,daylight: float) -> void:
 	if UrbanKit.window_material!=null: UrbanKit.window_material.set_shader_parameter("night",1.0-daylight)
 	if UrbanKit.materials.has("UrbanImpostor"): UrbanKit.materials.UrbanImpostor.set_shader_parameter("night",1.0-daylight)
@@ -50,6 +64,7 @@ func flush() -> void:
 			instances.set_instance_transform(i,transform)
 		var batch := MultiMeshInstance3D.new()
 		batch.multimesh=instances
+		batch.set_meta("prop",data.asset)   # asset id, for audits (tests/prop_placement_test.gd)
 		batch.material_override=data.piece.material
 		batch.position=origin
 		batch.visibility_range_begin=data.start
@@ -257,9 +272,10 @@ func street_details(b: Dictionary) -> void:
 	var base := pose(b.root,b.yaw)
 	var id: int=b.id
 	var half: float=b.width*.5
-	place("reuse_street_lamp",base*pose(Vector3(-half+3,0,2.6)),id,150)
+	var lamp := kerbside(base,Vector3(-half+3,0,2.6),"street_lamp",0.2)
+	place("reuse_street_lamp",lamp,id,150)
 	var street_light := OmniLight3D.new()
-	street_light.position=base*Vector3(-half+3,4.3,2.6)
+	street_light.position=lamp*Vector3(0,4.3,0)
 	street_light.light_color=Color("ffdcac")
 	street_light.omni_range=12
 	street_light.distance_fade_enabled=true
@@ -268,17 +284,18 @@ func street_details(b: Dictionary) -> void:
 	add_child(street_light)
 	lights.append(street_light)
 	module("storm_drain",base*pose(Vector3(-half+4,.05,3.8)),id)
-	module("parking_sign",base*pose(Vector3(half-3,0,2.6)),id)
-	if id%2==0: module("parking_meter",base*pose(Vector3(half-4,0,2.6)),id)
+	module("parking_sign",kerbside(base,Vector3(half-3,0,2.6),"parking_sign",0.1),id)
+	if id%2==0: module("parking_meter",kerbside(base,Vector3(half-4,0,2.6),"parking_meter",0.1),id)
 	if id%3==0:
-		module("tree_pit",base*pose(Vector3(-half+7,.09,2.8),0,Vector3(.67,1,.67)),id)
-		place("reuse_birch",base*pose(Vector3(-half+7,0,2.8),0,Vector3.ONE*.63),id,130)
-		module("hydrant",base*pose(Vector3(half-2,0,2.4)),id)
+		var tree := kerbside(base,Vector3(-half+7,0,2.8),"tree",0.35)
+		module("tree_pit",tree*pose(Vector3(0,.09,0),0,Vector3(.67,1,.67)),id)
+		place("reuse_birch",tree*pose(Vector3.ZERO,0,Vector3.ONE*.63),id,130)
+		module("hydrant",kerbside(base,Vector3(half-2,0,2.4),"hydrant",0.25),id)
 	if id%3==1:
-		place("reuse_park_bench",base*pose(Vector3(-half+5,0,2.5)),id,95)
-		module("trash_bin",base*pose(Vector3(-half+3.5,0,2.5)),id)
-		module("recycle_bin",base*pose(Vector3(-half+2.7,0,2.5)),id)
-	if id%5==0: module("newspaper_box",base*pose(Vector3(half-6,0,2.5)),id)
+		place("reuse_park_bench",kerbside(base,Vector3(-half+5,0,2.5),"bench",0.35),id,95)
+		module("trash_bin",kerbside(base,Vector3(-half+3.5,0,2.5),"trash_bin",0.3),id)
+		module("recycle_bin",kerbside(base,Vector3(-half+2.7,0,2.5),"recycle_bin",0.3),id)
+	if id%5==0: module("newspaper_box",kerbside(base,Vector3(half-6,0,2.5),"newspaper_box",0.25),id)
 	for x in [-half+2,half-2]:
 		module("security_camera",base*pose(Vector3(x,3.2,.15)),id)
 		module("poster",base*pose(Vector3(x,1.1,.18)),id)
@@ -360,8 +377,11 @@ func road_details() -> void:
 				place("reuse_"+kind,pose(Vector3(x,.08,z),PI),500+block_id,140)
 				collider(Vector3(x,1,z),Vector3(1.9,2,5.2))
 			else:
-				label("LOADING  15 MIN",Vector3(x-2,2,z),PI/2,21)
-				module("loading_sign",pose(Vector3(x-3,0,z)),500+block_id)
+				# The loading-bay sign stands on the sidewalk, not in the kerb lane (x - 3 was 0.7 m
+				# out on the carriageway).
+				var sign_at := city_placer().kerb_clear("loading_sign",Vector3(x-3,0,z),Vector3.LEFT,0.1,2.0)
+				label("LOADING  15 MIN",Vector3(sign_at.x+1,2,z),PI/2,21)
+				module("loading_sign",pose(sign_at),500+block_id)
 	# A quiet edge street reserves its curb lane for bicycles.
 	for z in range(-658,-274,12):
 		place("lane_dash",pose(Vector3(472.7,.08,z)),700,250)

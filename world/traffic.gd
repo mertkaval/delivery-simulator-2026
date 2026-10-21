@@ -8,6 +8,21 @@ var car_dimensions: Array[Vector3] = []
 var speeds: Array[float] = []
 var elapsed: float = 0
 var signals: Array[MeshInstance3D] = []
+## Slots (of 16) that carry a service vehicle drawn from VehicleCatalog.SERVICE; slot 1 is always
+## a taxi. The rest are everyday cars (VehicleCatalog.TRAFFIC).
+const SERVICE_SLOTS := [1, 3, 7, 11, 14]
+## Per loop: may it carry one long vehicle (bus, fire/garbage truck)? Checked by
+## tests/traffic_long_vehicle_test.gd, which sweeps each body along the route against the
+## static colliders (a pickup once jammed on a corner pole).
+const LONG_OK := [true, true, true]
+## Corner arcs per loop. Vehicles over 6 m (VehicleCatalog.turns_tight) drive their own copy of
+## each loop with tighter corners: both axles stay on the path, so on a wide arc a long body's middle
+## cuts across the inner kerb corner; a tighter arc keeps the inner side off the kerb and the
+## swing-out stays inside the junction (tests/traffic_long_vehicle_test.gd).
+const CORNER := [11.0, 11.0, 9.0]
+const LONG_CORNER := [6.0, 6.0, 6.0]
+var loops: Array[SmoothRoute] = []
+var long_loops: Array[SmoothRoute] = []
 
 func _ready() -> void:
 	for z in [-93, -177]:
@@ -43,19 +58,34 @@ func _ready() -> void:
 	var west := PackedVector3Array([Vector3(-1.95, 0, -256.36), Vector3(-1.95, 0, 46), Vector3(-62, 0, 46), Vector3(-62, 0, -118)])
 	west.append_array(ring_arc(Vector3(-64, 0, -145), 22.0, PI / 2 - 0.3, -PI / 2 + 0.3))
 	west.append_array(PackedVector3Array([Vector3(-62, 0, -172), Vector3(-62, 0, -256.36)]))
-	# 11 m corner arcs: wide enough that 5 m pickups and vans do not cut the inner kerb.
-	var loops: Array[SmoothRoute] = [SmoothRoute.from_corners(east, 11.0), SmoothRoute.from_corners(west, 11.0),
-		SmoothRoute.from_corners(PackedVector3Array([Vector3(-62.36, 0, -259.64), Vector3(-62.36, 0, -676.36), Vector3(62.36, 0, -676.36), Vector3(62.36, 0, -259.64)]), 9.0)]
+	# 11 m corner arcs for cars on the Cedar loops, 9 m on the south loop (CORNER).
+	var south := PackedVector3Array([Vector3(-62.36, 0, -259.64), Vector3(-62.36, 0, -676.36), Vector3(62.36, 0, -676.36), Vector3(62.36, 0, -259.64)])
+	var paths: Array[PackedVector3Array] = [east, west, south]
+	for li in range(paths.size()):
+		loops.append(SmoothRoute.from_corners(paths[li], float(CORNER[li])))
+		long_loops.append(SmoothRoute.from_corners(paths[li], float(LONG_CORNER[li])))
+	var rng := RandomNumberGenerator.new()
+	if VehicleCatalog.traffic_seed >= 0: rng.seed = VehicleCatalog.traffic_seed
+	else: rng.randomize()
+	var long_used: Array[bool] = [false, false, false]
 	for i in range(16):
 		var li := 0 if i < 5 else (1 if i < 10 else 2)
 		var count := 5 if li < 2 else 6
 		var slot := i - (0 if li == 0 else (5 if li == 1 else 10))
-		var route: SmoothRoute = loops[li]
-		var car := TrafficDriver.spawn(self, VehicleCatalog.next_traffic_id(), "TrafficCar%d" % i, route, route.total * float(slot) / count, 8.0, 1 | 4)
+		var id := VehicleCatalog.next_traffic_id() if not i in SERVICE_SLOTS else ("civil_taxi" if i == 1 else VehicleCatalog.next_service_id(rng, bool(LONG_OK[li]) and not long_used[li]))
+		if VehicleCatalog.is_long(id): long_used[li] = true
+		var route := route_for(li, id)
+		# Buses and trucks cruise a little slower.
+		var cruise := 6.5 if VehicleCatalog.turns_tight(id) else 8.0
+		var car := TrafficDriver.spawn(self, id, "TrafficCar%d" % i, route, route.total * float(slot) / count, cruise, 1 | 4)
 		drivers.append(car)
 		cars.append(car.body)
 		car_dimensions.append(car.size)
 		speeds.append(0)
+
+## The route a vehicle of this model drives on loop `li` (tighter corners for long vehicles).
+func route_for(li: int, id: String) -> SmoothRoute:
+	return long_loops[li] if VehicleCatalog.turns_tight(id) else loops[li]
 
 ## Points on a circle from angle a0 to a1 (radians, either direction), every ~2 m.
 static func ring_arc(centre: Vector3, radius: float, a0: float, a1: float) -> PackedVector3Array:

@@ -9,8 +9,11 @@ extends Node3D
 ## Shelf frames: corridor restaurants use their three-tier courier rack, the avenue restaurants
 ## their pickup counter, downtown counters get a rack placed facing their approach.
 
-const MODELS := {"bag": "res://assets/delivery/food_bag.glb", "pizza": "res://assets/delivery/pizza_box.glb", "drinks": "res://assets/delivery/drink_carrier.glb"}
-const FALLBACK_SIZE := {"bag": Vector3(0.26, 0.32, 0.16), "pizza": Vector3(0.36, 0.045, 0.36), "drinks": Vector3(0.22, 0.2, 0.14)}
+## Kraft takeaway bags come in three sizes by order size (OrderDetails.bag_size).
+const MODELS := {"bag_s": "res://assets/delivery/food_bag_s.glb", "bag_m": "res://assets/delivery/food_bag_m.glb", "bag_l": "res://assets/delivery/food_bag_l.glb",
+	"pizza": "res://assets/delivery/pizza_box.glb", "drinks": "res://assets/delivery/drink_carrier.glb"}
+const FALLBACK_SIZE := {"bag_s": Vector3(0.16, 0.27, 0.11), "bag_m": Vector3(0.19, 0.33, 0.13), "bag_l": Vector3(0.23, 0.39, 0.15),
+	"pizza": Vector3(0.36, 0.045, 0.36), "drinks": Vector3(0.22, 0.2, 0.14)}
 const RACK_SLOTS := [Vector3(-0.24, 0.47, 0.02), Vector3(0.23, 0.47, 0.02), Vector3(-0.24, 0.97, 0.02), Vector3(0.23, 0.97, 0.02), Vector3(0.0, 1.47, 0.02)]
 const DECOYS := 3
 
@@ -95,12 +98,14 @@ func restock(restaurant_id: String, mine: String) -> void:
 ## A package with its logo and printed receipt, selectable with the interaction ray.
 func make_package(details: Dictionary) -> StaticBody3D:
 	var kind: String = details.kind
+	var model_key := kind
+	if kind == "bag": model_key = "bag_" + OrderDetails.bag_size(details.get("items", []))
 	var body := StaticBody3D.new()
 	body.name = "Package_" + str(details.ticket)
 	body.set_meta("interaction", "package")
 	body.set_meta("package", details)
-	var size: Vector3 = FALLBACK_SIZE[kind]
-	var scene := scene_for(kind)
+	var size: Vector3 = FALLBACK_SIZE[model_key]
+	var scene := scene_for(model_key)
 	var extras := {}
 	if scene:
 		var model: Node3D = scene.instantiate()
@@ -121,7 +126,10 @@ func make_package(details: Dictionary) -> StaticBody3D:
 	# Logo: restaurant name printed on the logo panel.
 	var logo_c: Vector3 = vec(extras.get("logo_center", null), Vector3(0, size.y * 0.6, size.z * 0.5 + 0.002))
 	var logo_n: Vector3 = vec(extras.get("logo_normal", null), Vector3(0, 0, 1))
-	body.add_child(print_label(restaurant_name.to_upper(), logo_c, logo_n, 22, Color("7a1f12"), 0.0011))
+	# Shrink the type so the name fits the sticker (about 0.6 em per character).
+	var logo_w: float = float((extras.get("logo_size", [size.x * 0.8, 0.05]) as Array)[0])
+	var pixel := minf(0.0011, logo_w * 0.92 / maxf(1.0, restaurant_name.length() * 0.6 * 22.0))
+	body.add_child(print_label(restaurant_name.to_upper(), logo_c, logo_n, 22, Color("7a1f12"), pixel))
 	# Receipt: customer name in large type plus the order code.
 	var rc: Vector3 = vec(extras.get("receipt_center", null), Vector3(size.x * 0.32, size.y * 0.45, size.z * 0.5 + 0.003))
 	var rn: Vector3 = vec(extras.get("receipt_normal", null), Vector3(0, 0, 1))

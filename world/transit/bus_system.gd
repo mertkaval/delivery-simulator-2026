@@ -147,6 +147,14 @@ func add_stop(line: Dictionary, p: Vector2, seg: Dictionary) -> void:
 	props.box_collider(shelter_t * Vector3(0, 1.25, -0.6), Vector3(3.6, 2.5, 0.1), basis)
 	props.box_collider(shelter_t * Vector3(-1.75, 1.25, -0.05), Vector3(0.15, 2.5, 1.1), basis)
 	var pole_at: Vector2 = p + right * (seg.half + 0.7) + d * 5.0
+	# The stop flag stands in the kerb-side furniture zone: the city's PropPlacer nudges it along
+	# the kerb if a street light or sign already stands there, and records the shelter so later
+	# furniture keeps clear of the boarding area.
+	var placer: PropPlacer = get_parent().get("placer") if get_parent() != null and get_parent().get("placer") is PropPlacer else null
+	if placer != null:
+		var spot: Variant = placer.place("bus_stop_pole", Vector3(pole_at.x, 0, pole_at.y), 0.1, {"slide": Vector3(d.x, 0, d.y), "max_slide": 4.0, "walk": 0.0, "gap": 0.2, "reserved_ok": true, "source": "bus_stop"})
+		if spot != null: pole_at = Vector2((spot as Vector3).x, (spot as Vector3).z)
+		placer.record("bus_shelter", Vector3(kerb.x, 0, kerb.y), 1.9, "bus_stop")
 	var pole_t := Transform3D(basis, Vector3(pole_at.x, 0.12, pole_at.y))
 	props.add("bus_stop_pole", pole_t, tint, 140.0)
 	props.box_collider(pole_t * Vector3(0, 1.4, 0), Vector3(0.12, 2.8, 0.12), basis)

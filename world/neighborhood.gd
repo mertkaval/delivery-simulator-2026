@@ -24,6 +24,9 @@ var animals: AnimalLife
 var weather: WeatherSystem
 var furniture: StreetFurniture
 var vfx: CityVFX
+## Procedural prop placement (PropPlacer): every street light, tree and piece of street furniture
+## asks it for a valid spot on the sidewalk, clear of carriageways, junctions, walks and each other.
+var placer: PropPlacer
 
 func set_time(hour: float) -> void:
 	var amount := smoothstep(-0.12, 0.35, sin((hour - 6.0) / 24.0 * TAU))
@@ -71,7 +74,9 @@ func street_light_at(pole: Vector3, face: Vector3, old_height: float) -> void:
 	var light := PropKit.create("street_light", 180)
 	light.transform = Transform3D(Basis(Vector3.UP, atan2(face.x, face.z)), pole + face * 1.93)
 	add_child(light)
-	box(pole + Vector3(0, 3.0, 0), Vector3(0.25, 6.0, 0.25), "394a50").hide()   # pole collision
+	var collision := box(pole + Vector3(0, 3.0, 0), Vector3(0.25, 6.0, 0.25), "394a50")   # pole collision
+	collision.hide()
+	collision.get_child(0).set_meta("prop", "street_light")
 	lamp_at(pole + face * 3.4 + Vector3(0, 7.3, 0))
 
 func lamp_at(at: Vector3) -> void:
@@ -119,6 +124,7 @@ func label_at(words: String, at: Vector3, size: int = 48, color: Color = Color.W
 	return label
 
 func _ready() -> void:
+	placer = PropPlacer.new()
 	var environment := WorldEnvironment.new()
 	var env := Environment.new()
 	atmosphere = env
@@ -232,14 +238,22 @@ func _ready() -> void:
 		if near_cross_street(z): continue
 		for x in [-10.7, 10.7]:
 			if front_walk_near(Vector3(x, 0, z)): continue
-			tree(Vector3(x, 0, z))
-		street_light_at(Vector3(6.5, 0, z + 5), Vector3(-1, 0, 0), 4.3)
+			var spot: Variant = placer.place("tree", Vector3(x, 0, z), 0.35, {"slide": Vector3(0, 0, 1), "max_slide": 1.5, "walk": 0.8, "source": "avenue_tree"})
+			if spot != null: tree(spot)
+		# The avenue ends at z = 44, where traffic turns in from the estate road at z = 46: a pole
+		# at z = 45 stood inside every car's 11 m turning arc and jammed the east loop.
+		if z + 5 > 35: continue
+		# East sidewalk, 0.5 m behind the kerb (x 6), arm over the avenue; PropPlacer slides a
+		# pole off junctions, crossings and front walks.
+		var pole: Variant = placer.street_light(PropPlacer.kerb_spot(Vector3(0, 0, z + 5), Vector3.RIGHT, StreetGrid.AVENUE.half, 0.5), Vector3.LEFT, {"own": "CedarLane"})
+		if pole != null: street_light_at(pole, Vector3.LEFT, 4.3)
 	build_restaurant(0)
 	# Starter porch and equipment stand form a short, readable onboarding area.
 	build_cedar_home()
 	box(Vector3(7, 2.8, 19), Vector3(1.8, 0.38, 0.08), "254e44", false)
 	label_at("ATATÜRK AVENUE", Vector3(7, 2.8, 19.06), 26)
 	box(Vector3(7, 1.4, 19), Vector3(0.08, 2.8, 0.08), "394a50")
+	placer.record("sign", Vector3(7, 0, 19), 0.1, "avenue_name_sign")
 	for z in range(-246, 48, 3):
 		for x in [-8, 8]:
 			box(Vector3(x, 0.057, z), Vector3(3.5, 0.012, 0.025), "818c89", false)
@@ -424,7 +438,11 @@ func expanded_blocks() -> void:
 	for row in range(12):
 		var z: float = CityCatalog.address_position(12 + row * 2).z - 1.3
 		for side in [-1, 1]:
-			street_light_at(Vector3(side * 70, 0, z + 5), Vector3(-side, 0, 0), 4.5)
+			# Outer sidewalk of the side road (x 70: 1 m behind the 10 m street's kerb, 2 m behind
+			# the 8 m estate road's), arm over the road.
+			var face := Vector3(-side, 0, 0)
+			var pole: Variant = placer.street_light(Vector3(side * 70, 0, z + 5), face)
+			if pole != null: street_light_at(pole, face, 4.5)
 	# Small landscaped squares occupy the otherwise empty inner blocks.
 	for z in [-330, -470, -590]:
 		for side in [-1, 1]:
@@ -467,7 +485,9 @@ func build_park(at: Vector3) -> void:
 	water.position.y = 0.43
 	fountain.add_child(water)
 	for delta in [Vector3(4, 0, 4), Vector3(-4.5, 0, 6), Vector3(-3, 0, -10)]: bench(at + delta)
-	for delta in [Vector3(-8, 0, -10), Vector3(8, 0, 11), Vector3(-8, 0, 11)]: tree(at + delta)
+	for delta: Vector3 in [Vector3(-8, 0, -10), Vector3(8, 0, 11), Vector3(-8, 0, 11)]:
+		placer.record("tree", at + delta, 0.35, "park")
+		tree(at + delta)
 	for x in [-6.5, -2.5]:
 		for z in [4, 8]: box(at + Vector3(x, 1.42, z), Vector3(0.16, 2.84, 0.16), "9c8060").hide()
 
@@ -494,6 +514,7 @@ func bench(at: Vector3) -> void:
 	model.position = at
 	add_child(model)
 	box(at + Vector3(0, 0.48, 0), Vector3(2.03, 0.96, 0.7), "344448").hide()
+	placer.record("bench", at, 1.0, "bench")
 
 func build_restaurant(index: int) -> void:
 	var p: Vector3 = CityCatalog.PICKUPS[index] - Vector3.UP
@@ -581,6 +602,7 @@ func build_estate() -> void:
 	# Modular curved streets: asphalt, raised sidewalks with kerbs, centre/edge markings.
 	var curved := CurvedRoads.new()
 	curved.name="CurvedRoads"
+	curved.placer=placer
 	curved.keep_out=forecourt_rects()
 	for path in roads:
 		var ring: bool = path.size()>8 and path[0].distance_to(path[-1])<0.5
@@ -633,7 +655,7 @@ func build_store(id: String, at: Vector3) -> void:
 		box(at+Vector3(3,.9,-3),Vector3(.85,.30,.65),"737773",true,"water").hide()
 		label_at("DRINKING WATER",at+Vector3(3,1.5,-3),22)
 	else:
-		var displays: Array = {"equipment":["helmet","gloves","backpack","delivery_bag"],"bikes":["bicycle","bicycle"],"cars":["sedan","hatchback"],"scooters":["scooter","scooter"]}[id]
+		var displays: Array = {"equipment":["helmet","gloves","backpack","delivery_bag"],"bikes":["bicycle","bicycle"],"cars":["sedan","ace11","hatchback"],"scooters":["scooter","scooter"]}[id]
 		for i in range(displays.size()):
 			# The showroom sedan is the exact car the player gets after buying it (factory paint, full LODs).
 			var model: Node3D
@@ -644,7 +666,8 @@ func build_store(id: String, at: Vector3) -> void:
 			else:
 				model = asset_at(displays[i],at+Vector3(-4+i*2.8,1.84 if id=="equipment" else .12,-3),110)
 			if id=="equipment": model.position=at+Vector3(-5+(i%2)*3,.46+(i/2)*.7,-4.5)
-			if id=="cars": model.position=at+Vector3(-3.8+i*6.5,.12,-1.8)
+			# Three cars side by side, clear of the counter at x + 2.5 .. 5.5.
+			if id=="cars": model.position=at+Vector3(-4.6+i*3.1,.12,-1.8)
 		# Converted Sketchfab people: a clerk at the counter and a guard at the door.
 		var shop_index: int = ShopCatalog.LOCATIONS.keys().find(id)
 		var clerk: Node3D = LivingAssets.standing_person(1 + shop_index)

@@ -73,7 +73,9 @@ static func build(d: DowntownDistrict) -> void:
 				var p := Vector3(541+j*7,0,site.at.z+side*(w*.5+7))
 				model(d,"rain_garden",p,PI/2)
 				d.place("reuse_birch",d.pose(p+Vector3(0,0,side*3)),1000,230)
-				d.module("bollard",d.pose(Vector3(532,0,site.at.z+side*(w*.5+2))),1000)
+				# One bollard per driveway side, 1.5 m inside the civic fleet's turning arcs (it stood
+				# in the school bus's swept path at x 532).
+				if j==0: d.module("bollard",d.pose(Vector3(530.5,0,site.at.z+side*(w*.5+2))),1000)
 		if site.asset=="hospital": model(d,"hospital_sign",Vector3(530,0,-301),-PI/2)
 		if site.asset=="school":
 			d.collider(base*Vector3(17,4.4,-32),Vector3(14,8.8,18),-PI/2)

@@ -1,0 +1,49 @@
+{
+  "path": "res://assets/bicycles/gray_bicycle.glb",
+  "source": "sketchup_assets/woman_riding_a_gray_bicycle.glb",
+  "triangles": 24752,
+  "parts": {
+    "Frame": 11000,
+    "Saddle": 808,
+    "ForkAndBars": 6112,
+    "FrontWheelMesh": 3216,
+    "RearWheelMesh": 3616
+  },
+  "wheelbase": 1.1015,
+  "wheel_radius": 0.35,
+  "scale_from_source": 0.9533,
+  "bbox_min": [
+    -0.3449999988079071,
+    -0.9010000228881836,
+    -0.0010000000474974513
+  ],
+  "bbox_max": [
+    0.34299999475479126,
+    0.8999999761581421,
+    1.0379999876022339
+  ],
+  "steering_pivot": [
+    -0.001,
+    0.3641,
+    0.7577
+  ],
+  "steering_axis": [
+    0.0,
+    -0.3364,
+    0.9417
+  ],
+  "head_angle_deg": 70.3,
+  "hub_front": [
+    0.0,
+    0.5508,
+    0.35
+  ],
+  "hub_rear": [
+    0.0,
+    -0.5508,
+    0.35
+  ],
+  "texture": 1024,
+  "facing": "+Y blender / -Z godot",
+  "rider_triangles": 14000
+}
