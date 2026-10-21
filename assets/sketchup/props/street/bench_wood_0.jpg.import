@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cmk8hn75strvf"
-path="res://.godot/imported/bench_wood_0.jpg-12ac085cf0f6b831c412026c397c9b61.ctex"
+path.s3tc="res://.godot/imported/bench_wood_0.jpg-12ac085cf0f6b831c412026c397c9b61.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "64a16e564ce7a59f535154a9a29327d8"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/sketchup/props/street/bench_wood_0.jpg"
-dest_files=["res://.godot/imported/bench_wood_0.jpg-12ac085cf0f6b831c412026c397c9b61.ctex"]
+dest_files=["res://.godot/imported/bench_wood_0.jpg-12ac085cf0f6b831c412026c397c9b61.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

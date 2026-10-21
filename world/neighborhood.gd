@@ -191,7 +191,8 @@ func _ready() -> void:
 	var circles := TrafficCircles.new()
 	circles.name = "TrafficCircles"
 	add_child(circles)
-	for run in sidewalk_runs(-690, 50):
+	# Avenue sidewalks stop at z = 44, where Nezahat Onbaşı Street (and its own sidewalk) begins.
+	for run in sidewalk_runs(-690, 44):
 		for side in [-1, 1]:
 			box(Vector3(side * 8, 0.025, (run.x + run.y) * 0.5), Vector3(4, 0.05, run.y - run.x), "bdc2b8", false)
 	# Real collision boundaries, with visible hedges at the edge of the block.
@@ -517,8 +518,9 @@ func build_restaurant(index: int) -> void:
 func commercial_block(at: Vector3) -> void:
 	# The building itself is a city-kit walk-up (CityLayout/KitBuilder) with its own
 	# collision and name sign; only the forecourt paving is laid here.
-	box(at + Vector3(0, 0.04, 9), Vector3(17, 0.08, 3), "bdc2b8", false)
-	box(at+Vector3(0,.035,12),Vector3(18,.07,5),"bdc2b8",false)
+	# Forecourt aprons at road level, like the shop forecourts (the access road drives onto them).
+	box(at + Vector3(0, 0.014, 9), Vector3(17, 0.028, 3), "bdc2b8", false)
+	box(at+Vector3(0,.015,12),Vector3(18,.03,5),"bdc2b8",false)
 
 func asset_at(id: String, at: Vector3, distance: float = 220) -> Node3D:
 	var model := CityAssets.create(id,distance)
@@ -562,6 +564,7 @@ func build_estate() -> void:
 	# Modular curved streets: asphalt, raised sidewalks with kerbs, centre/edge markings.
 	var curved := CurvedRoads.new()
 	curved.name="CurvedRoads"
+	curved.keep_out=forecourt_rects()
 	for path in roads:
 		var ring: bool = path.size()>8 and path[0].distance_to(path[-1])<0.5
 		curved.specs.append({"path":path,"width":8.0,"walk":2.4,"ring":ring})
@@ -571,7 +574,19 @@ func build_estate() -> void:
 	for id in ShopCatalog.LOCATIONS:
 		build_store(id,ShopCatalog.LOCATIONS[id])
 	build_store("wc",Vector3(-40,0,32))
-	box(Vector3(-40,.04,43),Vector3(14,.08,10),"bdc2b8",false)
+	box(Vector3(-40,.04,39.8),Vector3(14,.08,3.6),"bdc2b8",false)   # ends at the street sidewalk
+
+## Paved forecourts that the frontage access roads drive into (shops, WC, walk-ups): the curved
+## roads stop at their edge instead of running underneath the paving.
+func forecourt_rects() -> Array[Rect2]:
+	var rects: Array[Rect2] = []
+	for id in ShopCatalog.LOCATIONS:
+		var at: Vector3 = ShopCatalog.LOCATIONS[id]
+		rects.append(Rect2(at.x - 8, at.z + 5, 16, 8))
+	for z in [-110, -190]:
+		for x in [-92, 92]:
+			rects.append(Rect2(x - 9, z + 7.5, 18, 7))
+	return rects
 
 func build_store(id: String, at: Vector3) -> void:
 	asset_at("store_"+id,at,260)
@@ -579,7 +594,13 @@ func build_store(id: String, at: Vector3) -> void:
 	box(at+Vector3(0,1.9,-5),Vector3(14,3.8,.26),"737773").hide()
 	for x in [-4.5,4.5]: box(at+Vector3(x,1.65,5),Vector3(5,3.3,.05),"737773").hide()
 	box(at+Vector3(4,.55,1),Vector3(3,1.1,.8),"737773",true,"wc" if id=="wc" else "store_"+id).hide()
-	box(at+Vector3(0,.04,9),Vector3(16,.08,8),"bdc2b8",false)
+	if id=="wc":
+		# The WC faces Nezahat Onbaşı Street: its forecourt stops at the street's sidewalk (z 41.6).
+		box(at+Vector3(0,.015,7.3),Vector3(16,.03,4.6),"bdc2b8",false)
+	else:
+		# Driveway apron at road level (top 3 cm, under the 3.6 cm asphalt): the access road
+		# runs onto it instead of being covered by raised paving.
+		box(at+Vector3(0,.015,9),Vector3(16,.03,8),"bdc2b8",false)
 	var sign_label := label_at("PUBLIC WC · WATER" if id=="wc" else ShopCatalog.TITLES[id],at+Vector3(0,3.5,5.23),64)
 	sign_label.pixel_size=.009
 	label_at("E · USE WC" if id=="wc" else "E · SHOP",at+Vector3(4,1.45,1.45),28)

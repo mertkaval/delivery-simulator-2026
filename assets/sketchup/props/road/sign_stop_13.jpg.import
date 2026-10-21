@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ddccfxtr23ppt"
-path="res://.godot/imported/sign_stop_13.jpg-2b31a36c5961ec390a2de5fb3dab21ea.ctex"
+path.s3tc="res://.godot/imported/sign_stop_13.jpg-2b31a36c5961ec390a2de5fb3dab21ea.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "c95b57c93329d3e83d60c98fce228ab8"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/sketchup/props/road/sign_stop_13.jpg"
-dest_files=["res://.godot/imported/sign_stop_13.jpg-2b31a36c5961ec390a2de5fb3dab21ea.ctex"]
+dest_files=["res://.godot/imported/sign_stop_13.jpg-2b31a36c5961ec390a2de5fb3dab21ea.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

@@ -17,6 +17,8 @@ const STEP := 0.0025       ## height step between overlapping paths
 ## spec: {"path": PackedVector3Array, "width": carriageway width, "walk": sidewalk width,
 ##        "ring": bool (closed one-way loop), "centre_line": bool}
 var specs: Array[Dictionary] = []
+## Paved forecourts (x/z rects): a road that runs into one ends at its edge.
+var keep_out: Array[Rect2] = []
 var _asphalt: ShaderMaterial
 var _concrete: Material
 var _yellow: StandardMaterial3D
@@ -33,11 +35,28 @@ func _ready() -> void:
 	_concrete = CityMaterials.get_surface("c4c2b8")
 	_yellow = paint(Color("e3b43a"))
 	_white = paint(Color("efede4"))
+	stop_at_forecourts()
 	extend_into_junctions()
 	for spec in specs: spec.path = densify(spec.path, 1.0)
 	for i in range(specs.size()):
 		build(specs[i], i)
 	street_lights()
+
+func stop_at_forecourts() -> void:
+	if keep_out.is_empty(): return
+	for spec in specs:
+		if spec.get("ring", false): continue
+		var path := densify(spec.path, 0.5)
+		var cut := -1
+		for i in range(path.size()):
+			for r in keep_out:
+				if r.has_point(Vector2(path[i].x, path[i].z)): cut = i
+			if cut >= 0: break
+		if cut > 1:
+			# The asphalt runs 3 m onto the road-level apron; the raised sidewalks stop at its edge
+			# (open_runs treats forecourts like junctions).
+			spec.path = path.slice(0, mini(path.size(), cut + 6))
+			spec["into_forecourt"] = true
 
 ## A road that ends on another road's centreline (an L corner or a T) stops halfway across it,
 ## leaving a notch of grass where the outer corner should be. Carry such ends on to the far
@@ -52,7 +71,7 @@ func extend_into_junctions() -> void:
 			var inward := path[1] - path[0] if end == 0 else path[end - 1] - path[end]
 			inward = inward.normalized()
 			for j in range(specs.size()):
-				if j == i: continue
+				if j == i or specs[j].get("ring", false): continue   # approaches stop at a ring
 				var other: PackedVector3Array = specs[j].path
 				var half: float = float(specs[j].get("width", 8.0)) * 0.5
 				var on_it := false
@@ -92,6 +111,13 @@ static func densify(path: PackedVector3Array, step: float) -> PackedVector3Array
 ## True where point p lies on another path's carriageway (a junction): sidewalks and kerbs
 ## are left open there so the roads actually connect.
 func on_other_carriageway(p: Vector3, own: int) -> bool:
+	for r in keep_out:
+		if r.grow(0.3).has_point(Vector2(p.x, p.z)): return true
+	# Straight street-grid roads (avenue, side roads, cross streets) count as junctions too.
+	for road in StreetGrid.roads():
+		var a := Vector3(road.a.x, 0, road.a.y)
+		var b := Vector3(road.b.x, 0, road.b.y)
+		if Geometry3D.get_closest_point_to_segment(Vector3(p.x, 0, p.z), a, b).distance_to(Vector3(p.x, 0, p.z)) < float(road.profile.half) + 0.25: return true
 	for j in range(specs.size()):
 		if j == own: continue
 		var path: PackedVector3Array = specs[j].path

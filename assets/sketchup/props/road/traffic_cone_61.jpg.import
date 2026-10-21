@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cb8ol1itctjqt"
-path="res://.godot/imported/traffic_cone_61.jpg-78d7bc6a99aff5abfa1cd63e90cbef38.ctex"
+path.s3tc="res://.godot/imported/traffic_cone_61.jpg-78d7bc6a99aff5abfa1cd63e90cbef38.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "a0e8863f6551a88bb240e26ced5fe4f7"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/sketchup/props/road/traffic_cone_61.jpg"
-dest_files=["res://.godot/imported/traffic_cone_61.jpg-78d7bc6a99aff5abfa1cd63e90cbef38.ctex"]
+dest_files=["res://.godot/imported/traffic_cone_61.jpg-78d7bc6a99aff5abfa1cd63e90cbef38.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

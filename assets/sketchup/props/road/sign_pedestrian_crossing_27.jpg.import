@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c88wb25rm2ahs"
-path="res://.godot/imported/sign_pedestrian_crossing_27.jpg-558d65baeaaa508d8bc3b6a1ca91e8ea.ctex"
+path.s3tc="res://.godot/imported/sign_pedestrian_crossing_27.jpg-558d65baeaaa508d8bc3b6a1ca91e8ea.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "267c62b5ce0b60962366688470afcad4"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/sketchup/props/road/sign_pedestrian_crossing_27.jpg"
-dest_files=["res://.godot/imported/sign_pedestrian_crossing_27.jpg-558d65baeaaa508d8bc3b6a1ca91e8ea.ctex"]
+dest_files=["res://.godot/imported/sign_pedestrian_crossing_27.jpg-558d65baeaaa508d8bc3b6a1ca91e8ea.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

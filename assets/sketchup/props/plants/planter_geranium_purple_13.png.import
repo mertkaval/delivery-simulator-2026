@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://pgxyk3montns"
-path="res://.godot/imported/planter_geranium_purple_13.png-c1ca3dd3c879b5e7b2f26e52880ec586.ctex"
+path.s3tc="res://.godot/imported/planter_geranium_purple_13.png-c1ca3dd3c879b5e7b2f26e52880ec586.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "6ce5609ae51f882a285a45603b40e8a0"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/sketchup/props/plants/planter_geranium_purple_13.png"
-dest_files=["res://.godot/imported/planter_geranium_purple_13.png-c1ca3dd3c879b5e7b2f26e52880ec586.ctex"]
+dest_files=["res://.godot/imported/planter_geranium_purple_13.png-c1ca3dd3c879b5e7b2f26e52880ec586.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0
