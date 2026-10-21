@@ -161,3 +161,30 @@ Verified with Godot 4.7.2 / Jolt: 11 new integration checks passed, existing sce
   - `BagRig` frames the open front. A package that fits better lying down is laid on its back.
   - The rig ray-tests the space ahead and pulls the bag closer and smaller near walls and shelves, so it never clips into the world.
   - The previous orange top-lid bag and the handled food bag are in `assets/delivery/archive/v1/` (`.gdignore`).
+
+## Hold / put down / drag-and-drop packing, and the training shift (2026-10-21)
+
+- **Holding a package:** picking an order up (from the shelf or the ground) flies it into your hands (`HOLD_POSE`, camera child).
+  - **G** (`drop`) sets it down on the flat surface in front of you, and **E** on it picks it up again.
+  - The order state is `DROPPED` with `order.dropped_at` = [x, y, z, yaw]. It is in `DeliverySession.ACTIVE`, validated, and saved and restored; `sync_dropped()` re-spawns the model.
+  - While it is down, the minimap routes you back to it, deliveries are refused and the clock keeps running.
+- **Drag and drop into the backpack:** with the bag open (F), the held package follows the mouse.
+  - `BagRig.pick()` ray-tests the compartment boxes (root extras, now read from the `DeliveryBag` child where glTF puts them). `highlight()` shows green when the order fits that compartment and red when it doesn't.
+  - Click drops the package in (`bag_click`). Clicking a packed compartment lifts the order back into your hands (`take_out`). E still quick-packs, and the UI slot buttons still work.
+- **Training shift** (`systems/tutorial.gd` `TutorialDirector`, `ui/mission_card.gd` `MissionCard`, HUD left column). New Game starts 12 mandatory tasks in order:
+  1. look around
+  2. walk
+  3. open and close the phone
+  4. open and close the map
+  5. buy the delivery bag (minimap guides you to Trail & Tool)
+  6. get on the bike (guided)
+  7. accept the scripted first order (Kebab House → 105 Atatürk Ave; it never expires and can't be rejected)
+  8. ride to the restaurant
+  9. take the right package by its receipt
+  10. put it down and pick it up
+  11. drag it into the backpack
+  12. deliver at the door
+- **Rules while training:** `gate()` blocks normal dispatch, rejecting, going offline, packing before task 10 and delivering before task 11, each with a hint.
+- **Saving:** progress is in `DeliverySession.tutorial` and saved. Old saves and fresh sessions count as trained.
+- **Finishing** pays a one-time $15 bonus (ledger `bonus_tutorial`, validated) and turns dispatch on.
+- **Tests:** `tests/tutorial_test.gd` (39 checks) plays the whole training through the real input paths and is part of `run_tests.ps1`.

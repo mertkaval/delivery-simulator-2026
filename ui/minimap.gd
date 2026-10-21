@@ -76,7 +76,7 @@ var _nav_from := Vector3(INF, 0, INF)
 var _nav_goal := Vector3(INF, 0, INF)
 func route_points() -> PackedVector3Array:
 	var state: String = session.order.get("state", "")
-	if state not in ["ACCEPTED", "IN_HAND", "CARRYING"]:
+	if state not in DeliverySession.ACTIVE:
 		# Destination picked on the city map (M).
 		if CityNavigation.target.is_empty(): return PackedVector3Array()
 		var goal: Vector3 = CityNavigation.target.at
@@ -88,4 +88,5 @@ func route_points() -> PackedVector3Array:
 		if live.size() > 0: live[0] = Vector3(player.position.x, 0, player.position.z)
 		return live
 	var destination: Vector3 = session.pickup_position() if state == "ACCEPTED" else world.doors[int(session.order.address)]
+	if state == "DROPPED": destination = session.dropped_position()      # back to the package you put down
 	return CityCatalog.route(player.position, destination, state == "ACCEPTED")

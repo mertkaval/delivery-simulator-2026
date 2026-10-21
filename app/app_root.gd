@@ -20,6 +20,10 @@ var shelves: PickupShelves
 var receipt_panel: PanelContainer
 var receipt_label: Label
 var held_package: Node3D
+var dropped_package: Node3D
+var _pickup_from: Variant = null      ## Transform3D a freshly held package flies in from
+var _drag_slot := ""                  ## bag compartment under the mouse while the backpack is open
+var tutorial: TutorialDirector
 var bag_rig: BagRig
 var bag_label: Label
 var _held_for := ""
@@ -89,6 +93,10 @@ func _ready() -> void:
 	shelves.name = "PickupShelves"
 	world.add_child(shelves)
 	shelves.setup(world, session)
+	tutorial = TutorialDirector.new()
+	tutorial.name = "Tutorial"
+	add_child(tutorial)
+	tutorial.setup(self)
 	show_menu("start")
 	update_hud()
 	if "--smoke-test" in OS.get_cmdline_user_args():
@@ -100,7 +108,7 @@ func bind_inputs() -> void:
 		var bike_key := InputEventKey.new()
 		bike_key.physical_keycode = KEY_B
 		InputMap.action_add_event("bicycle", bike_key)
-	var actions := {"move_forward": KEY_W, "move_back": KEY_S, "move_left": KEY_A, "move_right": KEY_D, "sprint": KEY_SHIFT, "jump": KEY_SPACE, "interact": KEY_E, "phone": KEY_TAB, "map": KEY_M, "pause_game": KEY_ESCAPE, "bell": KEY_Q, "bag": KEY_F}
+	var actions := {"move_forward": KEY_W, "move_back": KEY_S, "move_left": KEY_A, "move_right": KEY_D, "sprint": KEY_SHIFT, "jump": KEY_SPACE, "interact": KEY_E, "phone": KEY_TAB, "map": KEY_M, "pause_game": KEY_ESCAPE, "bell": KEY_Q, "bag": KEY_F, "drop": KEY_G}
 	for action in actions:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action)
@@ -139,6 +147,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif mode == "":
 			show_menu("bag")
 		get_viewport().set_input_as_handled()
+	elif mode == "bag" and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		# Drag and drop: drop the held package into the compartment under the pointer, or click
+		# a packed compartment to take the order back out.
+		if _drag_slot != "": bag_click(_drag_slot)
+		get_viewport().set_input_as_handled()
+	elif mode == "" and event.is_action_pressed("drop"):
+		drop_held()
+		get_viewport().set_input_as_handled()
 	elif mode == "bag" and event.is_action_pressed("interact"):
 		# E inside the bag: put the held package in the compartment it fits.
 		if session.holding_package():
@@ -149,12 +165,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _process(delta: float) -> void:
+	if mode == "bag": update_bag_drag(delta)
 	if get_tree().paused:
 		return
 	session.tick(delta)
 	session.offer_position = player.position
 	world.set_time(session.hour())
-	if session.dispatch(pickup_route_distance()):
+	sync_dropped()
+	if tutorial.gate("dispatch") == "" and session.dispatch(pickup_route_distance()):
 		notify("CourierNow · New delivery request\nPress Tab to review your offer")
 		save_session()
 	notification_time -= delta
@@ -201,9 +219,15 @@ func interact() -> void:
 	var result := ""
 	if target.id == "package":
 		var info: Dictionary = target.node.get_meta("package")
+		var node: Node3D = target.node
 		result = session.take_package(info, target.distance)
 		if session.holding_package():
-			shelves.take(target.node)
+			_pickup_from = node.global_transform
+			if node == dropped_package:
+				dropped_package = null
+				node.queue_free()
+			else:
+				shelves.take(node)
 			save_session()
 		notify(result)
 		return
@@ -220,7 +244,7 @@ func interact() -> void:
 		session.hydration = 100
 		session.bladder = minf(100, session.bladder + 8)
 		result = "Drinking water replenished."
-	elif (target.id == "pickup" or str(target.id).begins_with("pickup_")) and session.order.get("state") not in ["ACCEPTED", "IN_HAND", "CARRYING"]:
+	elif (target.id == "pickup" or str(target.id).begins_with("pickup_")) and session.order.get("state") not in DeliverySession.ACTIVE:
 		show_menu("food")
 		return
 	elif target.id == "pickup" or str(target.id).begins_with("pickup_"):
@@ -231,6 +255,8 @@ func interact() -> void:
 			result = "This is not your pickup restaurant. Collect at " + session.restaurant_name() + "."
 		else:
 			result = "Your order is already with you. Deliver it to " + str(session.order.get("customer", "the customer")) + "."
+	elif str(target.id).begins_with("door_") and tutorial.gate("deliver") != "" and session.order.get("state") in DeliverySession.ACTIVE:
+		result = tutorial.gate("deliver")
 	elif str(target.id).begins_with("door_"):
 		var was_packed: bool = session.order.get("state") == "CARRYING"
 		result = session.deliver(int(str(target.id).trim_prefix("door_")), target.distance)
@@ -244,7 +270,7 @@ func interact() -> void:
 		show_menu("shop")
 		return
 	elif target.id == "home":
-		if session.order.get("state") in ["ACCEPTED", "IN_HAND", "CARRYING"]:
+		if session.order.get("state") in DeliverySession.ACTIVE:
 			result = "Finish your active delivery before resting."
 		else:
 			session.energy = 100.0
@@ -321,7 +347,7 @@ func build_hud() -> void:
 	navigation_label = make_label("", 15, Color("b6f3d1"))
 	navigation_label.position = Vector2(36, 641)
 	hud.add_child(navigation_label)
-	var controls := make_label("%s  Move     %s  Sprint     %s  Interact     %s  Phone     %s  Map     %s  Pause" % ["WASD", binding("sprint"), binding("interact"), binding("phone"), binding("map"), binding("pause_game")], 16)
+	var controls := make_label("%s  Move     %s  Sprint     %s  Interact     %s  Bag     %s  Drop     %s  Phone     %s  Map     %s  Pause" % ["WASD", binding("sprint"), binding("interact"), binding("bag"), binding("drop"), binding("phone"), binding("map"), binding("pause_game")], 16)
 	controls.position = Vector2(24, 679)
 	hud.add_child(controls)
 	var center := make_label("+", 24)
@@ -405,6 +431,7 @@ func show_menu(which: String) -> void:
 	modal.set("phone_mode", is_phone)
 	modal.set("session", session)
 	if is_phone or which == "bag": menu_shade.visible = false
+	if which == "phone": tutorial.event("phone")
 	modal_body.add_theme_constant_override("separation",8 if is_phone else 12)
 	player.camera.make_current()
 	modal.custom_minimum_size = Vector2.ZERO
@@ -440,17 +467,21 @@ func show_menu(which: String) -> void:
 				add_text(DeliverySession.money(session.order.quote) + " guaranteed", 32)
 				add_text("Up to $3.00 tip  |  One bag\nPickup %dm  ·  Delivery %dm\nEstimated %d min  ·  Ready now\n%s\nUse the marked collection point or destination entrance.\n%ds to respond · paused in phone" % [int(session.order.pickup_distance), int(session.order.distance), maxi(1, int((session.order.pickup_distance + session.order.distance) / 3.5 / 60.0) + 1), DeliverySession.ADDRESSES[int(session.order.address)], maxi(0, int(session.order.expires - session.clock))], 17)
 				button("Accept delivery", func(): session.accept(); save_session(); close_menu(); notify("Collect at " + session.restaurant_name() + ". Follow the minimap."))
-				button("Reject without penalty", func(): session.reject(); save_session(); show_menu("phone"))
-			elif state in ["ACCEPTED", "IN_HAND", "CARRYING"]:
+				if tutorial.gate("reject") == "":
+					button("Reject without penalty", func(): session.reject(); save_session(); show_menu("phone"))
+				else:
+					add_text("Training order: accept it to continue.", 14, Color("9bceb7"))
+			elif state in DeliverySession.ACTIVE:
 				add_text("ORDER " + session.order.id.to_upper(), 20, Color("9bceb7"))
 				add_text("Collect at " + session.restaurant_name() if state == "ACCEPTED" else "Deliver to " + DeliverySession.ADDRESSES[int(session.order.address)], 25)
 				add_text("Customer: %s  ·  Order %s\n%s" % [session.order.get("customer", "?"), session.order.get("ticket", "?"), order_items_text()], 18, Color("f4e7c4"))
-				add_text("Guaranteed pay: " + DeliverySession.money(session.order.quote) + "\nPackage: " + str({"ACCEPTED": "waiting on the pickup shelf", "IN_HAND": "in your hands · press F to pack it", "CARRYING": "in your bag · " + str(OrderDetails.SLOT_NAMES.get(session.order.get("slot", ""), ""))}[state]))
+				add_text("Guaranteed pay: " + DeliverySession.money(session.order.quote) + "\nPackage: " + str({"ACCEPTED": "waiting on the pickup shelf", "IN_HAND": "in your hands · press F to pack it", "DROPPED": "on the ground where you put it down", "CARRYING": "in your bag · " + str(OrderDetails.SLOT_NAMES.get(session.order.get("slot", ""), ""))}[state]))
 			else:
 				add_text("Looking for requests nearby" if session.online else "You're offline", 24)
 				add_text("Requests arrive automatically while you explore. Lunch and dinner are busier. Cedar Kitchen, Market Noodles and Harbor Pizza serve 08:00–22:00.", 18)
 				add_text("Time pauses while the phone is open. Close it to continue your shift.", 16, Color("9bceb7"))
-			button("Go offline" if session.online else "Go online", func(): session.toggle_online(); save_session(); show_menu("phone"))
+			if tutorial.gate("offline") == "":
+				button("Go offline" if session.online else "Go online", func(): session.toggle_online(); save_session(); show_menu("phone"))
 			button("Local navigation", func(): show_menu("map"))
 			add_text("Wallet  " + DeliverySession.money(session.wallet) + "  /  %d deliveries" % session.completed, 19)
 			button("Back to street", close_menu)
@@ -543,6 +574,7 @@ func save_summary() -> String:
 
 ## Full-screen city map with clickable places and road navigation (ui/city_map.gd).
 func open_city_map() -> void:
+	tutorial.event("map")
 	mode = "map"
 	get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -601,21 +633,109 @@ func update_held_package() -> void:
 		body.collision_layer = 0
 		held_package = body
 		player.camera.add_child(held_package)
-		held_package.position = Vector3(0.22, -0.42, -0.55)
-		held_package.rotation = Vector3(0.15, -0.35, 0)
 		_held_for = id
+		if _pickup_from is Transform3D:
+			held_package.global_transform = _pickup_from
+			to_hands(held_package)
+		else:
+			held_package.transform = HOLD_POSE
+	_pickup_from = null
 	if held_package: held_package.visible = want
+
+## Where a held package sits: two hands, low and to the right of the view.
+var HOLD_POSE := Transform3D(Basis.from_euler(Vector3(0.15, -0.35, 0)), Vector3(0.22, -0.42, -0.55))
+
+## Animate a package (child of the camera) into the hands.
+func to_hands(node: Node3D) -> void:
+	var tw := create_tween()
+	tw.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tw.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(node, "transform", HOLD_POSE, 0.4)
+
+## G: put the held package down on the ground (or a counter) just in front of you.
+func drop_held() -> void:
+	if not session.holding_package():
+		notify("You're not holding anything.")
+		return
+	var forward := -player.global_basis.z
+	forward.y = 0.0
+	forward = forward.normalized()
+	var from := player.global_position + forward * 0.8 + Vector3(0, 1.4, 0)
+	var q := PhysicsRayQueryParameters3D.create(from, from + Vector3(0, -3.0, 0))
+	q.exclude = [player.get_rid()]
+	var hit := player.get_world_3d().direct_space_state.intersect_ray(q)
+	if hit.is_empty() or (hit.normal as Vector3).y < 0.7:
+		notify("There's no flat spot to put it down here.")
+		return
+	var start: Variant = held_package.global_transform if is_instance_valid(held_package) else null
+	var result := session.drop_package(hit.position, player.rotation.y)
+	if session.order.get("state") == "DROPPED":
+		if is_instance_valid(held_package): held_package.queue_free()
+		held_package = null
+		_held_for = ""
+		sync_dropped(start)
+		tutorial.event("dropped")
+		save_session()
+	notify(result)
+
+## Keep a package model on the ground while the order is DROPPED (also after loading a save).
+func sync_dropped(fall_from: Variant = null) -> void:
+	var down: bool = session.order.get("state") == "DROPPED"
+	if down and dropped_package == null:
+		var a: Array = session.order.get("dropped_at", [0, 0, 0, 0])
+		dropped_package = package_model()
+		dropped_package.collision_layer = 1
+		dropped_package.name = "DroppedPackage"
+		world.add_child(dropped_package)
+		var rest := Transform3D(Basis(Vector3.UP, float(a[3])), Vector3(float(a[0]), float(a[1]), float(a[2])))
+		if fall_from is Transform3D:
+			dropped_package.global_transform = fall_from
+			var tw := create_tween()
+			tw.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			tw.tween_property(dropped_package, "global_transform", rest, 0.35)
+		else:
+			dropped_package.global_transform = rest
+	elif not down and dropped_package != null:
+		dropped_package.queue_free()
+		dropped_package = null
 
 ## A fresh model of the current order's package (with its logo and receipt).
 func package_model() -> Node3D:
-	var info := {"customer": session.order.get("customer", ""), "ticket": session.order.get("ticket", ""), "kind": session.order.get("kind", "bag"), "items": session.order.get("items", []), "restaurant": session.restaurant_id()}
+	var info := {"customer": session.order.get("customer", ""), "ticket": session.order.get("ticket", ""), "kind": session.order.get("kind", "bag"), "items": session.order.get("items", []), "restaurant": session.restaurant_id(),
+		"subtotal": session.order.get("subtotal", 0), "payment_method": session.order.get("payment_method", ""), "address": int(session.order.get("address", 0))}
 	var body := shelves.make_package(info)
 	body.collision_layer = 0
 	return body
 
+## Backpack open: the held package follows the mouse; the compartment under it lights up
+## (green: it fits, red: it doesn't). A packed compartment lights up to be taken out.
+func update_bag_drag(delta: float) -> void:
+	if not bag_rig.out or not session.bag_upgrade:
+		_drag_slot = ""
+		return
+	var mouse := get_viewport().get_mouse_position()
+	var origin := player.camera.project_ray_origin(mouse)
+	var direction := player.camera.project_ray_normal(mouse)
+	var slot := bag_rig.pick(origin, direction)
+	var kind: String = session.order.get("kind", "bag")
+	if session.holding_package():
+		_drag_slot = slot
+		bag_rig.highlight(slot, OrderDetails.fits(kind, slot))
+		if is_instance_valid(held_package):
+			var goal := bag_rig.slot_mouth(slot) if slot != "" else origin + direction * 0.62
+			held_package.global_position = held_package.global_position.lerp(goal, minf(1.0, delta * 14.0))
+	else:
+		var packed: String = session.order.get("slot", "") if session.order.get("state") == "CARRYING" else ""
+		_drag_slot = slot if slot == packed else ""
+		bag_rig.highlight(_drag_slot, true)
+	Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND if _drag_slot != "" else Input.CURSOR_ARROW)
+
 ## Bag compartment clicked: pack the held package there, or take the packed one out.
 func bag_click(slot: String) -> void:
 	var result := ""
+	if session.holding_package() and tutorial.gate("stow") != "":
+		notify(tutorial.gate("stow"))
+		return
 	if session.holding_package():
 		result = session.stow(slot)
 		if session.order.get("state") == "CARRYING":
@@ -626,7 +746,14 @@ func bag_click(slot: String) -> void:
 			bag_rig.pack(pkg, slot)
 	elif session.order.get("state") == "CARRYING" and session.order.get("slot", "") == slot:
 		result = session.unstow()
-		bag_rig.clear_contents()
+		# Lift it out of the compartment back into your hands.
+		var node := bag_rig.take_out()
+		if node:
+			player.camera.add_child(node)
+			node.global_transform = node.get_meta("from")
+			held_package = node
+			_held_for = str(session.order.get("id", ""))
+			to_hands(node)
 	else:
 		result = "Empty compartment." if session.bag_upgrade else "You don't own a delivery bag yet."
 	notify(result)
@@ -646,7 +773,7 @@ func build_bag_menu() -> void:
 	var kind: String = session.order.get("kind", "bag")
 	var holding := session.holding_package()
 	if holding:
-		add_text("Holding %s's %s\nClick its compartment or press %s" % [session.order.customer, str(OrderDetails.KIND_NAMES[kind]).to_lower(), binding("interact")], 16, Color("f4e7c4"))
+		add_text("Holding %s's %s\nMove it over a compartment in the bag and click to drop it in, or press %s" % [session.order.customer, str(OrderDetails.KIND_NAMES[kind]).to_lower(), binding("interact")], 16, Color("f4e7c4"))
 	else:
 		add_text("Click a packed order to take it out.", 16, Color("f4e7c4"))
 	var grid := VBoxContainer.new()
@@ -682,6 +809,10 @@ func bag_slot(slot: String, min_size: Vector2, state: String, kind: String, hold
 
 func close_menu() -> void:
 	if bag_rig and bag_rig.out: bag_rig.put_on()
+	if mode == "bag":
+		_drag_slot = ""
+		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+		if is_instance_valid(held_package) and session.holding_package(): to_hands(held_package)
 	if main_menu: main_menu.close()
 	mode = ""
 	if city_map != null: city_map.hide()
@@ -731,9 +862,12 @@ func new_session() -> void:
 	player.position = Vector3(-8, 0.2, 23)
 	player.rotation = Vector3.ZERO
 	player.camera.rotation = Vector3.ZERO
+	if dropped_package: dropped_package.queue_free()
+	dropped_package = null
+	tutorial.start()
 	save_session()
 	close_menu()
-	notify("You're online. Your first offer will arrive shortly.\nTab: phone   ·   M: map")
+	notify("Welcome to your first shift! Follow the training tasks on the left.")
 
 func pickup_route_distance() -> float:
 	# Manhattan path via the open sidewalk and kitchen frontage.
@@ -794,6 +928,11 @@ func update_hud() -> void:
 	elif state == "ACCEPTED":
 		objective.text = "01  /  Collect at " + session.restaurant_name()
 		route_marker.position = session.pickup_position() + Vector3(0, 2, 0)
+	elif state == "DROPPED":
+		objective.text = "02  /  Pick up %s's order" % session.order.customer
+		route_marker.visible = player.position.distance_to(session.dropped_position()) > 4.0
+		route_marker.position = session.dropped_position() + Vector3(0, 1.2, 0)
+		route_marker.text = "YOUR PACKAGE\n%d m" % int(player.position.distance_to(session.dropped_position()))
 	elif state in ["CARRYING", "IN_HAND"]:
 		objective.text = "02  /  " + DeliverySession.ADDRESSES[int(session.order.address)]
 		route_marker.position = world.doors[int(session.order.address)] + Vector3(0, 2.5, 0)
@@ -806,7 +945,9 @@ func update_hud() -> void:
 	if session.bag_upgrade:
 		bag_state = "BACKPACK  ·  " + ("%s's %s in the %s" % [session.order.customer, str(OrderDetails.KIND_NAMES.get(session.order.get("kind", "bag"), "order")).to_lower(), str(OrderDetails.SLOT_NAMES.get(session.order.get("slot", ""), "bag")).to_lower()] if state == "CARRYING" else "empty") + "   [%s] open" % binding("bag")
 	if state == "IN_HAND":
-		bag_state = "HOLDING %s's order  ·  [%s] %s" % [session.order.customer, binding("bag"), "pack it in your backpack" if session.bag_upgrade else "no bag: walk it over"]
+		bag_state = "HOLDING %s's order  ·  [%s] %s  ·  [%s] put down" % [session.order.customer, binding("bag"), "pack it in your backpack" if session.bag_upgrade else "no bag: walk it over", binding("drop")]
+	elif state == "DROPPED":
+		bag_state = "%s's order is on the ground  ·  [%s] pick it up" % [session.order.customer, binding("interact")]
 	bag_label.text = bag_state
 	stats.text = "Day %d  ·  %02d:%02d  |  %s  |  Energy %d%%" % [int(session.calendar_minutes / 1440) + 1, int(session.hour()), int(session.calendar_minutes) % 60, DeliverySession.money(session.wallet), int(session.energy)]
 	calendar_label.text = "DAY %02d   ·   %s" % [int(session.calendar_minutes / 1440) + 1, session.date_text()]
@@ -823,6 +964,8 @@ func update_hud() -> void:
 	elif state == "ACCEPTED":
 		var pickup_distance := CityCatalog.distance(minimap.route_points())
 		navigation_label.text = "%d m · %s" % [int(pickup_distance), session.restaurant_name()]
+	elif state == "DROPPED":
+		navigation_label.text = "%d m · your package" % int(player.position.distance_to(session.dropped_position()))
 	elif state in ["CARRYING", "IN_HAND"]:
 		var destination := world.doors[int(session.order.address)]
 		var distance := CityCatalog.distance(minimap.route_points())

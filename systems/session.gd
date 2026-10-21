@@ -5,7 +5,7 @@ signal changed
 ## Atatürk Avenue (formerly Cedar Lane): Vancouver block numbering, odd west / even east.
 const ADDRESSES = ["105 Atatürk Avenue", "113 Atatürk Avenue", "121 Atatürk Avenue", "106 Atatürk Avenue", "114 Atatürk Avenue", "122 Atatürk Avenue", "137 Atatürk Avenue", "145 Atatürk Avenue", "161 Atatürk Avenue", "138 Atatürk Avenue", "146 Atatürk Avenue", "162 Atatürk Avenue", "305 Atatürk Avenue", "306 Atatürk Avenue", "313 Atatürk Avenue", "314 Atatürk Avenue", "321 Atatürk Avenue", "322 Atatürk Avenue", "329 Atatürk Avenue", "330 Atatürk Avenue", "505 Atatürk Avenue", "506 Atatürk Avenue", "513 Atatürk Avenue", "514 Atatürk Avenue", "521 Atatürk Avenue", "522 Atatürk Avenue", "529 Atatürk Avenue", "530 Atatürk Avenue", "705 Atatürk Avenue", "706 Atatürk Avenue", "713 Atatürk Avenue", "714 Atatürk Avenue", "721 Atatürk Avenue", "722 Atatürk Avenue", "729 Atatürk Avenue", "730 Atatürk Avenue"] + DowntownCatalog.DESTINATION_NAMES
 const TERMINAL = ["COMPLETED", "REJECTED", "EXPIRED"]
-const ACTIVE = ["ACCEPTED", "IN_HAND", "CARRYING"]
+const ACTIVE = ["ACCEPTED", "IN_HAND", "DROPPED", "CARRYING"]
 var wallet: int = 0
 var clock: float = 0.0
 var online: bool = true
@@ -59,6 +59,10 @@ var hunger := 100.0
 var hydration := 100.0
 var bladder := 0.0
 var purchase_serial := 0
+## First-shift training (TutorialDirector): {"done", "step", ...progress}. Fresh sessions and
+## old saves count as trained; New Game starts it.
+var tutorial: Dictionary = {"done": true, "step": 0}
+const TUTORIAL_BONUS := 1500
 ## Every new courier starts with $100 (recorded in the ledger like any other money movement).
 const STARTING_FUNDS := 10000
 
@@ -185,6 +189,13 @@ func pickup(restaurant_id: String, distance: float) -> String:
 ## ({"customer", "ticket", "restaurant"}); only your customer's package can be taken.
 func take_package(package: Dictionary, distance: float) -> String:
 	var state: String = order.get("state", "")
+	if state == "DROPPED" and str(package.get("ticket", "")) == str(order.get("ticket", "")):
+		if not is_finite(distance) or distance < 0 or distance > 2.5:
+			return "Move closer to your package."
+		order.state = "IN_HAND"
+		order.erase("dropped_at")
+		changed.emit()
+		return "Picked up %s's order again." % order.get("customer", "the customer")
 	if state in ["IN_HAND", "CARRYING"]:
 		return "You already have your order. Deliver it to " + str(order.get("customer", "the customer")) + "."
 	if state != "ACCEPTED":
@@ -230,7 +241,34 @@ func unstow() -> String:
 func holding_package() -> bool:
 	return order.get("state") == "IN_HAND"
 
+## Set the held package down at `at` (world position) facing `yaw`; pick it up again with
+## take_package(). It stays your order (and the clock keeps running) while it is down.
+func drop_package(at: Vector3, yaw: float) -> String:
+	if order.get("state") != "IN_HAND":
+		return "You are not holding anything."
+	if not (is_finite(at.x) and is_finite(at.y) and is_finite(at.z) and is_finite(yaw)):
+		return "You can't put it down here."
+	order.state = "DROPPED"
+	order["dropped_at"] = [at.x, at.y, at.z, yaw]
+	changed.emit()
+	return "Put down %s's order. Press E on it to pick it up again." % order.get("customer", "the customer")
+
+func dropped_position() -> Vector3:
+	var a: Array = order.get("dropped_at", [0, 0, 0, 0])
+	return Vector3(float(a[0]), float(a[1]), float(a[2]))
+
+## Training finished: one-time bonus into the wallet (ledger "bonus_tutorial").
+func finish_tutorial() -> void:
+	if tutorial.get("done", false): return
+	tutorial["done"] = true
+	if not ledger.has("bonus_tutorial"):
+		ledger["bonus_tutorial"] = TUTORIAL_BONUS
+		wallet += TUTORIAL_BONUS
+	changed.emit()
+
 func deliver(address: int, distance: float) -> String:
+	if order.get("state") == "DROPPED":
+		return "Your package is on the ground. Pick it up first."
 	if order.get("state") not in ["CARRYING", "IN_HAND"]:
 		return "There is no delivery bag to hand over."
 	if address != int(order.address):
@@ -272,12 +310,19 @@ func snapshot() -> Dictionary:
 		"serial": serial, "completed": completed, "energy": energy, "bag_upgrade": bag_upgrade,
 		"ledger": ledger.duplicate(true), "order": order.duplicate(true), "receipt": receipt,
 		"dispatch": {"online": online, "next_offer": next_offer, "calendar": calendar_minutes, "seed": random_seed},
-		"lifestyle": {"inventory": inventory.duplicate(), "vehicle": active_vehicle, "hunger": hunger, "hydration": hydration, "bladder": bladder, "purchase_serial": purchase_serial}}
+		"lifestyle": {"inventory": inventory.duplicate(), "vehicle": active_vehicle, "hunger": hunger, "hydration": hydration, "bladder": bladder, "purchase_serial": purchase_serial},
+		"tutorial": tutorial.duplicate(true)}
 
 static func validate(data: Variant) -> bool:
 	if not data is Dictionary:
 		return false
 	if not data.get("ledger") is Dictionary: return false
+	if data.has("tutorial"):
+		var t: Variant = data.tutorial
+		if not t is Dictionary or not t.get("done") is bool: return false
+		var step: Variant = t.get("step", 0)
+		if not (step is int or step is float) or float(step) != floor(float(step)) or step < 0 or step > 64: return false
+		if data.ledger.has("bonus_tutorial") and not t.done: return false
 	if data.has("lifestyle"):
 		var life: Variant = data.lifestyle
 		if not life is Dictionary or not life.get("inventory") is Array: return false
@@ -328,6 +373,9 @@ static func validate(data: Variant) -> bool:
 		elif key == "starting_funds":
 			if value != STARTING_FUNDS:
 				return false
+		elif key == "bonus_tutorial":
+			if value != TUTORIAL_BONUS:
+				return false
 		elif key.begins_with("purchase_"):
 			var id: String = key.trim_prefix("purchase_")
 			if not ShopCatalog.ITEMS.has(id) or value != -ShopCatalog.ITEMS[id].price: return false
@@ -362,8 +410,13 @@ static func validate(data: Variant) -> bool:
 	for key in ["address", "quote", "tip_cap", "pickup_distance", "distance", "expires", "deadline"]:
 		if not (job[key] is float or job[key] is int) or not is_finite(float(job[key])) or job[key] < 0:
 			return false
-	if job.address >= ADDRESSES.size() or float(job.address) != floor(float(job.address)) or job.state not in ["OFFERED", "ACCEPTED", "IN_HAND", "CARRYING", "COMPLETED", "REJECTED", "EXPIRED"]:
+	if job.address >= ADDRESSES.size() or float(job.address) != floor(float(job.address)) or job.state not in ["OFFERED", "ACCEPTED", "IN_HAND", "DROPPED", "CARRYING", "COMPLETED", "REJECTED", "EXPIRED"]:
 		return false
+	if job.state == "DROPPED":
+		var at: Variant = job.get("dropped_at")
+		if not at is Array or (at as Array).size() != 4: return false
+		for v: Variant in at:
+			if not (v is float or v is int) or not is_finite(float(v)): return false
 	if (job.state == "CARRYING") != (job.bag == "bag_" + job.id):
 		return false
 	if job.state != "CARRYING" and job.bag != "":
@@ -400,6 +453,7 @@ func restore(data: Dictionary) -> bool:
 	hydration = float(life.get("hydration", 100))
 	bladder = float(life.get("bladder", 0))
 	purchase_serial = int(life.get("purchase_serial", 0))
+	tutorial = (data.get("tutorial", {"done": true, "step": 0}) as Dictionary).duplicate(true)
 	changed.emit()
 	return true
 
