@@ -339,7 +339,18 @@ func target() -> Dictionary:
 	var query := PhysicsRayQueryParameters3D.create(origin, origin - camera.global_basis.z * 2.0, 1)
 	query.exclude = [get_rid()]
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	# Packages sit inside the pickup shelf's interaction volume: look through the shelf to them.
+	if not hit.is_empty() and not str(hit.collider.get_meta("interaction", "")) in ["package", ""] and str(hit.collider.get_meta("interaction", "")).begins_with("pickup"):
+		var skip: Array[RID] = [get_rid(), hit.rid]
+		for attempt in range(4):
+			query.exclude = skip
+			var behind := get_world_3d().direct_space_state.intersect_ray(query)
+			if behind.is_empty(): break
+			if behind.collider.get_meta("interaction", "") == "package":
+				hit = behind
+				break
+			skip.append(behind.rid)
 	if not hit.is_empty() and hit.collider.has_meta("interaction"):
-		return {"id": hit.collider.get_meta("interaction"), "distance": origin.distance_to(hit.position)}
+		return {"id": hit.collider.get_meta("interaction"), "distance": origin.distance_to(hit.position), "node": hit.collider}
 	return {}
 

@@ -24,6 +24,11 @@ static func create(asset: String, distance: float = 220) -> Node3D:
 		prepare(bicycle, distance)
 		return bicycle
 	if asset=="citizen": return LivingAssets.citizen()
+	if asset == "delivery_bag" and ResourceLoader.exists("res://assets/delivery/delivery_bag.glb"):
+		# The Blender-made insulated courier bag (shop display and on the bike's rear rack).
+		var bag: Node3D = load("res://assets/delivery/delivery_bag.glb").instantiate()
+		prepare(bag, distance)
+		return bag
 	if asset == "sedan":
 		# Traffic sedans are Jettas in traffic mode (lightest LOD, shared materials), each in
 		# the next colour of TRAFFIC_PAINTS.

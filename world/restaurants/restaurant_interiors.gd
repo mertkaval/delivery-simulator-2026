@@ -74,7 +74,7 @@ func fit_out(b: Dictionary, r: Array) -> void:
 		piece("rs_ceiling", t, colours, x, 0, 0)
 		piece("rs_back", t, colours, x, 0, 0.45)
 		piece("rs_pass" if i == e else ("rs_door" if i == door_bay else "rs_plain"), t, colours, x, 0, 0)
-		if i != door_bay: piece("rs_menu_board", t, colours, x, 2.55, -9.86)
+		pass   # the old blank menu boards are replaced by one readable MenuBoard (menu())
 	# Dining side walls: 4 m modules plus a half-length one, 10 m deep on each side.
 	var wall := "rs_wall_wood" if r[6] == "wood" else "rs_wall"
 	for run in [[0.0, 1.0], [-4.0, 1.0], [-8.0, 0.5]]:
@@ -206,19 +206,18 @@ func label(t: Transform3D, text: String, at: Vector3, size: int, colour: Color, 
 	return l
 
 ## Menu boards: restaurant name and five dishes with prices on each board.
-func menu(t: Transform3D, r: Array, xe: float, _e: int, door_bay: int, bays: int, b: Dictionary) -> void:
-	var items: Array = r[10]
-	var board := 0
-	for i in range(bays):
-		if i == door_bay: continue
-		var x := RestaurantCatalog.bay_x(b, i)
-		label(t, str(r[2]).to_upper(), Vector3(x, 2.88, -9.82), 26, Color("f3d98f"))
-		var lines := ""
-		for k in range(3):
-			lines += str(items[(board * 2 + k) % items.size()]) + ("\n" if k < 2 else "")
-		var l := label(t, lines, Vector3(x, 2.5, -9.82), 18, Color("f4f1e8"))
-		l.line_spacing = 2.0
-		board += 1
+func menu(t: Transform3D, r: Array, xe: float, _e: int, _door_bay: int, _bays: int, b: Dictionary) -> void:
+	# A large readable menu board on the back wall above the kitchen line, and a smaller one
+	# beside the entrance outside (MenuBoard: full menu, dollar prices, high-contrast type).
+	var accent := Color(str(r[8]))
+	var xl := -int(b.bays) * 2.0
+	var cx := xl + RestaurantCatalog.restaurant_width(b) * 0.5
+	var inside := MenuBoard.build(str(r[0]), Vector2(3.4, 1.15), accent)
+	inside.transform = Transform3D(t.basis, t * Vector3(cx, 2.55, -9.86))
+	add_child(inside)
+	var outside := MenuBoard.build(str(r[0]), Vector2(0.95, 1.25), accent)
+	outside.transform = Transform3D(t.basis, t * Vector3(xe + 1.55, 1.55, 0.1))
+	add_child(outside)
 
 func light(at: Vector3, colour: Color, energy: float, range_m: float) -> void:
 	var l := OmniLight3D.new()

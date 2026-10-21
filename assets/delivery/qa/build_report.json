@@ -1,0 +1,812 @@
+{
+ "glyphs": {
+  "file": "res://assets/delivery/glyphs.glb",
+  "tris": 6112,
+  "bbox_godot_size": [
+   2.00651,
+   1.52704,
+   0.026
+  ],
+  "bbox_blender_min": [
+   -0.5,
+   -0.026,
+   -0.5
+  ],
+  "bbox_blender_max": [
+   1.5065,
+   0.0,
+   1.027
+  ],
+  "font": "Bfont Regular (Blender bundled default font, OFL) emboldened with a 0.024 em outline offset; '1' rebuilt with a flag",
+  "scale_from_em": 1.36438,
+  "glyph_depth": 0.026,
+  "extrude_param": 0.012,
+  "bevel": 0.002,
+  "glyphs": {
+   "A": {
+    "advance": 0.97953,
+    "width": 1.01614,
+    "lsb": -0.01788,
+    "z": [
+     -0.0,
+     1.0055
+    ],
+    "tris": 66,
+    "res": 6,
+    "open_edges": 0
+   },
+   "B": {
+    "advance": 0.83764,
+    "width": 0.70862,
+    "lsb": 0.10233,
+    "z": [
+     0.0,
+     1.0
+    ],
+    "tris": 261,
+    "res": 4,
+    "open_edges": 4
+   },
+   "C": {
+    "advance": 1.03547,
+    "width": 0.90887,
+    "lsb": 0.06521,
+    "z": [
+     -0.0124,
+     1.0124
+    ],
+    "tris": 296,
+    "res": 6,
+    "open_edges": 0
+   },
+   "D": {
+    "advance": 1.09278,
+    "width": 0.92658,
+    "lsb": 0.10369,
+    "z": [
+     0.0,
+     1.0
+    ],
+    "tris": 180,
+    "res": 6,
+    "open_edges": 0
+   },
+   "E": {
+    "advance": 0.75168,
+    "width": 0.60979,
+    "lsb": 0.10233,
+    "z": [
+     0.0,
+     1.0
+    ],
+    "tris": 68,
+    "res": 6,
+    "open_edges": 0
+   },
+   "F": {
+    "advance": 0.70939,
+    "width": 0.56613,
+    "lsb": 0.10369,
+    "z": [
+     0.0,
+     1.0
+    ],
+    "tris": 56,
+    "res": 6,
+    "open_edges": 0
+   },
+   "G": {
+    "advance": 1.07913,
+    "width": 0.91993,
+    "lsb": 0.06779,
+    "z": [
+     -0.0124,
+     1.0124
+    ],
+    "tris": 272,
+    "res": 5,
+    "open_edges": 0
+   },
+   "H": {
+    "advance": 1.06413,
+    "width": 0.8581,
+    "lsb": 0.10233,
+    "z": [
+     0.0,
+     1.0
+    ],
+    "tris": 68,
+    "res": 6,
+    "open_edges": 0
+   },
+   "I": {
+    "advance": 0.41059,
+    "width": 0.2032,
+    "lsb": 0.10369,
+    "z": [
+     0.0,
+     1.0
+    ],
+    "tris": 20,
+    "res": 6,
+    "open_edges": 0
+   },
+   "J": {
+    "advance": 0.41059,
+    "width": 0.39903,
+    "lsb": -0.09214,
+    "z": [
+     -0.3138,
+     1.0
+    ],
+    "tris": 134,
+    "res": 6,
+    "open_edges": 0
+   },
+   "K": {
+    "advance": 0.96453,
+    "width": 0.91179,
+    "lsb": 0.10233,
+    "z": [
+     -0.0,
+     1.0
+    ],
+    "tris": 62,
+    "res": 6,
+    "open_edges": 0
+   },
+   "L": {
+    "advance": 0.73804,
+    "width": 0.62343,
+    "lsb": 0.10096,
+    "z": [
+     0.0,
+     1.0
+    ],
+    "tris": 32,
+    "res": 6,
+    "open_edges": 0
+   },
+   "M": {
+    "advance": 1.13507,
+    "width": 0.93724,
+    "lsb": 0.0996,
+    "z": [
+     0.0,
+     1.0
+    ],
+    "tris": 92,
+    "res": 6,
+    "open_edges": 8
+   },
+   "N": {
+    "advance": 1.13507,
+    "width": 0.93178,
+    "lsb": 0.10096,
+    "z": [
+     0.0,
+     1.0
+    ],
+    "tris": 56,
+    "res": 6,
+    "open_edges": 0
+   },
+   "O": {
+    "advance": 1.19238,
+    "width": 1.07014,
+    "lsb": 0.06111,
+    "z": [
+     -0.0125,
+     1.0125
+    ],
+    "tris": 288,
+    "res": 6,
+    "open_edges": 0
+   },
+   "P": {
+    "advance": 0.76533,
+    "width": 0.6564,
+    "lsb": 0.09551,
+    "z": [
+     0.0,
+     1.0
+    ],
+    "tris": 192,
+    "res": 6,
+    "open_edges": 0
+   },
+   "Q": {
+    "advance": 1.19238,
+    "width": 1.0735,
+    "lsb": 0.06081,
+    "z": [
+     -0.1921,
+     1.0128
+    ],
+    "tris": 270,
+    "res": 4,
+    "open_edges": 4
+   },
+   "R": {
+    "advance": 0.89358,
+    "width": 0.82177,
+    "lsb": 0.10506,
+    "z": [
+     0.0,
+     1.0
+    ],
+    "tris": 270,
+    "res": 5,
+    "open_edges": 0
+   },
+   "S": {
+    "advance": 0.69438,
+    "width": 0.59869,
+    "lsb": 0.05322,
+    "z": [
+     -0.0125,
+     1.0125
+    ],
+    "tris": 248,
+    "res": 4,
+    "open_edges": 0
+   },
+   "T": {
+    "advance": 0.89358,
+    "width": 0.84719,
+    "lsb": 0.02319,
+    "z": [
+     0.0,
+     1.0
+    ],
+    "tris": 44,
+    "res": 6,
+    "open_edges": 0
+   },
+   "U": {
+    "advance": 1.03547,
+    "width": 0.87038,
+    "lsb": 0.08323,
+    "z": [
+     -0.0124,
+     1.0
+    ],
+    "tris": 248,
+    "res": 6,
+    "open_edges": 0
+   },
+   "V": {
+    "advance": 0.89358,
+    "width": 0.92907,
+    "lsb": -0.01796,
+    "z": [
+     -0.0082,
+     1.0
+    ],
+    "tris": 38,
+    "res": 6,
+    "open_edges": 0
+   },
+   "W": {
+    "advance": 1.49118,
+    "width": 1.52314,
+    "lsb": -0.01663,
+    "z": [
+     -0.0082,
+     1.0
+    ],
+    "tris": 74,
+    "res": 6,
+    "open_edges": 0
+   },
+   "X": {
+    "advance": 1.03547,
+    "width": 1.10835,
+    "lsb": -0.03668,
+    "z": [
+     -0.0,
+     1.0
+    ],
+    "tris": 68,
+    "res": 6,
+    "open_edges": 0
+   },
+   "Y": {
+    "advance": 0.89358,
+    "width": 0.9672,
+    "lsb": -0.03688,
+    "z": [
+     0.0,
+     1.0
+    ],
+    "tris": 50,
+    "res": 6,
+    "open_edges": 0
+   },
+   "Z": {
+    "advance": 0.95088,
+    "width": 0.97593,
+    "lsb": -0.01184,
+    "z": [
+     0.0,
+     1.0
+    ],
+    "tris": 44,
+    "res": 6,
+    "open_edges": 0
+   },
+   "0": {
+    "advance": 0.75168,
+    "width": 0.67,
+    "lsb": 0.04084,
+    "z": [
+     -0.0129,
+     1.0129
+    ],
+    "tris": 288,
+    "res": 6,
+    "open_edges": 0
+   },
+   "1": {
+    "advance": 0.75168,
+    "width": 0.44631,
+    "lsb": 0.03249,
+    "z": [
+     0.0,
+     1.0
+    ],
+    "tris": 38,
+    "res": 6,
+    "open_edges": 0
+   },
+   "2": {
+    "advance": 0.75168,
+    "width": 0.6589,
+    "lsb": 0.04639,
+    "z": [
+     0.0,
+     1.0124
+    ],
+    "tris": 278,
+    "res": 6,
+    "open_edges": 0
+   },
+   "3": {
+    "advance": 0.75168,
+    "width": 0.56133,
+    "lsb": 0.08732,
+    "z": [
+     -0.0127,
+     1.0125
+    ],
+    "tris": 230,
+    "res": 3,
+    "open_edges": 0
+   },
+   "4": {
+    "advance": 0.75168,
+    "width": 0.69711,
+    "lsb": 0.01501,
+    "z": [
+     0.0,
+     1.0123
+    ],
+    "tris": 93,
+    "res": 6,
+    "open_edges": 4
+   },
+   "5": {
+    "advance": 0.75168,
+    "width": 0.59915,
+    "lsb": 0.06822,
+    "z": [
+     -0.0124,
+     1.0
+    ],
+    "tris": 248,
+    "res": 6,
+    "open_edges": 0
+   },
+   "6": {
+    "advance": 0.75168,
+    "width": 0.64493,
+    "lsb": 0.05964,
+    "z": [
+     -0.013,
+     1.027
+    ],
+    "tris": 246,
+    "res": 4,
+    "open_edges": 0
+   },
+   "7": {
+    "advance": 0.75168,
+    "width": 0.69004,
+    "lsb": 0.06685,
+    "z": [
+     -0.0232,
+     1.0
+    ],
+    "tris": 32,
+    "res": 6,
+    "open_edges": 0
+   },
+   "8": {
+    "advance": 0.75168,
+    "width": 0.666,
+    "lsb": 0.04283,
+    "z": [
+     -0.0132,
+     1.0133
+    ],
+    "tris": 292,
+    "res": 3,
+    "open_edges": 0
+   },
+   "9": {
+    "advance": 0.75168,
+    "width": 0.65047,
+    "lsb": 0.04846,
+    "z": [
+     -0.026,
+     1.013
+    ],
+    "tris": 270,
+    "res": 4,
+    "open_edges": 0
+   },
+   "dash": {
+    "advance": 0.51019,
+    "width": 0.40104,
+    "lsb": 0.05458,
+    "z": [
+     0.2374,
+     0.4338
+    ],
+    "tris": 20,
+    "res": 6,
+    "open_edges": 0
+   },
+   "dot": {
+    "advance": 0.36829,
+    "width": 0.23385,
+    "lsb": 0.06654,
+    "z": [
+     -0.0126,
+     0.2213
+    ],
+    "tris": 140,
+    "res": 6,
+    "open_edges": 0
+   },
+   "slash": {
+    "advance": 0.45288,
+    "width": 0.45455,
+    "lsb": -0.00015,
+    "z": [
+     -0.0123,
+     1.0123
+    ],
+    "tris": 20,
+    "res": 6,
+    "open_edges": 0
+   },
+   "amp": {
+    "advance": 0.92223,
+    "width": 0.92131,
+    "lsb": 0.0352,
+    "z": [
+     -0.0137,
+     0.9843
+    ],
+    "tris": 232,
+    "res": 2,
+    "open_edges": 0
+   },
+   "space": {
+    "advance": 0.44879,
+    "width": 0.0,
+    "tris": 0,
+    "res": 0
+   }
+  },
+  "max_glyph_tris": 296
+ },
+ "food_bag": {
+  "file": "res://assets/delivery/food_bag.glb",
+  "tris": 1714,
+  "bbox_godot_size": [
+   0.26951,
+   0.38549,
+   0.1731
+  ],
+  "bbox_blender_min": [
+   -0.1348,
+   -0.087,
+   0.0
+  ],
+  "bbox_blender_max": [
+   0.1348,
+   0.0861,
+   0.3855
+  ],
+  "extras": {
+   "logo_center": [
+    0.0,
+    0.215,
+    0.081
+   ],
+   "logo_normal": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "logo_size": [
+    0.16,
+    0.1
+   ],
+   "receipt_center": [
+    0.06,
+    0.09,
+    0.0825
+   ],
+   "receipt_normal": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "receipt_size": [
+    0.075,
+    0.13
+   ]
+  }
+ },
+ "pizza_box": {
+  "file": "res://assets/delivery/pizza_box.glb",
+  "tris": 542,
+  "bbox_godot_size": [
+   0.362,
+   0.052,
+   0.3662
+  ],
+  "bbox_blender_min": [
+   -0.181,
+   -0.1852,
+   0.0
+  ],
+  "bbox_blender_max": [
+   0.181,
+   0.181,
+   0.052
+  ],
+  "extras": {
+   "logo_center": [
+    0.0,
+    0.046,
+    0.0
+   ],
+   "logo_normal": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "logo_size": [
+    0.18,
+    0.18
+   ],
+   "receipt_center": [
+    0.135,
+    0.0475,
+    0.06
+   ],
+   "receipt_normal": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "receipt_size": [
+    0.075,
+    0.13
+   ]
+  }
+ },
+ "drink_carrier": {
+  "file": "res://assets/delivery/drink_carrier.glb",
+  "tris": 1240,
+  "bbox_godot_size": [
+   0.245,
+   0.22451,
+   0.147
+  ],
+  "bbox_blender_min": [
+   -0.1225,
+   -0.077,
+   0.0
+  ],
+  "bbox_blender_max": [
+   0.1225,
+   0.07,
+   0.2245
+  ],
+  "extras": {
+   "logo_center": [
+    -0.042,
+    0.085,
+    0.071
+   ],
+   "logo_normal": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "logo_size": [
+    0.14,
+    0.07
+   ],
+   "receipt_center": [
+    0.075,
+    0.0725,
+    0.0725
+   ],
+   "receipt_normal": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "receipt_size": [
+    0.075,
+    0.13
+   ]
+  }
+ },
+ "delivery_bag": {
+  "file": "res://assets/delivery/delivery_bag.glb",
+  "tris": 1798,
+  "bbox_godot_size": [
+   0.42952,
+   0.479,
+   0.40949
+  ],
+  "bbox_blender_min": [
+   -0.2148,
+   -0.1765,
+   0.0
+  ],
+  "bbox_blender_max": [
+   0.2148,
+   0.233,
+   0.479
+  ],
+  "extras": {
+   "logo_center": [
+    0.0,
+    0.215,
+    0.171
+   ],
+   "logo_normal": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "logo_size": [
+    0.26,
+    0.16
+   ],
+   "lid_hinge": [
+    0.0,
+    0.4,
+    -0.17
+   ],
+   "lid_open_deg": 110.0
+  },
+  "nodes": [
+   "BagBody",
+   "DeliveryBag",
+   "Lid",
+   "LogoPanel"
+  ]
+ },
+ "delivery_bag_open": {
+  "file": "res://assets/delivery/delivery_bag_open.glb",
+  "tris": 2110,
+  "bbox_godot_size": [
+   0.42952,
+   0.71813,
+   0.49559
+  ],
+  "bbox_blender_min": [
+   -0.2148,
+   -0.1765,
+   0.0
+  ],
+  "bbox_blender_max": [
+   0.2148,
+   0.3191,
+   0.7181
+  ],
+  "extras": {
+   "logo_center": [
+    0.0,
+    0.215,
+    0.171
+   ],
+   "logo_normal": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "logo_size": [
+    0.26,
+    0.16
+   ],
+   "lid_hinge": [
+    0.0,
+    0.4,
+    -0.17
+   ],
+   "lid_open_deg": 110.0,
+   "compartments": {
+    "bottom": {
+     "center": [
+      0.0,
+      0.05,
+      0.0
+     ],
+     "size": [
+      0.38,
+      0.06,
+      0.3
+     ]
+    },
+    "middle_left": {
+     "center": [
+      -0.098,
+      0.156,
+      0.0
+     ],
+     "size": [
+      0.184,
+      0.128,
+      0.3
+     ]
+    },
+    "middle_right": {
+     "center": [
+      0.098,
+      0.156,
+      0.0
+     ],
+     "size": [
+      0.184,
+      0.128,
+      0.3
+     ]
+    },
+    "top": {
+     "center": [
+      0.0,
+      0.316,
+      0.0
+     ],
+     "size": [
+      0.38,
+      0.168,
+      0.3
+     ]
+    }
+   }
+  },
+  "nodes": [
+   "BagBody",
+   "DeliveryBag",
+   "DividerLower",
+   "DividerUpper",
+   "Lid",
+   "LogoPanel",
+   "Slot_Bottom",
+   "Slot_MiddleLeft",
+   "Slot_MiddleRight",
+   "Slot_Top"
+  ]
+ }
+}

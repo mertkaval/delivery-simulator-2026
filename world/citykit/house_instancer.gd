@@ -231,15 +231,25 @@ func build_lot(lot: Dictionary) -> void:
 		door_body.transform = Transform3D(t.basis, t * Vector3(door.x, door.y + 1.1, door.z - 0.0))
 		add_child(door_body)
 		doors.append(ResidentialLayout.door_point(lot))
-		var number := Label3D.new()
-		number.text = DeliverySession.ADDRESSES[index].get_slice(" ", 0)
-		number.font_size = 34
-		number.pixel_size = 0.0025
-		number.outline_size = 2
-		number.modulate = Color("f4efe2")
-		number.transform = Transform3D(t.basis, t * Vector3(door.x + 0.85, door.y + 1.75, door.z + 0.03))
-		number.visibility_range_end = 40
-		add_child(number)
+		# Glowing 3D house numbers (Blender glyphs): a big one on an address post at the front walk
+		# and a smaller one beside the door at eye level.
+		var digits: String = DeliverySession.ADDRESSES[index].get_slice(" ", 0)
+		# Address post at the front walk beside the mailbox, facing the street: big digits on
+		# a navy plate, visible from the road while riding past.
+		var post := MeshInstance3D.new()
+		var post_mesh := BoxMesh.new()
+		post_mesh.size = Vector3(0.09, 1.25, 0.09)
+		post.mesh = post_mesh
+		post.material_override = CityMaterials.get_surface("344448")
+		post.transform = Transform3D(t.basis, t * Vector3(door.x - 1.25, 0.62, ResidentialLayout.SETBACK - 0.65))
+		post.visibility_range_end = 90.0
+		add_child(post)
+		var above := GlyphText.build(digits, 0.26)
+		above.transform = Transform3D(t.basis, t * Vector3(door.x - 1.25, 1.12, ResidentialLayout.SETBACK - 0.6))
+		add_child(above)
+		var beside := GlyphText.build(digits, 0.14)
+		beside.transform = Transform3D(t.basis, t * Vector3(door.x + 0.85, door.y + 1.6, door.z + 0.04))
+		add_child(beside)
 		var mailbox := CityAssets.create("mailbox", 85)
 		mailbox.transform = Transform3D(t.basis, t * Vector3(door.x + 1.2, 0, ResidentialLayout.SETBACK - 0.6))
 		add_child(mailbox)

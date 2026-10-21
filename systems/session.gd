@@ -5,6 +5,7 @@ signal changed
 ## Atatürk Avenue (formerly Cedar Lane): Vancouver block numbering, odd west / even east.
 const ADDRESSES = ["105 Atatürk Avenue", "113 Atatürk Avenue", "121 Atatürk Avenue", "106 Atatürk Avenue", "114 Atatürk Avenue", "122 Atatürk Avenue", "137 Atatürk Avenue", "145 Atatürk Avenue", "161 Atatürk Avenue", "138 Atatürk Avenue", "146 Atatürk Avenue", "162 Atatürk Avenue", "305 Atatürk Avenue", "306 Atatürk Avenue", "313 Atatürk Avenue", "314 Atatürk Avenue", "321 Atatürk Avenue", "322 Atatürk Avenue", "329 Atatürk Avenue", "330 Atatürk Avenue", "505 Atatürk Avenue", "506 Atatürk Avenue", "513 Atatürk Avenue", "514 Atatürk Avenue", "521 Atatürk Avenue", "522 Atatürk Avenue", "529 Atatürk Avenue", "530 Atatürk Avenue", "705 Atatürk Avenue", "706 Atatürk Avenue", "713 Atatürk Avenue", "714 Atatürk Avenue", "721 Atatürk Avenue", "722 Atatürk Avenue", "729 Atatürk Avenue", "730 Atatürk Avenue"] + DowntownCatalog.DESTINATION_NAMES
 const TERMINAL = ["COMPLETED", "REJECTED", "EXPIRED"]
+const ACTIVE = ["ACCEPTED", "IN_HAND", "CARRYING"]
 var wallet: int = 0
 var clock: float = 0.0
 var online: bool = true
@@ -58,6 +59,12 @@ var hunger := 100.0
 var hydration := 100.0
 var bladder := 0.0
 var purchase_serial := 0
+## Every new courier starts with $100 (recorded in the ledger like any other money movement).
+const STARTING_FUNDS := 10000
+
+func _init() -> void:
+	wallet = STARTING_FUNDS
+	ledger["starting_funds"] = STARTING_FUNDS
 
 func calendar() -> Dictionary:
 	# Day one is 16 September 2026; the engine handles month/year rollover.
@@ -129,6 +136,8 @@ func offer(pickup_distance: float = 10.0) -> void:
 		"quote": 600 + int(round((pickup_distance + distance) * 0.2)), "tip_cap": 300,
 		"pickup_distance": pickup_distance, "distance": distance, "expires": clock + 30.0,
 		"deadline": 0.0, "bag": "", "payment": ""}
+	order.merge(OrderDetails.build(serial, str(order.restaurant), random_seed))
+	order["slot"] = ""
 	changed.emit()
 
 func tick(delta: float) -> void:
@@ -172,12 +181,61 @@ func pickup(restaurant_id: String, distance: float) -> String:
 	changed.emit()
 	return "Bag secured. Deliver to " + ADDRESSES[int(order.address)] + "."
 
-func deliver(address: int, distance: float) -> String:
+## Take a package off the pickup shelf. `package` is the shelf package's details
+## ({"customer", "ticket", "restaurant"}); only your customer's package can be taken.
+func take_package(package: Dictionary, distance: float) -> String:
+	var state: String = order.get("state", "")
+	if state in ["IN_HAND", "CARRYING"]:
+		return "You already have your order. Deliver it to " + str(order.get("customer", "the customer")) + "."
+	if state != "ACCEPTED":
+		return "That order belongs to another courier. Accept an offer on your phone first."
+	if str(package.get("restaurant", "")) != restaurant_id():
+		return "This is not your pickup restaurant."
+	if not is_finite(distance) or distance < 0 or distance > 2.5:
+		return "Move closer to the shelf."
+	if str(package.get("customer", "")) != str(order.get("customer", "")) or str(package.get("ticket", "")) != str(order.get("ticket", "")):
+		return "Wrong package: this receipt says %s (order %s). Look for %s, order %s." % [package.get("customer", "?"), package.get("ticket", "?"), order.get("customer", "?"), order.get("ticket", "?")]
+	order.state = "IN_HAND"
+	order.deadline = clock + float(order.distance) / 3.5 * 1.35 + 60.0 + (30.0 if bag_upgrade else 0.0)
+	changed.emit()
+	return "Picked up %s's %s. Press F to put it in your delivery bag." % [order.customer, str(OrderDetails.KIND_NAMES.get(order.get("kind", "bag"), "order")).to_lower()]
+
+## Put the package you are holding into a bag compartment.
+func stow(slot: String) -> String:
+	if order.get("state") != "IN_HAND":
+		return "You are not holding a package."
+	if not bag_upgrade:
+		return "You need an insulated delivery bag. Trail & Tool sells them for $35."
+	if not slot in OrderDetails.SLOTS:
+		return "Choose a bag compartment."
+	var kind: String = order.get("kind", "bag")
+	if not OrderDetails.fits(kind, slot):
+		return "%s does not fit the %s. Use the %s." % [OrderDetails.KIND_NAMES[kind], OrderDetails.SLOT_NAMES[slot].to_lower(), OrderDetails.SLOT_NAMES[OrderDetails.best_slot(kind)].to_lower()]
+	order.state = "CARRYING"
+	order.bag = "bag_" + order.id
+	order.slot = slot
+	changed.emit()
+	return "Packed in the %s. Deliver to %s." % [OrderDetails.SLOT_NAMES[slot].to_lower(), ADDRESSES[int(order.address)]]
+
+## Take the package back out of the bag (into your hands).
+func unstow() -> String:
 	if order.get("state") != "CARRYING":
+		return "Your bag is empty."
+	order.state = "IN_HAND"
+	order.bag = ""
+	order.slot = ""
+	changed.emit()
+	return "Holding %s's order." % order.get("customer", "the customer")
+
+func holding_package() -> bool:
+	return order.get("state") == "IN_HAND"
+
+func deliver(address: int, distance: float) -> String:
+	if order.get("state") not in ["CARRYING", "IN_HAND"]:
 		return "There is no delivery bag to hand over."
 	if address != int(order.address):
 		return "Wrong address. Your customer is at " + ADDRESSES[int(order.address)] + "."
-	if not is_finite(distance) or distance < 0 or distance > 2.0 or order.bag != "bag_" + order.id:
+	if not is_finite(distance) or distance < 0 or distance > 2.0 or (order.state == "CARRYING" and order.bag != "bag_" + order.id):
 		return "Move closer to the correct door with your bag."
 	var transaction: String = "payment_" + order.id
 	if ledger.has(transaction):
@@ -191,6 +249,7 @@ func deliver(address: int, distance: float) -> String:
 	completed += 1
 	order.payment = transaction
 	order.bag = ""
+	order.slot = ""
 	order.state = "COMPLETED"
 	schedule_offer()
 	receipt = "DELIVERY COMPLETE\nGuaranteed  %s\nTip  %s\nTotal earned  %s\n%s" % [money(order.quote), money(tip), money(total), "On time. Nicely done." if late == 0 else "Late by %ds; guaranteed pay preserved." % int(late)]
@@ -206,7 +265,7 @@ func purchase_bag() -> String:
 	bag_upgrade = true
 	ledger["upgrade_insulated_bag"] = -3500
 	changed.emit()
-	return "Insulated bag purchased. Future pickups gain 30 seconds before tips decline."
+	return "Insulated delivery bag purchased. Press F to open it: top for food bags, middle for drinks, bottom for pizza."
 
 func snapshot() -> Dictionary:
 	return {"schema_version": 1, "content_version": 1, "wallet": wallet, "clock": clock,
@@ -266,6 +325,9 @@ static func validate(data: Variant) -> bool:
 		if key == "upgrade_insulated_bag":
 			if value != -3500:
 				return false
+		elif key == "starting_funds":
+			if value != STARTING_FUNDS:
+				return false
 		elif key.begins_with("purchase_"):
 			var id: String = key.trim_prefix("purchase_")
 			if not ShopCatalog.ITEMS.has(id) or value != -ShopCatalog.ITEMS[id].price: return false
@@ -300,7 +362,7 @@ static func validate(data: Variant) -> bool:
 	for key in ["address", "quote", "tip_cap", "pickup_distance", "distance", "expires", "deadline"]:
 		if not (job[key] is float or job[key] is int) or not is_finite(float(job[key])) or job[key] < 0:
 			return false
-	if job.address >= ADDRESSES.size() or float(job.address) != floor(float(job.address)) or job.state not in ["OFFERED", "ACCEPTED", "CARRYING", "COMPLETED", "REJECTED", "EXPIRED"]:
+	if job.address >= ADDRESSES.size() or float(job.address) != floor(float(job.address)) or job.state not in ["OFFERED", "ACCEPTED", "IN_HAND", "CARRYING", "COMPLETED", "REJECTED", "EXPIRED"]:
 		return false
 	if (job.state == "CARRYING") != (job.bag == "bag_" + job.id):
 		return false

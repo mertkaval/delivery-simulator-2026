@@ -245,10 +245,7 @@ def rs_pickup_shelf(m):
     m.box((0, 1.74, 0), (1.0, 0.08, 0.46), "AccentPaint")  # header panel (label in Godot)
     if near():
         m.box((0, 1.69, 0), (0.86, 0.015, 0.36), "LampGlow")
-        for k, (x, y) in enumerate(((-0.25, 0.465), (0.2, 0.465), (-0.15, 0.965), (0.25, 0.965), (0.0, 1.465))):
-            h = 0.3 + 0.05 * (k % 2)
-            m.box((x, y + h / 2, 0), (0.24, h, 0.16), "PaperBag")
-            m.box((x, y + h + 0.01, 0), (0.24, 0.02, 0.17), "PaperBag")
+    # The orders on the rack are real, named packages placed by the game (PickupShelves).
 
 
 def rs_menu_board(m):

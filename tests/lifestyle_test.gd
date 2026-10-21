@@ -9,7 +9,7 @@ func check(ok: bool, message: String) -> void:
 func _initialize() -> void: call_deferred("run")
 func run() -> void:
 	var session := DeliverySession.new()
-	check(not session.buy("helmet").contains("purchased"),"Insufficient funds cannot buy")
+	check(not session.buy("scooter").contains("purchased"),"Insufficient funds cannot buy")   # $890 scooter vs the $100 start
 	for i in range(1800):
 		session.offer()
 		session.accept()

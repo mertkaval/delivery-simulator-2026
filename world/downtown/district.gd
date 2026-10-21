@@ -16,8 +16,12 @@ func set_time(_hour: float,daylight: float) -> void:
 	if population!=null: population.hour=_hour
 func pose(at: Vector3, yaw: float=0, scale_factor: Vector3=Vector3.ONE) -> Transform3D:
 	return Transform3D(Basis(Vector3.UP,yaw).scaled_local(scale_factor),at)
+## Kit props replaced by the converted realistic props (PropKit) where one exists.
+const PROP_SWAP := {"dumpster":"dumpster_large","bollard":"bollard_metal","barrier":"water_barrier_white","trash_bin":"litter_bin_green",
+	"recycle_bin":"wheelie_bin_blue","hydrant":"fire_hydrant","cone":"traffic_cone"}
 func place(asset: String, transform: Transform3D, group: int, end: float=180, start: float=0) -> void:
 	var pieces := UrbanKit.get_parts(asset)
+	if PROP_SWAP.has(asset) and PropKit.has(PROP_SWAP[asset]): pieces = PropKit.get_parts(PROP_SWAP[asset])
 	var cell := Vector2i(floori(transform.origin.x/64),floori(transform.origin.z/64))
 	for i in range(pieces.size()):
 		var key := "%s_%d_%d_%d_%d_%d" % [asset,i,cell.x,cell.y,int(start),int(end)]
@@ -378,6 +382,13 @@ func delivery_locations() -> void:
 		var p: Vector3=DowntownCatalog.DESTINATIONS[i]
 		collider(p,Vector3(.8,.9,.16) if i!=4 else Vector3(.16,.9,.8),0,"door_%d"%(36+i))
 		label(["LOBBY","UNIT 102 DELIVERY","OFFICE RECEPTION","HOTEL RECEPTION","SITE DELIVERIES"][i],p+Vector3(0,1.25,.12),PI if i==3 else (PI/2 if i==4 else 0),18)
+		# Building/unit number in large 3D glyphs above the delivery point.
+		var yaw: float=PI if i==3 else (PI/2 if i==4 else 0.0)
+		var number: String=DeliverySession.ADDRESSES[36+i].get_slice(" ",0)
+		if i==1: number="604-102"
+		var plate := GlyphText.build(number,0.32)
+		plate.transform=Transform3D(Basis(Vector3.UP,yaw),p+Vector3(0,1.75,0)+Basis(Vector3.UP,yaw)*Vector3(0,0,0.14))
+		add_child(plate)
 
 func special_parcel(b: Dictionary) -> void:
 	var base := pose(b.root,b.yaw)

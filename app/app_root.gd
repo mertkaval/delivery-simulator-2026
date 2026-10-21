@@ -16,6 +16,11 @@ var notification_time: float = 0.0
 var route_marker: Label3D
 var navigation_label: Label
 var minimap: Control
+var shelves: PickupShelves
+var receipt_panel: PanelContainer
+var receipt_label: Label
+var held_package: Node3D
+var _held_for := ""
 var city_map: Control
 var city_map_layer: CanvasLayer
 var _arrival_note := ""
@@ -65,6 +70,10 @@ func _ready() -> void:
 	route_marker.modulate = Color("b6f3d1")
 	add_child(route_marker)
 	session.changed.connect(update_hud)
+	shelves = PickupShelves.new()
+	shelves.name = "PickupShelves"
+	world.add_child(shelves)
+	shelves.setup(world, session)
 	show_menu("start")
 	update_hud()
 	if "--smoke-test" in OS.get_cmdline_user_args():
@@ -76,7 +85,7 @@ func bind_inputs() -> void:
 		var bike_key := InputEventKey.new()
 		bike_key.physical_keycode = KEY_B
 		InputMap.action_add_event("bicycle", bike_key)
-	var actions := {"move_forward": KEY_W, "move_back": KEY_S, "move_left": KEY_A, "move_right": KEY_D, "sprint": KEY_SHIFT, "jump": KEY_SPACE, "interact": KEY_E, "phone": KEY_TAB, "map": KEY_M, "pause_game": KEY_ESCAPE, "bell": KEY_Q}
+	var actions := {"move_forward": KEY_W, "move_back": KEY_S, "move_left": KEY_A, "move_right": KEY_D, "sprint": KEY_SHIFT, "jump": KEY_SPACE, "interact": KEY_E, "phone": KEY_TAB, "map": KEY_M, "pause_game": KEY_ESCAPE, "bell": KEY_Q, "bag": KEY_F}
 	for action in actions:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action)
@@ -107,6 +116,17 @@ func _unhandled_input(event: InputEvent) -> void:
 		else:
 			show_menu("map" if event.is_action_pressed("map") else "phone")
 		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("bag"):
+		if mode == "bag":
+			close_menu()
+		elif mode == "":
+			show_menu("bag")
+		get_viewport().set_input_as_handled()
+	elif mode == "bag" and event.is_action_pressed("interact"):
+		# E inside the bag: put the held package in the compartment it fits.
+		if session.holding_package():
+			bag_click(OrderDetails.best_slot(str(session.order.get("kind", "bag"))))
+		get_viewport().set_input_as_handled()
 	elif mode == "" and event.is_action_pressed("interact"):
 		interact()
 		get_viewport().set_input_as_handled()
@@ -126,8 +146,11 @@ func _process(delta: float) -> void:
 	prompt.text = ""
 	if not target.is_empty():
 		var title: String = target.id
-		if title == "pickup" or title.begins_with("pickup_"):
-			title = "Collect matched order"
+		if title == "package":
+			var info: Dictionary = target.node.get_meta("package")
+			title = "Take order for %s (%s)" % [info.customer, info.ticket]
+		elif title == "pickup" or title.begins_with("pickup_"):
+			title = "Courier pickup shelf"
 		elif title.begins_with("cedar_door_"):
 			title = "Open / close house door"
 		elif title.begins_with("door_"):
@@ -137,9 +160,17 @@ func _process(delta: float) -> void:
 		elif title == "home":
 			title = "Rest and save"
 		prompt.text = "[%s]  %s" % [binding("interact"), title]
+	show_receipt(target)
+	update_held_package()
 	update_hud()
 
 func interact() -> void:
+	if not player.mounted and session.holding_package():
+		var near_vehicle := player.position.distance_to(player.bicycle.position) < 2.5
+		var t := player.target()
+		if near_vehicle and (t.is_empty() or not str(t.id).begins_with("door_")):
+			notify("Put the food in your delivery bag first (%s). Loose food can't ride along." % binding("bag"))
+			return
 	if player.mounted:
 		notify(player.toggle_bicycle())
 		save_session()
@@ -151,6 +182,14 @@ func interact() -> void:
 			save_session()
 		return
 	var result := ""
+	if target.id == "package":
+		var info: Dictionary = target.node.get_meta("package")
+		result = session.take_package(info, target.distance)
+		if session.holding_package():
+			shelves.take(target.node)
+			save_session()
+		notify(result)
+		return
 	if str(target.id).begins_with("cedar_door_"):
 		world.cedar_house.toggle_door(int(str(target.id).trim_prefix("cedar_door_")))
 		return
@@ -164,13 +203,17 @@ func interact() -> void:
 		session.hydration = 100
 		session.bladder = minf(100, session.bladder + 8)
 		result = "Drinking water replenished."
-	elif (target.id == "pickup" or str(target.id).begins_with("pickup_")) and session.order.get("state") not in ["ACCEPTED", "CARRYING"]:
+	elif (target.id == "pickup" or str(target.id).begins_with("pickup_")) and session.order.get("state") not in ["ACCEPTED", "IN_HAND", "CARRYING"]:
 		show_menu("food")
 		return
-	elif target.id == "pickup":
-		result = session.pickup("cedar_kitchen", target.distance)
-	elif str(target.id).begins_with("pickup_"):
-		result = session.pickup(str(target.id).trim_prefix("pickup_"), target.distance)
+	elif target.id == "pickup" or str(target.id).begins_with("pickup_"):
+		var rid := "cedar_kitchen" if target.id == "pickup" else str(target.id).trim_prefix("pickup_")
+		if session.order.get("state") == "ACCEPTED" and rid == session.restaurant_id():
+			result = "Find the package whose receipt says %s · order %s, and take it (%s)." % [session.order.get("customer", "?"), session.order.get("ticket", "?"), binding("interact")]
+		elif session.order.get("state") == "ACCEPTED":
+			result = "This is not your pickup restaurant. Collect at " + session.restaurant_name() + "."
+		else:
+			result = "Your order is already with you. Deliver it to " + str(session.order.get("customer", "the customer")) + "."
 	elif str(target.id).begins_with("door_"):
 		result = session.deliver(int(str(target.id).trim_prefix("door_")), target.distance)
 		if session.order.get("state") == "COMPLETED":
@@ -180,7 +223,7 @@ func interact() -> void:
 		show_menu("shop")
 		return
 	elif target.id == "home":
-		if session.order.get("state") in ["ACCEPTED", "CARRYING"]:
+		if session.order.get("state") in ["ACCEPTED", "IN_HAND", "CARRYING"]:
 			result = "Finish your active delivery before resting."
 		else:
 			session.energy = 100.0
@@ -389,14 +432,16 @@ func show_menu(which: String) -> void:
 			var state: String = session.order.get("state", "")
 			if state == "OFFERED":
 				add_text("NEW OFFER  /  " + session.restaurant_name(), 21, Color("9bceb7"))
+				add_text("Customer: %s  ·  Order %s\n%s  ·  %s" % [session.order.get("customer", "?"), session.order.get("ticket", "?"), order_items_text(), OrderDetails.KIND_NAMES.get(session.order.get("kind", "bag"), "")], 17, Color("f4e7c4"))
 				add_text(DeliverySession.money(session.order.quote) + " guaranteed", 32)
 				add_text("Up to $3.00 tip  |  One bag\nPickup %dm  ·  Delivery %dm\nEstimated %d min  ·  Ready now\n%s\nUse the marked collection point or destination entrance.\n%ds to respond · paused in phone" % [int(session.order.pickup_distance), int(session.order.distance), maxi(1, int((session.order.pickup_distance + session.order.distance) / 3.5 / 60.0) + 1), DeliverySession.ADDRESSES[int(session.order.address)], maxi(0, int(session.order.expires - session.clock))], 17)
 				button("Accept delivery", func(): session.accept(); save_session(); close_menu(); notify("Collect at " + session.restaurant_name() + ". Follow the minimap."))
 				button("Reject without penalty", func(): session.reject(); save_session(); show_menu("phone"))
-			elif state in ["ACCEPTED", "CARRYING"]:
+			elif state in ["ACCEPTED", "IN_HAND", "CARRYING"]:
 				add_text("ORDER " + session.order.id.to_upper(), 20, Color("9bceb7"))
 				add_text("Collect at " + session.restaurant_name() if state == "ACCEPTED" else "Deliver to " + DeliverySession.ADDRESSES[int(session.order.address)], 25)
-				add_text("Use the marked collection point or destination entrance.\nGuaranteed pay: " + DeliverySession.money(session.order.quote) + "\nBag: " + ("secured" if state == "CARRYING" else "awaiting pickup"))
+				add_text("Customer: %s  ·  Order %s\n%s" % [session.order.get("customer", "?"), session.order.get("ticket", "?"), order_items_text()], 18, Color("f4e7c4"))
+				add_text("Guaranteed pay: " + DeliverySession.money(session.order.quote) + "\nPackage: " + str({"ACCEPTED": "waiting on the pickup shelf", "IN_HAND": "in your hands · press F to pack it", "CARRYING": "in your bag · " + str(OrderDetails.SLOT_NAMES.get(session.order.get("slot", ""), ""))}[state]))
 			else:
 				add_text("Looking for requests nearby" if session.online else "You're offline", 24)
 				add_text("Requests arrive automatically while you explore. Lunch and dinner are busier. Cedar Kitchen, Market Noodles and Harbor Pizza serve 08:00–22:00.", 18)
@@ -417,6 +462,8 @@ func show_menu(which: String) -> void:
 			modal_body.add_child(large_map)
 			add_text("White arrow: you   ·   Mint: route\nGold: pickup   ·   North stays up", 16)
 			button("Back to street", close_menu)
+		"bag":
+			build_bag_menu()
 		"shop":
 			add_text(ShopCatalog.TITLES.get(current_shop, "TRAIL & TOOL"), 29)
 			add_text("Wallet  " + DeliverySession.money(session.wallet), 20, Color("9bceb7"))
@@ -476,6 +523,110 @@ func open_city_map() -> void:
 			notify("Navigating to %s · follow the mint route on the minimap." % place.name))
 	city_map.open(player, world)
 
+func order_items_text() -> String:
+	var parts := PackedStringArray()
+	for it in session.order.get("items", []): parts.append("%dx %s" % [int(it[1]), it[0]])
+	return ", ".join(parts)
+
+## Receipt panel while looking at a package on a shelf: read it before you take it.
+func show_receipt(target: Dictionary) -> void:
+	if receipt_panel == null:
+		receipt_panel = PanelContainer.new()
+		receipt_panel.add_theme_stylebox_override("panel", style_panel(Color(0.97, 0.96, 0.92, 0.97)))
+		receipt_panel.position = Vector2(860, 250)
+		receipt_label = Label.new()
+		receipt_label.add_theme_font_size_override("font_size", 15)
+		receipt_label.add_theme_color_override("font_color", Color("1d1b18"))
+		var mono := SystemFont.new()
+		mono.font_names = PackedStringArray(["Consolas", "Courier New", "monospace"])
+		receipt_label.add_theme_font_override("font", mono)
+		receipt_panel.add_child(receipt_label)
+		hud.add_child(receipt_panel)
+	var showing: bool = not target.is_empty() and target.id == "package"
+	receipt_panel.visible = showing
+	if showing:
+		var info: Dictionary = target.node.get_meta("package")
+		var name: String = CityCatalog.NAMES[maxi(0, CityCatalog.restaurant_index(str(info.restaurant)))]
+		var mine: bool = info.customer == session.order.get("customer", "") and info.ticket == session.order.get("ticket", "")
+		receipt_label.text = OrderDetails.receipt_text(info, name, DeliverySession.ADDRESSES[int(info.get("address", 0))], session.calendar_minutes)
+		if mine and session.order.get("state") == "ACCEPTED": receipt_label.text += "\n\n>> YOUR CUSTOMER <<"
+
+## The package in your hands (bottom-right of the view) while it is out of the bag.
+func update_held_package() -> void:
+	var want: bool = session.holding_package() and not player.mounted
+	var id: String = str(session.order.get("id", ""))
+	if want and (held_package == null or _held_for != id):
+		if held_package: held_package.queue_free()
+		var info := {"customer": session.order.customer, "ticket": session.order.ticket, "kind": session.order.kind, "items": session.order.items, "restaurant": session.restaurant_id()}
+		var body := shelves.make_package(info)
+		body.collision_layer = 0
+		held_package = body
+		player.camera.add_child(held_package)
+		held_package.position = Vector3(0.22, -0.42, -0.55)
+		held_package.rotation = Vector3(0.15, -0.35, 0)
+		_held_for = id
+	if held_package: held_package.visible = want
+
+## Bag compartment clicked: pack the held package there, or take the packed one out.
+func bag_click(slot: String) -> void:
+	var result := ""
+	if session.holding_package():
+		result = session.stow(slot)
+	elif session.order.get("state") == "CARRYING" and session.order.get("slot", "") == slot:
+		result = session.unstow()
+	else:
+		result = "Empty compartment." if session.bag_upgrade else "You don't own a delivery bag yet."
+	notify(result)
+	save_session()
+	if mode == "bag": show_menu("bag")
+
+## F: the insulated bag. Top: one big compartment (food bags). Middle: two halves (drinks and
+## desserts stay level). Bottom: a flat full-width drawer for pizza boxes.
+func build_bag_menu() -> void:
+	add_text("INSULATED DELIVERY BAG", 22, Color("9bceb7"))
+	if not session.bag_upgrade:
+		add_text("You don't own a delivery bag yet.\nTrail & Tool (equipment store) sells an insulated courier bag for $35. Without it you can only walk an order to the customer by hand.", 18)
+		if session.holding_package(): add_text("Holding: %s's order" % session.order.customer, 18, Color("f4e7c4"))
+		button("Close (%s)" % binding("bag"), close_menu)
+		return
+	var state: String = session.order.get("state", "")
+	var kind: String = session.order.get("kind", "bag")
+	var holding := session.holding_package()
+	if holding:
+		add_text("Holding %s's %s\nClick its compartment or press %s" % [session.order.customer, str(OrderDetails.KIND_NAMES[kind]).to_lower(), binding("interact")], 16, Color("f4e7c4"))
+	else:
+		add_text("Click a packed order to take it out.", 16, Color("f4e7c4"))
+	var grid := VBoxContainer.new()
+	grid.add_theme_constant_override("separation", 6)
+	modal_body.add_child(grid)
+	grid.add_child(bag_slot("top", Vector2(0, 150), state, kind, holding))
+	var middle := HBoxContainer.new()
+	middle.add_theme_constant_override("separation", 6)
+	grid.add_child(middle)
+	middle.add_child(bag_slot("left", Vector2(0, 92), state, kind, holding))
+	middle.add_child(bag_slot("right", Vector2(0, 92), state, kind, holding))
+	grid.add_child(bag_slot("bottom", Vector2(0, 62), state, kind, holding))
+	button("Close (%s)" % binding("bag"), close_menu)
+
+func bag_slot(slot: String, min_size: Vector2, state: String, kind: String, holding: bool) -> Button:
+	var b := Button.new()
+	b.name = "Slot_" + slot
+	b.custom_minimum_size = min_size
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var packed: bool = state == "CARRYING" and session.order.get("slot", "") == slot
+	var fits: bool = holding and OrderDetails.fits(kind, slot)
+	var hint := "pizza boxes" if slot == "bottom" else ("drinks & desserts" if slot != "top" else "food bags")
+	b.text = "%s\n%s" % [str(OrderDetails.SLOT_NAMES[slot]).to_upper(), ("● " + str(session.order.customer) + " · " + str(OrderDetails.KIND_NAMES[kind])) if packed else ("fits this order" if fits else hint)]
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color("2f6f58") if packed else (Color("3f5a4f") if fits else Color("1d2a2c"))
+	box.border_color = Color("9bceb7") if fits or packed else Color("4b5e60")
+	box.set_border_width_all(2)
+	box.set_corner_radius_all(8)
+	for st in ["normal", "hover", "pressed", "focus"]: b.add_theme_stylebox_override(st, box)
+	b.add_theme_font_size_override("font_size", 15)
+	b.pressed.connect(bag_click.bind(slot))
+	return b
+
 func close_menu() -> void:
 	mode = ""
 	if city_map != null: city_map.hide()
@@ -520,6 +671,7 @@ func new_session() -> void:
 	player.session = session
 	player.replace_vehicle(Vector3(-8, 0, 19))
 	minimap.session = session
+	if shelves: shelves.session = session
 	session.changed.connect(update_hud)
 	player.position = Vector3(-8, 0.2, 23)
 	player.rotation = Vector3.ZERO
@@ -586,7 +738,7 @@ func update_hud() -> void:
 	elif state == "ACCEPTED":
 		objective.text = "01  /  Collect at " + session.restaurant_name()
 		route_marker.position = session.pickup_position() + Vector3(0, 2, 0)
-	elif state == "CARRYING":
+	elif state in ["CARRYING", "IN_HAND"]:
 		objective.text = "02  /  " + DeliverySession.ADDRESSES[int(session.order.address)]
 		route_marker.position = world.doors[int(session.order.address)] + Vector3(0, 2.5, 0)
 		route_marker.text = "DELIVER\n%d m" % int(player.position.distance_to(world.doors[int(session.order.address)]))
@@ -605,7 +757,7 @@ func update_hud() -> void:
 	elif state == "ACCEPTED":
 		var pickup_distance := CityCatalog.distance(minimap.route_points())
 		navigation_label.text = "%d m · %s" % [int(pickup_distance), session.restaurant_name()]
-	elif state == "CARRYING":
+	elif state in ["CARRYING", "IN_HAND"]:
 		var destination := world.doors[int(session.order.address)]
 		var distance := CityCatalog.distance(minimap.route_points())
 		navigation_label.text = "%d m · %s" % [int(distance), DeliverySession.ADDRESSES[int(session.order.address)]]

@@ -4,7 +4,7 @@ const ITEMS = {
 	"helmet": {"name": "Cycle helmet", "price": 2800, "shop": "equipment", "description": "Wear a protective helmet while riding."},
 	"gloves": {"name": "Riding gloves", "price": 1800, "shop": "equipment", "description": "Padded grips reduce riding fatigue by 15%."},
 	"lights": {"name": "Rechargeable lights", "price": 2400, "shop": "equipment", "description": "A working headlight for evening deliveries."},
-	"delivery_bag": {"name": "Insulated delivery bag", "price": 3500, "shop": "equipment", "description": "Adds 30 seconds of tip protection on future pickups."},
+	"delivery_bag": {"name": "Insulated delivery bag", "price": 3500, "shop": "equipment", "description": "Thermal courier backpack. Needed to carry orders on a bike or in a car. Top: food bags · middle halves: drinks & desserts · bottom drawer: pizza. Press F to open it. Keeps food hot: +30 s before tips drop."},
 	"backpack": {"name": "Courier backpack", "price": 4500, "shop": "equipment", "description": "Reduces walking fatigue by 20%."},
 	"commuter_bike": {"name": "Commuter bicycle", "price": 32000, "shop": "bikes", "description": "A geared city bicycle. Top speed: 25 km/h."},
 	"scooter": {"name": "Electric scooter", "price": 89000, "shop": "scooters", "description": "Quiet electric transport. Top speed: 32 km/h."},

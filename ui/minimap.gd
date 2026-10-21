@@ -76,7 +76,7 @@ var _nav_from := Vector3(INF, 0, INF)
 var _nav_goal := Vector3(INF, 0, INF)
 func route_points() -> PackedVector3Array:
 	var state: String = session.order.get("state", "")
-	if state not in ["ACCEPTED", "CARRYING"]:
+	if state not in ["ACCEPTED", "IN_HAND", "CARRYING"]:
 		# Destination picked on the city map (M).
 		if CityNavigation.target.is_empty(): return PackedVector3Array()
 		var goal: Vector3 = CityNavigation.target.at

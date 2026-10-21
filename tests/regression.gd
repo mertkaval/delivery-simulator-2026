@@ -29,7 +29,7 @@ func run() -> void:
 	check(restored.restore(saver.load_game(path)), "Restore carrying save")
 	check(restored.order.bag == session.order.bag, "Cargo survives restart")
 	for i in range(20): restored.deliver(0, 1)
-	check(restored.completed == 1 and restored.ledger.size() == 1, "Twenty handoffs credit once")
+	check(restored.completed == 1 and restored.ledger.keys().filter(func(k): return str(k).begins_with("payment_")).size() == 1, "Twenty handoffs credit once")
 	var after := restored.snapshot()
 	after.player = data.player
 	check(saver.save_game(after, path), "Write completed save with backup")

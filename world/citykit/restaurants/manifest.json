@@ -229,12 +229,11 @@
  },
  "rs_pickup_shelf": {
   "near": {
-   "triangles": 200,
+   "triangles": 80,
    "materials": [
     "KitSteel",
     "KitAccentPaint",
-    "KitLampGlow",
-    "KitPaperBag"
+    "KitLampGlow"
    ]
   },
   "far": {

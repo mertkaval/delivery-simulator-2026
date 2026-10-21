@@ -60,11 +60,25 @@ func set_time(hour: float) -> void:
 		weather.set_time(hour)
 		weather.apply_light(daylight, atmosphere, sky_material)
 
+## Street light with its pole at `pole` and its arm reaching over the road (`face`), plus the
+## night light under the lamp head. Uses the converted 8 m street light (PropKit), whose pole
+## stands 1.93 m behind its origin and whose head hangs ~3.6 m out from the pole.
+func street_light_at(pole: Vector3, face: Vector3, old_height: float) -> void:
+	if not PropKit.has("street_light"):
+		asset_at("street_lamp", pole, 180)
+		lamp_at(pole + Vector3(0, old_height, 0))
+		return
+	var light := PropKit.create("street_light", 180)
+	light.transform = Transform3D(Basis(Vector3.UP, atan2(face.x, face.z)), pole + face * 1.93)
+	add_child(light)
+	box(pole + Vector3(0, 3.0, 0), Vector3(0.25, 6.0, 0.25), "394a50").hide()   # pole collision
+	lamp_at(pole + face * 3.4 + Vector3(0, 7.3, 0))
+
 func lamp_at(at: Vector3) -> void:
 	var lamp := OmniLight3D.new()
 	lamp.position = at
 	lamp.light_color = Color("ffda9a")
-	lamp.omni_range = 13.0
+	lamp.omni_range = 16.0
 	lamp.shadow_enabled = false
 	add_child(lamp)
 	lamps.append(lamp)
@@ -219,8 +233,7 @@ func _ready() -> void:
 		for x in [-10.7, 10.7]:
 			if front_walk_near(Vector3(x, 0, z)): continue
 			tree(Vector3(x, 0, z))
-		asset_at("street_lamp",Vector3(6.5,0,z+5),180)
-		lamp_at(Vector3(6.5, 4.3, z + 5))
+		street_light_at(Vector3(6.5, 0, z + 5), Vector3(-1, 0, 0), 4.3)
 	build_restaurant(0)
 	# Starter porch and equipment stand form a short, readable onboarding area.
 	build_cedar_home()
@@ -411,8 +424,7 @@ func expanded_blocks() -> void:
 	for row in range(12):
 		var z: float = CityCatalog.address_position(12 + row * 2).z - 1.3
 		for side in [-1, 1]:
-			asset_at("street_lamp",Vector3(side*70,0,z+5),180)
-			lamp_at(Vector3(side * 70, 4.5, z + 5))
+			street_light_at(Vector3(side * 70, 0, z + 5), Vector3(-side, 0, 0), 4.5)
 	# Small landscaped squares occupy the otherwise empty inner blocks.
 	for z in [-330, -470, -590]:
 		for side in [-1, 1]:
@@ -478,7 +490,7 @@ func tree(at: Vector3) -> void:
 	model.add_child(trunk)
 
 func bench(at: Vector3) -> void:
-	var model := CityAssets.create("park_bench", 120)
+	var model: Node3D = PropKit.create("bench_wood", 120) if PropKit.has("bench_wood") else CityAssets.create("park_bench", 120)
 	model.position = at
 	add_child(model)
 	box(at + Vector3(0, 0.48, 0), Vector3(2.03, 0.96, 0.7), "344448").hide()
@@ -493,6 +505,11 @@ func build_restaurant(index: int) -> void:
 	for x in [-10, 2]: box(p + Vector3(x, 2.15, -2.6), Vector3(0.22, 4.3, 10.6), "806753").hide()
 	box(p + Vector3(-4, 2.15, -7.9), Vector3(12, 4.3, 0.22), "806753").hide()
 	box(p + Vector3(-5.8, 1.6, 2.75), Vector3(8.2, 3.2, 0.12), "344448").hide()
+	# Readable menu in the shop window, facing the sidewalk.
+	var menu_entry: Array = RestaurantCatalog.entry(CityCatalog.RESTAURANTS[index])
+	var board := MenuBoard.build(CityCatalog.RESTAURANTS[index], Vector2(1.15, 1.45), Color(str(menu_entry[8])) if not menu_entry.is_empty() else Color("8e2b1f"))
+	board.position = p + Vector3(-8.4, 1.55, 2.84)
+	add_child(board)
 	var interaction: String = "pickup" if index == 0 else "pickup_" + CityCatalog.RESTAURANTS[index]
 	box(p + Vector3(-3, 0.55, 0), Vector3(7, 1.1, 1), "b98a5c", true, interaction).hide()
 	box(p + Vector3(0, 1.35, 0), Vector3(0.45, 0.55, 0.3), "d4b885", true, interaction).hide()
@@ -601,6 +618,11 @@ func build_store(id: String, at: Vector3) -> void:
 		# Driveway apron at road level (top 3 cm, under the 3.6 cm asphalt): the access road
 		# runs onto it instead of being covered by raised paving.
 		box(at+Vector3(0,.015,9),Vector3(16,.03,8),"bdc2b8",false)
+	# Street number on the shop front in 3D glyphs (easy to find on the map and from the road).
+	var shop_number: String = {"equipment": "1250", "bikes": "1180", "cars": "1170", "scooters": "1260", "wc": "1010"}.get(id, "1000")
+	var number_plate := GlyphText.build(shop_number, 0.38)
+	number_plate.position = at + Vector3(-5.6, 3.5, 5.3)
+	add_child(number_plate)
 	var sign_label := label_at("PUBLIC WC · WATER" if id=="wc" else ShopCatalog.TITLES[id],at+Vector3(0,3.5,5.23),64)
 	sign_label.pixel_size=.009
 	label_at("E · USE WC" if id=="wc" else "E · SHOP",at+Vector3(4,1.45,1.45),28)
