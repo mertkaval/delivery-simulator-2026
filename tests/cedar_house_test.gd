@@ -44,6 +44,34 @@ func run() -> void:
 	await move_player(90,Vector3.ZERO)
 	await move_player(50,Vector3(0,0,-1))
 	check(game.player.position.z<34,"Walkable interior has no old starter-house solid block")
+	# Furnishing (world/cedar_house/furnishing.json, props in assets/interiors).
+	var layout: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://world/cedar_house/furnishing.json"))
+	var items: Array = layout.items
+	check(items.size() >= 80 and home.furnishing.size()==items.size(),"All %d furnishing props placed" % items.size())
+	var names := {}
+	for n: Node3D in home.furnishing: names[str(n.name).rstrip("0123456789")]=true
+	var missing: Array[String] = []
+	for key: String in ["Fridge","KitchenRange","Dishwasher","Sofa","CoffeeTable","TvConsole","TvScreen","BedBlue","BedPlaid","BreadBasket","FruitBowl","BookcaseStaggered","HallMirrorConsole","Shampoo","AlarmClock"]:
+		if not names.has(key): missing.append(key)
+	check(missing.is_empty(),"Kitchen, living room, bedrooms, bathroom and hall furnished %s" % str(missing))
+	var boxes: int = home.get_node("FurnishingCollision").get_child_count()
+	check(boxes>=20,"Furniture has box collision (%d)" % boxes)
+	var outside := 0
+	for n: Node3D in home.furnishing:
+		var l: Vector3 = home.to_local(n.global_position)
+		if absf(l.x)>6.4 or l.z<-9.0 or l.z>9.5: outside += 1
+	check(outside==0,"Every prop stands on the Cedar House lot")
+	var ranged := true
+	for n: Node3D in home.furnishing:
+		for g in n.find_children("*","GeometryInstance3D",true,false):
+			if (g as GeometryInstance3D).visibility_range_end<=0.0 or (g as GeometryInstance3D).visibility_range_end>40.0: ranged=false
+	check(ranged,"Interior props use a short visibility range")
+	# Walk the hall from the front door to the rear door, then into the kitchen past the dining table.
+	game.player.position=Vector3(19.0,.76,34.3)
+	await move_player(135,Vector3(0,0,-1))
+	check(game.player.position.z<27.0,"Hall to the rear door stays clear of furniture")
+	await move_player(40,Vector3(-1,0,0))
+	check(game.player.position.x<17.5,"Kitchen is reachable from the hall")
 	game.player.position=Vector3(17.8,.76,36.4)
 	game.player.camera.look_at(Vector3(17.8,1.66,35.4))
 	await move_player(2,Vector3.ZERO)

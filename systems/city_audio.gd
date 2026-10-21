@@ -164,7 +164,7 @@ func setup(owner_game: Node) -> void:
 			loop_at("grill_sizzle", (r.frame as Transform3D) * Vector3(0, 1.2, -9.6), 2.0, 10.0)
 	if game.world.buses != null:
 		for bus: Dictionary in game.world.buses.buses: attach_loop(bus.body, "bus_engine_idle", 5.0, 55.0)
-	for p: Vector3 in PARKS: loop_at("fountain_water", p + Vector3(4, 0.8, -5), 4.0, 28.0)
+	for p: Vector3 in CityMonuments.fountain_spots(): loop_at("fountain_water", p + Vector3(0, 0.8, 0), 4.0, 28.0)
 	for r in restaurants: loop_at("grill_sizzle", r + Vector3(-2, 1.2, -5), 2.0, 12.0)
 
 func pooled_player(unit_size: float, max_distance: float) -> AudioStreamPlayer3D:

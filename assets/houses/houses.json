@@ -1,0 +1,380 @@
+{
+ "house_farmhouse": {
+  "stats": {
+   "source_tris": 4824,
+   "figures_removed_faces": 0,
+   "after_cleanup_tris": 3297,
+   "visibility": {
+    "deleted": 1288,
+    "flipped": 0,
+    "doubled": 12
+   },
+   "after_visibility_tris": 2009,
+   "after_dissolve_tris": 1830,
+   "near_tris": 1836,
+   "coplanar": {
+    "dropped": 0,
+    "pushed": 108
+   },
+   "near_materials": [
+    "KitAsphaltShingles",
+    "KitDeckBoards",
+    "KitDoorPaint",
+    "KitGlass",
+    "KitLapSiding",
+    "KitTrimPaint"
+   ],
+   "far_tris": 733,
+   "size_m": [
+    10.35,
+    7.92,
+    8.02
+   ]
+  },
+  "meta": {
+   "lot": 12.5,
+   "w": 10.35,
+   "d": 7.1,
+   "h": 6.8,
+   "door": [
+    -1.0,
+    0.52,
+    -1.78
+   ],
+   "step_height": 0.14,
+   "ramp": [
+    -1.75,
+    0.5,
+    0.52,
+    0.0,
+    0.95
+   ],
+   "boxes": [
+    [
+     [
+      1.65,
+      0.26,
+      -0.89
+     ],
+     [
+      6.9,
+      0.52,
+      1.78
+     ]
+    ]
+   ],
+   "hull": [
+    [
+     [
+      -3.4,
+      3.0,
+      -3.45
+     ],
+     [
+      3.2,
+      6.0,
+      6.9
+     ]
+    ],
+    [
+     [
+      1.6,
+      3.0,
+      -4.34
+     ],
+     [
+      6.8,
+      6.0,
+      5.12
+     ]
+    ]
+   ],
+   "number": [
+    -1.0,
+    2.85,
+    -1.72
+   ],
+   "massing": [
+    3.64,
+    3.16,
+    "x",
+    10.35,
+    7.1
+   ],
+   "bounds_min": [
+    -5.173,
+    -1.115,
+    -7.114
+   ],
+   "bounds_max": [
+    5.175,
+    6.804,
+    0.911
+   ]
+  }
+ },
+ "house_suburban": {
+  "stats": {
+   "source_tris": 145426,
+   "figures_removed_faces": 23697,
+   "after_cleanup_tris": 115357,
+   "visibility": {
+    "deleted": 94922,
+    "flipped": 240,
+    "doubled": 213
+   },
+   "after_visibility_tris": 20433,
+   "after_dissolve_tris": 19534,
+   "near_tris": 19534,
+   "coplanar": {
+    "dropped": 53,
+    "pushed": 60
+   },
+   "near_materials": [
+    "KitAsphaltShingles",
+    "KitDeckBoards",
+    "KitDoorPaint",
+    "KitGlass",
+    "KitPlinthDark",
+    "KitSidingPaint",
+    "KitTrimPaint"
+   ],
+   "far_tris": 6446,
+   "size_m": [
+    16.43,
+    7.45,
+    14.98
+   ]
+  },
+  "meta": {
+   "lot": 18.0,
+   "w": 16.43,
+   "d": 14.68,
+   "h": 7.0,
+   "door": [
+    -3.43,
+    0.0,
+    -3.08
+   ],
+   "step_height": 0.0,
+   "ramp": [],
+   "boxes": [],
+   "hull": [
+    [
+     [
+      2.425,
+      2.75,
+      -4.55
+     ],
+     [
+      10.75,
+      5.5,
+      8.1
+     ]
+    ],
+    [
+     [
+      2.0,
+      2.75,
+      -0.25
+     ],
+     [
+      4.5,
+      5.5,
+      0.5
+     ]
+    ],
+    [
+     [
+      -4.475,
+      2.6,
+      -5.8
+     ],
+     [
+      3.05,
+      5.2,
+      5.6
+     ]
+    ],
+    [
+     [
+      -1.0,
+      2.5,
+      -9.3
+     ],
+     [
+      6.0,
+      5.0,
+      1.4
+     ]
+    ]
+   ],
+   "number": [
+    -5.05,
+    1.6,
+    -2.95
+   ],
+   "massing": [
+    3.0,
+    4.0,
+    "x",
+    15.0,
+    9.5
+   ],
+   "bounds_min": [
+    -8.215,
+    -0.45,
+    -14.68
+   ],
+   "bounds_max": [
+    8.215,
+    7.0,
+    0.3
+   ]
+  }
+ },
+ "house_duplex": {
+  "stats": {
+   "source_tris": 19546,
+   "figures_removed_faces": 0,
+   "after_cleanup_tris": 3656,
+   "visibility": {
+    "deleted": 626,
+    "flipped": 2,
+    "doubled": 1
+   },
+   "after_visibility_tris": 3030,
+   "after_dissolve_tris": 2845,
+   "near_tris": 2865,
+   "coplanar": {
+    "dropped": 0,
+    "pushed": 0
+   },
+   "near_materials": [
+    "KitAsphaltShingles",
+    "KitBrickRed",
+    "KitConcrete",
+    "KitDoorPaint",
+    "KitGlass",
+    "KitLapSiding",
+    "KitTrimPaint"
+   ],
+   "far_tris": 1146,
+   "size_m": [
+    10.2,
+    8.03,
+    16.93
+   ]
+  },
+  "meta": {
+   "lot": 12.5,
+   "w": 10.2,
+   "d": 16.32,
+   "h": 8.03,
+   "door": [
+    -0.75,
+    0.51,
+    -1.89
+   ],
+   "door2": [
+    -0.75,
+    3.22,
+    -1.89
+   ],
+   "step_height": 0.17,
+   "ramp": [
+    -1.45,
+    -0.05,
+    0.51,
+    0.0,
+    0.84
+   ],
+   "boxes": [
+    [
+     [
+      -2.35,
+      0.255,
+      -0.95
+     ],
+     [
+      4.9,
+      0.51,
+      1.9
+     ]
+    ],
+    [
+     [
+      2.45,
+      0.255,
+      -15.05
+     ],
+     [
+      4.7,
+      0.51,
+      1.9
+     ]
+    ]
+   ],
+   "hull": [
+    [
+     [
+      0.0,
+      3.0,
+      -8.0
+     ],
+     [
+      9.6,
+      6.0,
+      12.2
+     ]
+    ],
+    [
+     [
+      2.45,
+      3.0,
+      -0.95
+     ],
+     [
+      4.7,
+      6.0,
+      1.9
+     ]
+    ],
+    [
+     [
+      -2.35,
+      3.0,
+      -15.05
+     ],
+     [
+      4.9,
+      6.0,
+      1.9
+     ]
+    ]
+   ],
+   "number": [
+    -1.62,
+    2.05,
+    -1.85
+   ],
+   "massing": [
+    5.9,
+    2.13,
+    "z",
+    9.6,
+    16.0
+   ],
+   "bounds_min": [
+    -5.099,
+    -0.0,
+    -16.32
+   ],
+   "bounds_max": [
+    5.102,
+    8.032,
+    0.607
+   ]
+  }
+ }
+}

@@ -8,9 +8,15 @@ extends Node3D
 const DIR := "res://world/citykit/houses/%s.glb"
 const RESTAURANT_DIR := "res://world/citykit/restaurants/%s.glb"
 const TRANSIT_DIR := "res://world/citykit/transit/%s.glb"
+const HOUSE_ASSETS := "res://assets/houses/%s.glb"
 const NEAR_END := 110.0
+## Cell size shared by a house's near LOD, far LOD and massing (they switch together per cell).
+## Bigger cells = fewer MultiMesh draw calls; 96 m keeps the LOD switch well beyond the street.
+const HOUSE_CELL := 96.0
+## Imported (heavier) house models switch to their _far LOD here, then to massing at NEAR_END.
+const MID_END := 45.0
 const FAR_END := 700.0
-const BODY_MATS := ["KitLapSiding", "KitShingleSiding", "KitBoardBatten", "KitHouseStucco"]
+const BODY_MATS := ["KitLapSiding", "KitShingleSiding", "KitBoardBatten", "KitHouseStucco", "KitSidingPaint"]
 
 var groups := {}
 var parts := {}
@@ -39,6 +45,7 @@ func get_parts(asset: String, lod: String) -> Array:
 		var dir := RESTAURANT_DIR if asset.begins_with("rs_") else (TRANSIT_DIR if asset.begins_with("bus_") else DIR)
 		for prefix in ["dog_", "cat_", "pigeon_", "crow_", "gull_", "bird_"]:
 			if asset.begins_with(prefix): dir = "res://world/citykit/animals/%s.glb"
+		if asset in ResidentialLayout.IMPORTED: dir = HOUSE_ASSETS
 		var path := dir % (asset + ("_far" if lod == "far" else ""))
 		var node: Node3D = load(path).instantiate()
 		var list: Array = []
@@ -52,37 +59,48 @@ func get_parts(asset: String, lod: String) -> Array:
 
 ## Massing used for every house beyond NEAR_END: wall box + roof prism (eave height, roof rise, ridge axis).
 const MASSING := {"house_craftsman": [3.85, 4.6, "x"], "house_special": [5.4, 2.2, "x"], "house_modern": [6.0, 1.0, "z"],
-	"house_foursquare": [6.3, 4.05, "z"], "house_splitlevel": [5.2, 2.0, "x"], "house_laneway": [5.6, 3.2, "z"], "house_bungalow": [4.0, 2.8, "x"]}
+	"house_foursquare": [6.3, 4.05, "z"], "house_splitlevel": [5.2, 2.0, "x"], "house_laneway": [5.6, 3.2, "z"], "house_bungalow": [4.0, 2.8, "x"],
+	# Imported models: main body only (the suburban carport and rear deck are left out), [.., width, depth].
+	"house_suburban": [3.0, 4.0, "x", 15.0, 9.5], "house_duplex": [5.9, 2.13, "z", 9.6, 16.0], "house_farmhouse": [3.64, 3.16, "x", 10.35, 7.1]}
 static var far_wall_material: ShaderMaterial
 static var far_roof_material: StandardMaterial3D
 
 ## Queue one instance of an asset with per-material tint colours.
-## Houses: detailed near LOD in 48 m cells; massing beyond NEAR_END in 256 m cells.
+## Houses: detailed near LOD in HOUSE_CELL cells; massing beyond NEAR_END in 256 m cells.
 ## Props: near only, ending at `end` metres.
 func add(asset: String, placement: Transform3D, colours: Dictionary, end: float = 0.0) -> void:
 	var is_house := asset.begins_with("house_")
-	var cell_size := 48.0 if (is_house or end == 0.0) else 128.0
+	var cell_size := HOUSE_CELL if (is_house or end == 0.0) else 128.0
 	var cell := Vector2i(floori(placement.origin.x / cell_size), floori(placement.origin.z / cell_size))
-	var range_end: float = NEAR_END if is_house else (end if end > 0.0 else 75.0)
+	var imported := asset in ResidentialLayout.IMPORTED
+	var range_end: float = (MID_END if imported else NEAR_END) if is_house else (end if end > 0.0 else 75.0)
 	var list := get_parts(asset, "near")
 	for i in range(list.size()):
 		var key := "%s|%d|%d_%d" % [asset, i, cell.x, cell.y]
 		if not groups.has(key):
 			groups[key] = {"piece": list[i], "begin": 0.0, "end": range_end, "shadows": true, "items": []}
 		groups[key].items.append([placement * list[i].transform, tint(list[i].name, colours)])
+	if imported:
+		# Same HOUSE_CELL cells, so near and far LOD of one house always switch together.
+		var far := get_parts(asset, "far")
+		for i in range(far.size()):
+			var key := "%s_far|%d|%d_%d" % [asset, i, cell.x, cell.y]
+			if not groups.has(key):
+				groups[key] = {"piece": far[i], "begin": MID_END, "end": NEAR_END, "shadows": true, "items": []}
+			groups[key].items.append([placement * far[i].transform, tint(far[i].name, colours)])
 	if is_house: add_massing(asset, placement, colours)
 
 func add_massing(asset: String, placement: Transform3D, colours: Dictionary) -> void:
 	var spec: Dictionary = ResidentialLayout.TYPES[asset]
 	var m: Array = MASSING[asset]
-	var w: float = spec.w
-	var d: float = spec.d
+	var w: float = m[3] if m.size() > 3 else spec.w
+	var d: float = m[4] if m.size() > 4 else spec.d
 	var eave: float = m[0]
 	var rise: float = m[1]
-	# Same 48 m cells as the detailed house, so both LODs switch on the same distance and are never
+	# Same HOUSE_CELL cells as the detailed house, so both LODs switch on the same distance and are never
 	# shown together; the massing is also tucked 12 cm inside the walls and under the roof so that,
 	# even during the switch, its faces can never sit on (and z-fight with) the real walls.
-	var cell := Vector2i(floori(placement.origin.x / 48.0), floori(placement.origin.z / 48.0))
+	var cell := Vector2i(floori(placement.origin.x / HOUSE_CELL), floori(placement.origin.z / HOUSE_CELL))
 	var inset := 0.24
 	var wall := Transform3D(Basis.from_scale(Vector3(w - inset, eave - 0.12, d - inset)), Vector3(0, (eave - 0.12) / 2, -d / 2))
 	var roof_basis := Basis.from_scale(Vector3(w + 0.8 - inset, rise - 0.12, d + 0.8 - inset)) if m[2] == "z" else Basis(Vector3.UP, PI / 2) * Basis.from_scale(Vector3(d + 0.8 - inset, rise - 0.12, w + 0.8 - inset))
@@ -163,7 +181,9 @@ func build_lot(lot: Dictionary) -> void:
 	var w: float = spec.w
 	var d: float = spec.d
 	var h: float = spec.h
-	if spec.has("recess"):
+	if spec.has("hull"):
+		for b in spec.hull: box_collider(t * b[0], b[1], t.basis)
+	elif spec.has("recess"):
 		var rx0: float = spec.recess[0]
 		var rx1: float = spec.recess[1]
 		var rd: float = spec.recess[2]
@@ -211,6 +231,8 @@ func build_lot(lot: Dictionary) -> void:
 	if lot.rear == "garage":
 		add("garage_single", t * Transform3D(Basis(Vector3.UP, PI), Vector3(lot.width / 2 - 2.6, 0, back + 0.2)), colours)
 		box_collider(t * Vector3(lot.width / 2 - 2.6, 1.6, back + 0.2 + 3.1), Vector3(3.8, 3.2, 6.2), t.basis)
+	elif lot.type in ResidentialLayout.IMPORTED and -d - 2.4 < back + 0.6:
+		pass  # deep imported house (duplex, suburban on a 22 m lot): no room for yard furniture behind it
 	else:
 		if lot.rear == "shed":
 			add("shed", t * Transform3D(Basis(Vector3.UP, PI), Vector3(lot.width / 2 - 1.8, 0, back + 1.4)), colours)
@@ -248,11 +270,17 @@ func build_lot(lot: Dictionary) -> void:
 		above.transform = Transform3D(t.basis, t * Vector3(door.x - 1.25, 1.12, ResidentialLayout.SETBACK - 0.6))
 		add_child(above)
 		var beside := GlyphText.build(digits, 0.14)
-		beside.transform = Transform3D(t.basis, t * Vector3(door.x + 0.85, door.y + 1.6, door.z + 0.04))
+		var plate: Vector3 = spec.get("number", Vector3(door.x + 0.85, door.y + 1.6, door.z + 0.04))
+		beside.transform = Transform3D(t.basis, t * plate)
 		add_child(beside)
 		var mailbox := CityAssets.create("mailbox", 85)
 		mailbox.transform = Transform3D(t.basis, t * Vector3(door.x + 1.2, 0, ResidentialLayout.SETBACK - 0.6))
 		add_child(mailbox)
+		if spec.has("door2"):
+			# Up/down duplex: the upper flat has its own mailbox beside the first.
+			var upper := CityAssets.create("mailbox", 85)
+			upper.transform = Transform3D(t.basis, t * Vector3(door.x + 1.75, 0, ResidentialLayout.SETBACK - 0.6))
+			add_child(upper)
 		var lamp := OmniLight3D.new()
 		lamp.position = t * Vector3(door.x, door.y + 2.4, door.z + 0.6)
 		lamp.light_color = Color("ffd9a0")

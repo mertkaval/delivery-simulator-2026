@@ -27,6 +27,10 @@ var vfx: CityVFX
 ## Procedural prop placement (PropPlacer): every street light, tree and piece of street furniture
 ## asks it for a valid spot on the sidewalk, clear of carriageways, junctions, walks and each other.
 var placer: PropPlacer
+## Parks, monuments and sports courts (CityMonuments).
+var monuments: CityMonuments
+## Trees, shrubs, flower beds, grass clumps and the edge / horizon forest (CityLandscape).
+var landscape: CityLandscape
 
 func set_time(hour: float) -> void:
 	var amount := smoothstep(-0.12, 0.35, sin((hour - 6.0) / 24.0 * TAU))
@@ -126,6 +130,9 @@ func label_at(words: String, at: Vector3, size: int = 48, color: Color = Color.W
 
 func _ready() -> void:
 	placer = PropPlacer.new()
+	landscape = CityLandscape.new()
+	landscape.placer = placer
+	add_child(landscape)
 	var environment := WorldEnvironment.new()
 	var env := Environment.new()
 	atmosphere = env
@@ -185,7 +192,7 @@ func _ready() -> void:
 	sun.light_energy = 1.7
 	sun.shadow_enabled = true
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
-	sun.directional_shadow_max_distance = 170.0
+	sun.directional_shadow_max_distance = 130.0   # was 170: fewer shadow-cascade draws, no visible loss at street level
 	sun.directional_shadow_split_1 = 0.08
 	sun.directional_shadow_split_2 = 0.22
 	sun.directional_shadow_split_3 = 0.5
@@ -318,6 +325,8 @@ func _ready() -> void:
 	add_child(weather)
 	# Signals, LED shop boards and street effects (world/streets/street_life.gd).
 	StreetLife.attach(self)
+	# Planting last, so every tree, shrub and bed keeps clear of the props placed above.
+	landscape.plant_city()
 
 func batch_imported_assets() -> void:
 	var groups := {}
@@ -461,32 +470,14 @@ func build_park(at: Vector3) -> void:
 	var garden := CityAssets.create("park_garden", 200)
 	garden.position = at
 	add_child(garden)
-	var fountain := CityAssets.create("fountain", 150)
-	fountain.position = at + Vector3(4, 0, -5)
-	add_child(fountain)
-	var basin := StaticBody3D.new()
-	var collision := CollisionShape3D.new()
-	var cylinder := CylinderShape3D.new()
-	cylinder.radius = 1.75
-	cylinder.height = 0.55
-	collision.shape = cylinder
-	collision.position.y = 0.275
-	basin.add_child(collision)
-	fountain.add_child(basin)
-	var water := MeshInstance3D.new()
-	var disk := CylinderMesh.new()
-	disk.top_radius = 1.49
-	disk.bottom_radius = 1.49
-	disk.height = 0.01
-	disk.radial_segments = 48
-	water.mesh = disk
-	var surface := StandardMaterial3D.new()
-	surface.albedo_color = Color("477d87")
-	surface.metallic = 0.45
-	surface.roughness = 0.17
-	water.material_override = surface
-	water.position.y = 0.43
-	fountain.add_child(water)
+	# Fountain with animated water, the Atatürk bust memorial, sculptures, or (Halime Çavuş Park)
+	# the equestrian monument: CityMonuments (world/monuments/city_monuments.gd).
+	if monuments == null:
+		monuments = CityMonuments.new()
+		monuments.name = "Monuments"
+		monuments.placer = placer
+		add_child(monuments)
+	monuments.park(at)
 	for delta in [Vector3(4, 0, 4), Vector3(-4.5, 0, 6), Vector3(-3, 0, -10)]: bench(at + delta)
 	for delta: Vector3 in [Vector3(-8, 0, -10), Vector3(8, 0, 11), Vector3(-8, 0, 11)]:
 		placer.record("tree", at + delta, 0.35, "park")
@@ -494,23 +485,10 @@ func build_park(at: Vector3) -> void:
 	for x in [-6.5, -2.5]:
 		for z in [4, 8]: box(at + Vector3(x, 1.42, z), Vector3(0.16, 2.84, 0.16), "9c8060").hide()
 
+## Avenue plane trees and the original park trees: instanced LOD trees with a trunk collider
+## (CityLandscape.street_tree picks the species from the location).
 func tree(at: Vector3) -> void:
-	var variation := absi(int(at.x * 7 + at.z)) % 3
-	var model := CityAssets.create(["maple", "birch", "conifer"][variation], 240)
-	model.position = at
-	model.rotation.y = fmod(absf(at.z * 0.83 + at.x), TAU)
-	model.scale = Vector3.ONE * (0.80 + float(variation) * 0.12)
-	add_child(model)
-	# Only the trunk needs collision; branches and leaves are visual.
-	var trunk := StaticBody3D.new()
-	var shape := CollisionShape3D.new()
-	var capsule := CapsuleShape3D.new()
-	capsule.radius = 0.24
-	capsule.height = 3.5
-	shape.shape = capsule
-	shape.position.y = 1.75
-	trunk.add_child(shape)
-	model.add_child(trunk)
+	landscape.street_tree(at)
 
 func bench(at: Vector3) -> void:
 	var model: Node3D = PropKit.create("bench_wood", 120) if PropKit.has("bench_wood") else CityAssets.create("park_bench", 120)

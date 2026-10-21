@@ -1,0 +1,125 @@
+{
+ "grove_b": {
+  "species": "grove_b",
+  "height": 10.0,
+  "crown_radius": 1.8340879040956495,
+  "crown_base": 3.2370094541807473,
+  "trunk_radius": 0.247,
+  "tris_lod0": 1806,
+  "tris_lod1": 1024,
+  "far_slot": 12,
+  "far_size": 10.3,
+  "source": "low_poly_tree_scene_free.glb",
+  "source_tris": {
+   "bark": 276,
+   "leaves": 1530
+  },
+  "card_size_lod0": null,
+  "card_size_lod1": 0.6680662734759718,
+  "source_scale": 0.5806919521638103,
+  "textures": {
+   "leaves": [
+    1024,
+    1024
+   ],
+   "bark": [
+    [
+     512,
+     512
+    ],
+    [
+     512,
+     512
+    ]
+   ]
+  }
+ },
+ "garden": {
+  "grass_a": {
+   "tris": 50,
+   "height": 0.55,
+   "kind": "grass"
+  },
+  "grass_b": {
+   "tris": 80,
+   "height": 0.42,
+   "kind": "grass"
+  },
+  "shrub_a": {
+   "tris": 1530,
+   "height": 1.05,
+   "kind": "shrub"
+  },
+  "shrub_b": {
+   "tris": 1824,
+   "height": 1.35,
+   "kind": "shrub"
+  },
+  "shrub_c": {
+   "tris": 1530,
+   "height": 0.75,
+   "kind": "shrub"
+  },
+  "potted_snake": {
+   "tris": 651,
+   "height": 0.9253759384155273,
+   "kind": "potted"
+  },
+  "bed_snake": {
+   "tris": 254,
+   "height": 0.6286236763000488,
+   "kind": "bed_plant"
+  },
+  "potted_croton": {
+   "tris": 3571,
+   "height": 0.5311089158058167,
+   "kind": "potted"
+  },
+  "bed_croton": {
+   "tris": 3534,
+   "height": 0.381964747607708,
+   "kind": "bed_plant"
+  },
+  "potted_lily": {
+   "tris": 2910,
+   "height": 1.0860259337350726,
+   "kind": "potted"
+  },
+  "bed_edging": {
+   "tris": 1408,
+   "height": 0.12,
+   "kind": "bed"
+  }
+ },
+ "cherry": {
+  "species": "cherry",
+  "height": 7.0,
+  "crown_radius": 2.1470392930507654,
+  "crown_base": 4.4193328473699545,
+  "trunk_radius": 0.659,
+  "tris_lod0": 7408,
+  "tris_lod1": 2802,
+  "far_slot": 10,
+  "far_size": 7.551944055557251,
+  "source": "tree.glb",
+  "source_tris": {
+   "bark": 13092,
+   "leaves": 203654
+  },
+  "card_size_lod0": 0.23985911673829952,
+  "card_size_lod1": 0.4908145033206449,
+  "source_scale": 31.744850357146753,
+  "textures": {
+   "leaves": [
+    1024,
+    1024
+   ],
+   "bark": [
+    [
+     128,
+     512
+    ]
+   ]
+  }
+ }
+}

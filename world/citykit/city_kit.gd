@@ -49,6 +49,8 @@ const FLAT := {
 	"KitBinBlue": ["1f4f8f", 0.5, 0.0], "KitBinGreen": ["2d6a3a", 0.5, 0.0], "KitInsulator": ["cfd6d8", 0.3, 0.0],
 	"KitBronze": ["6b4a2c", 0.36, 0.85], "KitSignGreen": ["1f5c3a", 0.4, 0.0],
 	"KitPlaster": ["eeebe4", 0.85, 0.0], "KitWallPaint": ["ffffff", 0.8, 0.0], "KitAccentPaint": ["ffffff", 0.45, 0.0],
+	# Imported houses (tools/prepare_new_houses.py): modelled lap boards painted per house; dark plinth.
+	"KitSidingPaint": ["ffffff", 0.72, 0.0], "KitPlinthDark": ["34373a", 0.85, 0.0],
 	"KitUpholstery": ["ffffff", 0.7, 0.0], "KitSteel": ["c4c8ca", 0.28, 0.85], "KitSteelDark": ["5d6366", 0.4, 0.7],
 	"KitCounterStone": ["e9e5dc", 0.15, 0.0], "KitOak": ["a77a4f", 0.5, 0.0], "KitChalkboard": ["1d2321", 0.85, 0.0],
 	"KitCopper": ["b06a3b", 0.3, 0.9], "KitBrass": ["b8913f", 0.3, 0.9], "KitMeatRoast": ["7a3a1c", 0.55, 0.0],

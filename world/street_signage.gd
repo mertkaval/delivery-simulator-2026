@@ -1,6 +1,6 @@
 class_name StreetSignage
 extends HouseInstancer
-## Street-name posts at every junction, park entrance signs with memorial busts, and the
+## Street-name posts at every junction, park entrance signs (memorials: CityMonuments), and the
 ## name plaques (StreetNames). Uses the Blender props from build_houses.py, instanced like
 ## the residential props; the names are Label3D text so they stay crisp.
 
@@ -23,29 +23,26 @@ func _ready() -> void:
 var monument_at := Vector3.ZERO
 var monument_transform := Transform3D.IDENTITY
 
-## Atatürk Square: stepped granite plinth with the standing bronze figure, facing the street.
+## Atatürk Square: the standing bronze Atatürk on its stepped granite plinth, facing the street,
+## with the inscription and the fountain behind (CityMonuments.square).
 func monument(plaza: Transform3D) -> void:
-	var t := plaza * Transform3D(Basis.IDENTITY, Vector3(0, 0, -6.5))
-	monument_at = t.origin
-	monument_transform = t
-	add("monument_plinth", t, {}, 400.0)
-	add("statue_figure", t * Transform3D(Basis.IDENTITY, Vector3(0, 4.14, 0)), {}, 400.0)
-	for i in range(3):
-		var w := 7.0 - i * 1.4
-		box_collider(t * Vector3(0, 0.15 + i * 0.3, 0), Vector3(w, 0.3, w), t.basis)
-	box_collider(t * Vector3(0, 2.4, 0), Vector3(2.4, 3.0, 2.4), t.basis)
-	var lines := [["ATATÜRK SQUARE", 44, 2.62], ["MUSTAFA KEMAL ATATÜRK · 1881–1938", 20, 2.3], ["“Peace at home, peace in the world.”", 18, 2.08]]
-	for line in lines:
-		var label := Label3D.new()
-		label.text = line[0]
-		label.font_size = line[1]
-		label.pixel_size = minf(0.004, 1.5 / (String(line[0]).length() * float(line[1]) * 0.6))
-		label.outline_size = 0
-		label.modulate = Color("f0dca0")
-		label.transform = t * Transform3D(Basis.IDENTITY, Vector3(0, line[2], 1.232))
-		label.double_sided = false
-		label.visibility_range_end = 50.0
-		add_child(label)
+	var monuments := monuments_node()
+	monument_transform = monuments.square(plaza)
+	monument_at = monument_transform.origin
+
+## The city's CityMonuments (CedarNeighborhood.monuments), or a local one when built standalone.
+func monuments_node() -> CityMonuments:
+	var city := get_parent()
+	var found: Variant = city.get("monuments") if city != null else null
+	if found is CityMonuments: return found
+	var own := get_node_or_null("Monuments") as CityMonuments
+	if own == null:
+		own = CityMonuments.new()
+		own.name = "Monuments"
+		var placer: Variant = city.get("placer") if city != null else null
+		if placer is PropPlacer: own.placer = placer
+		add_child(own)
+	return own
 
 ## Corner post on the sidewalk, on the first corner that is clear of every carriageway.
 func junction_sign(j: Dictionary) -> void:
@@ -82,7 +79,7 @@ func blade_text(words: String, at: Vector3, yaw: float) -> void:
 	label.visibility_range_end = SIGN_RANGE - 25.0
 	add_child(label)
 
-## Timber entrance sign on the park's south edge and a bronze bust facing it.
+## Timber entrance sign on the park's south edge.
 func park(centre: Vector3, title: String) -> void:
 	var sign_at := centre + Vector3(0, 0, 15.2)
 	add("park_sign", Transform3D(Basis.IDENTITY, sign_at), {}, 90.0)
@@ -100,20 +97,9 @@ func park(centre: Vector3, title: String) -> void:
 		label.double_sided = false
 		label.visibility_range_end = 60.0
 		add_child(label)
-	# The bust stands in the open lawn south of the fountain, facing the entrance sign.
-	var bust_at := centre + Vector3(-1.5, 0, 0.5)
-	add("statue_bust", Transform3D(Basis.IDENTITY, bust_at), {}, 110.0)
-	box_collider(bust_at + Vector3(0, 0.7, 0), Vector3(1.6, 1.4, 1.6), Basis.IDENTITY)
-	var plaque := Label3D.new()
-	plaque.text = title.trim_suffix(" Park").to_upper()
-	plaque.font_size = 24
-	plaque.pixel_size = minf(0.0026, 0.56 / (plaque.text.length() * 14.0))
-	plaque.outline_size = 0
-	plaque.modulate = Color("e9d9a6")
-	plaque.position = bust_at + Vector3(0, 0.86, 0.468)
-	plaque.visibility_range_end = 30.0
-	add_child(plaque)
-	busts.append(bust_at)
+	# The park's Atatürk memorial (bust wall, or the equestrian monument) comes from CityMonuments.
+	var memorial: Variant = monuments_node().memorials.get(Vector2(centre.x, centre.z))
+	busts.append(memorial if memorial is Vector3 else centre)
 
 var murals: Array[Transform3D] = []
 

@@ -1,0 +1,2948 @@
+{
+ "convention": {
+  "units": "metres",
+  "up": "Blender +Z / Godot +Y",
+  "origin": "floor centre of the footprint; origin 'back' props: centre of the back face at floor level",
+  "front": "front faces Blender -Y = Godot +Z",
+  "size": "[x_width, y_height_up, z_depth] in Godot axes, metres",
+  "mesh": "single static MeshInstance per prop, one surface per material, transforms applied",
+  "alpha": "foliage uses alpha scissor (glTF MASK); glass uses alpha blend",
+  "metadata": "glTF node extras on the prop node: prop_id, category, collision, size, source"
+ },
+ "props": [
+  {
+   "id": "bread_1",
+   "category": "bakery",
+   "path": "res://assets/interiors/bakery/bread_1.glb",
+   "source": "baked_goods.glb",
+   "size": [
+    0.136,
+    0.08,
+    0.221
+   ],
+   "bounds_min": [
+    -0.068,
+    0.0,
+    -0.11
+   ],
+   "tris": 914,
+   "source_tris": 914,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 263.5,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "bread_2",
+   "category": "bakery",
+   "path": "res://assets/interiors/bakery/bread_2.glb",
+   "source": "baked_goods.glb",
+   "size": [
+    0.124,
+    0.075,
+    0.281
+   ],
+   "bounds_min": [
+    -0.062,
+    0.0,
+    -0.14
+   ],
+   "tris": 992,
+   "source_tris": 992,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 278.1,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "bread_3",
+   "category": "bakery",
+   "path": "res://assets/interiors/bakery/bread_3.glb",
+   "source": "baked_goods.glb",
+   "size": [
+    0.119,
+    0.074,
+    0.22
+   ],
+   "bounds_min": [
+    -0.06,
+    0.0,
+    -0.11
+   ],
+   "tris": 964,
+   "source_tris": 964,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 322.7,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "bread_4",
+   "category": "bakery",
+   "path": "res://assets/interiors/bakery/bread_4.glb",
+   "source": "baked_goods.glb",
+   "size": [
+    0.124,
+    0.065,
+    0.24
+   ],
+   "bounds_min": [
+    -0.062,
+    0.0,
+    -0.12
+   ],
+   "tris": 996,
+   "source_tris": 996,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 269.4,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "bread_basket",
+   "category": "bakery",
+   "path": "res://assets/interiors/bakery/bread_basket.glb",
+   "source": "baked_goods.glb (assembled)",
+   "size": [
+    0.364,
+    0.11,
+    0.264
+   ],
+   "tris": 4246,
+   "materials": 7,
+   "kb": 1480.2,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "bread_roll_1",
+   "category": "bakery",
+   "path": "res://assets/interiors/bakery/bread_roll_1.glb",
+   "source": "baked_goods.glb",
+   "size": [
+    0.103,
+    0.044,
+    0.097
+   ],
+   "bounds_min": [
+    -0.052,
+    0.0,
+    -0.048
+   ],
+   "tris": 728,
+   "source_tris": 728,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 237.1,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "bread_roll_2",
+   "category": "bakery",
+   "path": "res://assets/interiors/bakery/bread_roll_2.glb",
+   "source": "baked_goods.glb",
+   "size": [
+    0.086,
+    0.057,
+    0.091
+   ],
+   "bounds_min": [
+    -0.043,
+    0.0,
+    -0.045
+   ],
+   "tris": 582,
+   "source_tris": 582,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 305.5,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "bread_roll_3",
+   "category": "bakery",
+   "path": "res://assets/interiors/bakery/bread_roll_3.glb",
+   "source": "baked_goods.glb",
+   "size": [
+    0.084,
+    0.054,
+    0.085
+   ],
+   "bounds_min": [
+    -0.042,
+    0.0,
+    -0.043
+   ],
+   "tris": 720,
+   "source_tris": 720,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 316.0,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "bread_roll_4",
+   "category": "bakery",
+   "path": "res://assets/interiors/bakery/bread_roll_4.glb",
+   "source": "baked_goods.glb",
+   "size": [
+    0.077,
+    0.031,
+    0.082
+   ],
+   "bounds_min": [
+    -0.038,
+    0.0,
+    -0.041
+   ],
+   "tris": 782,
+   "source_tris": 782,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 269.3,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "pastry_1",
+   "category": "bakery",
+   "path": "res://assets/interiors/bakery/pastry_1.glb",
+   "source": "baked_goods.glb",
+   "size": [
+    0.132,
+    0.056,
+    0.101
+   ],
+   "bounds_min": [
+    -0.066,
+    0.0,
+    -0.051
+   ],
+   "tris": 1076,
+   "source_tris": 1076,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 267.6,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "pastry_2",
+   "category": "bakery",
+   "path": "res://assets/interiors/bakery/pastry_2.glb",
+   "source": "baked_goods.glb",
+   "size": [
+    0.126,
+    0.046,
+    0.076
+   ],
+   "bounds_min": [
+    -0.063,
+    0.0,
+    -0.038
+   ],
+   "tris": 1100,
+   "source_tris": 1100,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 223.8,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "pastry_3",
+   "category": "bakery",
+   "path": "res://assets/interiors/bakery/pastry_3.glb",
+   "source": "baked_goods.glb",
+   "size": [
+    0.099,
+    0.029,
+    0.086
+   ],
+   "bounds_min": [
+    -0.05,
+    0.0,
+    -0.043
+   ],
+   "tris": 994,
+   "source_tris": 994,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 203.4,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "pastry_4",
+   "category": "bakery",
+   "path": "res://assets/interiors/bakery/pastry_4.glb",
+   "source": "baked_goods.glb",
+   "size": [
+    0.079,
+    0.015,
+    0.075
+   ],
+   "bounds_min": [
+    -0.04,
+    0.0,
+    -0.038
+   ],
+   "tris": 694,
+   "source_tris": 694,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 306.6,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "tray_breads",
+   "category": "bakery",
+   "path": "res://assets/interiors/bakery/tray_breads.glb",
+   "source": "baked_goods.glb (assembled)",
+   "size": [
+    0.428,
+    0.092,
+    0.308
+   ],
+   "tris": 2930,
+   "materials": 4,
+   "kb": 868.2,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "tray_cookies",
+   "category": "bakery",
+   "path": "res://assets/interiors/bakery/tray_cookies.glb",
+   "source": "baked_goods.glb (assembled)",
+   "size": [
+    0.428,
+    0.041,
+    0.308
+   ],
+   "tris": 7506,
+   "materials": 3,
+   "kb": 698.5,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "tray_pastries",
+   "category": "bakery",
+   "path": "res://assets/interiors/bakery/tray_pastries.glb",
+   "source": "baked_goods.glb (assembled)",
+   "size": [
+    0.428,
+    0.068,
+    0.308
+   ],
+   "tris": 6100,
+   "materials": 5,
+   "kb": 1075.1,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "tray_rolls",
+   "category": "bakery",
+   "path": "res://assets/interiors/bakery/tray_rolls.glb",
+   "source": "baked_goods.glb (assembled)",
+   "size": [
+    0.428,
+    0.069,
+    0.308
+   ],
+   "tris": 5684,
+   "materials": 5,
+   "kb": 1216.1,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "bin_small",
+   "category": "bath",
+   "path": "res://assets/interiors/bath/bin_small.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.369,
+    0.3,
+    0.255
+   ],
+   "bounds_min": [
+    -0.184,
+    0.0,
+    -0.127
+   ],
+   "tris": 92,
+   "source_tris": 92,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 29.2,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "shampoo",
+   "category": "bath",
+   "path": "res://assets/interiors/bath/shampoo.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.081,
+    0.22,
+    0.07
+   ],
+   "bounds_min": [
+    -0.04,
+    0.0,
+    -0.035
+   ],
+   "tris": 68,
+   "source_tris": 68,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 21.6,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "shampoo_b",
+   "category": "bath",
+   "path": "res://assets/interiors/bath/shampoo_b.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.074,
+    0.21,
+    0.064
+   ],
+   "bounds_min": [
+    -0.037,
+    0.0,
+    -0.032
+   ],
+   "tris": 73,
+   "source_tris": 73,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 18.5,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "soap_bar",
+   "category": "bath",
+   "path": "res://assets/interiors/bath/soap_bar.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.09,
+    0.035,
+    0.051
+   ],
+   "bounds_min": [
+    -0.045,
+    0.0,
+    -0.026
+   ],
+   "tris": 44,
+   "source_tris": 44,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 12.6,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "toilet_paper_holder",
+   "category": "bath",
+   "path": "res://assets/interiors/bath/toilet_paper_holder.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.145,
+    0.16,
+    0.182
+   ],
+   "bounds_min": [
+    -0.072,
+    0.0,
+    -0.0
+   ],
+   "tris": 50,
+   "source_tris": 50,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 17.9,
+   "collision": false,
+   "origin": "back"
+  },
+  {
+   "id": "toothbrush_cup",
+   "category": "bath",
+   "path": "res://assets/interiors/bath/toothbrush_cup.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.186,
+    0.17,
+    0.167
+   ],
+   "bounds_min": [
+    -0.093,
+    0.0,
+    -0.084
+   ],
+   "tris": 92,
+   "source_tris": 92,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 24.6,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "alarm_clock",
+   "category": "bedroom",
+   "path": "res://assets/interiors/bedroom/alarm_clock.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.091,
+    0.14,
+    0.046
+   ],
+   "bounds_min": [
+    -0.046,
+    0.0,
+    -0.023
+   ],
+   "tris": 194,
+   "source_tris": 194,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 30.1,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "alarm_clock_b",
+   "category": "bedroom",
+   "path": "res://assets/interiors/bedroom/alarm_clock_b.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.095,
+    0.13,
+    0.05
+   ],
+   "bounds_min": [
+    -0.047,
+    0.0,
+    -0.025
+   ],
+   "tris": 240,
+   "source_tris": 240,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 26.2,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "armchair_reading",
+   "category": "bedroom",
+   "path": "res://assets/interiors/bedroom/armchair_reading.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.826,
+    0.942,
+    0.627
+   ],
+   "bounds_min": [
+    -0.413,
+    0.0,
+    -0.313
+   ],
+   "tris": 194,
+   "source_tris": 194,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 30.3,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "bed_blue",
+   "category": "bedroom",
+   "path": "res://assets/interiors/bedroom/bed_blue.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    1.217,
+    0.876,
+    2.115
+   ],
+   "bounds_min": [
+    -0.609,
+    0.0,
+    -1.057
+   ],
+   "tris": 134,
+   "source_tris": 134,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 22.9,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "bed_fur",
+   "category": "bedroom",
+   "path": "res://assets/interiors/bedroom/bed_fur.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    1.268,
+    1.076,
+    2.107
+   ],
+   "bounds_min": [
+    -0.634,
+    0.0,
+    -1.053
+   ],
+   "tris": 176,
+   "source_tris": 176,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 27.0,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "bed_plaid",
+   "category": "bedroom",
+   "path": "res://assets/interiors/bedroom/bed_plaid.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    1.327,
+    1.046,
+    2.098
+   ],
+   "bounds_min": [
+    -0.664,
+    0.0,
+    -1.049
+   ],
+   "tris": 212,
+   "source_tris": 212,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 28.4,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "chair_wood",
+   "category": "bedroom",
+   "path": "res://assets/interiors/bedroom/chair_wood.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.475,
+    1.024,
+    0.466
+   ],
+   "bounds_min": [
+    -0.238,
+    0.0,
+    -0.233
+   ],
+   "tris": 400,
+   "source_tris": 400,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 43.2,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "clothes_rack",
+   "category": "bedroom",
+   "path": "res://assets/interiors/bedroom/clothes_rack.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    1.958,
+    1.693,
+    0.038
+   ],
+   "bounds_min": [
+    -0.979,
+    0.0,
+    -0.019
+   ],
+   "tris": 36,
+   "source_tris": 36,
+   "materials": 2,
+   "textures": [
+    "256x256",
+    "512x256"
+   ],
+   "kb": 107.8,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "lamp_table",
+   "category": "bedroom",
+   "path": "res://assets/interiors/bedroom/lamp_table.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.371,
+    0.55,
+    0.362
+   ],
+   "bounds_min": [
+    -0.186,
+    0.0,
+    -0.181
+   ],
+   "tris": 206,
+   "source_tris": 206,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 28.4,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "lamp_table_b",
+   "category": "bedroom",
+   "path": "res://assets/interiors/bedroom/lamp_table_b.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.357,
+    0.52,
+    0.348
+   ],
+   "bounds_min": [
+    -0.179,
+    0.0,
+    -0.174
+   ],
+   "tris": 187,
+   "source_tris": 187,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 29.2,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "radio",
+   "category": "bedroom",
+   "path": "res://assets/interiors/bedroom/radio.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.13,
+    0.22,
+    0.222
+   ],
+   "bounds_min": [
+    -0.065,
+    0.0,
+    -0.111
+   ],
+   "tris": 90,
+   "source_tris": 90,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 17.7,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "side_table_small",
+   "category": "bedroom",
+   "path": "res://assets/interiors/bedroom/side_table_small.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.534,
+    0.682,
+    0.534
+   ],
+   "bounds_min": [
+    -0.267,
+    0.0,
+    -0.267
+   ],
+   "tris": 128,
+   "source_tris": 128,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 22.8,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "book_flat",
+   "category": "decor",
+   "path": "res://assets/interiors/decor/book_flat.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.36,
+    0.029,
+    0.169
+   ],
+   "bounds_min": [
+    -0.18,
+    0.0,
+    -0.085
+   ],
+   "tris": 485,
+   "source_tris": 1404,
+   "materials": 1,
+   "textures": [
+    "512x256"
+   ],
+   "kb": 54.6,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "book_stack",
+   "category": "decor",
+   "path": "res://assets/interiors/decor/book_stack.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.3,
+    0.036,
+    0.211
+   ],
+   "bounds_min": [
+    -0.15,
+    0.0,
+    -0.106
+   ],
+   "tris": 40,
+   "source_tris": 40,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 31.3,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "figurine",
+   "category": "decor",
+   "path": "res://assets/interiors/decor/figurine.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.19,
+    0.14,
+    0.079
+   ],
+   "bounds_min": [
+    -0.095,
+    0.0,
+    -0.039
+   ],
+   "tris": 264,
+   "source_tris": 264,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 25.3,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "flowers_vase",
+   "category": "decor",
+   "path": "res://assets/interiors/decor/flowers_vase.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.202,
+    0.5,
+    0.202
+   ],
+   "bounds_min": [
+    -0.101,
+    0.0,
+    -0.101
+   ],
+   "tris": 64,
+   "source_tris": 64,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 67.1,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "hall_mirror_console",
+   "category": "decor",
+   "path": "res://assets/interiors/decor/hall_mirror_console.glb",
+   "source": "tv_unit.glb",
+   "size": [
+    1.15,
+    1.46,
+    0.434
+   ],
+   "bounds_min": [
+    -0.575,
+    0.544,
+    -0.0
+   ],
+   "tris": 1555,
+   "source_tris": 1555,
+   "materials": 9,
+   "textures": [],
+   "kb": 84.0,
+   "collision": false,
+   "origin": "back_keepz"
+  },
+  {
+   "id": "photo_frame",
+   "category": "decor",
+   "path": "res://assets/interiors/decor/photo_frame.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.255,
+    0.18,
+    0.094
+   ],
+   "bounds_min": [
+    -0.128,
+    0.0,
+    -0.047
+   ],
+   "tris": 28,
+   "source_tris": 28,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 22.3,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "photo_frame_b",
+   "category": "decor",
+   "path": "res://assets/interiors/decor/photo_frame_b.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.244,
+    0.18,
+    0.094
+   ],
+   "bounds_min": [
+    -0.122,
+    0.0,
+    -0.047
+   ],
+   "tris": 28,
+   "source_tris": 28,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 22.3,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "photo_frame_c",
+   "category": "decor",
+   "path": "res://assets/interiors/decor/photo_frame_c.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.167,
+    0.18,
+    0.094
+   ],
+   "bounds_min": [
+    -0.084,
+    0.0,
+    -0.047
+   ],
+   "tris": 28,
+   "source_tris": 28,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 22.3,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "picture_frames_wall",
+   "category": "decor",
+   "path": "res://assets/interiors/decor/picture_frames_wall.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.979,
+    0.97,
+    0.045
+   ],
+   "bounds_min": [
+    -0.49,
+    0.0,
+    -0.0
+   ],
+   "tris": 84,
+   "source_tris": 84,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 61.1,
+   "collision": false,
+   "origin": "back"
+  },
+  {
+   "id": "vase_a",
+   "category": "decor",
+   "path": "res://assets/interiors/decor/vase_a.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.187,
+    0.26,
+    0.182
+   ],
+   "bounds_min": [
+    -0.094,
+    0.0,
+    -0.091
+   ],
+   "tris": 108,
+   "source_tris": 108,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 29.1,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "vase_b",
+   "category": "decor",
+   "path": "res://assets/interiors/decor/vase_b.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.191,
+    0.3,
+    0.186
+   ],
+   "bounds_min": [
+    -0.095,
+    0.0,
+    -0.093
+   ],
+   "tris": 108,
+   "source_tris": 108,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 29.0,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "vase_c",
+   "category": "decor",
+   "path": "res://assets/interiors/decor/vase_c.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.162,
+    0.24,
+    0.158
+   ],
+   "bounds_min": [
+    -0.081,
+    0.0,
+    -0.079
+   ],
+   "tris": 108,
+   "source_tris": 108,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 30.3,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "vase_d",
+   "category": "decor",
+   "path": "res://assets/interiors/decor/vase_d.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.135,
+    0.22,
+    0.156
+   ],
+   "bounds_min": [
+    -0.067,
+    0.0,
+    -0.078
+   ],
+   "tris": 92,
+   "source_tris": 92,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 30.0,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "vase_e",
+   "category": "decor",
+   "path": "res://assets/interiors/decor/vase_e.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.12,
+    0.24,
+    0.138
+   ],
+   "bounds_min": [
+    -0.06,
+    0.0,
+    -0.069
+   ],
+   "tris": 80,
+   "source_tris": 80,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 29.0,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "wall_clock",
+   "category": "decor",
+   "path": "res://assets/interiors/decor/wall_clock.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.351,
+    0.36,
+    0.062
+   ],
+   "bounds_min": [
+    -0.175,
+    0.0,
+    -0.0
+   ],
+   "tris": 38,
+   "source_tris": 38,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 10.9,
+   "collision": false,
+   "origin": "back"
+  },
+  {
+   "id": "wall_shelf_decor",
+   "category": "decor",
+   "path": "res://assets/interiors/decor/wall_shelf_decor.glb",
+   "source": "tv_unit.glb",
+   "size": [
+    1.977,
+    0.38,
+    0.347
+   ],
+   "bounds_min": [
+    -0.988,
+    1.655,
+    -0.0
+   ],
+   "tris": 3876,
+   "source_tris": 58881,
+   "materials": 11,
+   "textures": [],
+   "kb": 240.8,
+   "collision": false,
+   "origin": "back_keepz"
+  },
+  {
+   "id": "ac_unit",
+   "category": "exterior",
+   "path": "res://assets/interiors/exterior/ac_unit.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.769,
+    0.55,
+    0.752
+   ],
+   "bounds_min": [
+    -0.385,
+    0.0,
+    -0.0
+   ],
+   "tris": 28,
+   "source_tris": 28,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 16.1,
+   "collision": false,
+   "origin": "back"
+  },
+  {
+   "id": "fuse_box",
+   "category": "exterior",
+   "path": "res://assets/interiors/exterior/fuse_box.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.274,
+    0.5,
+    0.18
+   ],
+   "bounds_min": [
+    -0.137,
+    0.0,
+    -0.0
+   ],
+   "tris": 196,
+   "source_tris": 196,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 33.1,
+   "collision": false,
+   "origin": "back"
+  },
+  {
+   "id": "garbage_bag",
+   "category": "exterior",
+   "path": "res://assets/interiors/exterior/garbage_bag.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.513,
+    0.55,
+    0.626
+   ],
+   "bounds_min": [
+    -0.257,
+    0.0,
+    -0.313
+   ],
+   "tris": 34,
+   "source_tris": 34,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 23.4,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "garbage_bag_b",
+   "category": "exterior",
+   "path": "res://assets/interiors/exterior/garbage_bag_b.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.606,
+    0.5,
+    0.576
+   ],
+   "bounds_min": [
+    -0.303,
+    0.0,
+    -0.288
+   ],
+   "tris": 34,
+   "source_tris": 34,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 23.3,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "watering_can",
+   "category": "exterior",
+   "path": "res://assets/interiors/exterior/watering_can.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.431,
+    0.25,
+    0.129
+   ],
+   "bounds_min": [
+    -0.215,
+    0.0,
+    -0.065
+   ],
+   "tris": 83,
+   "source_tris": 83,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 24.1,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "airfryer",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/airfryer.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.304,
+    0.33,
+    0.388
+   ],
+   "bounds_min": [
+    -0.152,
+    0.0,
+    -0.194
+   ],
+   "tris": 1939,
+   "source_tris": 6382,
+   "materials": 2,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 146.2,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "almond_bottles",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/almond_bottles.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.154,
+    0.24,
+    0.07
+   ],
+   "bounds_min": [
+    -0.077,
+    0.0,
+    -0.035
+   ],
+   "tris": 1164,
+   "source_tris": 8604,
+   "materials": 3,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 223.1,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "blender",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/blender.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.211,
+    0.399,
+    0.195
+   ],
+   "bounds_min": [
+    -0.106,
+    0.0,
+    -0.097
+   ],
+   "tris": 1940,
+   "source_tris": 12700,
+   "materials": 2,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 205.6,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "bowl",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/bowl.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.178,
+    0.151,
+    0.206
+   ],
+   "bounds_min": [
+    -0.089,
+    0.0,
+    -0.103
+   ],
+   "tris": 893,
+   "source_tris": 3632,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 133.3,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "canisters",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/canisters.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.84,
+    0.24,
+    0.263
+   ],
+   "bounds_min": [
+    -0.42,
+    0.0,
+    -0.131
+   ],
+   "tris": 1454,
+   "source_tris": 4344,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 164.2,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "casserole_pot",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/casserole_pot.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.3,
+    0.155,
+    0.233
+   ],
+   "bounds_min": [
+    -0.15,
+    0.0,
+    -0.116
+   ],
+   "tris": 336,
+   "source_tris": 336,
+   "materials": 2,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 40.3,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "cereal_box",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/cereal_box.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.207,
+    0.3,
+    0.064
+   ],
+   "bounds_min": [
+    -0.104,
+    0.0,
+    -0.032
+   ],
+   "tris": 12,
+   "source_tris": 12,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 25.5,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "chef_knife",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/chef_knife.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.31,
+    0.031,
+    0.239
+   ],
+   "bounds_min": [
+    -0.155,
+    0.0,
+    -0.119
+   ],
+   "tris": 582,
+   "source_tris": 6958,
+   "materials": 2,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 193.9,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "coffee_can",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/coffee_can.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.137,
+    0.14,
+    0.133
+   ],
+   "bounds_min": [
+    -0.068,
+    0.0,
+    -0.067
+   ],
+   "tris": 24,
+   "source_tris": 24,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 26.6,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "coffee_jar",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/coffee_jar.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.078,
+    0.17,
+    0.08
+   ],
+   "bounds_min": [
+    -0.039,
+    0.0,
+    -0.04
+   ],
+   "tris": 788,
+   "source_tris": 3344,
+   "materials": 3,
+   "textures": [
+    "256x512",
+    "512x512"
+   ],
+   "kb": 310.0,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "coffee_machine",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/coffee_machine.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.477,
+    0.36,
+    0.06
+   ],
+   "bounds_min": [
+    -0.238,
+    0.0,
+    -0.03
+   ],
+   "tris": 1460,
+   "source_tris": 2593,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 64.6,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "cookbook",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/cookbook.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.27,
+    0.019,
+    0.26
+   ],
+   "bounds_min": [
+    -0.135,
+    0.0,
+    -0.13
+   ],
+   "tris": 489,
+   "source_tris": 1512,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 63.8,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "cookbook_pile",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/cookbook_pile.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.319,
+    0.064,
+    0.32
+   ],
+   "bounds_min": [
+    -0.159,
+    0.0,
+    -0.16
+   ],
+   "tris": 787,
+   "source_tris": 3174,
+   "materials": 3,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 262.8,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "cookware_rail",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/cookware_rail.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.831,
+    0.5,
+    0.112
+   ],
+   "bounds_min": [
+    -0.415,
+    0.0,
+    -0.0
+   ],
+   "tris": 20,
+   "source_tris": 20,
+   "materials": 1,
+   "textures": [
+    "256x128"
+   ],
+   "kb": 38.5,
+   "collision": false,
+   "origin": "back"
+  },
+  {
+   "id": "cutlery_holder",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/cutlery_holder.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.111,
+    0.22,
+    0.13
+   ],
+   "bounds_min": [
+    -0.056,
+    0.0,
+    -0.065
+   ],
+   "tris": 80,
+   "source_tris": 80,
+   "materials": 2,
+   "textures": [
+    "128x256",
+    "256x256"
+   ],
+   "kb": 53.8,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "cutting_board",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/cutting_board.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.249,
+    0.022,
+    0.42
+   ],
+   "bounds_min": [
+    -0.124,
+    0.0,
+    -0.21
+   ],
+   "tris": 586,
+   "source_tris": 1616,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 173.7,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "detergent",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/detergent.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.101,
+    0.27,
+    0.045
+   ],
+   "bounds_min": [
+    -0.051,
+    0.0,
+    -0.022
+   ],
+   "tris": 776,
+   "source_tris": 2904,
+   "materials": 4,
+   "textures": [
+    "256x512",
+    "512x512"
+   ],
+   "kb": 107.2,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "dish_stack",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/dish_stack.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.27,
+    0.103,
+    0.263
+   ],
+   "bounds_min": [
+    -0.135,
+    0.0,
+    -0.132
+   ],
+   "tris": 80,
+   "source_tris": 80,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 18.0,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "dishwasher",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/dishwasher.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.651,
+    0.82,
+    0.579
+   ],
+   "bounds_min": [
+    -0.325,
+    0.0,
+    -0.29
+   ],
+   "tris": 1696,
+   "source_tris": 1696,
+   "materials": 1,
+   "textures": [
+    "1024x1024"
+   ],
+   "kb": 96.0,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "fridge",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/fridge.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.801,
+    1.8,
+    0.761
+   ],
+   "bounds_min": [
+    -0.401,
+    0.0,
+    -0.381
+   ],
+   "tris": 3885,
+   "source_tris": 5102,
+   "materials": 1,
+   "textures": [
+    "256x1024"
+   ],
+   "kb": 118.6,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "fruit_bowl",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/fruit_bowl.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.32,
+    0.152,
+    0.32
+   ],
+   "bounds_min": [
+    -0.16,
+    0.0,
+    -0.16
+   ],
+   "tris": 2935,
+   "source_tris": 24569,
+   "materials": 7,
+   "textures": [
+    "128x128",
+    "256x256",
+    "32x128",
+    "512x512"
+   ],
+   "kb": 406.0,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "kitchen_range",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/kitchen_range.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.885,
+    0.92,
+    0.659
+   ],
+   "bounds_min": [
+    -0.443,
+    0.0,
+    -0.329
+   ],
+   "tris": 4907,
+   "source_tris": 18933,
+   "materials": 2,
+   "textures": [
+    "1024x1024",
+    "512x512"
+   ],
+   "kb": 442.9,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "knife_block",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/knife_block.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.282,
+    0.24,
+    0.1
+   ],
+   "bounds_min": [
+    -0.141,
+    0.0,
+    -0.05
+   ],
+   "tris": 204,
+   "source_tris": 204,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 30.1,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "measuring_cups",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/measuring_cups.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.281,
+    0.048,
+    0.078
+   ],
+   "bounds_min": [
+    -0.14,
+    0.0,
+    -0.039
+   ],
+   "tris": 872,
+   "source_tris": 6072,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 132.7,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "mug",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/mug.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.15,
+    0.1,
+    0.126
+   ],
+   "bounds_min": [
+    -0.075,
+    0.0,
+    -0.063
+   ],
+   "tris": 70,
+   "source_tris": 70,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 18.1,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "mug_b",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/mug_b.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.162,
+    0.09,
+    0.135
+   ],
+   "bounds_min": [
+    -0.081,
+    0.0,
+    -0.067
+   ],
+   "tris": 66,
+   "source_tris": 66,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 21.3,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "oil_bottles",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/oil_bottles.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.266,
+    0.28,
+    0.07
+   ],
+   "bounds_min": [
+    -0.133,
+    0.0,
+    -0.035
+   ],
+   "tris": 184,
+   "source_tris": 184,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 34.9,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "olive_oil_bottle",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/olive_oil_bottle.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.057,
+    0.3,
+    0.057
+   ],
+   "bounds_min": [
+    -0.028,
+    0.0,
+    -0.028
+   ],
+   "tris": 678,
+   "source_tris": 2284,
+   "materials": 2,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 121.4,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "paper_towel",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/paper_towel.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.152,
+    0.3,
+    0.152
+   ],
+   "bounds_min": [
+    -0.076,
+    0.0,
+    -0.076
+   ],
+   "tris": 776,
+   "source_tris": 2596,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 122.7,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "plate",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/plate.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.282,
+    0.104,
+    0.282
+   ],
+   "bounds_min": [
+    -0.141,
+    0.0,
+    -0.141
+   ],
+   "tris": 873,
+   "source_tris": 21240,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 190.5,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "skillet",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/skillet.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.292,
+    0.041,
+    0.45
+   ],
+   "bounds_min": [
+    -0.146,
+    0.0,
+    -0.225
+   ],
+   "tris": 114,
+   "source_tris": 114,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 20.1,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "spice_grinder",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/spice_grinder.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.093,
+    0.201,
+    0.049
+   ],
+   "bounds_min": [
+    -0.047,
+    0.0,
+    -0.024
+   ],
+   "tris": 776,
+   "source_tris": 10872,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 150.0,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "spice_jars",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/spice_jars.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.313,
+    0.119,
+    0.056
+   ],
+   "bounds_min": [
+    -0.156,
+    0.0,
+    -0.028
+   ],
+   "tris": 1164,
+   "source_tris": 8060,
+   "materials": 7,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 816.2,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "spice_tins",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/spice_tins.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.344,
+    0.12,
+    0.078
+   ],
+   "bounds_min": [
+    -0.172,
+    0.0,
+    -0.039
+   ],
+   "tris": 184,
+   "source_tris": 184,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 37.9,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "sponge",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/sponge.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.11,
+    0.017,
+    0.074
+   ],
+   "bounds_min": [
+    -0.055,
+    0.0,
+    -0.037
+   ],
+   "tris": 291,
+   "source_tris": 764,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 238.3,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "stewpot",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/stewpot.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.24,
+    0.193,
+    0.234
+   ],
+   "bounds_min": [
+    -0.12,
+    0.0,
+    -0.117
+   ],
+   "tris": 241,
+   "source_tris": 241,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 23.5,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "tall_spice_bottles",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/tall_spice_bottles.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.125,
+    0.169,
+    0.039
+   ],
+   "bounds_min": [
+    -0.063,
+    0.0,
+    -0.02
+   ],
+   "tris": 1164,
+   "source_tris": 12072,
+   "materials": 3,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 541.0,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "toaster",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/toaster.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.173,
+    0.2,
+    0.296
+   ],
+   "bounds_min": [
+    -0.087,
+    0.0,
+    -0.148
+   ],
+   "tris": 1489,
+   "source_tris": 13431,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 152.0,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "utensil_holder",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/utensil_holder.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.19,
+    0.34,
+    0.172
+   ],
+   "bounds_min": [
+    -0.095,
+    0.0,
+    -0.086
+   ],
+   "tris": 1746,
+   "source_tris": 9092,
+   "materials": 1,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 182.5,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "wine_rack",
+   "category": "kitchen",
+   "path": "res://assets/interiors/kitchen/wine_rack.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.479,
+    0.34,
+    0.288
+   ],
+   "bounds_min": [
+    -0.239,
+    0.0,
+    -0.144
+   ],
+   "tris": 2471,
+   "source_tris": 20738,
+   "materials": 3,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 348.0,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "armchair",
+   "category": "living",
+   "path": "res://assets/interiors/living/armchair.glb",
+   "source": "sofa_set.glb",
+   "size": [
+    0.665,
+    0.907,
+    0.75
+   ],
+   "bounds_min": [
+    -0.333,
+    0.0,
+    -0.375
+   ],
+   "tris": 2276,
+   "source_tris": 2276,
+   "materials": 3,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 148.6,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "armchair_wide",
+   "category": "living",
+   "path": "res://assets/interiors/living/armchair_wide.glb",
+   "source": "sofa_set.glb",
+   "size": [
+    1.23,
+    0.907,
+    0.754
+   ],
+   "bounds_min": [
+    -0.615,
+    0.0,
+    -0.377
+   ],
+   "tris": 2467,
+   "source_tris": 2512,
+   "materials": 3,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 161.1,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "bookcase_staggered",
+   "category": "living",
+   "path": "res://assets/interiors/living/bookcase_staggered.glb",
+   "source": "decor_shelf.glb",
+   "size": [
+    1.0,
+    2.0,
+    0.3
+   ],
+   "bounds_min": [
+    -0.5,
+    0.0,
+    -0.15
+   ],
+   "tris": 2910,
+   "source_tris": 18644,
+   "materials": 2,
+   "textures": [
+    "1024x512"
+   ],
+   "kb": 223.8,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "coffee_table",
+   "category": "living",
+   "path": "res://assets/interiors/living/coffee_table.glb",
+   "source": "sofa_set.glb",
+   "size": [
+    1.23,
+    0.395,
+    0.83
+   ],
+   "bounds_min": [
+    -0.615,
+    0.0,
+    -0.415
+   ],
+   "tris": 1472,
+   "source_tris": 2082,
+   "materials": 3,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 85.8,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "cube_shelf",
+   "category": "living",
+   "path": "res://assets/interiors/living/cube_shelf.glb",
+   "source": "decor_shelf.glb",
+   "size": [
+    1.2,
+    2.12,
+    0.3
+   ],
+   "bounds_min": [
+    -0.6,
+    0.0,
+    -0.15
+   ],
+   "tris": 1544,
+   "source_tris": 1544,
+   "materials": 2,
+   "textures": [
+    "1024x512"
+   ],
+   "kb": 199.5,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "etagere",
+   "category": "living",
+   "path": "res://assets/interiors/living/etagere.glb",
+   "source": "decor_shelf.glb",
+   "size": [
+    0.626,
+    1.55,
+    0.407
+   ],
+   "bounds_min": [
+    -0.313,
+    -0.0,
+    -0.203
+   ],
+   "tris": 2216,
+   "source_tris": 2216,
+   "materials": 3,
+   "textures": [
+    "1024x512"
+   ],
+   "kb": 235.4,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "pouf",
+   "category": "living",
+   "path": "res://assets/interiors/living/pouf.glb",
+   "source": "tv_unit.glb",
+   "size": [
+    0.441,
+    0.425,
+    0.483
+   ],
+   "bounds_min": [
+    -0.22,
+    0.0,
+    -0.242
+   ],
+   "tris": 4850,
+   "source_tris": 10203,
+   "materials": 1,
+   "textures": [],
+   "kb": 338.1,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "side_table_lamp",
+   "category": "living",
+   "path": "res://assets/interiors/living/side_table_lamp.glb",
+   "source": "sofa_set.glb",
+   "size": [
+    0.6,
+    0.859,
+    0.6
+   ],
+   "bounds_min": [
+    -0.3,
+    0.0,
+    -0.3
+   ],
+   "tris": 1954,
+   "source_tris": 2088,
+   "materials": 5,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 97.2,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "sideboard",
+   "category": "living",
+   "path": "res://assets/interiors/living/sideboard.glb",
+   "source": "decor_shelf.glb",
+   "size": [
+    0.9,
+    0.85,
+    0.422
+   ],
+   "bounds_min": [
+    -0.45,
+    0.0,
+    -0.211
+   ],
+   "tris": 2946,
+   "source_tris": 43224,
+   "materials": 2,
+   "textures": [
+    "1024x512"
+   ],
+   "kb": 221.1,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "sofa",
+   "category": "living",
+   "path": "res://assets/interiors/living/sofa.glb",
+   "source": "sofa_set.glb",
+   "size": [
+    1.8,
+    0.907,
+    0.75
+   ],
+   "bounds_min": [
+    -0.9,
+    0.0,
+    -0.375
+   ],
+   "tris": 2830,
+   "source_tris": 2830,
+   "materials": 3,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 188.0,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "tv_console",
+   "category": "living",
+   "path": "res://assets/interiors/living/tv_console.glb",
+   "source": "tv_unit.glb",
+   "size": [
+    2.022,
+    0.942,
+    0.573
+   ],
+   "bounds_min": [
+    -1.011,
+    0.0,
+    -0.286
+   ],
+   "tris": 9948,
+   "source_tris": 83988,
+   "materials": 24,
+   "textures": [],
+   "kb": 966.9,
+   "collision": true,
+   "origin": "floor"
+  },
+  {
+   "id": "tv_screen",
+   "category": "living",
+   "path": "res://assets/interiors/living/tv_screen.glb",
+   "source": "tv_unit.glb",
+   "size": [
+    1.05,
+    0.8,
+    0.153
+   ],
+   "bounds_min": [
+    -0.525,
+    0.0,
+    -0.077
+   ],
+   "tris": 730,
+   "source_tris": 730,
+   "materials": 3,
+   "textures": [],
+   "kb": 51.6,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "faux_succulent",
+   "category": "plants",
+   "path": "res://assets/interiors/plants/faux_succulent.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.12,
+    0.216,
+    0.105
+   ],
+   "bounds_min": [
+    -0.06,
+    0.0,
+    -0.053
+   ],
+   "tris": 1970,
+   "source_tris": 60945,
+   "materials": 2,
+   "textures": [
+    "512x512"
+   ],
+   "kb": 321.2,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "hanging_plant",
+   "category": "plants",
+   "path": "res://assets/interiors/plants/hanging_plant.glb",
+   "source": "kitchen_decor_pack.glb",
+   "size": [
+    0.267,
+    1.14,
+    0.317
+   ],
+   "bounds_min": [
+    -0.134,
+    0.0,
+    -0.159
+   ],
+   "tris": 3883,
+   "source_tris": 6296,
+   "materials": 5,
+   "textures": [
+    "512x512",
+    "64x128"
+   ],
+   "kb": 457.1,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "planter_box_a",
+   "category": "plants",
+   "path": "res://assets/interiors/plants/planter_box_a.glb",
+   "source": "stylized_plant_pots_set__3dmodel_fbx__textures.glb",
+   "size": [
+    0.522,
+    0.595,
+    0.523
+   ],
+   "bounds_min": [
+    -0.261,
+    0.0,
+    -0.261
+   ],
+   "tris": 3879,
+   "source_tris": 152504,
+   "materials": 4,
+   "textures": [
+    "512x256",
+    "512x512"
+   ],
+   "kb": 365.0,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "planter_box_b",
+   "category": "plants",
+   "path": "res://assets/interiors/plants/planter_box_b.glb",
+   "source": "stylized_plant_pots_set__3dmodel_fbx__textures.glb",
+   "size": [
+    0.522,
+    0.595,
+    0.523
+   ],
+   "bounds_min": [
+    -0.261,
+    0.0,
+    -0.261
+   ],
+   "tris": 3879,
+   "source_tris": 152552,
+   "materials": 5,
+   "textures": [],
+   "kb": 255.1,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "planter_box_c",
+   "category": "plants",
+   "path": "res://assets/interiors/plants/planter_box_c.glb",
+   "source": "stylized_plant_pots_set__3dmodel_fbx__textures.glb",
+   "size": [
+    0.522,
+    0.595,
+    0.523
+   ],
+   "bounds_min": [
+    -0.261,
+    0.0,
+    -0.261
+   ],
+   "tris": 3880,
+   "source_tris": 152552,
+   "materials": 5,
+   "textures": [
+    "512x256"
+   ],
+   "kb": 302.9,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "planter_trough_a",
+   "category": "plants",
+   "path": "res://assets/interiors/plants/planter_trough_a.glb",
+   "source": "stylized_plant_pots_set__3dmodel_fbx__textures.glb",
+   "size": [
+    0.993,
+    0.604,
+    0.507
+   ],
+   "bounds_min": [
+    -0.496,
+    0.0,
+    -0.253
+   ],
+   "tris": 4850,
+   "source_tris": 152504,
+   "materials": 4,
+   "textures": [
+    "512x256",
+    "512x512"
+   ],
+   "kb": 410.7,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "planter_trough_b",
+   "category": "plants",
+   "path": "res://assets/interiors/plants/planter_trough_b.glb",
+   "source": "stylized_plant_pots_set__3dmodel_fbx__textures.glb",
+   "size": [
+    0.993,
+    0.681,
+    0.507
+   ],
+   "bounds_min": [
+    -0.497,
+    0.0,
+    -0.254
+   ],
+   "tris": 4850,
+   "source_tris": 152576,
+   "materials": 5,
+   "textures": [],
+   "kb": 299.2,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "planter_trough_c",
+   "category": "plants",
+   "path": "res://assets/interiors/plants/planter_trough_c.glb",
+   "source": "stylized_plant_pots_set__3dmodel_fbx__textures.glb",
+   "size": [
+    1.002,
+    0.604,
+    0.507
+   ],
+   "bounds_min": [
+    -0.501,
+    0.0,
+    -0.253
+   ],
+   "tris": 4850,
+   "source_tris": 152576,
+   "materials": 5,
+   "textures": [
+    "512x256"
+   ],
+   "kb": 345.0,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "potted_plant_floor",
+   "category": "plants",
+   "path": "res://assets/interiors/plants/potted_plant_floor.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.859,
+    0.85,
+    0.687
+   ],
+   "bounds_min": [
+    -0.429,
+    0.0,
+    -0.344
+   ],
+   "tris": 434,
+   "source_tris": 434,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 110.2,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "potted_plant_tall",
+   "category": "plants",
+   "path": "res://assets/interiors/plants/potted_plant_tall.glb",
+   "source": "trailer_park_props.glb",
+   "size": [
+    0.684,
+    1.05,
+    0.633
+   ],
+   "bounds_min": [
+    -0.342,
+    0.0,
+    -0.316
+   ],
+   "tris": 194,
+   "source_tris": 194,
+   "materials": 1,
+   "textures": [
+    "256x256"
+   ],
+   "kb": 71.7,
+   "collision": false,
+   "origin": "floor"
+  },
+  {
+   "id": "food_bar_counter",
+   "category": "restaurant",
+   "path": "res://assets/interiors/restaurant/food_bar_counter.glb",
+   "source": "food_bar.glb",
+   "size": [
+    4.989,
+    1.467,
+    0.876
+   ],
+   "bounds_min": [
+    -2.495,
+    0.0,
+    -0.438
+   ],
+   "tris": 8899,
+   "source_tris": 9956,
+   "materials": 12,
+   "textures": [
+    "1024x1024",
+    "128x128",
+    "128x256",
+    "128x512",
+    "256x128",
+    "256x256",
+    "32x16",
+    "512x512"
+   ],
+   "kb": 885.9,
+   "collision": true,
+   "origin": "floor"
+  }
+ ]
+}

@@ -25,7 +25,28 @@ const TYPES := {
 		"ramp": [-1.4, -0.2, 0.36, 1.8, 2.36], "boxes": [[Vector3(-0.6, 0.18, 0.9), Vector3(4.2, 0.36, 1.8)]]},
 	"house_bungalow": {"lot": 12.5, "w": 10.4, "d": 9.6, "h": 7.0, "door": Vector3(0.0, 1.3, 0.0),
 		"ramp": [-0.6, 0.6, 1.3, 1.5, 3.46], "boxes": [[Vector3(0.0, 0.65, 0.75), Vector3(2.0, 1.3, 1.5)]]},
+	# Imported models (tools/prepare_new_houses.py -> assets/houses/, values from its houses.json):
+	# "hull" replaces the single body collision box, "number" is the beside-door house number,
+	# "door2" the upper flat's balcony door of the up/down duplex.
+	"house_suburban": {"lot": 18.0, "w": 16.43, "d": 14.68, "h": 7.0, "door": Vector3(-3.43, 0.0, -3.08), "ramp": [], "boxes": [],
+		"hull": [[Vector3(2.425, 2.75, -4.55), Vector3(10.75, 5.5, 8.1)], [Vector3(2.0, 2.75, -0.25), Vector3(4.5, 5.5, 0.5)],
+			[Vector3(-4.475, 2.6, -5.8), Vector3(3.05, 5.2, 5.6)], [Vector3(-1.0, 2.5, -9.3), Vector3(6.0, 5.0, 1.4)]],
+		"number": Vector3(-5.05, 1.6, -2.95)},
+	"house_duplex": {"lot": 12.5, "w": 10.2, "d": 16.32, "h": 8.03, "door": Vector3(-0.75, 0.51, -1.89), "door2": Vector3(-0.75, 3.22, -1.89),
+		"ramp": [-1.45, -0.05, 0.51, 0.0, 0.84],
+		"boxes": [[Vector3(-2.35, 0.255, -0.95), Vector3(4.9, 0.51, 1.9)], [Vector3(2.45, 0.255, -15.05), Vector3(4.7, 0.51, 1.9)]],
+		"hull": [[Vector3(0.0, 3.0, -8.0), Vector3(9.6, 6.0, 12.2)], [Vector3(2.45, 3.0, -0.95), Vector3(4.7, 6.0, 1.9)],
+			[Vector3(-2.35, 3.0, -15.05), Vector3(4.9, 6.0, 1.9)]],
+		"number": Vector3(-1.62, 2.05, -1.85)},
+	"house_farmhouse": {"lot": 12.5, "w": 10.35, "d": 7.1, "h": 6.8, "door": Vector3(-1.0, 0.52, -1.78),
+		"ramp": [-1.75, 0.5, 0.52, 0.0, 0.95], "boxes": [[Vector3(1.65, 0.26, -0.89), Vector3(6.9, 0.52, 1.78)]],
+		"hull": [[Vector3(-3.4, 3.0, -3.45), Vector3(3.2, 6.0, 6.9)], [Vector3(1.6, 3.0, -4.34), Vector3(6.8, 6.0, 5.12)]],
+		"number": Vector3(-1.0, 2.85, -1.72)},
 }
+## Types built from imported models (detailed + _far LOD GLBs in assets/houses/).
+const IMPORTED := ["house_suburban", "house_duplex", "house_farmhouse"]
+## False = kit houses only (A/B performance comparisons); set before the first lots() call.
+static var mix_imported := true
 const BODY := ["5d6b82", "4f6b57", "b39a4e", "efece4", "8c3b30", "3a444c", "c9b99a", "7d8f9c", "5a6b45", "a35d3c", "d9cdb0", "6f7f8f"]
 const STUCCO := ["e3d6bd", "d8c8a8", "efe8da", "cbb89a", "e6dccb"]
 const TRIM := ["f2f0ea", "efe6cf", "f2f0ea", "1f2427", "d9d4c5"]
@@ -90,22 +111,34 @@ static func lots() -> Array[Dictionary]:
 	if not _lots.is_empty(): return _lots
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 60317
+	# Imported house types are mixed in by their own generator, so the kit sequence stays put
+	# wherever they don't fit.
+	var mix := RandomNumberGenerator.new()
+	mix.seed = 82311
 	var list: Array[Dictionary] = []
 	for row in rows():
 		var s: int = row.s
 		var depth: float = row.depth
 		var z: float = row.z.y
+		var corner := true  # first lot after a cross street, park or shop
 		while z > row.z.x:
 			var type := pick_type(rng, row.zone, depth)
-			var spec: Dictionary = TYPES[type]
-			var width: float = spec.lot
+			var alt := pick_imported(mix, row.zone, depth, corner)
 			var x0: float = row.line
 			var x1: float = row.line - s * depth
+			if alt != "":
+				var alt_width: float = TYPES[alt].lot
+				var alt_rect := Rect2(minf(x0, x1), z - alt_width, absf(x1 - x0), alt_width)
+				if z - alt_width >= row.z.x and not blocked(alt_rect): type = alt
+			var spec: Dictionary = TYPES[type]
+			var width: float = spec.lot
 			var rect := Rect2(minf(x0, x1), z - width, absf(x1 - x0), width)
 			if z - width < row.z.x: break
 			if blocked(rect):
 				z -= 2.0
+				corner = true
 				continue
+			corner = false
 			var yaw := s * PI / 2.0
 			var basis := Basis(Vector3.UP, yaw)
 			var front := Vector3(row.line - s * SETBACK, 0, z - width / 2.0)
@@ -141,6 +174,18 @@ static func pick_type(rng: RandomNumberGenerator, zone: String, depth: float) ->
 		pick -= weights[t]
 		if pick < 0: return t
 	return "house_laneway"
+
+## Imported types: the big gambrel house takes 60% of corner lots (end of a block, beside a
+## park), the up/down duplex and the farmhouse cottage about one mid-block lot in nine each.
+## Always draws exactly one number so the sequence is stable.
+static func pick_imported(rng: RandomNumberGenerator, zone: String, depth: float, corner: bool) -> String:
+	var roll := rng.randf()
+	if not mix_imported: return ""
+	if corner and zone in ["north", "south", "outer"]:
+		return "house_suburban" if roll < 0.6 and TYPES.house_suburban.d + SETBACK <= depth else ""
+	if roll < 0.11 and zone != "inner" and TYPES.house_duplex.d + SETBACK <= depth: return "house_duplex"
+	if roll > 0.89 and TYPES.house_farmhouse.d + SETBACK <= depth: return "house_farmhouse"
+	return ""
 
 ## The 36 original delivery addresses move to the nearest street-facing Cedar Lane lot on the
 ## same side, in address order, so routes and distances stay comparable.

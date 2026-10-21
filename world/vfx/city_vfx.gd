@@ -21,7 +21,8 @@ var droplet: GradientTexture2D
 func _ready() -> void:
 	soft_puff = radial_texture(Color(1, 1, 1, 0.55), Color(1, 1, 1, 0.0))
 	droplet = radial_texture(Color(1, 1, 1, 1), Color(0.7, 0.85, 1.0, 0.0))
-	for park in FOUNTAIN_PARKS: fountain(park + Vector3(4, 0, -5))
+	# The putti fountains (CityMonuments): every park but the equestrian one, and Atatürk Square.
+	for spot in CityMonuments.fountain_spots(): fountain(spot)
 	# Steam from downtown alley manholes (every third building) and restaurant kitchen vents.
 	for block in range(9):
 		for b in DowntownCatalog.buildings(block):
@@ -73,17 +74,18 @@ func billboard_material(texture: Texture2D, tint: Color, additive: bool = false)
 	return m
 
 func fountain(at: Vector3) -> void:
-	# Central jet with droplets arcing back into the basin (basin radius 1.5 m).
+	# The putti fountain (assets/monuments/fountain_putti.glb): water bubbles up from the top of
+	# the reed column (2.95 m) and spills in arcs down over the putti into the basin (r ~1.5 m).
 	var jet := GPUParticles3D.new()
-	jet.amount = 260
-	jet.lifetime = 1.15
+	jet.amount = 220
+	jet.lifetime = 1.0
 	jet.preprocess = 2.0
-	jet.position = at + Vector3(0, 1.05, 0)
+	jet.position = at + Vector3(0, 2.95, 0)
 	var process := ParticleProcessMaterial.new()
 	process.direction = Vector3.UP
-	process.spread = 14.0
-	process.initial_velocity_min = 3.6
-	process.initial_velocity_max = 4.3
+	process.spread = 38.0
+	process.initial_velocity_min = 1.5
+	process.initial_velocity_max = 2.2
 	process.gravity = Vector3(0, -9.8, 0)
 	process.scale_min = 0.6
 	process.scale_max = 1.2
@@ -100,10 +102,10 @@ func fountain(at: Vector3) -> void:
 	jet.draw_pass_1 = quad
 	jet.visibility_range_end = 70.0
 	jet.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	jet.visibility_aabb = AABB(Vector3(-2, -1.2, -2), Vector3(4, 3.5, 4))
+	jet.visibility_aabb = AABB(Vector3(-2, -3.2, -2), Vector3(4, 4.4, 4))
 	add_child(jet)
 	# Splash mist where the water lands.
-	var mist := plume(at + Vector3(0, 0.6, 0), 0.5, 1.2, Color(0.95, 0.97, 1.0), 60.0)
+	var mist := plume(at + Vector3(0, 0.25, 0), 0.5, 1.2, Color(0.95, 0.97, 1.0), 60.0)
 	(mist.process_material as ParticleProcessMaterial).emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_RING
 	(mist.process_material as ParticleProcessMaterial).emission_ring_radius = 1.1
 	(mist.process_material as ParticleProcessMaterial).emission_ring_inner_radius = 0.7

@@ -13,6 +13,8 @@ func run() -> void:
 	var before := mode == "before"
 	VehicleCatalog.legacy_traffic = mode in ["before", "visuals"]
 	StreetLife.enabled = mode in ["after", "visuals"]
+	# Third user arg "legacy": the city before the landscape pass (old kit trees, no planting).
+	CityLandscape.legacy = args.size() > 2 and args[2] == "legacy"
 	var world := CedarNeighborhood.new()
 	root.add_child(world)
 	world.set_time(14)

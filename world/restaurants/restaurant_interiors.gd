@@ -39,6 +39,7 @@ func _ready() -> void:
 	for k in range(buildings.size()):
 		fit_out(buildings[k], RestaurantCatalog.LIST[3 + k])
 	for i in range(3): avenue(i)
+	RestaurantDressing.downtown_cafe(self)
 	# Interior dressing sits under the building: only the street furniture casts sun shadows.
 	for key in groups:
 		if not str(key).begins_with("rs_sidewalk") and not str(key).begins_with("rs_aframe") and not str(key).begins_with("rs_planter") and not str(key).begins_with("rs_blade"):
@@ -83,10 +84,14 @@ func fit_out(b: Dictionary, r: Array) -> void:
 	piece("rs_wall_kitchen", t, colours, xl + 0.3, 0, 0)
 	piece("rs_wall_kitchen", t, colours, xr - 0.1, 0, -26.0, PI)
 	# --- counter, pickup, drinks --------------------------------------------------------------
-	piece("rs_counter", t, colours, xe - 0.5, 0, -7.3)
-	piece("rs_counter", t, colours, xe + 1.5, 0, -7.3)
-	piece("rs_register", t, colours, xe + 0.3, 0, -7.35)
-	piece("rs_ayran_machine" if r[4] != "tavern" else "rs_tea_station", t, colours, xe + 1.7, 1.04, -7.45)
+	if RestaurantDressing.uses_food_bar(r):
+		RestaurantDressing.food_bar(self, t, xe)   # café food bar with its own vitrine and register
+	else:
+		piece("rs_counter", t, colours, xe - 0.5, 0, -7.3)
+		piece("rs_counter", t, colours, xe + 1.5, 0, -7.3)
+		piece("rs_register", t, colours, xe + 0.3, 0, -7.35)
+		piece("rs_ayran_machine" if r[4] != "tavern" else "rs_tea_station", t, colours, xe + 1.7, 1.04, -7.45)
+		RestaurantDressing.counter(self, t, r, xe)   # bakery trays / bread baskets
 	piece("rs_pickup_shelf", t, colours, xe + 3.2, 0, -7.3)
 	piece("rs_drink_fridge", t, colours, xr - 0.45, 0, -7.6, -PI / 2)
 	piece("rs_condiments", t, colours, xl + 0.6, 0, -6.6, PI / 2)
@@ -238,6 +243,7 @@ func exterior(t: Transform3D, b: Dictionary, r: Array, xe: float, e: int, bays: 
 		piece("rs_sidewalk_set", t, colours, x, 0.06, 1.7, 0.0, 120.0)
 		local_box(t, Vector3(x, 0.4, 1.7), Vector3(1.5, 0.8, 0.8))
 	piece("rs_aframe", t, colours, xe + 1.5, 0.06, 1.0, PI / 2, 90.0)
+	RestaurantDressing.terrace(self, t, b, e, bays)
 	for x in [xe - 1.4, xe + 1.4]:
 		piece("rs_planter", t, colours, x, 0.06, 0.45, 0.0, 120.0)
 	label(t, str(r[3]), Vector3(xe, 3.3, 0.16), 16, Color("f1ead7"))

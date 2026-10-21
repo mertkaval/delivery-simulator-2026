@@ -1,8 +1,12 @@
 extends Node3D
 ## Self-contained house. Coordinates and physics are authored in meters.
 ## Import this scene into another project along with assets/ and this script.
+## The interior is furnished from furnishing.json (props from assets/interiors, InteriorProps).
 signal door_changed(door_name: String, is_open: bool)
 var doors: Array[Dictionary] = []
+## Furnishing props are only drawn within this distance (interiors only matter up close).
+const FURNISHING_RANGE := 30.0
+var furnishing: Array[Node3D] = []
 
 func point(v: Array) -> Vector3:
 	return Vector3(float(v[0]), float(v[2]), -float(v[1]))
@@ -64,6 +68,32 @@ func _ready() -> void:
 		body.set_meta("interaction", "cedar_door_%d" % doors.size())
 		var opening_angle := deg_to_rad(100.0) if str(item.name) in ["DoorFrontPivot", "DoorRearPivot"] else -deg_to_rad(100.0)
 		doors.append({"pivot": pivot, "body": body, "closed_angle": pivot.rotation.y, "opening_angle": opening_angle, "open": false})
+	furnish(package_path.path_join("furnishing.json"))
+
+## Place the furnishing props (house coordinates, Blender axes, yaw in degrees about up) and give
+## the furniture box colliders. Small decor (snapped onto counters and shelves) has no collision.
+func furnish(path: String) -> void:
+	if not FileAccess.file_exists(path): return
+	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not data is Dictionary: return
+	var root := Node3D.new()
+	root.name = "Furnishing"
+	add_child(root)
+	var body := StaticBody3D.new()
+	body.name = "FurnishingCollision"
+	add_child(body)
+	for item: Dictionary in (data as Dictionary).get("items", []):
+		var id := str(item.id)
+		if not InteriorProps.has(id): continue
+		var scale_factor := float(item.get("s", 1.0))
+		var xform := Transform3D(Basis(Vector3.UP, deg_to_rad(float(item.get("yaw", 0.0)))).scaled(Vector3.ONE * scale_factor), point(item.p))
+		var node := InteriorProps.spawn(id, xform, FURNISHING_RANGE)
+		if node == null: continue
+		node.set_meta("room", str(item.get("room", "")))
+		root.add_child(node)
+		furnishing.append(node)
+		var collide: bool = item.get("collide", InteriorProps.entry(id).get("collision", false)) and not item.get("snap", false)
+		if collide: InteriorProps.add_box_collider(body, id, xform)
 
 func toggle_door(index: int) -> void:
 	if index < 0 or index >= doors.size():

@@ -1,0 +1,1088 @@
+{
+ "note": "Writes world/cedar_house/furnishing.json (authoring pass). Coordinates are Cedar House",
+ "axes": "Blender house coordinates (x, y, z); Godot = (x, z, -y)",
+ "yaw": "degrees about +Z (Godot rotation.y)",
+ "items": [
+  {
+   "id": "tv_console",
+   "room": "living",
+   "p": [
+    -3.595,
+    -3.3,
+    0.732
+   ],
+   "yaw": 90
+  },
+  {
+   "id": "tv_screen",
+   "room": "living",
+   "p": [
+    -3.72,
+    -3.527,
+    1.3179
+   ],
+   "yaw": 90,
+   "snap": true,
+   "support": "tv_console.001"
+  },
+  {
+   "id": "sofa",
+   "room": "living",
+   "p": [
+    -0.955,
+    -3.3,
+    0.754
+   ],
+   "yaw": -90
+  },
+  {
+   "id": "coffee_table",
+   "room": "living",
+   "p": [
+    -2.35,
+    -3.3,
+    0.754
+   ],
+   "yaw": 90
+  },
+  {
+   "id": "armchair_wide",
+   "room": "living",
+   "p": [
+    -2.55,
+    -4.99,
+    0.732
+   ],
+   "yaw": 180
+  },
+  {
+   "id": "side_table_lamp",
+   "room": "living",
+   "p": [
+    -0.955,
+    -4.55,
+    0.732
+   ],
+   "yaw": 0
+  },
+  {
+   "id": "armchair",
+   "room": "living",
+   "p": [
+    -2.35,
+    -1.6,
+    0.754
+   ],
+   "yaw": -20
+  },
+  {
+   "id": "side_table_lamp",
+   "room": "living",
+   "p": [
+    -2.8,
+    -0.78,
+    0.732
+   ],
+   "yaw": 180
+  },
+  {
+   "id": "pouf",
+   "room": "living",
+   "p": [
+    -1.595,
+    -4.92,
+    0.732
+   ],
+   "yaw": 0
+  },
+  {
+   "id": "potted_plant_tall",
+   "room": "living",
+   "p": [
+    -3.55,
+    -4.76,
+    0.732
+   ],
+   "yaw": 30
+  },
+  {
+   "id": "bookcase_staggered",
+   "room": "living",
+   "p": [
+    -0.225,
+    -1.45,
+    0.732
+   ],
+   "yaw": -90
+  },
+  {
+   "id": "cube_shelf",
+   "room": "living",
+   "p": [
+    -0.35,
+    -5.235,
+    0.732
+   ],
+   "yaw": 180
+  },
+  {
+   "id": "wall_clock",
+   "room": "living",
+   "p": [
+    -3.35,
+    -0.465,
+    2.352
+   ],
+   "yaw": 0
+  },
+  {
+   "id": "flowers_vase",
+   "room": "living",
+   "p": [
+    -2.3,
+    -3.02,
+    1.149
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "coffee_table.001"
+  },
+  {
+   "id": "book_flat",
+   "room": "living",
+   "p": [
+    -2.42,
+    -3.55,
+    1.149
+   ],
+   "yaw": 100,
+   "snap": true,
+   "support": "coffee_table.001"
+  },
+  {
+   "id": "book_stack",
+   "room": "living",
+   "p": [
+    -0.21,
+    -1.7,
+    1.1815
+   ],
+   "yaw": -90,
+   "snap": true,
+   "support": "bookcase_staggered.001"
+  },
+  {
+   "id": "vase_a",
+   "room": "living",
+   "p": [
+    -0.22,
+    -1.2,
+    1.5819
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "bookcase_staggered.001"
+  },
+  {
+   "id": "photo_frame",
+   "room": "living",
+   "p": [
+    -0.2,
+    -1.72,
+    1.9793
+   ],
+   "yaw": -100,
+   "snap": true,
+   "support": "bookcase_staggered.001"
+  },
+  {
+   "id": "figurine",
+   "room": "living",
+   "p": [
+    -0.2,
+    -1.22,
+    2.3595
+   ],
+   "yaw": -90,
+   "snap": true,
+   "support": "bookcase_staggered.001"
+  },
+  {
+   "id": "vase_d",
+   "room": "living",
+   "p": [
+    -0.22,
+    -1.7,
+    2.7114
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "bookcase_staggered.001"
+  },
+  {
+   "id": "vase_b",
+   "room": "living",
+   "p": [
+    -0.8,
+    -5.24,
+    1.67
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "cube_shelf.001"
+  },
+  {
+   "id": "photo_frame_b",
+   "room": "living",
+   "p": [
+    -0.05,
+    -5.22,
+    1.952
+   ],
+   "yaw": 190,
+   "snap": true,
+   "support": "cube_shelf.001"
+  },
+  {
+   "id": "cookbook_pile",
+   "room": "living",
+   "p": [
+    -0.48,
+    -5.24,
+    1.07
+   ],
+   "yaw": 180,
+   "snap": true,
+   "support": "cube_shelf.001"
+  },
+  {
+   "id": "vase_e",
+   "room": "living",
+   "p": [
+    0.1,
+    -5.24,
+    2.832
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "cube_shelf.001"
+  },
+  {
+   "id": "photo_frame_c",
+   "room": "living",
+   "p": [
+    -0.35,
+    -5.22,
+    2.852
+   ],
+   "yaw": 180,
+   "snap": true,
+   "support": "cube_shelf.001"
+  },
+  {
+   "id": "fridge",
+   "room": "kitchen",
+   "p": [
+    -3.5,
+    0.35,
+    0.732
+   ],
+   "yaw": 90
+  },
+  {
+   "id": "wine_rack",
+   "room": "kitchen",
+   "p": [
+    -3.52,
+    0.35,
+    2.5215
+   ],
+   "yaw": 90,
+   "snap": true,
+   "support": "fridge.001"
+  },
+  {
+   "id": "kitchen_range",
+   "room": "kitchen",
+   "p": [
+    -3.555,
+    3.43,
+    0.732
+   ],
+   "yaw": 90
+  },
+  {
+   "id": "stewpot",
+   "room": "kitchen",
+   "p": [
+    -3.62,
+    3.22,
+    1.6278
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "kitchen_range.001"
+  },
+  {
+   "id": "skillet",
+   "room": "kitchen",
+   "p": [
+    -3.45,
+    3.66,
+    1.628
+   ],
+   "yaw": 120,
+   "snap": true,
+   "support": "kitchen_range.001"
+  },
+  {
+   "id": "dishwasher",
+   "room": "kitchen",
+   "p": [
+    -1.95,
+    4.885,
+    0.732
+   ],
+   "yaw": 0
+  },
+  {
+   "id": "sideboard",
+   "room": "kitchen",
+   "p": [
+    -3.665,
+    1.8,
+    0.732
+   ],
+   "yaw": 90
+  },
+  {
+   "id": "canisters",
+   "room": "kitchen",
+   "p": [
+    -3.71,
+    1.8,
+    1.582
+   ],
+   "yaw": 90,
+   "snap": true,
+   "support": "sideboard.001"
+  },
+  {
+   "id": "hanging_plant",
+   "room": "kitchen",
+   "p": [
+    -3.5,
+    2.56,
+    2.48
+   ],
+   "yaw": 25
+  },
+  {
+   "id": "paper_towel",
+   "room": "kitchen",
+   "p": [
+    -3.58,
+    5.15,
+    1.6525
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "Furniture__Porcelain"
+  },
+  {
+   "id": "utensil_holder",
+   "room": "kitchen",
+   "p": [
+    -3.31,
+    5.13,
+    1.6525
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "Furniture__Porcelain"
+  },
+  {
+   "id": "olive_oil_bottle",
+   "room": "kitchen",
+   "p": [
+    -3.47,
+    4.82,
+    1.6525
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "Furniture__Porcelain"
+  },
+  {
+   "id": "spice_grinder",
+   "room": "kitchen",
+   "p": [
+    -3.24,
+    4.84,
+    1.6525
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "Furniture__Porcelain"
+  },
+  {
+   "id": "spice_jars",
+   "room": "kitchen",
+   "p": [
+    -3.05,
+    5.25,
+    1.6525
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "Furniture__Porcelain"
+  },
+  {
+   "id": "detergent",
+   "room": "kitchen",
+   "p": [
+    -2.22,
+    5.19,
+    1.6525
+   ],
+   "yaw": 10,
+   "snap": true,
+   "support": "Furniture__Porcelain"
+  },
+  {
+   "id": "sponge",
+   "room": "kitchen",
+   "p": [
+    -2.24,
+    4.97,
+    1.6525
+   ],
+   "yaw": 15,
+   "snap": true,
+   "support": "Furniture__Porcelain"
+  },
+  {
+   "id": "cutting_board",
+   "room": "kitchen",
+   "p": [
+    -1.88,
+    4.97,
+    1.6525
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "Furniture__Porcelain"
+  },
+  {
+   "id": "chef_knife",
+   "room": "kitchen",
+   "p": [
+    -1.86,
+    4.95,
+    1.6745
+   ],
+   "yaw": 35,
+   "snap": true,
+   "support": "cutting_board.001"
+  },
+  {
+   "id": "knife_block",
+   "room": "kitchen",
+   "p": [
+    -1.86,
+    5.25,
+    1.6525
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "Furniture__Porcelain"
+  },
+  {
+   "id": "airfryer",
+   "room": "kitchen",
+   "p": [
+    -1.45,
+    5.08,
+    1.6525
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "Furniture__Porcelain"
+  },
+  {
+   "id": "toaster",
+   "room": "kitchen",
+   "p": [
+    -1.1,
+    5.14,
+    1.6525
+   ],
+   "yaw": 90,
+   "snap": true,
+   "support": "Furniture__Porcelain"
+  },
+  {
+   "id": "blender",
+   "room": "kitchen",
+   "p": [
+    -0.83,
+    5.17,
+    1.6525
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "Furniture__Porcelain"
+  },
+  {
+   "id": "coffee_machine",
+   "room": "kitchen",
+   "p": [
+    -0.4,
+    5.358,
+    1.6925
+   ],
+   "yaw": 0
+  },
+  {
+   "id": "mug",
+   "room": "kitchen",
+   "p": [
+    -0.4,
+    5.17,
+    1.6525
+   ],
+   "yaw": 200,
+   "snap": true,
+   "support": "Furniture__Porcelain"
+  },
+  {
+   "id": "casserole_pot",
+   "room": "kitchen",
+   "p": [
+    -1.05,
+    5.1,
+    3.205
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "Furniture__Sage_Painted_Cedar"
+  },
+  {
+   "id": "cereal_box",
+   "room": "kitchen",
+   "p": [
+    -0.5,
+    5.15,
+    3.205
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "Furniture__Sage_Painted_Cedar"
+  },
+  {
+   "id": "cereal_box",
+   "room": "kitchen",
+   "p": [
+    -0.28,
+    5.12,
+    3.205
+   ],
+   "yaw": -8,
+   "snap": true,
+   "support": "Furniture__Sage_Painted_Cedar"
+  },
+  {
+   "id": "fruit_bowl",
+   "room": "kitchen",
+   "p": [
+    -1.42,
+    1.66,
+    1.5275
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "Furniture__Oak_Floor"
+  },
+  {
+   "id": "bread_basket",
+   "room": "kitchen",
+   "p": [
+    -0.86,
+    1.62,
+    1.5275
+   ],
+   "yaw": 12,
+   "snap": true,
+   "support": "Furniture__Oak_Floor"
+  },
+  {
+   "id": "etagere",
+   "room": "kitchen",
+   "p": [
+    -0.02,
+    -0.122,
+    0.732
+   ],
+   "yaw": 180
+  },
+  {
+   "id": "plate",
+   "room": "kitchen",
+   "p": [
+    -0.12,
+    -0.12,
+    0.832
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "etagere.001"
+  },
+  {
+   "id": "bowl",
+   "room": "kitchen",
+   "p": [
+    0.15,
+    -0.12,
+    0.832
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "etagere.001"
+  },
+  {
+   "id": "cookbook",
+   "room": "kitchen",
+   "p": [
+    -0.02,
+    -0.12,
+    1.232
+   ],
+   "yaw": 180,
+   "snap": true,
+   "support": "etagere.001"
+  },
+  {
+   "id": "measuring_cups",
+   "room": "kitchen",
+   "p": [
+    -0.02,
+    -0.08,
+    1.2501
+   ],
+   "yaw": 180,
+   "snap": true,
+   "support": "cookbook.001"
+  },
+  {
+   "id": "coffee_jar",
+   "room": "kitchen",
+   "p": [
+    -0.17,
+    -0.12,
+    1.582
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "etagere.001"
+  },
+  {
+   "id": "coffee_can",
+   "room": "kitchen",
+   "p": [
+    0.1,
+    -0.12,
+    1.582
+   ],
+   "yaw": 30,
+   "snap": true,
+   "support": "etagere.001"
+  },
+  {
+   "id": "spice_tins",
+   "room": "kitchen",
+   "p": [
+    -0.02,
+    -0.15,
+    1.932
+   ],
+   "yaw": 180,
+   "snap": true,
+   "support": "etagere.001"
+  },
+  {
+   "id": "cutlery_holder",
+   "room": "kitchen",
+   "p": [
+    0.16,
+    -0.12,
+    2.0507
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "spice_tins.001"
+  },
+  {
+   "id": "faux_succulent",
+   "room": "kitchen",
+   "p": [
+    -0.02,
+    -0.12,
+    2.282
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "etagere.001"
+  },
+  {
+   "id": "tall_spice_bottles",
+   "room": "kitchen",
+   "p": [
+    -3.71,
+    1.48,
+    1.8219
+   ],
+   "yaw": 90,
+   "snap": true,
+   "support": "canisters.001"
+  },
+  {
+   "id": "almond_bottles",
+   "room": "kitchen",
+   "p": [
+    -3.71,
+    2.12,
+    1.8217
+   ],
+   "yaw": 90,
+   "snap": true,
+   "support": "canisters.001"
+  },
+  {
+   "id": "bed_blue",
+   "room": "bedroom1",
+   "p": [
+    3.27,
+    -2.78,
+    0.732
+   ],
+   "yaw": 0
+  },
+  {
+   "id": "picture_frames_wall",
+   "room": "bedroom1",
+   "p": [
+    3.27,
+    -1.712,
+    1.782
+   ],
+   "yaw": 0
+  },
+  {
+   "id": "alarm_clock",
+   "room": "bedroom1",
+   "p": [
+    2.15,
+    -2.02,
+    1.285
+   ],
+   "yaw": 20,
+   "snap": true,
+   "support": "Furniture__Warm_Cedar"
+  },
+  {
+   "id": "armchair_reading",
+   "room": "bedroom1",
+   "p": [
+    3.47,
+    -4.3,
+    0.732
+   ],
+   "yaw": -90
+  },
+  {
+   "id": "book_stack",
+   "room": "bedroom1",
+   "p": [
+    3.47,
+    -4.25,
+    1.2632
+   ],
+   "yaw": -80,
+   "snap": true,
+   "support": "armchair_reading.001"
+  },
+  {
+   "id": "bed_plaid",
+   "room": "bedroom2",
+   "p": [
+    3.222,
+    2.03,
+    0.732
+   ],
+   "yaw": 0
+  },
+  {
+   "id": "alarm_clock_b",
+   "room": "bedroom2",
+   "p": [
+    2.2,
+    2.76,
+    1.285
+   ],
+   "yaw": -15,
+   "snap": true,
+   "support": "Furniture__Warm_Cedar"
+  },
+  {
+   "id": "side_table_small",
+   "room": "bedroom2",
+   "p": [
+    3.6,
+    0.35,
+    0.732
+   ],
+   "yaw": 90
+  },
+  {
+   "id": "chair_wood",
+   "room": "bedroom2",
+   "p": [
+    3.05,
+    0.35,
+    0.732
+   ],
+   "yaw": 90
+  },
+  {
+   "id": "lamp_table_b",
+   "room": "bedroom2",
+   "p": [
+    3.64,
+    0.48,
+    1.4143
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "side_table_small.001"
+  },
+  {
+   "id": "radio",
+   "room": "bedroom2",
+   "p": [
+    3.64,
+    0.19,
+    1.4143
+   ],
+   "yaw": -90,
+   "snap": true,
+   "support": "side_table_small.001"
+  },
+  {
+   "id": "planter_box_b",
+   "room": "bedroom2",
+   "p": [
+    3.6,
+    -0.36,
+    0.732
+   ],
+   "yaw": 0
+  },
+  {
+   "id": "shampoo",
+   "room": "bath",
+   "p": [
+    3.76,
+    5.27,
+    0.885
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "Furniture__Porcelain"
+  },
+  {
+   "id": "shampoo_b",
+   "room": "bath",
+   "p": [
+    3.66,
+    5.3,
+    0.885
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "Furniture__Porcelain"
+  },
+  {
+   "id": "soap_bar",
+   "room": "bath",
+   "p": [
+    3.79,
+    3.95,
+    1.53
+   ],
+   "yaw": 90,
+   "snap": true,
+   "support": "Furniture__Porcelain"
+  },
+  {
+   "id": "toothbrush_cup",
+   "room": "bath",
+   "p": [
+    3.7,
+    3.33,
+    1.53
+   ],
+   "yaw": 90,
+   "snap": true,
+   "support": "Furniture__Porcelain"
+  },
+  {
+   "id": "toilet_paper_holder",
+   "room": "bath",
+   "p": [
+    1.91,
+    4.86,
+    1.379
+   ],
+   "yaw": 90
+  },
+  {
+   "id": "bin_small",
+   "room": "bath",
+   "p": [
+    3.0,
+    3.35,
+    0.759
+   ],
+   "yaw": 0
+  },
+  {
+   "id": "hall_mirror_console",
+   "room": "hall",
+   "p": [
+    1.79,
+    -2.0,
+    0.732
+   ],
+   "yaw": -90,
+   "collide": true
+  },
+  {
+   "id": "lamp_table",
+   "room": "hall",
+   "p": [
+    1.58,
+    -2.22,
+    1.4747
+   ],
+   "yaw": 0,
+   "snap": true,
+   "support": "hall_mirror_console.001"
+  },
+  {
+   "id": "wall_shelf_decor",
+   "room": "hall",
+   "p": [
+    1.79,
+    2.25,
+    0.732
+   ],
+   "yaw": -90
+  },
+  {
+   "id": "planter_box_a",
+   "room": "hall",
+   "p": [
+    1.51,
+    3.33,
+    0.732
+   ],
+   "yaw": 0
+  },
+  {
+   "id": "planter_trough_a",
+   "room": "porch",
+   "p": [
+    -2.3,
+    -5.93,
+    0.72
+   ],
+   "yaw": 0
+  },
+  {
+   "id": "planter_trough_c",
+   "room": "porch",
+   "p": [
+    2.82,
+    -5.93,
+    0.72
+   ],
+   "yaw": 0
+  },
+  {
+   "id": "potted_plant_floor",
+   "room": "porch",
+   "p": [
+    -0.8,
+    -6.02,
+    0.72
+   ],
+   "yaw": 15
+  },
+  {
+   "id": "watering_can",
+   "room": "porch",
+   "p": [
+    2.25,
+    6.05,
+    0.72
+   ],
+   "yaw": 200,
+   "snap": true,
+   "support": "Architecture__Warm_Cedar"
+  },
+  {
+   "id": "garbage_bag",
+   "room": "garden",
+   "p": [
+    5.95,
+    4.55,
+    -0.01
+   ],
+   "yaw": 30,
+   "snap": true,
+   "support": "Garden__Grass"
+  },
+  {
+   "id": "garbage_bag_b",
+   "room": "garden",
+   "p": [
+    5.95,
+    5.95,
+    -0.01
+   ],
+   "yaw": -20,
+   "snap": true,
+   "support": "Garden__Grass"
+  },
+  {
+   "id": "ac_unit",
+   "room": "garden",
+   "p": [
+    4.12,
+    2.7,
+    1.95
+   ],
+   "yaw": 90
+  },
+  {
+   "id": "fuse_box",
+   "room": "garden",
+   "p": [
+    4.12,
+    4.85,
+    1.05
+   ],
+   "yaw": 90
+  }
+ ]
+}

@@ -81,7 +81,8 @@ static func build(d: DowntownDistrict) -> void:
 			d.collider(base*Vector3(17,4.4,-32),Vector3(14,8.8,18),-PI/2)
 			model(d,"school_zone",Vector3(511,0,-565))
 			d.flat(Vector3(606,.025,-601),Vector3(33,.05,60),"3a4249")
-			for z in [-579,-623]:
+			# The north half of the yard holds the two basketball courts (CityMonuments.COURTS).
+			for z in [-579]:
 				d.module("barrier",d.pose(Vector3(611,0,z)),1000)
 				d.place("reuse_birch",d.pose(Vector3(613,0,z+7)),1000,230)
 	# Two separated cycle tracks with marked crossings and flexible posts.

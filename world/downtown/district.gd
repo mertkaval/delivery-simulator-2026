@@ -436,8 +436,8 @@ func special_parcel(b: Dictionary) -> void:
 			place("reuse_garden_planter",base*pose(Vector3(x,0,-6)),id,120)
 			place("reuse_birch",base*pose(Vector3(x,0,-10)),id,200)
 			place("reuse_park_bench",base*pose(Vector3(x,0,-15),PI),id,120)
-		place("reuse_fountain",base*pose(Vector3(0,0,-15)),id,160)
-		# Atatürk Square: the monument comes from StreetSignage.monument().
+		# Atatürk Square: the monument and the putti fountain behind it come from
+		# StreetSignage.monument() / CityMonuments.square().
 		for x in [-8,-4,4,8]: module("bollard",base*pose(Vector3(x,0,.8)),id)
 
 

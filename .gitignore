@@ -12,3 +12,6 @@
 
 # Baked editor preview of the city (regenerate: tools/bake_editor_preview.gd)
 /world/editor_preview/city_preview.scn
+
+# Raw source packs the user drops in (converted copies live under assets/)
+/source_assets/

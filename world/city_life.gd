@@ -64,9 +64,12 @@ func _ready() -> void:
 	# Park strollers walk a loop round each square's fountain.
 	var park_index := 0
 	for park in PARKS:
+		# The equestrian monument park has no fountain: its strollers circle the monument plaza.
+		var points: Array[Vector3] = CityMonuments.stroll_loop(park)
+		if points.is_empty(): points.assign(PARK_LOOP)
 		for k in range(2):
 			var loop := PackedVector3Array()
-			for p: Vector3 in PARK_LOOP: loop.append(park + p + Vector3(0, 0.056, 0))
+			for p: Vector3 in points: loop.append(park + p + Vector3(0, 0.056, 0))
 			if k == 1: loop.reverse()
 			var start := loop[(k * 2 + park_index) % loop.size()]
 			add_walker([start, start + Vector3(0, 0, -1)], 200 + park_index * 2 + k)

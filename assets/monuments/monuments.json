@@ -1,0 +1,492 @@
+{
+ "convention": "metres, origin at footprint centre on the ground, front +Z (Godot); collision boxes/cylinders in Godot coordinates relative to the origin",
+ "assets": {
+  "ataturk_monument": {
+   "path": "res://assets/monuments/ataturk_monument.glb",
+   "tris": 13675,
+   "size": [
+    7.0,
+    9.15,
+    7.0
+   ],
+   "textures": [
+    "ataturk_bronze 2048x1024",
+    "granite 512x512"
+   ],
+   "file_kb": 796,
+   "kind": "monument",
+   "source": "mustafa_ataturk.glb",
+   "height": 9.18,
+   "plinth_top": 4.38,
+   "panel_front_z": 1.32,
+   "panel_centre_y": 2.34,
+   "collision": [
+    {
+     "type": "box",
+     "center": [
+      0,
+      0.15,
+      0
+     ],
+     "size": [
+      7.0,
+      0.3,
+      7.0
+     ]
+    },
+    {
+     "type": "box",
+     "center": [
+      0,
+      0.45,
+      0
+     ],
+     "size": [
+      5.8,
+      0.3,
+      5.8
+     ]
+    },
+    {
+     "type": "box",
+     "center": [
+      0,
+      0.75,
+      0
+     ],
+     "size": [
+      4.6,
+      0.3,
+      4.6
+     ]
+    },
+    {
+     "type": "box",
+     "center": [
+      0,
+      2.64,
+      0
+     ],
+     "size": [
+      2.95,
+      3.48,
+      2.95
+     ]
+    },
+    {
+     "type": "box",
+     "center": [
+      0,
+      6.78,
+      0
+     ],
+     "size": [
+      1.3,
+      4.8,
+      1.1
+     ]
+    }
+   ]
+  },
+  "ataturk_equestrian": {
+   "path": "res://assets/monuments/ataturk_equestrian.glb",
+   "tris": 14549,
+   "size": [
+    2.609,
+    8.542,
+    5.02
+   ],
+   "textures": [
+    "granite 512x512"
+   ],
+   "file_kb": 1633,
+   "kind": "monument",
+   "source": "mustafa_kemal_ataturk_horse_statue.glb",
+   "height": 8.54,
+   "pedestal_top": 4.275,
+   "collision": [
+    {
+     "type": "box",
+     "center": [
+      -0.0,
+      2.137,
+      0.0
+     ],
+     "size": [
+      2.609,
+      4.275,
+      5.02
+     ]
+    },
+    {
+     "type": "box",
+     "center": [
+      0,
+      6.275,
+      0
+     ],
+     "size": [
+      1.4,
+      4.0,
+      3.2
+     ]
+    }
+   ]
+  },
+  "fountain_putti": {
+   "path": "res://assets/monuments/fountain_putti.glb",
+   "tris": 17459,
+   "size": [
+    3.244,
+    3.055,
+    3.258
+   ],
+   "textures": [
+    "fountain_base 2048x2048",
+    "fountain_normal 2048x2048",
+    "fountain_orm 1024x1024"
+   ],
+   "file_kb": 4335,
+   "kind": "fountain",
+   "source": "fountain_with_three_putts_brno_luzanky.glb",
+   "height": 3.055,
+   "radius": 1.741,
+   "rim_top": 0.224,
+   "water_y": 0.236,
+   "water_radius": 1.651,
+   "collision": [
+    {
+     "type": "cylinder",
+     "center": [
+      0,
+      0.112,
+      0
+     ],
+     "radius": 1.741,
+     "height": 0.224
+    },
+    {
+     "type": "cylinder",
+     "center": [
+      0,
+      1.3,
+      0
+     ],
+     "radius": 0.75,
+     "height": 2.6
+    }
+   ]
+  },
+  "ataturk_bust": {
+   "path": "res://assets/monuments/ataturk_bust.glb",
+   "tris": 9227,
+   "size": [
+    3.74,
+    2.032,
+    1.727
+   ],
+   "textures": [
+    "bust_scan 2048x2048",
+    "travertine 512x512"
+   ],
+   "file_kb": 1099,
+   "kind": "memorial",
+   "source": "busto_de_ataturk.glb",
+   "height": 2.032,
+   "collision": [
+    {
+     "type": "box",
+     "center": [
+      0,
+      0.11,
+      0
+     ],
+     "size": [
+      3.74,
+      0.22,
+      1.727
+     ]
+    },
+    {
+     "type": "box",
+     "center": [
+      0.002,
+      0.9,
+      -0.335
+     ],
+     "size": [
+      3.496,
+      1.4,
+      0.817
+     ]
+    }
+   ]
+  },
+  "sculpture_open_arms": {
+   "path": "res://assets/monuments/sculpture_open_arms.glb",
+   "tris": 11663,
+   "size": [
+    1.785,
+    2.55,
+    1.25
+   ],
+   "textures": [
+    "granite 512x512",
+    "sculpture_open_arms_metal 1024x1024"
+   ],
+   "file_kb": 663,
+   "kind": "sculpture",
+   "source": "open_arms_in_the_park.glb",
+   "height": 2.55,
+   "collision": [
+    {
+     "type": "box",
+     "center": [
+      0,
+      0.3,
+      0
+     ],
+     "size": [
+      1.0,
+      0.6,
+      1.0
+     ]
+    },
+    {
+     "type": "box",
+     "center": [
+      0,
+      1.55,
+      0
+     ],
+     "size": [
+      0.5,
+      2.0,
+      0.4
+     ]
+    }
+   ]
+  },
+  "sculpture_stretch": {
+   "path": "res://assets/monuments/sculpture_stretch.glb",
+   "tris": 11662,
+   "size": [
+    1.763,
+    2.55,
+    1.25
+   ],
+   "textures": [
+    "granite 512x512",
+    "sculpture_stretch_metal 1024x1024"
+   ],
+   "file_kb": 648,
+   "kind": "sculpture",
+   "source": "park_stretch.glb",
+   "height": 2.55,
+   "collision": [
+    {
+     "type": "box",
+     "center": [
+      0,
+      0.3,
+      0
+     ],
+     "size": [
+      1.0,
+      0.6,
+      1.0
+     ]
+    },
+    {
+     "type": "box",
+     "center": [
+      0,
+      1.55,
+      0
+     ],
+     "size": [
+      0.5,
+      2.0,
+      0.4
+     ]
+    }
+   ]
+  },
+  "statue_jenner": {
+   "path": "res://assets/monuments/statue_jenner.glb",
+   "tris": 14561,
+   "size": [
+    4.416,
+    5.764,
+    3.853
+   ],
+   "textures": [
+    "granite 512x512",
+    "jenner_scan 2048x2048"
+   ],
+   "file_kb": 1504,
+   "kind": "statue",
+   "source": "statue_in_hyde_park_london.glb",
+   "height": 5.764,
+   "collision": [
+    {
+     "type": "box",
+     "center": [
+      0.004,
+      0.5,
+      -0.025
+     ],
+     "size": [
+      4.116,
+      1.0,
+      3.553
+     ]
+    },
+    {
+     "type": "box",
+     "center": [
+      0,
+      1.6,
+      0
+     ],
+     "size": [
+      4.125,
+      3.2,
+      2.404
+     ]
+    }
+   ]
+  },
+  "basketball_court": {
+   "path": "res://assets/monuments/basketball_court.glb",
+   "tris": 16765,
+   "size": [
+    13.475,
+    3.896,
+    27.373
+   ],
+   "textures": [
+    "court_BCourt_Markngs 2048x2048",
+    "court_Concrete 2048x2048",
+    "court_Concrete_nrm 1024x1024",
+    "court_Concrete_orm 1024x1024",
+    "court_Light_iron 1024x1024",
+    "court_Light_iron_nrm 512x512",
+    "court_Light_iron_orm 512x512",
+    "court_M_Fence 1024x1024",
+    "court_M_Fence_nrm 512x512",
+    "court_M_Fence_orm 512x512",
+    "court_M_Hoop 1024x1024",
+    "court_M_Hoop_nrm 512x512",
+    "court_M_Hoop_orm 512x512",
+    "court_rope_002 512x64",
+    "court_rope_002_nrm 256x32",
+    "court_rope_003 512x64",
+    "court_rope_003_nrm 256x32"
+   ],
+   "file_kb": 4945,
+   "kind": "court",
+   "source": "street_basketball_court.glb",
+   "fence": [
+    -6.466,
+    -13.686,
+    6.413,
+    13.526
+   ],
+   "front_fence_y": 12.337,
+   "collision": [
+    {
+     "type": "box",
+     "center": [
+      -0.026,
+      1.95,
+      13.466
+     ],
+     "size": [
+      12.879,
+      3.9,
+      0.12
+     ]
+    },
+    {
+     "type": "box",
+     "center": [
+      -6.406,
+      1.95,
+      -0.08
+     ],
+     "size": [
+      0.12,
+      3.9,
+      27.212
+     ]
+    },
+    {
+     "type": "box",
+     "center": [
+      6.353,
+      1.95,
+      -0.08
+     ],
+     "size": [
+      0.12,
+      3.9,
+      27.212
+     ]
+    },
+    {
+     "type": "box",
+     "center": [
+      -6.108,
+      1.95,
+      -12.337
+     ],
+     "size": [
+      0.716,
+      3.9,
+      0.12
+     ]
+    },
+    {
+     "type": "box",
+     "center": [
+      0.982,
+      1.95,
+      -12.337
+     ],
+     "size": [
+      10.863,
+      3.9,
+      0.12
+     ]
+    },
+    {
+     "type": "box",
+     "center": [
+      -0.203,
+      1.5,
+      12.946
+     ],
+     "size": [
+      0.634,
+      3.0,
+      0.634
+     ]
+    },
+    {
+     "type": "box",
+     "center": [
+      -0.228,
+      1.5,
+      -11.943
+     ],
+     "size": [
+      0.634,
+      3.0,
+      0.634
+     ]
+    }
+   ]
+  }
+ }
+}
