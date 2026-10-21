@@ -121,3 +121,16 @@ Verified with Godot 4.7.2 / Jolt: 11 new integration checks passed, existing sce
 - **Street furniture** (`StreetFurniture`): hydrants, drains, manholes, bins, bike racks, newspaper boxes, cabinets, Kara Fatma Street road works.
 - **Sound**: `tools/sfx_forge` (free, offline procedural SFX + MCP server), `CityAudio`.
 - Tests: `tests/run_tests.ps1` (12 suites, all passing). Captures: `tests/capture_*.gd`. Perf: 7.7–10 ms median in residential views (RTX 3070 laptop).
+
+## Courier backpack and main menu (2026-10-20)
+
+- **Delivery bag as a backpack** (`ui/bag_rig.gd`, `BagRig` on the player camera): F swings the open insulated bag (`assets/delivery/delivery_bag_open.glb`) off your back into view. Packing drops the held package into its compartment (`compartments` extra). Closing swings the bag back onto your shoulders. A delivery from the bag brings it round and lifts the package out to the customer. The HUD line reads `BACKPACK · …` / `HOLDING …`. Only the plain courier backpack still rides on the vehicle rack.
+- **Main menu** (`ui/main_menu.gd`, `MainMenu`, CanvasLayer 10):
+  - Layout: transparent text buttons on the left over a big living city picture.
+  - Animation: a slow Ken Burns drift, procedurally drawn bird flocks (V formations and singles, flapping and gliding), and a photo collage of one delivery (pickup shelf → ride → doorstep handover). The collage carries a live order tracker whose dot runs the route, lifts each print in turn and stamps DELIVERED.
+  - Buttons on the title: Continue (with a save summary), New Game (confirms over an existing save), Save Game and Exit to Menu (both disabled), Settings, Exit to Desktop.
+  - Buttons on the Esc menu, shown over the paused street: Continue, Save Game, New Game, Settings, Exit to Menu (saves), Exit to Desktop (saves).
+  - Esc backs out of sub-pages.
+  - Stills come from the game world via `tools/render_menu_collage.gd` → `ui/menu/*.jpg`.
+- **Settings** (`systems/game_settings.gd`, `user://settings.cfg`): master/ambience/effects volume (audio buses), mouse sensitivity, field of view, fullscreen and vsync. Changes apply live.
+- **Tests**: `tests/main_menu_test.gd` has 19 checks and is in `run_tests.ps1`. The scene smoke test (`--smoke-test`) now takes the named package from the shelf. Captures are in `tests/capture_main_menu.gd`.

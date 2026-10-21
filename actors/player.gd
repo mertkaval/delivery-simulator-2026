@@ -76,8 +76,10 @@ func refresh_equipment() -> void:
 	if is_instance_valid(equipment): equipment.queue_free()
 	equipment = Node3D.new()
 	bicycle.add_child(equipment)
-	if session.owns("delivery_bag") or session.owns("backpack"):
-		var bag := CityAssets.create("delivery_bag" if session.owns("delivery_bag") else "backpack", 80)
+	# The insulated delivery bag is worn as a backpack (BagRig, first person); only the plain
+	# courier backpack rides on the rack.
+	if session.owns("backpack") and not session.owns("delivery_bag"):
+		var bag := CityAssets.create("backpack", 80)
 		bag.position = Vector3(0, 0.75, 0.6)
 		equipment.add_child(bag)
 	if session.owns("helmet"):

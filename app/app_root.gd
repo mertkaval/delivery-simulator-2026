@@ -20,11 +20,14 @@ var shelves: PickupShelves
 var receipt_panel: PanelContainer
 var receipt_label: Label
 var held_package: Node3D
+var bag_rig: BagRig
+var bag_label: Label
 var _held_for := ""
 var city_map: Control
 var city_map_layer: CanvasLayer
 var _arrival_note := ""
 var gameplay_ui: Control
+var main_menu: MainMenu
 var menu_shade: ColorRect
 var menu_camera: Camera3D
 var phone_width: float = 390.0
@@ -36,6 +39,7 @@ var audio: CityAudio
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	GameSettings.load_settings()
 	bind_inputs()
 	world = get_node_or_null("Neighborhood") as CedarNeighborhood
 	if world == null:
@@ -57,6 +61,14 @@ func _ready() -> void:
 	add_child(audio)
 	audio.setup(self)
 	build_hud()
+	var menu_layer := CanvasLayer.new()
+	menu_layer.layer = 10
+	add_child(menu_layer)
+	main_menu = MainMenu.new()
+	main_menu.name = "MainMenu"
+	menu_layer.add_child(main_menu)
+	main_menu.chosen.connect(on_main_menu)
+	GameSettings.apply(player)
 	menu_camera = Camera3D.new()
 	add_child(menu_camera)
 	menu_camera.position = Vector3(36, 16, 44)
@@ -70,6 +82,9 @@ func _ready() -> void:
 	route_marker.modulate = Color("b6f3d1")
 	add_child(route_marker)
 	session.changed.connect(update_hud)
+	bag_rig = BagRig.new()
+	bag_rig.name = "BagRig"
+	player.camera.add_child(bag_rig)
 	shelves = PickupShelves.new()
 	shelves.name = "PickupShelves"
 	world.add_child(shelves)
@@ -99,7 +114,9 @@ func binding(action: String) -> String:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause_game"):
-		if mode in ["start", "confirm_new"]:
+		if mode in ["start", "pause"]:
+			if not main_menu.back() and mode == "pause": close_menu()
+			get_viewport().set_input_as_handled()
 			return
 		if mode != "":
 			close_menu()
@@ -107,7 +124,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			show_menu("pause")
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("phone") or event.is_action_pressed("map"):
-		if mode in ["start", "confirm_new"]:
+		if mode in ["start", "pause"]:
 			return
 		if mode != "":
 			close_menu()
@@ -215,8 +232,12 @@ func interact() -> void:
 		else:
 			result = "Your order is already with you. Deliver it to " + str(session.order.get("customer", "the customer")) + "."
 	elif str(target.id).begins_with("door_"):
+		var was_packed: bool = session.order.get("state") == "CARRYING"
 		result = session.deliver(int(str(target.id).trim_prefix("door_")), target.distance)
 		if session.order.get("state") == "COMPLETED":
+			if was_packed:
+				if not is_instance_valid(bag_rig.contents): bag_rig.show_contents(package_model(), "top")
+				bag_rig.handover()
 			show_menu("receipt")
 	elif target.id == "shop":
 		current_shop = "equipment"
@@ -367,6 +388,9 @@ func button(text: String, callback: Callable) -> void:
 	modal_body.add_child(control)
 
 func show_menu(which: String) -> void:
+	if which in ["start", "pause", "confirm_new"]:
+		open_main_menu(which != "pause")
+		return
 	if which == "map":
 		open_city_map()
 		return
@@ -375,21 +399,17 @@ func show_menu(which: String) -> void:
 	get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	modal.show()
-	var title_screen := which in ["start", "confirm_new"]
-	gameplay_ui.visible = not title_screen
+	gameplay_ui.visible = true
 	menu_shade.visible = true
 	var is_phone := which in ["phone", "map"]
 	modal.set("phone_mode", is_phone)
 	modal.set("session", session)
-	if is_phone: menu_shade.visible = false
+	if is_phone or which == "bag": menu_shade.visible = false
 	modal_body.add_theme_constant_override("separation",8 if is_phone else 12)
-	if title_screen:
-		menu_camera.make_current()
-	else:
-		player.camera.make_current()
+	player.camera.make_current()
 	modal.custom_minimum_size = Vector2.ZERO
-	modal.position = Vector2(70, 58) if title_screen else Vector2(830, 28)
-	modal.size = Vector2(480, 600) if title_screen else Vector2(420, 640)
+	modal.position = Vector2(830, 28)
+	modal.size = Vector2(420, 640)
 	var style := style_panel(Color(0.04, 0.075, 0.09, 0.92))
 	style.set_corner_radius_all(28 if which == "phone" else 10)
 	if is_phone:
@@ -407,24 +427,8 @@ func show_menu(which: String) -> void:
 	for child in modal_body.get_children():
 		modal_body.remove_child(child)
 		child.queue_free()
-	add_text("DELIVERY SIMULATOR   /   ATATÜRK AVENUE" if title_screen else "%02d:%02d       ●       COURIERNOW" % [int(session.hour()), int(session.calendar_minutes) % 60], 14, Color("9bceb7"))
+	add_text("%02d:%02d       ●       COURIERNOW" % [int(session.hour()), int(session.calendar_minutes) % 60], 14, Color("9bceb7"))
 	match which:
-		"start":
-			add_text("DELIVERY\nSIMULATOR", 48)
-			add_text("Every street is a new beginning.", 21, Color("c3d0ca"))
-			add_text("Build your routine. Learn your neighborhood.\nEarn a better tomorrow.", 17)
-			if FileAccess.file_exists(DeliverySave.PATH) or FileAccess.file_exists(DeliverySave.PATH + ".bak"):
-				button("Continue saved shift", load_session)
-			button("New game", func():
-				if FileAccess.file_exists(DeliverySave.PATH): show_menu("confirm_new")
-				else: new_session())
-			button("Quit", func(): get_tree().quit())
-			add_text("EARLY DEVELOPMENT   ·   0.2\nKeyboard & mouse  /  Windows", 13, Color("8eaaa0"))
-		"confirm_new":
-			add_text("Start over?", 30)
-			add_text("Starting a new shift replaces the current save. Your previous valid save remains in the backup until the next save.")
-			button("Start new shift", new_session)
-			button("Back", func(): show_menu("start"))
 		"phone":
 			add_text("CourierNow", 34)
 			add_text("YOUR CITY. YOUR NEXT DELIVERY.", 12, Color("8fb4a7"))
@@ -464,6 +468,10 @@ func show_menu(which: String) -> void:
 			button("Back to street", close_menu)
 		"bag":
 			build_bag_menu()
+			if session.bag_upgrade:
+				bag_rig.take_off()
+				if session.order.get("state") == "CARRYING" and not is_instance_valid(bag_rig.contents):
+					bag_rig.show_contents(package_model(), str(session.order.get("slot", "top")))
 		"shop":
 			add_text(ShopCatalog.TITLES.get(current_shop, "TRAIL & TOOL"), 29)
 			add_text("Wallet  " + DeliverySession.money(session.wallet), 20, Color("9bceb7"))
@@ -489,18 +497,49 @@ func show_menu(which: String) -> void:
 			add_text("Wallet  " + DeliverySession.money(session.wallet), 24, Color("9bceb7"))
 			add_text("Your next request will arrive automatically while online.", 18)
 			button("Back to street", close_menu)
-		"pause":
-			add_text("Take a breather.", 32)
-			add_text("The shift and all order timers are paused.")
-			button("Resume", close_menu)
-			button("Save shift", func(): if save_session(): notify("Shift saved."); close_menu())
-			button("Load saved shift", load_session)
-			button("Save and quit", func(): if save_session(): get_tree().quit())
-			button("Quit without saving", func(): get_tree().quit())
 	for child in modal_body.get_children():
 		if child is Button:
 			child.grab_focus()
 			break
+
+## Title screen (new game, continue, settings, exit) or the Esc pause menu (ui/main_menu.gd).
+func open_main_menu(title: bool) -> void:
+	if city_map != null: city_map.hide()
+	if bag_rig and bag_rig.out: bag_rig.put_on()
+	mode = "start" if title else "pause"
+	get_tree().paused = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	modal.hide()
+	menu_shade.hide()
+	gameplay_ui.hide()
+	if title: menu_camera.make_current()
+	else: player.camera.make_current()
+	main_menu.has_save = FileAccess.file_exists(DeliverySave.PATH) or FileAccess.file_exists(DeliverySave.PATH + ".bak")
+	main_menu.save_summary = save_summary() if main_menu.has_save else ""
+	main_menu.open(not title)
+
+func on_main_menu(action: String) -> void:
+	match action:
+		"continue": load_session()
+		"resume": close_menu()
+		"save": main_menu.flash("Shift saved." if save_session() else saves.error)
+		"new_game": new_session()
+		"exit_to_menu":
+			save_session()
+			show_menu("start")
+		"quit":
+			if mode == "pause": save_session()
+			get_tree().quit()
+		"settings_changed": GameSettings.apply(player)
+
+## "Day 3 · $142.50 · 7 deliveries" for the Continue button.
+func save_summary() -> String:
+	var path := DeliverySave.PATH if FileAccess.file_exists(DeliverySave.PATH) else DeliverySave.PATH + ".bak"
+	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not data is Dictionary: return ""
+	var d: Dictionary = data
+	var done := int(d.get("completed", 0))
+	return "Day %d  ·  %s  ·  %d %s" % [int(float((d.get("dispatch", {}) as Dictionary).get("calendar", 0)) / 1440.0) + 1, DeliverySession.money(int(d.get("wallet", 0))), done, "delivery" if done == 1 else "deliveries"]
 
 ## Full-screen city map with clickable places and road navigation (ui/city_map.gd).
 func open_city_map() -> void:
@@ -567,13 +606,27 @@ func update_held_package() -> void:
 		_held_for = id
 	if held_package: held_package.visible = want
 
+## A fresh model of the current order's package (with its logo and receipt).
+func package_model() -> Node3D:
+	var info := {"customer": session.order.get("customer", ""), "ticket": session.order.get("ticket", ""), "kind": session.order.get("kind", "bag"), "items": session.order.get("items", []), "restaurant": session.restaurant_id()}
+	var body := shelves.make_package(info)
+	body.collision_layer = 0
+	return body
+
 ## Bag compartment clicked: pack the held package there, or take the packed one out.
 func bag_click(slot: String) -> void:
 	var result := ""
 	if session.holding_package():
 		result = session.stow(slot)
+		if session.order.get("state") == "CARRYING":
+			# The package goes from your hands into the open bag's compartment.
+			var pkg: Node3D = held_package if is_instance_valid(held_package) else package_model()
+			held_package = null
+			_held_for = ""
+			bag_rig.pack(pkg, slot)
 	elif session.order.get("state") == "CARRYING" and session.order.get("slot", "") == slot:
 		result = session.unstow()
+		bag_rig.clear_contents()
 	else:
 		result = "Empty compartment." if session.bag_upgrade else "You don't own a delivery bag yet."
 	notify(result)
@@ -628,6 +681,8 @@ func bag_slot(slot: String, min_size: Vector2, state: String, kind: String, hold
 	return b
 
 func close_menu() -> void:
+	if bag_rig and bag_rig.out: bag_rig.put_on()
+	if main_menu: main_menu.close()
 	mode = ""
 	if city_map != null: city_map.hide()
 	modal.hide()
@@ -700,7 +755,8 @@ func save_session() -> bool:
 func load_session() -> void:
 	var data := saves.load_game()
 	if data.is_empty():
-		add_text(saves.error, 18, Color("f0c28b"))
+		if main_menu.visible: main_menu.flash(saves.error)
+		else: add_text(saves.error, 18, Color("f0c28b"))
 		return
 	session.restore(data)
 	player.replace_vehicle(Vector3(-8, 0, 19))
@@ -742,6 +798,16 @@ func update_hud() -> void:
 		objective.text = "02  /  " + DeliverySession.ADDRESSES[int(session.order.address)]
 		route_marker.position = world.doors[int(session.order.address)] + Vector3(0, 2.5, 0)
 		route_marker.text = "DELIVER\n%d m" % int(player.position.distance_to(world.doors[int(session.order.address)]))
+	if bag_label == null:
+		bag_label = make_label("", 14, Color("f4e7c4"))
+		bag_label.position = Vector2(36, 380)
+		hud.add_child(bag_label)
+	var bag_state := ""
+	if session.bag_upgrade:
+		bag_state = "BACKPACK  ·  " + ("%s's %s in the %s" % [session.order.customer, str(OrderDetails.KIND_NAMES.get(session.order.get("kind", "bag"), "order")).to_lower(), str(OrderDetails.SLOT_NAMES.get(session.order.get("slot", ""), "bag")).to_lower()] if state == "CARRYING" else "empty") + "   [%s] open" % binding("bag")
+	if state == "IN_HAND":
+		bag_state = "HOLDING %s's order  ·  [%s] %s" % [session.order.customer, binding("bag"), "pack it in your backpack" if session.bag_upgrade else "no bag: walk it over"]
+	bag_label.text = bag_state
 	stats.text = "Day %d  ·  %02d:%02d  |  %s  |  Energy %d%%" % [int(session.calendar_minutes / 1440) + 1, int(session.hour()), int(session.calendar_minutes) % 60, DeliverySession.money(session.wallet), int(session.energy)]
 	calendar_label.text = "DAY %02d   ·   %s" % [int(session.calendar_minutes / 1440) + 1, session.date_text()]
 	if world.weather != null: calendar_label.text += "   ·   " + world.weather.describe().to_upper()
@@ -786,16 +852,26 @@ func smoke_test() -> void:
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	var hit := player.target()
-	assert(hit.get("id") == "pickup", "Pickup counter must be physically interactable")
-	interact()
-	assert(session.order.state == "CARRYING")
-	var destination := world.doors[int(session.order.address)]
-	player.position = destination + Vector3(0, -0.92, 1.6)
-	player.camera.rotation.x = -0.2
+	assert(hit.get("id") in ["pickup", "package"], "Pickup counter must be physically interactable")
+	# Take your named package off the pickup shelf (same path as pressing E on it).
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var mine: Node3D = null
+	for p: Node3D in shelves.packages.get(session.restaurant_id(), []):
+		if is_instance_valid(p) and p.get_meta("package").get("customer") == session.order.customer: mine = p
+	assert(mine != null, "Your package waits on the pickup shelf")
+	session.take_package(mine.get_meta("package"), 1.0)
+	shelves.take(mine)
+	assert(session.order.state == "IN_HAND")
+	var address := int(session.order.address)
+	var facing: Vector3 = CityCatalog.address_facing(address)
+	player.position = world.doors[address] + facing * 1.6 + Vector3(0, -0.92, 0)
+	player.rotation = Vector3(0, atan2(facing.x, facing.z), 0)
+	player.camera.rotation = Vector3(-0.2, 0, 0)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	hit = player.target()
-	assert(hit.get("id") == "door_0", "Correct door must be physically interactable")
+	assert(hit.get("id") == "door_%d" % address, "Correct door must be physically interactable")
 	interact()
 	assert(session.order.state == "COMPLETED" and session.wallet > 0)
 	close_menu()
@@ -806,5 +882,5 @@ func smoke_test() -> void:
 	player.riding_speed = 0
 	await get_tree().physics_frame
 	assert(player.toggle_bicycle() == "Bicycle parked.")
-	print("SCENE SMOKE PASS: real raycast pickup, correct door, receipt; test does not write player save")
+	print("SCENE SMOKE PASS: real raycast pickup, named package, correct door, receipt; test does not write player save")
 	get_tree().quit()
