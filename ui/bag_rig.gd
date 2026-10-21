@@ -117,7 +117,7 @@ static func fit_scale(room: Vector3, item: Vector3) -> float:
 ## Drop a package from the hands into the compartment (animated), then keep it there.
 func pack(package: Node3D, slot: String) -> void:
 	if bag == null or package == null: return
-	var start := package.global_transform
+	var start := package.global_transform if package.is_inside_tree() else global_transform * Transform3D(Basis.IDENTITY, Vector3(0.2, 0.3, 0.4))
 	show_contents(package, slot)
 	var end := contents.transform
 	contents.global_transform = start

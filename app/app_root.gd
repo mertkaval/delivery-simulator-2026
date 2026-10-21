@@ -24,6 +24,12 @@ var dropped_package: Node3D
 var _pickup_from: Variant = null      ## Transform3D a freshly held package flies in from
 var _drag_slot := ""                  ## bag compartment under the mouse while the backpack is open
 var tutorial: TutorialDirector
+var phone: PhoneDevice
+var terminal: StoreTerminal
+var store_terminals: StoreTerminals
+var drop_zone: DropZone
+var _zone_for := ""
+var _flash: ColorRect
 var bag_rig: BagRig
 var bag_label: Label
 var _held_for := ""
@@ -64,6 +70,7 @@ func _ready() -> void:
 	audio.name = "CityAudio"
 	add_child(audio)
 	audio.setup(self)
+	audio.auto_order_cues = false     # app_root plays the order cues itself (notify_order, delivery_success)
 	build_hud()
 	var menu_layer := CanvasLayer.new()
 	menu_layer.layer = 10
@@ -97,6 +104,29 @@ func _ready() -> void:
 	tutorial.name = "Tutorial"
 	add_child(tutorial)
 	tutorial.setup(self)
+	store_terminals = StoreTerminals.new()
+	store_terminals.name = "StoreTerminals"
+	world.add_child(store_terminals)
+	store_terminals.setup(session)
+	var terminal_layer := CanvasLayer.new()
+	terminal_layer.layer = 11
+	add_child(terminal_layer)
+	terminal = StoreTerminal.new()
+	terminal.name = "StoreTerminal"
+	terminal_layer.add_child(terminal)
+	terminal.closed.connect(func() -> void: if mode == "terminal": close_menu())
+	terminal.purchased.connect(on_store_purchase)
+	terminal.equip.connect(equip_vehicle)
+	phone = PhoneDevice.new()
+	phone.name = "Phone"
+	player.camera.add_child(phone)
+	phone.setup(self)
+	phone.os.action.connect(on_phone_action)
+	_flash = ColorRect.new()
+	_flash.color = Color(1, 1, 1, 0)
+	_flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.add_child(_flash)
 	show_menu("start")
 	update_hud()
 	if "--smoke-test" in OS.get_cmdline_user_args():
@@ -108,7 +138,7 @@ func bind_inputs() -> void:
 		var bike_key := InputEventKey.new()
 		bike_key.physical_keycode = KEY_B
 		InputMap.action_add_event("bicycle", bike_key)
-	var actions := {"move_forward": KEY_W, "move_back": KEY_S, "move_left": KEY_A, "move_right": KEY_D, "sprint": KEY_SHIFT, "jump": KEY_SPACE, "interact": KEY_E, "phone": KEY_TAB, "map": KEY_M, "pause_game": KEY_ESCAPE, "bell": KEY_Q, "bag": KEY_F, "drop": KEY_G}
+	var actions := {"move_forward": KEY_W, "move_back": KEY_S, "move_left": KEY_A, "move_right": KEY_D, "sprint": KEY_SHIFT, "jump": KEY_SPACE, "interact": KEY_E, "phone": KEY_TAB, "map": KEY_M, "pause_game": KEY_ESCAPE, "bell": KEY_Q, "bag": KEY_F, "drop": KEY_G, "use_water": KEY_1, "use_snack": KEY_2}
 	for action in actions:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action)
@@ -120,7 +150,21 @@ func binding(action: String) -> String:
 	var event := InputMap.action_get_events(action)[0] as InputEventKey
 	return OS.get_keycode_string(event.physical_keycode if event.physical_keycode != 0 else event.keycode)
 
+## Mouse on the raised phone: taps and scrolling go to the phone screen.
+func _input(event: InputEvent) -> void:
+	if mode == "phone" and event is InputEventMouse and phone.forward(player.camera, event):
+		get_viewport().set_input_as_handled()
+
 func _unhandled_input(event: InputEvent) -> void:
+	if mode == "terminal":
+		if event.is_action_pressed("pause_game"):
+			terminal.close()
+			get_viewport().set_input_as_handled()
+		return
+	if mode == "" and (event.is_action_pressed("use_water") or event.is_action_pressed("use_snack")):
+		notify(session.use_supply("water_bottle" if event.is_action_pressed("use_water") else "energy_bar"))
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("pause_game"):
 		if mode in ["start", "pause"]:
 			if not main_menu.back() and mode == "pause": close_menu()
@@ -172,9 +216,12 @@ func _process(delta: float) -> void:
 	session.offer_position = player.position
 	world.set_time(session.hour())
 	sync_dropped()
-	if tutorial.gate("dispatch") == "" and session.dispatch(pickup_route_distance()):
-		notify("CourierNow · New delivery request\nPress Tab to review your offer")
+	if tutorial.gate("dispatch") == "" and session.has_phone() and session.has_bag() and session.dispatch(pickup_route_distance()):
+		notify("CourierNow · New delivery request\nPress %s and open CourierNow" % binding("phone"))
+		sound("notify_order")
 		save_session()
+	sync_drop_zone()
+	store_terminals.refresh()
 	notification_time -= delta
 	notice.visible = notification_time > 0
 	var target := player.target()
@@ -189,12 +236,29 @@ func _process(delta: float) -> void:
 		elif title.begins_with("cedar_door_"):
 			title = "Open / close house door"
 		elif title.begins_with("door_"):
-			title = "Deliver  /  " + DeliverySession.ADDRESSES[int(title.trim_prefix("door_"))]
+			var mine: bool = session.order.get("state") in DeliverySession.ACTIVE and int(title.trim_prefix("door_")) == int(session.order.get("address", -1))
+			title = (("Knock  /  " if session.order.get("method", "meet") == "meet" else "Door  /  ") if mine else "") + DeliverySession.ADDRESSES[int(title.trim_prefix("door_"))]
+		elif title.begins_with("kiosk_") or title.begins_with("store_") and title != "store_pickup":
+			title = "Use the store computer"
+		elif title == "store_pickup":
+			var idx := int(target.node.get_meta("pickup_index", -1))
+			title = "Collect  " + (str(ShopCatalog.ITEMS[session.pickups[idx].id].name) if idx >= 0 and idx < session.pickups.size() else "item")
+		elif title == "dropzone":
+			title = "Leave the order here"
+		elif title == "customer":
+			title = "Hand over the order"
 		elif title == "shop":
 			title = "Browse delivery equipment"
 		elif title == "home":
 			title = "Rest and save"
 		prompt.text = "[%s]  %s" % [binding("interact"), title]
+	# At the door, E works by proximity (see interact): say so whatever the crosshair is on.
+	if drop_zone and session.order.get("state") in ["IN_HAND", "CARRYING"] and (target.is_empty() or str(target.id).begins_with("door_")):
+		var flat := Vector2(player.position.x - drop_zone.global_position.x, player.position.z - drop_zone.global_position.z).length()
+		if drop_zone.method == "door" and flat < 1.9:
+			prompt.text = "[%s]  Leave the order here" % binding("interact")
+		elif drop_zone.customer != null and player.position.distance_to(drop_zone.customer.global_position) < 2.2:
+			prompt.text = "[%s]  Hand the order to %s" % [binding("interact"), session.order.get("customer", "the customer")]
 	show_receipt(target)
 	update_held_package()
 	update_hud()
@@ -211,10 +275,33 @@ func interact() -> void:
 		save_session()
 		return
 	var target := player.target()
+	# At the customer's door, E works without aiming exactly: standing in/at the marked area
+	# (leave at door) or next to the waiting customer (meet at door).
+	if drop_zone and session.order.get("state") in ["IN_HAND", "CARRYING"] and (target.is_empty() or str(target.id).begins_with("door_")):
+		var flat := Vector2(player.position.x - drop_zone.global_position.x, player.position.z - drop_zone.global_position.z).length()
+		if drop_zone.method == "door" and flat < 1.9:
+			deliver_here({"id": "dropzone"})
+			return
+		if drop_zone.customer != null and player.position.distance_to(drop_zone.customer.global_position) < 2.2:
+			deliver_here({"id": "customer"})
+			return
 	if target.is_empty():
-		if player.position.distance_to(player.bicycle.position) < 2.5:
+		if player.has_vehicle() and player.position.distance_to(player.bicycle.position) < 2.5:
 			notify(player.toggle_bicycle())
 			save_session()
+		return
+	if str(target.id).begins_with("kiosk_") or (str(target.id).begins_with("store_") and target.id != "store_pickup"):
+		open_terminal(str(target.id).trim_prefix("kiosk_").trim_prefix("store_"))
+		return
+	if target.id == "store_pickup":
+		notify(session.collect(int(target.node.get_meta("pickup_index", -1))))
+		store_terminals.refresh()
+		player.refresh_equipment()
+		sound("item_pickup")
+		save_session()
+		return
+	if target.id == "dropzone" or target.id == "customer":
+		deliver_here(target)
 		return
 	var result := ""
 	if target.id == "package":
@@ -233,10 +320,6 @@ func interact() -> void:
 		return
 	if str(target.id).begins_with("cedar_door_"):
 		world.cedar_house.toggle_door(int(str(target.id).trim_prefix("cedar_door_")))
-		return
-	if str(target.id).begins_with("store_"):
-		current_shop = str(target.id).trim_prefix("store_")
-		show_menu("shop")
 		return
 	if target.id == "wc":
 		result = session.consume("wc")
@@ -257,6 +340,8 @@ func interact() -> void:
 			result = "Your order is already with you. Deliver it to " + str(session.order.get("customer", "the customer")) + "."
 	elif str(target.id).begins_with("door_") and tutorial.gate("deliver") != "" and session.order.get("state") in DeliverySession.ACTIVE:
 		result = tutorial.gate("deliver")
+	elif str(target.id).begins_with("door_") and session.order.get("state") in ["IN_HAND", "CARRYING", "DROPPED"] and int(str(target.id).trim_prefix("door_")) == int(session.order.address):
+		result = at_door()
 	elif str(target.id).begins_with("door_"):
 		var was_packed: bool = session.order.get("state") == "CARRYING"
 		result = session.deliver(int(str(target.id).trim_prefix("door_")), target.distance)
@@ -417,6 +502,9 @@ func show_menu(which: String) -> void:
 	if which in ["start", "pause", "confirm_new"]:
 		open_main_menu(which != "pause")
 		return
+	if which == "phone":
+		open_phone()
+		return
 	if which == "map":
 		open_city_map()
 		return
@@ -431,7 +519,6 @@ func show_menu(which: String) -> void:
 	modal.set("phone_mode", is_phone)
 	modal.set("session", session)
 	if is_phone or which == "bag": menu_shade.visible = false
-	if which == "phone": tutorial.event("phone")
 	modal_body.add_theme_constant_override("separation",8 if is_phone else 12)
 	player.camera.make_current()
 	modal.custom_minimum_size = Vector2.ZERO
@@ -456,35 +543,6 @@ func show_menu(which: String) -> void:
 		child.queue_free()
 	add_text("%02d:%02d       ●       COURIERNOW" % [int(session.hour()), int(session.calendar_minutes) % 60], 14, Color("9bceb7"))
 	match which:
-		"phone":
-			add_text("CourierNow", 34)
-			add_text("YOUR CITY. YOUR NEXT DELIVERY.", 12, Color("8fb4a7"))
-			add_text(("ONLINE  /  " if session.online else "OFFLINE  /  ") + session.demand(), 16, Color("9bceb7"))
-			var state: String = session.order.get("state", "")
-			if state == "OFFERED":
-				add_text("NEW OFFER  /  " + session.restaurant_name(), 21, Color("9bceb7"))
-				add_text("Customer: %s  ·  Order %s\n%s  ·  %s" % [session.order.get("customer", "?"), session.order.get("ticket", "?"), order_items_text(), OrderDetails.KIND_NAMES.get(session.order.get("kind", "bag"), "")], 17, Color("f4e7c4"))
-				add_text(DeliverySession.money(session.order.quote) + " guaranteed", 32)
-				add_text("Up to $3.00 tip  |  One bag\nPickup %dm  ·  Delivery %dm\nEstimated %d min  ·  Ready now\n%s\nUse the marked collection point or destination entrance.\n%ds to respond · paused in phone" % [int(session.order.pickup_distance), int(session.order.distance), maxi(1, int((session.order.pickup_distance + session.order.distance) / 3.5 / 60.0) + 1), DeliverySession.ADDRESSES[int(session.order.address)], maxi(0, int(session.order.expires - session.clock))], 17)
-				button("Accept delivery", func(): session.accept(); save_session(); close_menu(); notify("Collect at " + session.restaurant_name() + ". Follow the minimap."))
-				if tutorial.gate("reject") == "":
-					button("Reject without penalty", func(): session.reject(); save_session(); show_menu("phone"))
-				else:
-					add_text("Training order: accept it to continue.", 14, Color("9bceb7"))
-			elif state in DeliverySession.ACTIVE:
-				add_text("ORDER " + session.order.id.to_upper(), 20, Color("9bceb7"))
-				add_text("Collect at " + session.restaurant_name() if state == "ACCEPTED" else "Deliver to " + DeliverySession.ADDRESSES[int(session.order.address)], 25)
-				add_text("Customer: %s  ·  Order %s\n%s" % [session.order.get("customer", "?"), session.order.get("ticket", "?"), order_items_text()], 18, Color("f4e7c4"))
-				add_text("Guaranteed pay: " + DeliverySession.money(session.order.quote) + "\nPackage: " + str({"ACCEPTED": "waiting on the pickup shelf", "IN_HAND": "in your hands · press F to pack it", "DROPPED": "on the ground where you put it down", "CARRYING": "in your bag · " + str(OrderDetails.SLOT_NAMES.get(session.order.get("slot", ""), ""))}[state]))
-			else:
-				add_text("Looking for requests nearby" if session.online else "You're offline", 24)
-				add_text("Requests arrive automatically while you explore. Lunch and dinner are busier. Cedar Kitchen, Market Noodles and Harbor Pizza serve 08:00–22:00.", 18)
-				add_text("Time pauses while the phone is open. Close it to continue your shift.", 16, Color("9bceb7"))
-			if tutorial.gate("offline") == "":
-				button("Go offline" if session.online else "Go online", func(): session.toggle_online(); save_session(); show_menu("phone"))
-			button("Local navigation", func(): show_menu("map"))
-			add_text("Wallet  " + DeliverySession.money(session.wallet) + "  /  %d deliveries" % session.completed, 19)
-			button("Back to street", close_menu)
 		"map":
 			add_text("COURIERNOW  /  NAVIGATION", 15, Color("9bceb7"))
 			add_text("Atatürk Avenue", 32)
@@ -499,8 +557,9 @@ func show_menu(which: String) -> void:
 			button("Back to street", close_menu)
 		"bag":
 			build_bag_menu()
-			if session.bag_upgrade:
+			if session.has_bag():
 				bag_rig.take_off()
+				sound("bag_zip")
 				if session.order.get("state") == "CARRYING" and not is_instance_valid(bag_rig.contents):
 					bag_rig.show_contents(package_model(), str(session.order.get("slot", "top")))
 		"shop":
@@ -532,6 +591,197 @@ func show_menu(which: String) -> void:
 		if child is Button:
 			child.grab_focus()
 			break
+
+## Tab: the phone comes out of your pocket (PhoneDevice); the CourierNow app lives on it.
+func open_phone() -> void:
+	if not session.has_phone():
+		notify("You don't have a phone yet. Trail & Tool sells a budget smartphone for $25." if not session.bought("budget_phone") else "Your phone is waiting on the pickup shelf at Trail & Tool.")
+		return
+	if city_map != null: city_map.hide()
+	mode = "phone"
+	get_tree().paused = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	modal.hide()
+	menu_shade.hide()
+	gameplay_ui.visible = true
+	player.camera.make_current()
+	phone.raise(player.camera)
+	notice.hide()                     # the phone shows its own toasts; keep the screen clear
+	notification_time = 0.0
+	sound("phone_raise")
+	tutorial.event("phone")
+
+func on_phone_action(name: String, arg: String) -> void:
+	match name:
+		"page":
+			tutorial.event("app_" + arg)
+		"toggle_online":
+			if session.online and tutorial.gate("offline") != "":
+				phone.os.flash("Training: stay online")
+				return
+			if not session.online and not session.has_bag():
+				phone.os.flash("You need a delivery bag first")
+				return
+			session.toggle_online()
+			phone.os.flash("You're online" if session.online else "You're offline")
+			save_session()
+		"accept":
+			if session.accept():
+				phone.os.flash("Accepted · go to " + session.restaurant_name())
+				sound("ui_accept")
+				save_session()
+		"reject":
+			if tutorial.gate("reject") == "" and session.reject():
+				save_session()
+		"maps":
+			close_menu()
+			show_menu("map")
+
+## E on a store computer (or its counter): the online shop of that store.
+func open_terminal(store: String) -> void:
+	if not ShopCatalog.LOCATIONS.has(store): return
+	mode = "terminal"
+	get_tree().paused = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	modal.hide()
+	menu_shade.hide()
+	gameplay_ui.hide()
+	current_shop = store
+	terminal.open(store, session)
+	sound("kiosk_click")
+
+func on_store_purchase(message: String) -> void:
+	for id in session.bought_vehicles:
+		# A new vehicle is rolled out in front of the store and becomes the one you use.
+		session.active_vehicle = id
+		var shop: Vector3 = ShopCatalog.LOCATIONS[current_shop]
+		player.replace_vehicle(Vector3(signf(shop.x) * 79, 0.06, shop.z + 12))
+	store_terminals.refresh()
+	save_session()
+	notify(message)
+
+## The marked delivery area at the active order's door (shown once you have the package).
+func sync_drop_zone() -> void:
+	var state: String = session.order.get("state", "")
+	var id: String = session.order.get("id", "")
+	var want: bool = state in ["IN_HAND", "DROPPED", "CARRYING"]
+	if want and (drop_zone == null or _zone_for != id or drop_zone.method != str(session.order.get("method", "meet"))):
+		if drop_zone: drop_zone.clear()
+		var address := int(session.order.address)
+		drop_zone = DropZone.new()
+		drop_zone.name = "DropZone"
+		world.add_child(drop_zone)
+		drop_zone.setup(address, world.doors[address], CityCatalog.address_facing(address), str(session.order.get("method", "meet")))
+		_zone_for = id
+	elif not want and drop_zone != null and drop_zone.customer == null:
+		drop_zone.clear()
+		drop_zone = null
+		_zone_for = ""
+
+## E on the customer's door: knock for "meet at door", a reminder for "leave at door".
+func at_door() -> String:
+	if session.order.get("method", "meet") == "door":
+		return "Leave it in the yellow marked area in front of the door: press %s there, or hold it and press %s." % [binding("interact"), binding("drop")]
+	if drop_zone and drop_zone.customer == null:
+		sound("door_knock")
+		var tw := create_tween()
+		tw.tween_interval(1.1)
+		tw.tween_callback(func() -> void:
+			if drop_zone:
+				drop_zone.call_customer(session.order)
+				sound("door_open"))
+		return "You knock on the door…"
+	return "%s is at the door. Hand the order over with %s." % [session.order.get("customer", "The customer"), binding("interact")]
+
+## E on the delivery area (leave at door) or on the customer (meet at door).
+func deliver_here(target: Dictionary) -> void:
+	var state: String = session.order.get("state", "")
+	if not state in ["IN_HAND", "CARRYING", "DROPPED"] or drop_zone == null:
+		return
+	if tutorial.gate("deliver") != "":
+		notify(tutorial.gate("deliver"))
+		return
+	var address := int(session.order.address)
+	if target.id == "dropzone":
+		if session.order.get("method", "meet") != "door":
+			notify("This customer wants to meet you. Knock on the door (%s)." % binding("interact"))
+			return
+		if state == "DROPPED":
+			notify("Pick the order up and put it down inside the lines.")
+			return
+		var from: Variant = null
+		if state == "CARRYING":
+			# The bag swings round and the order comes out of its compartment.
+			var node := bag_rig.take_out()
+			from = node.get_meta("from") if node else null
+			if node: node.queue_free()
+			session.unstow()
+			bag_rig.take_off()
+			var tw := create_tween()
+			tw.tween_interval(0.6)
+			tw.tween_callback(bag_rig.put_on)
+		elif is_instance_valid(held_package):
+			from = held_package.global_transform
+			held_package.queue_free()
+			held_package = null
+			_held_for = ""
+		session.drop_package(drop_zone.global_position, drop_zone.rotation.y)
+		sync_dropped(from)
+		complete_left()
+	elif target.id == "customer":
+		if state == "DROPPED":
+			notify("Pick the order up first.")
+			return
+		var pkg: Node3D = null
+		if state == "CARRYING":
+			pkg = bag_rig.take_out()
+			if pkg:
+				world.add_child(pkg)
+				pkg.global_transform = pkg.get_meta("from")
+			bag_rig.handover()
+		elif is_instance_valid(held_package):
+			pkg = held_package
+			held_package = null
+			_held_for = ""
+		var result := session.deliver(address, 1.0)
+		if session.order.get("state") == "COMPLETED":
+			drop_zone.customer_leaves(pkg)
+			delivered("meet")
+		else:
+			if pkg: pkg.queue_free()
+			notify(result)
+
+## Package down inside the lines: proof photo and payout.
+func complete_left() -> void:
+	if drop_zone == null or session.order.get("state") != "DROPPED": return
+	if not drop_zone.contains(session.dropped_position()): return
+	var result := session.leave_at_door(int(session.order.address), true)
+	if session.order.get("state") == "COMPLETED":
+		_flash.color.a = 0.85
+		create_tween().tween_property(_flash, "color:a", 0.0, 0.45)
+		sound("photo_shutter")
+		var left := dropped_package
+		dropped_package = null
+		if left:
+			var tw := left.create_tween()
+			tw.tween_interval(3.0)
+			tw.tween_callback(left.queue_free)
+		delivered("door")
+	else:
+		notify(result)
+
+func delivered(method: String) -> void:
+	sound("delivery_success")
+	if method == "meet": sound("customer_thanks")
+	var tw := create_tween()
+	tw.tween_interval(0.5)
+	tw.tween_callback(sound.bind("coins"))
+	session.receipt += "\n" + ("Photo proof sent to the customer." if method == "door" else "Handed over in person.")
+	save_session()
+	show_menu("receipt")
+
+func sound(name: String) -> void:
+	if audio and ResourceLoader.exists(CityAudio.SFX % name): audio.play_ui(name, -6.0)
 
 ## Title screen (new game, continue, settings, exit) or the Esc pause menu (ui/main_menu.gd).
 func open_main_menu(title: bool) -> void:
@@ -675,7 +925,11 @@ func drop_held() -> void:
 		_held_for = ""
 		sync_dropped(start)
 		tutorial.event("dropped")
+		sound("package_drop")
 		save_session()
+		if drop_zone and session.order.get("method", "meet") == "door" and drop_zone.contains(hit.position) and tutorial.gate("deliver") == "":
+			complete_left()
+			return
 	notify(result)
 
 ## Keep a package model on the ground while the order is DROPPED (also after loading a save).
@@ -710,7 +964,7 @@ func package_model() -> Node3D:
 ## Backpack open: the held package follows the mouse; the compartment under it lights up
 ## (green: it fits, red: it doesn't). A packed compartment lights up to be taken out.
 func update_bag_drag(delta: float) -> void:
-	if not bag_rig.out or not session.bag_upgrade:
+	if not bag_rig.out or not session.has_bag():
 		_drag_slot = ""
 		return
 	var mouse := get_viewport().get_mouse_position()
@@ -740,10 +994,16 @@ func bag_click(slot: String) -> void:
 		result = session.stow(slot)
 		if session.order.get("state") == "CARRYING":
 			# The package goes from your hands into the open bag's compartment.
+			if not is_instance_valid(held_package):
+				# Still flying into the hands (the bag opened the same frame): make it now.
+				session.order.state = "IN_HAND"
+				update_held_package()
+				session.order.state = "CARRYING"
 			var pkg: Node3D = held_package if is_instance_valid(held_package) else package_model()
 			held_package = null
 			_held_for = ""
 			bag_rig.pack(pkg, slot)
+			sound("package_place")
 	elif session.order.get("state") == "CARRYING" and session.order.get("slot", "") == slot:
 		result = session.unstow()
 		# Lift it out of the compartment back into your hands.
@@ -755,7 +1015,7 @@ func bag_click(slot: String) -> void:
 			_held_for = str(session.order.get("id", ""))
 			to_hands(node)
 	else:
-		result = "Empty compartment." if session.bag_upgrade else "You don't own a delivery bag yet."
+		result = "Empty compartment." if session.has_bag() else "You don't own a delivery bag yet."
 	notify(result)
 	save_session()
 	if mode == "bag": show_menu("bag")
@@ -764,7 +1024,7 @@ func bag_click(slot: String) -> void:
 ## desserts stay level). Bottom: a flat full-width drawer for pizza boxes.
 func build_bag_menu() -> void:
 	add_text("INSULATED DELIVERY BAG", 22, Color("9bceb7"))
-	if not session.bag_upgrade:
+	if not session.has_bag():
 		add_text("You don't own a delivery bag yet.\nTrail & Tool (equipment store) sells an insulated courier bag for $35. Without it you can only walk an order to the customer by hand.", 18)
 		if session.holding_package(): add_text("Holding: %s's order" % session.order.customer, 18, Color("f4e7c4"))
 		button("Close (%s)" % binding("bag"), close_menu)
@@ -809,6 +1069,10 @@ func bag_slot(slot: String, min_size: Vector2, state: String, kind: String, hold
 
 func close_menu() -> void:
 	if bag_rig and bag_rig.out: bag_rig.put_on()
+	if phone and phone.out:
+		phone.lower(player.camera)
+		sound("phone_lower")
+	if terminal and terminal.visible: terminal.hide()
 	if mode == "bag":
 		_drag_slot = ""
 		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
@@ -854,8 +1118,10 @@ func new_session() -> void:
 	player.camera.position.y = 1.65
 	player.bicycle.position = Vector3(-8, 0, 19)
 	session = DeliverySession.new()
+	session.start_career()
 	player.session = session
 	player.replace_vehicle(Vector3(-8, 0, 19))
+	if store_terminals: store_terminals.session = session
 	minimap.session = session
 	if shelves: shelves.session = session
 	session.changed.connect(update_hud)
@@ -867,7 +1133,8 @@ func new_session() -> void:
 	tutorial.start()
 	save_session()
 	close_menu()
-	notify("Welcome to your first shift! Follow the training tasks on the left.")
+	player.refresh_equipment()
+	notify("Welcome! You start on foot with $100. Follow the training tasks on the left.")
 
 func pickup_route_distance() -> float:
 	# Manhattan path via the open sidewalk and kitchen frontage.
@@ -893,6 +1160,7 @@ func load_session() -> void:
 		else: add_text(saves.error, 18, Color("f0c28b"))
 		return
 	session.restore(data)
+	if store_terminals: store_terminals.session = session
 	player.replace_vehicle(Vector3(-8, 0, 19))
 	player.position = Vector3(data.player.position[0], data.player.position[1], data.player.position[2])
 	player.rotation.y = data.player.yaw
@@ -942,10 +1210,10 @@ func update_hud() -> void:
 		bag_label.position = Vector2(36, 380)
 		hud.add_child(bag_label)
 	var bag_state := ""
-	if session.bag_upgrade:
+	if session.has_bag():
 		bag_state = "BACKPACK  ·  " + ("%s's %s in the %s" % [session.order.customer, str(OrderDetails.KIND_NAMES.get(session.order.get("kind", "bag"), "order")).to_lower(), str(OrderDetails.SLOT_NAMES.get(session.order.get("slot", ""), "bag")).to_lower()] if state == "CARRYING" else "empty") + "   [%s] open" % binding("bag")
 	if state == "IN_HAND":
-		bag_state = "HOLDING %s's order  ·  [%s] %s  ·  [%s] put down" % [session.order.customer, binding("bag"), "pack it in your backpack" if session.bag_upgrade else "no bag: walk it over", binding("drop")]
+		bag_state = "HOLDING %s's order  ·  [%s] %s  ·  [%s] put down" % [session.order.customer, binding("bag"), "pack it in your backpack" if session.has_bag() else "no bag: walk it over", binding("drop")]
 	elif state == "DROPPED":
 		bag_state = "%s's order is on the ground  ·  [%s] pick it up" % [session.order.customer, binding("interact")]
 	bag_label.text = bag_state
@@ -953,9 +1221,12 @@ func update_hud() -> void:
 	calendar_label.text = "DAY %02d   ·   %s" % [int(session.calendar_minutes / 1440) + 1, session.date_text()]
 	if world.weather != null: calendar_label.text += "   ·   " + world.weather.describe().to_upper()
 	needs_label.text = "FOOD %d%%   WATER %d%%   WC %d%%   ·   %s" % [int(session.hunger), int(session.hydration), int(session.bladder), "Night" if session.hour() < 6 or session.hour() >= 20 else "Daylight"]
+	var water := int(session.supplies.get("water_bottle", 0))
+	var snack := int(session.supplies.get("energy_bar", 0))
+	if water + snack > 0: needs_label.text += "   ·   [%s] water ×%d   [%s] bar ×%d" % [binding("use_water"), water, binding("use_snack"), snack]
 	if player.mounted:
 		prompt.text = "Space: brake   ·   E: dismount   ·   %d km/h" % int(absf(player.riding_speed) * 3.6)
-	elif player.position.distance_to(player.bicycle.position) < 2:
+	elif player.has_vehicle() and player.position.distance_to(player.bicycle.position) < 2:
 		prompt.text = "E: mount " + session.active_vehicle.replace("_", " ")
 	if navigation_label == null:
 		return
@@ -1015,9 +1286,24 @@ func smoke_test() -> void:
 	await get_tree().physics_frame
 	hit = player.target()
 	assert(hit.get("id") == "door_%d" % address, "Correct door must be physically interactable")
+	# Meet at door: knock, the customer comes out, hand the order over with E.
+	session.order["method"] = "meet"
+	sync_drop_zone()
+	interact()
+	await get_tree().create_timer(1.5).timeout
+	assert(drop_zone != null and drop_zone.customer != null, "Knocking brings the customer to the door")
+	var face := drop_zone.customer.global_position + Vector3(0, 1.1, 0) - player.camera.global_position
+	player.rotation.y = atan2(-face.x, -face.z)
+	player.camera.rotation = Vector3(atan2(face.y, Vector2(face.x, face.z).length()), 0, 0)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	assert(player.target().get("id") == "customer", "The customer can be handed the order")
 	interact()
 	assert(session.order.state == "COMPLETED" and session.wallet > 0)
 	close_menu()
+	if not player.has_vehicle():
+		session.active_vehicle = "bicycle"
+		player.replace_vehicle(player.position + Vector3(3, 0, 0))
 	player.position = player.bicycle.position + Vector3(1, 0.1, 0)
 	assert(player.toggle_bicycle().begins_with("Mounted"))
 	player.riding_speed = 3
@@ -1025,5 +1311,5 @@ func smoke_test() -> void:
 	player.riding_speed = 0
 	await get_tree().physics_frame
 	assert(player.toggle_bicycle() == "Bicycle parked.")
-	print("SCENE SMOKE PASS: real raycast pickup, named package, correct door, receipt; test does not write player save")
+	print("SCENE SMOKE PASS: real raycast pickup, named package, knock + customer handover, receipt; test does not write player save")
 	get_tree().quit()

@@ -86,15 +86,111 @@ static func prepare() -> void:
 			var entry := node(Vector3(560.8,.1,z-1.5))
 			link(id,entry)
 			destinations.append({"node":entry,"type":"service" if z!=-608 else "work","name":"Hospital" if z==-328 else ("Fire station" if z==-468 else "School"),"building":100})
-	# Existing neighborhood retains its sidewalk corridor and two controlled crossings.
-	for x in [-8.4,8.4]:
+	neighbourhood()
+
+## Cedar neighbourhood sidewalks (x < 120): Atatürk Avenue both sides (x +-8.4, the walking line
+## between the kerb furniture and the benches), the four cross streets (z = c +- 7) out to the
+## side roads, and both sidewalks of each side road (x = +-64 +- 7). Signalled mid-block avenue
+## crossings at z -93 / -177; every junction crossing is a zebra (gap acceptance, see
+## CitizenBrain.crossing_open). Sidewalk centrelines follow neighborhood.gd's sidewalk boxes.
+const AVENUE_Z := [35.0, 12.0, -38.0, -93.0, -140.0, -177.0, -220.0, -300.0, -350.0, -450.0, -500.0, -600.0, -640.0]
+static func neighbourhood() -> void:
+	var streets: Array = CityCatalog.CROSS_STREETS
+	for x in [-8.4, 8.4]:
+		var zs: Array[float] = []
+		for z in AVENUE_Z: zs.append(z)
+		for c in streets:
+			zs.append(float(c) + 7.0)
+			if c != streets[-1]: zs.append(float(c) - 7.0)
+		zs.sort()
+		zs.reverse()
 		var previous := -1
-		for z in [35.0,12.0,-38.0,-93.0,-140.0,-177.0,-220.0,-300.0,-400.0,-500.0,-600.0,-675.0]:
-			var id := node(Vector3(x,.1,z))
-			if previous>=0: link(previous,id)
+		for z in zs:
+			# Junction corners sit 0.5 m nearer the kerb: kerbside furniture stands on the
+			# walking line at the cross streets.
+			var corner := not (z in AVENUE_Z)
+			var id := node(Vector3(signf(x)*7.9 if corner else x,.1,z))
+			if previous>=0:
+				var pz := graph.get_point_position(previous).z
+				# Through a cross-street junction: a zebra across the side street.
+				link(previous,id,absf(pz-z)==14.0 and streets.has(int(round((pz+z)*0.5))))
 			previous=id
-			destinations.append({"node":id,"type":"home" if x>0 else ("cafe" if z>-221 else "work"),"name":"Cedar neighbourhood","building":-1})
+			if z in AVENUE_Z:
+				destinations.append({"node":id,"type":"home" if x>0 else ("cafe" if z>-221 else "work"),"name":"Cedar neighbourhood","building":-1})
 	for z in [-93.0,-177.0]: link(node(Vector3(-8.4,.1,z)),node(Vector3(8.4,.1,z)),true)
+	for c in streets:
+		for s in [-1.0, 1.0]:
+			if c == streets[-1] and s < 0: continue   # the south side of the last street has no walk
+			var z: float = c + s * 7.0
+			for lx in [-1.0, 1.0]:
+				var previous := -1
+				for ax in [7.9, 20.0, 32.0, 44.0, 57.0]:
+					var id := node(Vector3(lx * ax, .1, z))
+					if previous >= 0: link(previous, id)
+					previous = id
+					if ax in [20.0, 44.0]:
+						destinations.append({"node": id, "type": ["home", "shop", "home", "work"][posmod(int(c) / 10 + int(ax), 4)], "name": "Cedar neighbourhood", "building": -1})
+				# Across the side road at the junction.
+				link(node(Vector3(lx * 57.0, .1, z)), node(Vector3(lx * 71.0, .1, z)), true)
+	# Side roads (x +-64, z -258 .. -678): inner and outer sidewalks, zebras across each junction.
+	for road_x in CityCatalog.SIDE_ROADS:
+		for off in [-7.0, 7.0]:
+			var x: float = road_x + off
+			var zs: Array[float] = []
+			for k in range(streets.size()):
+				var c: float = streets[k]
+				if k > 0: zs.append(c + 7.0)
+				if k < streets.size() - 1:
+					zs.append(c - 7.0)
+					var next: float = streets[k + 1]
+					var span: float = (c - 7.0) - (next + 7.0)
+					var steps := int(span / 35.0)
+					for j in range(1, steps + 1): zs.append(c - 7.0 - span * j / (steps + 1))
+			zs.sort()
+			zs.reverse()
+			var previous := -1
+			for z in zs:
+				var id := node(Vector3(x, .1, z))
+				if previous >= 0:
+					var pz := graph.get_point_position(previous).z
+					link(previous, id, absf(pz - z) == 14.0)
+				previous = id
+			# The first junction (z -258) is a T: its north corner is on the cross-street sidewalk.
+			link(node(Vector3(x, .1, float(streets[0]) - 7.0)), node(Vector3(x, .1, float(streets[0]) + 7.0)), true)
+			var mid := node(Vector3(x, .1, zs[zs.size() / 2]))
+			destinations.append({"node": mid, "type": "home", "name": "Cedar neighbourhood", "building": -1})
+
+## Visible walking-surface height at p (the ground collision is a flat slab at y 0, so people
+## are placed on the rendered sidewalks / road decks instead): neighbourhood sidewalk boxes
+## (neighborhood.gd), downtown pavements and carriageways (DowntownDistrict.build_roads).
+static func ground_y(p: Vector3) -> float:
+	if p.x < 120.0:
+		var ax := absf(p.x)
+		for c in CityCatalog.CROSS_STREETS:
+			if absf(p.z - float(c)) < 5.0 and ax < 69.0: return 0.036
+		if ax >= 6.0 and ax <= 10.0 and p.z <= 44.0: return 0.05
+		for c in CityCatalog.CROSS_STREETS:
+			var dz := absf(p.z - float(c))
+			if dz <= 9.0 and ax < 69.0: return 0.08
+			if dz <= 11.0 and p.x > 69.0: return 0.08
+		for sx in CityCatalog.SIDE_ROADS:
+			var dx := absf(p.x - float(sx))
+			if dx < 5.0: return 0.036
+			if dx <= 9.0: return 0.08
+		if ax < 6.0: return 0.036
+		return 0.05
+	var top := 0.0
+	for x in DowntownCatalog.STREET_X:
+		var half := 9.0 if x == 252 else 7.0
+		var dx := absf(p.x - float(x))
+		if dx < half: top = maxf(top, 0.05)
+		elif dx <= half + 4.0: top = maxf(top, 0.14)
+	for z in DowntownCatalog.STREET_Z:
+		var dz := absf(p.z - float(z))
+		if dz < 7.0: top = maxf(top, 0.15)
+		elif dz <= 11.0: top = maxf(top, 0.16)
+	return top
+
 static func nearby(p: Vector3) -> int:
 	prepare()
 	return graph.get_closest_point(p)

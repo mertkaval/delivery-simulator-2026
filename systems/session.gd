@@ -63,6 +63,24 @@ var purchase_serial := 0
 ## old saves count as trained; New Game starts it.
 var tutorial: Dictionary = {"done": true, "step": 0}
 const TUTORIAL_BONUS := 1500
+## Career economy. 1: original saves (a bicycle and a phone come with the job). 2: New Game: on
+## foot with $100; the phone, the delivery bag and every vehicle are bought at the stores.
+var economy := 1
+## Bought on a store computer and waiting on that store's pickup shelf: [{"id", "store", "qty"}].
+var pickups: Array = []
+## Carried supplies (water_bottle, energy_bar): id -> count.
+var supplies: Dictionary = {}
+var store_serial := 0
+## Delivery methods: "door" = leave it in the marked area at the door, "meet" = hand it to the
+## customer in person.
+const METHODS := {"door": "Leave at door", "meet": "Meet at door"}
+
+## New Game: the career starts on foot with no phone and no bag, offline, in training.
+func start_career() -> void:
+	economy = 2
+	active_vehicle = ""
+	online = false
+	tutorial = {"done": false, "step": 0}
 ## Every new courier starts with $100 (recorded in the ledger like any other money movement).
 const STARTING_FUNDS := 10000
 
@@ -81,10 +99,107 @@ func date_text() -> String:
 	return "%s  %02d %s %d  |  %02d:%02d" % [days[date.weekday], date.day, months[date.month - 1], date.year, date.hour, date.minute]
 
 func owns(id: String) -> bool:
-	return id == "bicycle" or id in inventory or (id == "delivery_bag" and bag_upgrade)
+	if awaiting_pickup(id): return false
+	return bought(id)
+
+## Paid for (it may still be waiting on a pickup shelf).
+func bought(id: String) -> bool:
+	if economy == 1 and id in ["bicycle", "budget_phone"]: return true
+	return id in inventory or (id == "delivery_bag" and bag_upgrade)
+
+func awaiting_pickup(id: String) -> bool:
+	for p: Dictionary in pickups:
+		if p.get("id", "") == id: return true
+	return false
+
+func has_bag() -> bool:
+	return owns("delivery_bag")
+
+func has_phone() -> bool:
+	return owns("budget_phone")
+
+## Store computer checkout: cart is id -> quantity. Equipment comes once, supplies by quantity.
+## Vehicles are ready outside at once; everything else waits on the store's pickup shelf.
+## Returns the message; `bought_vehicles` lists vehicles to roll out.
+var bought_vehicles: Array[String] = []
+func checkout(cart: Dictionary, store: String) -> String:
+	bought_vehicles.clear()
+	var total := 0
+	var lines: Array[String] = []
+	for id: String in cart:
+		var qty := int(cart[id])
+		if qty <= 0: continue
+		if not ShopCatalog.ITEMS.has(id): return "An item in your cart is unavailable."
+		var item: Dictionary = ShopCatalog.ITEMS[id]
+		if ShopCatalog.is_supply(id):
+			qty = clampi(qty, 1, ShopCatalog.max_qty(id))
+		elif bought(id):
+			return "You already own the %s." % item.name
+		else:
+			qty = 1
+		total += int(item.price) * qty
+		lines.append(id)
+	if lines.is_empty(): return "Your cart is empty."
+	if wallet < total: return "Not enough money: the cart is %s, you have %s." % [money(total), money(wallet)]
+	var waiting := 0
+	for id in lines:
+		var item: Dictionary = ShopCatalog.ITEMS[id]
+		var qty := clampi(int(cart[id]), 1, ShopCatalog.max_qty(id)) if ShopCatalog.is_supply(id) else 1
+		if ShopCatalog.is_supply(id):
+			store_serial += 1
+			ledger["store_order_%d" % store_serial] = -int(item.price) * qty
+			wallet -= int(item.price) * qty
+		elif id == "delivery_bag":
+			wallet -= 3500
+			bag_upgrade = true
+			ledger["upgrade_insulated_bag"] = -3500
+		else:
+			wallet -= int(item.price)
+			inventory.append(id)
+			ledger["purchase_" + id] = -int(item.price)
+		if ShopCatalog.is_vehicle(id):
+			bought_vehicles.append(id)
+		else:
+			pickups.append({"id": id, "store": store, "qty": qty})
+			waiting += 1
+	changed.emit()
+	var msg := "Paid %s." % money(total)
+	if waiting > 0: msg += " Collect your order from the pickup shelf."
+	if not bought_vehicles.is_empty(): msg += " Your new ride is waiting outside the store."
+	return msg
+
+## Take pickup `index` off the shelf: equipment becomes yours, supplies go in your pockets.
+func collect(index: int) -> String:
+	if index < 0 or index >= pickups.size(): return "Nothing to collect."
+	var p: Dictionary = pickups[index]
+	pickups.remove_at(index)
+	var id: String = p.id
+	var item: Dictionary = ShopCatalog.ITEMS[id]
+	if ShopCatalog.is_supply(id):
+		supplies[id] = int(supplies.get(id, 0)) + int(p.qty)
+		changed.emit()
+		return "Picked up %d × %s." % [int(p.qty), item.name]
+	changed.emit()
+	if id == "budget_phone": return "Picked up your %s. Press Tab to use it." % item.name
+	if id == "delivery_bag": return "Picked up the insulated delivery bag. It's on your back now: press F to open it."
+	return "Picked up the %s." % item.name
+
+## Keys 1 / 2: drink a water bottle, eat an energy bar.
+func use_supply(id: String) -> String:
+	var have := int(supplies.get(id, 0))
+	if have <= 0: return "You have no %s left. Buy more at Trail & Tool." % str(ShopCatalog.ITEMS.get(id, {}).get("name", id)).to_lower()
+	supplies[id] = have - 1
+	if id == "water_bottle":
+		hydration = minf(100, hydration + 45)
+		bladder = minf(100, bladder + 8)
+	elif id == "energy_bar":
+		hunger = minf(100, hunger + 30)
+		energy = minf(100, energy + 10)
+	changed.emit()
+	return "%s · %d left." % [ShopCatalog.ITEMS[id].name, have - 1]
 
 func buy(id: String) -> String:
-	if not ShopCatalog.ITEMS.has(id): return "This item is unavailable."
+	if not ShopCatalog.ITEMS.has(id) or ShopCatalog.is_supply(id): return "This item is unavailable."
 	if owns(id): return "You already own this item."
 	if id == "delivery_bag": return purchase_bag()
 	var item: Dictionary = ShopCatalog.ITEMS[id]
@@ -122,7 +237,7 @@ func restaurant_name() -> String:
 func pickup_position() -> Vector3:
 	return CityCatalog.PICKUPS[CityCatalog.restaurant_index(restaurant_id())]
 
-func offer(pickup_distance: float = 10.0) -> void:
+func offer(pickup_distance: float = 10.0, force_restaurant: int = -1, force_address: int = -1, force_method: String = "") -> void:
 	if not order.is_empty() and order.state not in TERMINAL:
 		return
 	serial += 1
@@ -132,6 +247,8 @@ func offer(pickup_distance: float = 10.0) -> void:
 	if offer_position.x>120:
 		address=36+(serial-1)%DowntownCatalog.DESTINATIONS.size()
 		restaurant=3+(serial-1)%DowntownCatalog.PICKUPS.size()
+	if force_restaurant >= 0: restaurant = force_restaurant
+	if force_address >= 0: address = force_address
 	var counter: Vector3 = CityCatalog.PICKUPS[restaurant]
 	pickup_distance = CityCatalog.distance(CityCatalog.route(offer_position, counter, true))
 	distance = CityCatalog.distance(CityCatalog.route(counter, CityCatalog.address_position(address), false))
@@ -142,6 +259,7 @@ func offer(pickup_distance: float = 10.0) -> void:
 		"deadline": 0.0, "bag": "", "payment": ""}
 	order.merge(OrderDetails.build(serial, str(order.restaurant), random_seed))
 	order["slot"] = ""
+	order["method"] = force_method if METHODS.has(force_method) else ("meet" if (serial * 7 + random_seed) % 5 < 2 else "door")
 	changed.emit()
 
 func tick(delta: float) -> void:
@@ -215,8 +333,8 @@ func take_package(package: Dictionary, distance: float) -> String:
 func stow(slot: String) -> String:
 	if order.get("state") != "IN_HAND":
 		return "You are not holding a package."
-	if not bag_upgrade:
-		return "You need an insulated delivery bag. Trail & Tool sells them for $35."
+	if not has_bag():
+		return "You need an insulated delivery bag. Trail & Tool sells them for $35." if not bag_upgrade else "Your delivery bag is waiting on the pickup shelf at Trail & Tool."
 	if not slot in OrderDetails.SLOTS:
 		return "Choose a bag compartment."
 	var kind: String = order.get("kind", "bag")
@@ -294,6 +412,20 @@ func deliver(address: int, distance: float) -> String:
 	changed.emit()
 	return receipt
 
+## Leave at door: the package was put down inside the marked area at the customer's door.
+func leave_at_door(address: int, in_zone: bool) -> String:
+	if order.get("method", "meet") != "door":
+		return "This customer wants to meet you. Knock and hand the order over in person."
+	if order.get("state") != "DROPPED" or not in_zone:
+		return "Put the order down inside the marked area at the door."
+	if address != int(order.address):
+		return "Wrong address. Your customer is at " + ADDRESSES[int(order.address)] + "."
+	order.state = "IN_HAND"         # handed over from the ground: same payout path as a handover
+	order.erase("dropped_at")
+	var result := deliver(address, 0.5)
+	if order.get("state") == "COMPLETED": order["proof"] = "photo"
+	return result
+
 func purchase_bag() -> String:
 	if bag_upgrade:
 		return "You already own the insulated bag."
@@ -311,12 +443,30 @@ func snapshot() -> Dictionary:
 		"ledger": ledger.duplicate(true), "order": order.duplicate(true), "receipt": receipt,
 		"dispatch": {"online": online, "next_offer": next_offer, "calendar": calendar_minutes, "seed": random_seed},
 		"lifestyle": {"inventory": inventory.duplicate(), "vehicle": active_vehicle, "hunger": hunger, "hydration": hydration, "bladder": bladder, "purchase_serial": purchase_serial},
-		"tutorial": tutorial.duplicate(true)}
+		"tutorial": tutorial.duplicate(true), "economy": economy,
+		"store": {"pickups": pickups.duplicate(true), "supplies": supplies.duplicate(), "serial": store_serial}}
 
 static func validate(data: Variant) -> bool:
 	if not data is Dictionary:
 		return false
 	if not data.get("ledger") is Dictionary: return false
+	var eco: Variant = data.get("economy", 1)
+	if not (eco is int or eco is float) or not int(eco) in [1, 2]: return false
+	var store_serial_max := 0
+	if data.has("store"):
+		var st: Variant = data.store
+		if not st is Dictionary or not st.get("pickups") is Array or not st.get("supplies") is Dictionary: return false
+		var ser: Variant = st.get("serial", 0)
+		if not (ser is int or ser is float) or ser < 0: return false
+		store_serial_max = int(ser)
+		for p: Variant in st.pickups:
+			if not p is Dictionary or not ShopCatalog.ITEMS.has(str(p.get("id", ""))) or not ShopCatalog.LOCATIONS.has(str(p.get("store", ""))): return false
+			var q: Variant = p.get("qty", 0)
+			if not (q is int or q is float) or q < 1 or q > 99: return false
+		for k: Variant in st.supplies:
+			if not ShopCatalog.is_supply(str(k)): return false
+			var c: Variant = st.supplies[k]
+			if not (c is int or c is float) or c < 0 or c > 999: return false
 	if data.has("tutorial"):
 		var t: Variant = data.tutorial
 		if not t is Dictionary or not t.get("done") is bool: return false
@@ -331,8 +481,11 @@ static func validate(data: Variant) -> bool:
 			if not id is String or not ShopCatalog.ITEMS.has(id) or seen.has(id): return false
 			seen[id] = true
 			if id == "delivery_bag" or not data.get("ledger", {}).has("purchase_" + id): return false
-		if not life.get("vehicle") is String or not ShopCatalog.is_vehicle(life.vehicle): return false
-		if life.vehicle != "bicycle" and not life.vehicle in life.inventory: return false
+		if not life.get("vehicle") is String: return false
+		if life.vehicle == "":
+			if int(eco) != 2: return false
+		elif not ShopCatalog.is_vehicle(life.vehicle): return false
+		elif (life.vehicle != "bicycle" or int(eco) == 2) and not life.vehicle in life.inventory: return false
 		for key in ["hunger", "hydration", "bladder", "purchase_serial"]:
 			var number: Variant = life.get(key)
 			if not (number is float or number is int) or not is_finite(float(number)) or number < 0: return false
@@ -373,6 +526,9 @@ static func validate(data: Variant) -> bool:
 		elif key == "starting_funds":
 			if value != STARTING_FUNDS:
 				return false
+		elif key.begins_with("store_order_"):
+			var n: String = str(key).trim_prefix("store_order_")
+			if not n.is_valid_int() or int(n) < 1 or int(n) > store_serial_max or value >= 0: return false
 		elif key == "bonus_tutorial":
 			if value != TUTORIAL_BONUS:
 				return false
@@ -412,6 +568,7 @@ static func validate(data: Variant) -> bool:
 			return false
 	if job.address >= ADDRESSES.size() or float(job.address) != floor(float(job.address)) or job.state not in ["OFFERED", "ACCEPTED", "IN_HAND", "DROPPED", "CARRYING", "COMPLETED", "REJECTED", "EXPIRED"]:
 		return false
+	if job.has("method") and not METHODS.has(str(job.method)): return false
 	if job.state == "DROPPED":
 		var at: Variant = job.get("dropped_at")
 		if not at is Array or (at as Array).size() != 4: return false
@@ -454,6 +611,11 @@ func restore(data: Dictionary) -> bool:
 	bladder = float(life.get("bladder", 0))
 	purchase_serial = int(life.get("purchase_serial", 0))
 	tutorial = (data.get("tutorial", {"done": true, "step": 0}) as Dictionary).duplicate(true)
+	economy = int(data.get("economy", 1))
+	var st: Dictionary = data.get("store", {})
+	pickups = (st.get("pickups", []) as Array).duplicate(true)
+	supplies = (st.get("supplies", {}) as Dictionary).duplicate()
+	store_serial = int(st.get("serial", 0))
 	changed.emit()
 	return true
 

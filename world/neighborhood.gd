@@ -59,6 +59,7 @@ func set_time(hour: float) -> void:
 	CityKit.set_night(1.0 - amount)
 	if buses != null: buses.set_night(1.0 - amount)
 	if vfx!=null: vfx.set_time(hour,amount)
+	StreetLife.set_time(self, hour, amount)
 	if weather != null:
 		weather.set_time(hour)
 		weather.apply_light(daylight, atmosphere, sky_material)
@@ -315,6 +316,8 @@ func _ready() -> void:
 	weather = WeatherSystem.new()
 	weather.name = "Weather"
 	add_child(weather)
+	# Signals, LED shop boards and street effects (world/streets/street_life.gd).
+	StreetLife.attach(self)
 
 func batch_imported_assets() -> void:
 	var groups := {}
@@ -647,7 +650,7 @@ func build_store(id: String, at: Vector3) -> void:
 	add_child(number_plate)
 	var sign_label := label_at("PUBLIC WC · WATER" if id=="wc" else ShopCatalog.TITLES[id],at+Vector3(0,3.5,5.23),64)
 	sign_label.pixel_size=.009
-	label_at("E · USE WC" if id=="wc" else "E · SHOP",at+Vector3(4,1.45,1.45),28)
+	if id=="wc": label_at("E · USE WC",at+Vector3(4,1.45,1.45),28)   # shops: the store computer (StoreTerminals) on the counter
 	if id=="wc":
 		box(at+Vector3(-3,.3,-2),Vector3(.7,.6,.8),"737773",true,"wc").hide()
 		box(at+Vector3(-1,1.1,-2.5),Vector3(.12,2.2,4.5),"737773").hide()

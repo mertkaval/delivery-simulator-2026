@@ -18,7 +18,7 @@ var failed := 0
 ## Kara Fatma Street road works close a lane on purpose (cones, barriers, warning sign).
 const ROAD_WORKS := Rect2(-42.0, -538.6, 30.5, 4.6)
 ## Visual instances that are not street props.
-const SKIP_ROOTS := ["CityTraffic", "CityLife", "Animals", "Weather", "CityVFX", "DowntownActivity", "CivicFleet",
+const SKIP_ROOTS := ["CityTraffic", "CityLife", "Animals", "Weather", "CityVFX", "StreetVFX", "DowntownActivity", "CivicFleet",
 	"TrafficCircles", "StreetGrid", "Restaurants"]
 
 func check(ok: bool, what: String) -> void:
@@ -255,6 +255,9 @@ func run() -> void:
 		if fleet != null:
 			for car: Dictionary in fleet.fleet:
 				routes.append({"name": str((car.body as Node).name), "points": (car.route as SmoothRoute).points, "half": float((car.size as Vector3).x) * 0.5})
+			# Downtown street traffic (driven by CivicFleet since the street-life pass).
+			for car: Dictionary in fleet.get("drivers"):
+				routes.append({"name": str((car.body as Node).name), "points": (car.route as SmoothRoute).points, "half": float((car.size as Vector3).x) * 0.5})
 	if world.buses != null:
 		for line: Dictionary in world.buses.lines:
 			var pts: PackedVector3Array = (line.path as PackedVector3Array).duplicate()
@@ -316,6 +319,7 @@ func run() -> void:
 		var civic := population.get_node_or_null("CivicFleet")
 		if civic != null:
 			for car: Dictionary in civic.fleet: drivers.append(car)
+			for car: Dictionary in civic.get("drivers"): drivers.append(car)
 	# 4x time; cap the frame rate so the run stays well inside run_tests.ps1's --quit-after frames.
 	Engine.time_scale = 4.0
 	Engine.max_fps = 30

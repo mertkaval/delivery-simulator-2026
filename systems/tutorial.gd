@@ -1,8 +1,10 @@
 class_name TutorialDirector
 extends Node
-## First-shift training, started by New Game: twelve mandatory tasks done in order that teach
-## the controls and the delivery loop (phone, map, gear, bike, offer, pickup shelf, holding and
-## putting down a package, packing the backpack, handing over at the door).
+## First-shift training, started by New Game: fifteen mandatory tasks done in order that teach
+## the controls and the delivery loop on foot: the store computer and pickup shelf (phone + bag),
+## the phone and its CourierNow app, the restaurant pickup shelf, holding / putting down a package,
+## packing the backpack, and both delivery methods (leave at door, meet at door). Afterwards an
+## optional goal card tracks saving up for the first bicycle.
 ## While training is running, normal dispatch is off (the director sends the first order
 ## itself), and rejecting, going offline, packing or delivering before their task are refused
 ## with a hint (gate()). Progress lives in DeliverySession.tutorial, so it saves and resumes.
@@ -10,17 +12,20 @@ extends Node
 
 const STEPS := [
 	{"id": "look", "title": "Look around", "hint": "Move the mouse to look around the street."},
-	{"id": "walk", "title": "Take a walk", "hint": "Walk with W A S D. Hold {sprint} to jog."},
-	{"id": "phone", "title": "Check your courier phone", "hint": "Press {phone} to open CourierNow: offers, orders and your wallet live here. Press {phone} again to put it away."},
-	{"id": "map", "title": "Open the city map", "hint": "On foot, press {map}. Pick any place and the minimap guides you there. Press {map} to close it."},
-	{"id": "bag", "title": "Buy an insulated delivery bag", "hint": "Food travels in a delivery backpack. Follow the minimap to Trail & Tool, press {interact} at the shop and buy the bag ($35)."},
-	{"id": "bike", "title": "Get on your bicycle", "hint": "Follow the minimap back to your bike and press {interact} to ride. {interact} again gets you off."},
-	{"id": "accept", "title": "Accept your first order", "hint": "A request just came in. Press {phone} and accept it."},
-	{"id": "ride", "title": "Ride to {restaurant}", "hint": "Follow the mint route on the minimap. Park by the restaurant and get off ({interact})."},
-	{"id": "take", "title": "Take the right package", "hint": "Look at the packages on the pickup shelf and read their receipts. Take the one for {customer} · {ticket} with {interact}."},
-	{"id": "drop", "title": "Put it down, pick it up", "hint": "You're holding the order. Press {drop} to set it down, then look at it and press {interact} to pick it up again."},
-	{"id": "pack", "title": "Pack it in your backpack", "hint": "Press {bag} to swing the backpack round. Move the package over the {slot} and click to drop it in (or press {interact}). Close with {bag}."},
-	{"id": "deliver", "title": "Deliver to {customer}", "hint": "Ride to {address}, get off at the house and hand the order over at the door with {interact}."},
+	{"id": "walk", "title": "Take a walk", "hint": "Walk with W A S D. Hold {sprint} to jog. You start on foot: a bicycle comes later."},
+	{"id": "store", "title": "Walk to Trail & Tool", "hint": "Follow the mint route on the minimap to the equipment store."},
+	{"id": "order", "title": "Order a phone and a delivery bag", "hint": "Use the store computer on the counter ({interact}). Add the Nova budget phone and the insulated delivery bag to the cart and press Purchase. You have $100."},
+	{"id": "collect", "title": "Collect your order", "hint": "Your items wait on the ONLINE ORDER PICKUP shelf at the back of the store. Look at each one and press {interact}."},
+	{"id": "phone", "title": "Open your phone and CourierNow", "hint": "Press {phone} to take out your phone, then tap the orange CourierNow app."},
+	{"id": "online", "title": "Start your shift", "hint": "In CourierNow, tap 'Start shift · go online'. A first request will come in."},
+	{"id": "accept", "title": "Accept your first order", "hint": "Tap Accept on the request in CourierNow, then put the phone away ({phone})."},
+	{"id": "ride", "title": "Walk to {restaurant}", "hint": "Follow the mint route on the minimap to the restaurant's pickup shelf."},
+	{"id": "take", "title": "Take the right package", "hint": "Read the receipts on the pickup shelf. Take the one for {customer} · {ticket} with {interact}."},
+	{"id": "drop", "title": "Put it down, pick it up", "hint": "Press {drop} to set the package down, then look at it and press {interact} to pick it up again."},
+	{"id": "pack", "title": "Pack it in your backpack", "hint": "Press {bag}, move the package over the {slot} and click to drop it in (or press {interact}). Close with {bag}."},
+	{"id": "leave", "title": "Leave it at the door", "hint": "This customer chose LEAVE AT DOOR. Go to {address} and put the order inside the yellow marked area: press {interact} on the area (or hold it and press {drop} there)."},
+	{"id": "accept2", "title": "Accept the next order", "hint": "A new request is waiting: this one is MEET AT DOOR. Open the phone ({phone}) and accept it."},
+	{"id": "meet", "title": "Meet the customer", "hint": "Collect {customer}'s order at {restaurant} and pack it. At {address}, knock ({interact} on the door), then hand the order over with {interact} when they come out."},
 ]
 const LOOK_GOAL := 2.4     ## radians of looking around
 const WALK_GOAL := 12.0    ## metres on foot
@@ -34,7 +39,7 @@ var _last_pos := Vector3.INF
 
 func setup(owner_game: Node) -> void:
 	game = owner_game
-	process_mode = Node.PROCESS_MODE_PAUSABLE
+	process_mode = Node.PROCESS_MODE_ALWAYS     # tasks done on the phone advance while it's open
 	card = MissionCard.new()
 	card.name = "MissionCard"
 	game.gameplay_ui.add_child(card)
@@ -77,7 +82,7 @@ func gate(action: String) -> String:
 			if step() < index_of("pack"):
 				return "Training: first practise putting the package down (%s) and picking it up (%s)." % [game.binding("drop"), game.binding("interact")]
 		"deliver":
-			if step() < index_of("deliver"):
+			if step() < index_of("leave"):
 				return "Training: pack the order in your backpack first (%s)." % game.binding("bag")
 	return ""
 
@@ -85,13 +90,14 @@ func gate(action: String) -> String:
 func event(name: String) -> void:
 	if not active(): return
 	var t: Dictionary = session().tutorial
-	if name == step_id() or (name == "dropped" and step_id() == "drop"):
+	if name == step_id() or (name == "dropped" and step_id() == "drop") or (name == "app_courier" and step_id() == "phone"):
 		t[name] = true
 
 func _process(delta: float) -> void:
 	if game == null: return
+	if get_tree().paused and game.mode != "phone": return
 	if not active():
-		if card.visible and not card.finished: card.hide()
+		bike_goal()
 		return
 	var t: Dictionary = session().tutorial
 	var id := step_id()
@@ -106,8 +112,6 @@ func _process(delta: float) -> void:
 	_last_yaw = player.rotation.y
 	_last_pitch = player.camera.rotation.x
 	_last_pos = player.position
-	if id == "bike" and not player.mounted:
-		CityNavigation.target = {"name": "Your bicycle", "kind": "home", "at": player.bicycle.position}
 	if _check_delay > 0.0:
 		_check_delay -= delta
 		if _check_delay <= 0.0: advance()
@@ -116,7 +120,7 @@ func _process(delta: float) -> void:
 		_check_delay = 1.2
 		card.complete()
 		var audio := get_tree().get_first_node_in_group("city_audio") as CityAudio
-		if audio: audio.play_ui("ui_accept", -6.0)
+		if audio: audio.play_ui("step_complete" if ResourceLoader.exists(CityAudio.SFX % "step_complete") else "ui_accept", -6.0)
 		return
 	refresh()
 
@@ -128,11 +132,15 @@ func done(id: String) -> bool:
 	match id:
 		"look": return float(t.get("look", 0.0)) >= LOOK_GOAL
 		"walk": return float(t.get("walk", 0.0)) >= WALK_GOAL
-		"phone": return bool(t.get("phone", false)) and closed
-		"map": return bool(t.get("map", false)) and closed
-		"bag": return s.bag_upgrade and closed
-		"bike": return game.player.mounted
-		"accept": return state in DeliverySession.ACTIVE and closed
+		"store":
+			var p: Vector3 = game.player.position
+			var at: Vector3 = ShopCatalog.LOCATIONS["equipment"]
+			return Vector2(p.x - at.x, p.z - at.z).length() < 8.0
+		"order": return s.bought("budget_phone") and s.bought("delivery_bag") and closed
+		"collect": return s.has_phone() and s.has_bag()
+		"phone": return bool(t.get("app_courier", false))
+		"online": return s.online
+		"accept", "accept2": return state in DeliverySession.ACTIVE and closed
 		"ride":
 			var p: Vector3 = game.player.position
 			var at := s.pickup_position()
@@ -140,7 +148,7 @@ func done(id: String) -> bool:
 		"take": return state in ["IN_HAND", "DROPPED", "CARRYING"]
 		"drop": return bool(t.get("dropped", false)) and state == "IN_HAND"
 		"pack": return state == "CARRYING" and closed
-		"deliver": return state == "COMPLETED"
+		"leave", "meet": return state == "COMPLETED" and closed
 	return false
 
 func advance() -> void:
@@ -159,18 +167,16 @@ func advance() -> void:
 func enter(id: String) -> void:
 	var s := session()
 	match id:
-		"bag":
+		"store":
 			CityNavigation.target = {"name": "Trail & Tool", "kind": "store", "at": ShopCatalog.LOCATIONS["equipment"]}
-		"bike":
-			CityNavigation.target = {"name": "Your bicycle", "kind": "home", "at": game.player.bicycle.position}
-		"accept":
+		"accept", "accept2":
 			CityNavigation.target = {}
 			if s.order.is_empty() or s.order.get("state", "") in DeliverySession.TERMINAL:
-				s.online = true
 				s.offer_position = game.player.position
-				s.offer()
-				s.order["expires"] = s.clock + 86400.0     # the training order never times out
-			game.notify("CourierNow · New delivery request\nPress %s to review your offer" % game.binding("phone"))
+				# Training orders from Kebab House: the first is left at the door, the second met in person.
+				s.offer(10.0, 0, 0 if id == "accept" else 3, "door" if id == "accept" else "meet")
+				s.order["expires"] = s.clock + 86400.0     # training orders never time out
+			game.notify("CourierNow · New delivery request\nPress %s to review it" % game.binding("phone"))
 		_:
 			pass
 
@@ -180,8 +186,25 @@ func finish() -> void:
 	s.schedule_offer()
 	CityNavigation.target = {}
 	card.show_finished(DeliverySession.money(DeliverySession.TUTORIAL_BONUS))
+	var audio := get_tree().get_first_node_in_group("city_audio") as CityAudio
+	if audio and ResourceLoader.exists(CityAudio.SFX % "mission_complete"): audio.play_ui("mission_complete", -4.0)
 	game.notify("Training complete! %s bonus added.\nRequests now arrive automatically while you're online." % DeliverySession.money(DeliverySession.TUTORIAL_BONUS))
 	game.save_session()
+
+## After training (new careers): an optional goal card, saving up for the first bicycle.
+func bike_goal() -> void:
+	var s := session()
+	if card.finished: return
+	if s.economy != 2 or bool(s.tutorial.get("bike_goal", false)):
+		if card.visible: card.hide()
+		return
+	var price := int(ShopCatalog.ITEMS["bicycle"].price)
+	if s.owns("bicycle"):
+		s.tutorial["bike_goal"] = true
+		card.show_finished("", "GOAL REACHED", "Your first bicycle!", "Press %s next to it to ride. Deliveries are faster now: more orders, more tips." % game.binding("interact"))
+		return
+	card.set_goal("GOAL", "Save up for a bicycle", "Cedar Cycles sells a gray city bike for %s. Keep delivering on foot: %s to go." % [DeliverySession.money(price), DeliverySession.money(maxi(0, price - s.wallet))], float(s.wallet) / float(price))
+	card.visible = game.mode == "" or game.mode == "bag"
 
 ## Current task text with keys and order details filled in.
 func refresh() -> void:
@@ -199,6 +222,8 @@ func refresh() -> void:
 	var t: Dictionary = s.tutorial
 	var progress := 0.0
 	match step_id():
+		"order": progress = (0.5 if s.bought("budget_phone") else 0.0) + (0.5 if s.bought("delivery_bag") else 0.0)
+		"collect": progress = (0.5 if s.has_phone() else 0.0) + (0.5 if s.has_bag() else 0.0)
 		"look": progress = float(t.get("look", 0.0)) / LOOK_GOAL
 		"walk": progress = float(t.get("walk", 0.0)) / WALK_GOAL
 		"drop": progress = 0.5 if bool(t.get("dropped", false)) else 0.0

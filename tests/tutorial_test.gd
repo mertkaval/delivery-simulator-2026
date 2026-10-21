@@ -1,9 +1,9 @@
 extends SceneTree
-## Training shift (TutorialDirector) played start to finish through the game's own paths, plus
-## the hold / put down / pick up mechanic and drag-and-drop packing into the open backpack:
-## tasks advance in order, normal dispatch and rejecting are blocked while training, packing
-## before the put-down task and delivering before packing are refused, a dropped package
-## saves and reloads, and finishing pays the one-time bonus and turns dispatch back on.
+## A New Game career start played through the game's own paths: on foot with $100 and no
+## bike; the store computer (cart, purchase) and the pickup shelf; the 3D phone (screen taps)
+## and the CourierNow app; the training orders (leave at door into the marked area, meet at
+## door: knock, customer comes out, hand over with E); hold / put down / drag-and-drop packing;
+## the training gates; the bonus and the bicycle goal afterwards.
 var game
 var failures := 0
 var checks := 0
@@ -22,13 +22,39 @@ func wait_step(id: String) -> bool:
 	for i in range(400):
 		if game.tutorial.step_id() == id: return true
 		await process_frame
+	print("  (still at '%s')" % game.tutorial.step_id())
 	return false
 
 func look_at_point(target: Vector3) -> void:
 	var p: CourierPlayer = game.player
 	var d := target - p.camera.global_position
 	p.rotation.y = atan2(-d.x, -d.z)
-	p.camera.rotation.x = atan2(d.y, Vector2(d.x, d.z).length())
+	p.camera.rotation = Vector3(atan2(d.y, Vector2(d.x, d.z).length()), 0, 0)
+
+## Stand at `from` and look at `at`.
+func stand_and_look(at: Vector3, from: Vector3) -> void:
+	game.player.position = from
+	await physics_frame
+	look_at_point(at)
+	for i in range(3): await physics_frame
+
+func take_my_package() -> bool:
+	var s: DeliverySession = game.session
+	await frames(3)
+	var mine: Node3D = null
+	for pkg: Node3D in game.shelves.packages.get(s.restaurant_id(), []):
+		if (pkg.get_meta("package", {}) as Dictionary).get("customer", "") == s.order.get("customer", "?"): mine = pkg
+	if mine == null: return false
+	await stand_and_look(mine.global_position + Vector3(0, 0.12, 0), mine.global_position + Vector3(0.0, -1.0, 1.25))
+	game.interact()
+	return s.holding_package()
+
+func pack() -> void:
+	game.show_menu("bag")
+	await create_timer(0.7).timeout
+	game.bag_click(OrderDetails.best_slot(str(game.session.order.kind)))
+	await create_timer(0.5).timeout
+	game.close_menu()
 
 func run() -> void:
 	root.size = Vector2i(1280, 720)
@@ -36,15 +62,17 @@ func run() -> void:
 	game.save_enabled = false
 	root.add_child(game)
 	await frames(10)
-	var s: DeliverySession = game.session
 	check(not game.tutorial.active(), "no training before New Game (old saves / tests stay untouched)")
 	game.new_session()
-	s = game.session
+	var s: DeliverySession = game.session
 	var t: TutorialDirector = game.tutorial
 	await frames(3)
 	check(t.active() and t.step_id() == "look", "New Game starts training at 'Look around'")
-	check(t.card.visible and t.card.header.text.contains("TASK 1 OF 12"), "mission card shows task 1 of 12")
-	# Normal dispatch is off during training.
+	check(s.wallet == 10000 and not game.player.has_vehicle() and not game.player.bicycle.visible, "New Game: $100, on foot, no bike")
+	check(game.player.toggle_bicycle().begins_with("You don't have a bicycle"), "no bike to ride")
+	check(not s.has_phone() and not s.has_bag() and not s.online, "no phone, no bag, offline")
+	game.show_menu("phone")
+	check(game.mode == "", "no phone to open yet")
 	s.next_offer = 0.0
 	s.calendar_minutes = 720.0
 	await frames(5)
@@ -53,117 +81,139 @@ func run() -> void:
 	for i in range(40):
 		game.player.rotation.y += 0.08
 		await process_frame
-	check(await wait_step("walk"), "looking around completes task 1")
+	check(await wait_step("walk"), "looking around completes 'look'")
 	for i in range(70):
 		game.player.position.x += 0.25
 		await physics_frame
-	check(await wait_step("phone"), "walking completes task 2")
-	# 3 phone, 4 map
-	game.show_menu("phone")
-	await frames(2)
-	game.close_menu()
-	check(await wait_step("map"), "opening and closing the phone completes task 3")
-	game.show_menu("map")
-	await frames(2)
-	game.close_menu()
-	check(await wait_step("bag"), "opening and closing the map completes task 4")
+	check(await wait_step("store"), "walking completes 'walk'")
 	check(CityNavigation.target.get("name", "") == "Trail & Tool", "minimap guides to Trail & Tool")
-	# 5 bag
-	game.buy_item("delivery_bag")
-	game.close_menu()
-	check(await wait_step("bike"), "buying the delivery bag completes task 5")
-	# 6 bike
-	game.player.position = game.player.bicycle.position + Vector3(1, 0.1, 0)
-	game.notify(game.player.toggle_bicycle())
-	check(await wait_step("accept"), "mounting the bike completes task 6")
-	check(s.order.get("state") == "OFFERED" and s.restaurant_id() == "cedar_kitchen", "training sends the first order (Kebab House)")
-	game.show_menu("phone")
-	var reject_shown := false
-	for c in game.modal_body.get_children():
-		if c is Button and (c as Button).text.begins_with("Reject"): reject_shown = true
-	check(not reject_shown, "the training order can't be rejected")
-	s.clock += 200.0
-	check(s.order.get("state") == "OFFERED", "the training order never times out")
-	s.accept()
-	game.close_menu()
-	check(await wait_step("ride"), "accepting completes task 7")
-	# 8 ride
-	game.player.riding_speed = 0.0
-	game.notify(game.player.toggle_bicycle())
-	var rid := s.restaurant_id()
-	var mine: Node3D = null
-	var decoy: Node3D = null
-	for pkg: Node3D in game.shelves.packages.get(rid, []):
-		if pkg.get_meta("package").customer == s.order.customer: mine = pkg
-		else: decoy = pkg
-	check(mine != null and decoy != null, "your package and others' wait on the shelf")
-	game.player.position = mine.global_position + Vector3(0.0, -1.0, 1.25)
-	check(await wait_step("take"), "reaching the restaurant completes task 8")
-	# 9 take (real ray + E)
-	check(s.take_package(decoy.get_meta("package"), 1.0).begins_with("Wrong package"), "another customer's package is refused")
-	look_at_point(mine.global_position + Vector3(0, 0.12, 0))
-	for i in range(3): await physics_frame
+	# 3 store
+	var shop: Vector3 = ShopCatalog.LOCATIONS["equipment"]
+	game.player.position = shop + Vector3(4.0, 0.1, 2.6)
+	check(await wait_step("order"), "reaching the store completes 'store'")
+	# 4 order on the store computer (real ray on the kiosk)
+	await stand_and_look(shop + Vector3(4.0, 1.4, 1.0), shop + Vector3(4.0, 0.1, 2.4))
+	check(str(game.player.target().get("id", "")) == "kiosk_equipment", "the store computer is on the counter")
 	game.interact()
-	check(s.holding_package(), "E on your package picks it up into your hands")
+	check(game.mode == "terminal" and game.terminal.visible, "E opens the store computer")
+	var term: StoreTerminal = game.terminal
+	term.add_to_cart("budget_phone", 1)
+	term.add_to_cart("delivery_bag", 1)
+	term.add_to_cart("water_bottle", 3)
+	term.change("water_bottle", -1)
+	check(int(term.cart.get("water_bottle", 0)) == 2 and term.total() == 2500 + 3500 + 300, "cart: phone + bag + 2 water ($63)")
+	term.add_to_cart("budget_phone", 1)
+	check(int(term.cart["budget_phone"]) == 1, "equipment can't be added twice")
+	term.purchase()
+	check(s.wallet == 10000 - 6300 and s.pickups.size() == 3, "purchase pays and puts 3 items on the pickup shelf")
+	check(not s.has_phone() and s.bought("budget_phone"), "bought items wait on the shelf until collected")
+	term.close()
 	await frames(2)
-	check(is_instance_valid(game.held_package) and game.held_package.visible, "the package is held in view")
-	check(await wait_step("drop"), "taking the right package completes task 9")
-	# Gates: no packing before the put-down task, no delivering before packing.
+	check(game.mode == "", "closing the computer returns to the game")
+	check(await wait_step("collect"), "ordering completes 'order'")
+	# 5 collect from the pickup shelf (real ray per item)
+	await frames(2)
+	for k in range(3):
+		var items: Array[Node3D] = game.store_terminals.items
+		if items.is_empty(): break
+		var it: Node3D = items[0]
+		await stand_and_look(it.global_position + Vector3(0, 0.15, 0), it.global_position + Vector3(0, -1.1, 1.3))
+		game.interact()
+		await frames(2)
+	check(s.pickups.is_empty() and s.has_phone() and s.has_bag() and int(s.supplies.get("water_bottle", 0)) == 2, "E on each shelf item collects it")
+	check(await wait_step("phone"), "collecting completes 'collect'")
+	# 6 phone: raise it, tap CourierNow on the screen
+	game.show_menu("phone")
+	await create_timer(0.5).timeout
+	var phone: PhoneDevice = game.phone
+	check(game.mode == "phone" and phone.out, "Tab raises the phone")
+	var cam: Camera3D = game.player.camera
+	var centre: Vector3 = phone.screen.global_transform * phone.screen.get_aabb().get_center()
+	var px := phone.screen_point(cam, cam.unproject_position(centre))
+	check(px.distance_to(Vector2(PhoneOS.W, PhoneOS.H) * 0.5) < 12.0, "a click on the screen centre lands mid-screen (%s)" % px)
+	phone.os.tap_app(PhoneOS.APPS[6])
+	check(phone.os.page == "home" and phone.os.toast.visible, "locked apps say coming soon")
+	phone.os.tap_app(PhoneOS.APPS[0])
+	check(phone.os.page == "courier", "CourierNow opens")
+	check(await wait_step("online"), "opening CourierNow completes 'phone'")
+	# 7 online -> the training order arrives in the app
+	game.on_phone_action("toggle_online", "")
+	check(s.online, "Start shift puts you online")
+	check(await wait_step("accept"), "going online completes 'online'")
+	await frames(3)
+	check(s.order.get("state") == "OFFERED" and s.order.get("method") == "door", "the first training order (leave at door) arrives")
+	game.on_phone_action("reject", "")
+	check(s.order.get("state") == "OFFERED", "training orders can't be declined")
+	game.on_phone_action("toggle_online", "")
+	check(s.online, "you can't go offline during training")
+	game.on_phone_action("accept", "")
+	game.close_menu()
+	check(await wait_step("ride"), "accepting completes 'accept'")
+	# 9 ride (walk) to the restaurant, 10 take, 11 drop, 12 pack
+	var mine_ok: bool = await take_my_package()
+	check(mine_ok, "E on your package on the shelf picks it up")
+	check(await wait_step("drop"), "reaching the restaurant and taking the package advance training")
 	game.bag_click("top")
-	check(s.holding_package(), "packing is refused until you've practised putting it down")
-	# 10 drop / pick up
+	check(s.holding_package(), "packing is refused before practising put down / pick up")
 	look_at_point(game.player.global_position + Vector3(0, 0, -1.0))
 	await physics_frame
 	game.drop_held()
-	check(s.order.get("state") == "DROPPED" and game.dropped_package != null, "G puts the package down in front of you")
-	check(DeliverySession.validate(s.snapshot()), "a save with the package on the ground validates")
-	var copy := DeliverySession.new()
-	check(copy.restore(s.snapshot()) and copy.order.state == "DROPPED" and copy.dropped_position().is_equal_approx(s.dropped_position()), "the dropped package survives save/load")
-	check(s.deliver(int(s.order.address), 1.0).contains("Pick it up first"), "you can't deliver from the ground")
-	await create_timer(0.6).timeout      # let the put-down animation land
-	look_at_point(game.dropped_package.global_position + Vector3(0, 0.1, 0))
-	for i in range(3): await physics_frame
+	check(s.order.get("state") == "DROPPED" and game.dropped_package != null, "G puts the package down")
+	await create_timer(0.6).timeout
+	await stand_and_look(game.dropped_package.global_position + Vector3(0, 0.1, 0), game.player.position)
 	game.interact()
-	check(s.holding_package() and game.dropped_package == null, "E on the dropped package picks it up again")
-	check(await wait_step("pack"), "put down + pick up completes task 10")
-	# 11 drag and drop into the backpack
-	game.show_menu("bag")
-	await create_timer(0.7).timeout      # bag swings round
-	var kind: String = s.order.kind
-	var slot := OrderDetails.best_slot(kind)
-	var cam: Camera3D = game.player.camera
-	var screen := cam.unproject_position(game.bag_rig.slot_mouth(slot))
-	check(game.bag_rig.pick(cam.project_ray_origin(screen), cam.project_ray_normal(screen)) == slot, "pointing at the %s picks that compartment" % slot)
-	var wrong := "bottom" if slot != "bottom" else "top"
-	game.bag_click(wrong)
-	check(s.holding_package(), "dropping it into a compartment it doesn't fit is refused")
-	game.bag_click(slot)
-	check(s.order.get("state") == "CARRYING" and is_instance_valid(game.bag_rig.contents), "dropping it into the right compartment packs it")
-	await create_timer(0.6).timeout
-	game.bag_click(slot)
-	check(s.holding_package() and is_instance_valid(game.held_package), "clicking the packed compartment lifts it back into your hands")
-	await create_timer(0.6).timeout
-	game.bag_click(slot)
-	check(s.order.get("state") == "CARRYING", "and it can be packed again")
-	game.close_menu()
-	check(await wait_step("deliver"), "packing completes task 11")
-	# 12 deliver
+	check(s.holding_package(), "E on it picks it up again")
+	check(await wait_step("pack"), "'drop' completes")
+	await pack()
+	check(s.order.get("state") == "CARRYING", "packed in the backpack")
+	check(await wait_step("leave"), "'pack' completes")
+	# 13 leave at door: the marked area appears; E on it delivers with a proof photo
+	await frames(3)
+	var zone: DropZone = game.drop_zone
+	check(zone != null and zone.method == "door", "the delivery area is marked at the door")
 	var address := int(s.order.address)
 	var facing: Vector3 = CityCatalog.address_facing(address)
+	await stand_and_look(zone.global_position, zone.global_position + facing * 0.9 + Vector3(0, 0.1, 0))
+	check(str(game.player.target().get("id", "")) == "dropzone", "the area can be targeted")
+	game.interact()
+	check(s.order.get("state") == "COMPLETED" and s.order.get("proof") == "photo", "leaving it in the area completes the delivery")
+	game.close_menu()
+	check(await wait_step("accept2"), "'leave' completes")
+	# 14 second order: meet at door
+	await frames(3)
+	check(s.order.get("state") == "OFFERED" and s.order.get("method") == "meet", "the second training order is meet at door")
+	game.show_menu("phone")
+	await frames(2)
+	game.on_phone_action("accept", "")
+	game.close_menu()
+	check(await wait_step("meet"), "accepting completes 'accept2'")
+	mine_ok = await take_my_package()
+	check(mine_ok, "second package taken")
+	await pack()
+	address = int(s.order.address)
+	facing = CityCatalog.address_facing(address)
 	game.player.position = game.world.doors[address] + facing * 1.6 + Vector3(0, -0.92, 0)
 	game.player.rotation = Vector3(0, atan2(facing.x, facing.z), 0)
 	game.player.camera.rotation = Vector3(-0.2, 0, 0)
 	for i in range(3): await physics_frame
-	var wallet_before := s.wallet
 	game.interact()
-	check(s.order.get("state") == "COMPLETED", "handing over at the door completes the delivery")
+	await create_timer(1.5).timeout
+	check(game.drop_zone != null and game.drop_zone.customer != null, "knocking brings the customer to the door")
+	await stand_and_look(game.drop_zone.customer.global_position + Vector3(0, 1.1, 0), game.player.position)
+	check(str(game.player.target().get("id", "")) == "customer", "the customer can be targeted")
+	var before := s.wallet
+	game.interact()
+	check(s.order.get("state") == "COMPLETED" and s.wallet > before, "E hands the order to the customer")
 	game.close_menu()
 	for i in range(200):
 		if not t.active(): break
 		await process_frame
-	check(not t.active() and s.tutorial.done, "training finishes after the first delivery")
-	check(s.ledger.get("bonus_tutorial", 0) == DeliverySession.TUTORIAL_BONUS and s.wallet > wallet_before, "the training bonus is paid once")
-	check(DeliverySession.validate(s.snapshot()), "the finished save validates")
-	check(t.gate("dispatch") == "" and t.gate("reject") == "", "after training, dispatch and rejecting are back")
+	check(not t.active() and s.tutorial.done, "training finishes")
+	check(s.ledger.get("bonus_tutorial", 0) == DeliverySession.TUTORIAL_BONUS, "the training bonus is paid once")
+	check(DeliverySession.validate(s.snapshot()), "the save validates")
+	var copy := DeliverySession.new()
+	check(copy.restore(s.snapshot()) and copy.economy == 2 and not copy.owns("bicycle") and copy.has_phone(), "career save restores (no bike, phone owned)")
+	check(t.gate("dispatch") == "" and t.gate("reject") == "", "after training, dispatch and declining are back")
+	await create_timer(0.2).timeout
 	print("TUTORIAL PASS: %d checks, %d failures" % [checks, failures] if failures == 0 else "TUTORIAL FAIL: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 else 0)

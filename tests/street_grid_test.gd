@@ -48,14 +48,18 @@ func run() -> void:
 		check(outward.cross(Vector3.UP).dot(-travel) > 0.99, "Bike symbol faces right-hand travel")
 	var traffic: Node = game.world.get_node("CityTraffic")
 	check(is_equal_approx(absf(traffic.LOOP[0].x), StreetGrid.AVENUE.lane), "Cedar Lane traffic uses lane centre")
-	# Straight stretches of the side-road loop run on lane centres (corners are smooth arcs).
-	var side_route: SmoothRoute = traffic.drivers[10].route
-	for p in side_route.points:
-		var on_side_road := absf(absf(p.x) - 64.0)
-		var on_cross := minf(absf(p.z + 678.0), absf(p.z + 258.0))
-		var in_corner := absf(absf(p.x) - 64.0) < 12.0 and on_cross < 12.0
-		if in_corner or TrafficCircles.near_circle(p, 4.0): continue
-		check(absf(on_side_road - StreetGrid.STREET.lane) < 0.01 or absf(on_cross - StreetGrid.STREET.lane) < 0.01, "Side-road route on lane centre")
+	# Straight stretches of the south-grid loops (side roads, cross streets, the avenue south of
+	# Refet Bele Street) run on lane centres (corners are smooth arcs).
+	for li in range(2, traffic.loops.size()):
+		var side_route: SmoothRoute = traffic.loops[li]
+		for p in side_route.points:
+			var on_side_road := absf(absf(p.x) - 64.0)
+			var on_avenue := absf(absf(p.x) - StreetGrid.AVENUE.lane)
+			var on_cross := INF
+			for z: float in CityCatalog.CROSS_STREETS: on_cross = minf(on_cross, absf(p.z - z))
+			var in_corner := (absf(absf(p.x) - 64.0) < 12.0 or absf(p.x) < 14.0) and on_cross < 12.0
+			if in_corner or TrafficCircles.near_circle(p, 4.0): continue
+			check(absf(on_side_road - StreetGrid.STREET.lane) < 0.01 or absf(on_cross - StreetGrid.STREET.lane) < 0.01 or on_avenue < 0.01, "Side-road route on lane centre (loop %d at %.1f, %.1f)" % [li, p.x, p.z])
 	# The avenue shuttle never turns tighter than a car can (bulb U-turns, no kinks).
 	var avenue: SmoothRoute = traffic.drivers[0].route
 	var sharpest := 0.0

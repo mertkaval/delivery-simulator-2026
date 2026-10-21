@@ -100,12 +100,8 @@ func _resample(raw: PackedVector3Array) -> void:
 ## Position on the path at distance s (wraps around).
 func at(s: float) -> Vector3:
 	s = fposmod(s, total)
-	var lo := 0
-	var hi := lengths.size() - 1
-	while lo < hi:
-		var mid := (lo + hi + 1) >> 1
-		if lengths[mid] <= s: lo = mid
-		else: hi = mid - 1
+	# Native binary search: index of the last cumulative length <= s.
+	var lo := clampi(lengths.bsearch(s, false) - 1, 0, lengths.size() - 1)
 	var a := points[lo]
 	var b := points[(lo + 1) % points.size()]
 	var seg := a.distance_to(b)
@@ -133,6 +129,18 @@ func curvature(s: float, span := 3.0) -> float:
 	var b := at(s + span)
 	var turn := absf((m - a).signed_angle_to(b - m, Vector3.UP))
 	return turn / (2.0 * span)
+
+## Curve speed limit sampled every metre (safe_speed with no cruise cap), built on first use.
+var _curve_table := PackedFloat32Array()
+
+## Highest comfortable speed for the next 18 m, from the precomputed table (cheap, per frame).
+func curve_speed(s: float, cruise: float) -> float:
+	if _curve_table.is_empty():
+		var n := maxi(1, ceili(total))
+		_curve_table.resize(n)
+		for i in range(n): _curve_table[i] = safe_speed(float(i), 1000.0)
+	var i := posmod(floori(s), _curve_table.size())
+	return minf(cruise, minf(_curve_table[i], _curve_table[(i + 1) % _curve_table.size()]))
 
 ## Highest comfortable speed for the next `ahead` metres.
 func safe_speed(s: float, cruise: float, ahead := 18.0) -> float:

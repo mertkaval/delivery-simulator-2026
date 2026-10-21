@@ -1,0 +1,391 @@
+{
+ "budget_phone": {
+  "file": "res://assets/gadgets/budget_phone.glb",
+  "tris": 838,
+  "tris_per_mesh": {
+   "PhoneBody": 836,
+   "Screen": 2
+  },
+  "bbox_godot_size": [
+   0.07482,
+   0.1552,
+   0.01297
+  ],
+  "bbox_godot_min": [
+   -0.03707,
+   -0.07762,
+   -0.00732
+  ],
+  "bbox_godot_max": [
+   0.03775,
+   0.07758,
+   0.00565
+  ],
+  "nodes": [
+   "BudgetPhone",
+   "PhoneBody",
+   "Screen"
+  ],
+  "materials": [
+   "BrandPrint",
+   "CameraIsland",
+   "Flash",
+   "LensGlass",
+   "LensRing",
+   "PhoneButtons",
+   "PhoneDetailDark",
+   "PhoneGlass",
+   "PhonePlastic",
+   "ScreenMat"
+  ],
+  "extras": {
+   "screen_center": [
+    0.0,
+    0.0005,
+    0.00565
+   ],
+   "screen_size": [
+    0.0645,
+    0.136
+   ],
+   "screen_normal": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "phone_size": [
+    0.074,
+    0.155,
+    0.0105
+   ],
+   "extras_space": "godot_local"
+  },
+  "qa": [
+   "assets/gadgets/qa/budget_phone.png",
+   "assets/gadgets/qa/budget_phone_back.png",
+   "assets/gadgets/qa/budget_phone_closeup_front.png",
+   "assets/gadgets/qa/budget_phone_closeup_back.png",
+   "assets/gadgets/qa/budget_phone_closeup_side.png",
+   "assets/gadgets/qa/budget_phone_closeup_bottom.png"
+  ]
+ },
+ "store_kiosk": {
+  "file": "res://assets/gadgets/store_kiosk.glb",
+  "tris": 4796,
+  "tris_per_mesh": {
+   "Monitor": 598,
+   "Screen": 2,
+   "DeskMat": 92,
+   "Keyboard": 3004,
+   "Mouse": 202,
+   "Cable": 176,
+   "CardReader": 722
+  },
+  "bbox_godot_size": [
+   0.841,
+   0.4555,
+   0.467
+  ],
+  "bbox_godot_min": [
+   -0.4205,
+   0.0,
+   -0.2335
+  ],
+  "bbox_godot_max": [
+   0.4205,
+   0.4555,
+   0.2335
+  ],
+  "nodes": [
+   "Cable",
+   "CardReader",
+   "DeskMat",
+   "Keyboard",
+   "Monitor",
+   "Mouse",
+   "Screen",
+   "StoreKiosk"
+  ],
+  "materials": [
+   "BrandPrint",
+   "Cable",
+   "DeskMat",
+   "KeyCap",
+   "KeyGreen",
+   "KeyRed",
+   "KeyYellow",
+   "KeyboardBody",
+   "MonitorBezel",
+   "MonitorShell",
+   "MouseShell",
+   "MouseWheel",
+   "PowerLED",
+   "ScreenMat",
+   "StandMetal",
+   "TerminalBody",
+   "TerminalDisplay",
+   "TerminalKey"
+  ],
+  "extras": {
+   "screen_center": [
+    -0.0205,
+    0.3,
+    -0.101
+   ],
+   "screen_size": [
+    0.528,
+    0.297
+   ],
+   "screen_normal": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "extras_space": "godot_local",
+   "footprint": [
+    0.841,
+    0.4555,
+    0.467
+   ]
+  },
+  "qa": [
+   "assets/gadgets/qa/store_kiosk.png",
+   "assets/gadgets/qa/store_kiosk_back.png",
+   "assets/gadgets/qa/store_kiosk_front.png"
+  ]
+ },
+ "store_kiosk_stand": {
+  "file": "res://assets/gadgets/store_kiosk_stand.glb",
+  "tris": 4886,
+  "tris_per_mesh": {
+   "Monitor": 306,
+   "Screen": 2,
+   "Pedestal": 510,
+   "Keyboard": 3004,
+   "Mouse": 202,
+   "Cable": 140,
+   "CardReader": 722
+  },
+  "bbox_godot_size": [
+   0.74,
+   1.4055,
+   0.51
+  ],
+  "bbox_godot_min": [
+   -0.37,
+   0.0,
+   -0.255
+  ],
+  "bbox_godot_max": [
+   0.37,
+   1.4055,
+   0.255
+  ],
+  "nodes": [
+   "Cable",
+   "CardReader",
+   "Keyboard",
+   "Monitor",
+   "Mouse",
+   "Pedestal",
+   "Screen",
+   "StoreKioskStand"
+  ],
+  "materials": [
+   "AccentStripe",
+   "BrandPrint",
+   "Cable",
+   "KeyCap",
+   "KeyGreen",
+   "KeyRed",
+   "KeyYellow",
+   "KeyboardBody",
+   "MonitorBezel",
+   "MonitorShell",
+   "MouseShell",
+   "MouseWheel",
+   "PedestalSteel",
+   "PowerLED",
+   "ScreenMat",
+   "ShelfTop",
+   "StandMetal",
+   "TerminalBody",
+   "TerminalDisplay",
+   "TerminalKey"
+  ],
+  "extras": {
+   "screen_center": [
+    0.0,
+    1.25,
+    -0.1045
+   ],
+   "screen_size": [
+    0.528,
+    0.297
+   ],
+   "screen_normal": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "extras_space": "godot_local",
+   "shelf_height": 0.95
+  },
+  "qa": [
+   "assets/gadgets/qa/store_kiosk_stand.png",
+   "assets/gadgets/qa/store_kiosk_stand_back.png",
+   "assets/gadgets/qa/store_kiosk_stand_front.png"
+  ]
+ },
+ "drop_arrow": {
+  "file": "res://assets/gadgets/drop_arrow.glb",
+  "tris": 384,
+  "tris_per_mesh": {
+   "Arrow": 384
+  },
+  "bbox_godot_size": [
+   0.35,
+   0.45,
+   0.08
+  ],
+  "bbox_godot_min": [
+   -0.175,
+   0.0,
+   -0.04
+  ],
+  "bbox_godot_max": [
+   0.175,
+   0.45,
+   0.04
+  ],
+  "nodes": [
+   "Arrow",
+   "DropArrow"
+  ],
+  "materials": [
+   "ArrowFill",
+   "ArrowRim"
+  ],
+  "extras": {
+   "tip": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "size": [
+    0.35,
+    0.45,
+    0.08
+   ],
+   "extras_space": "godot_local"
+  },
+  "qa": [
+   "assets/gadgets/qa/drop_arrow.png",
+   "assets/gadgets/qa/drop_arrow_back.png",
+   "assets/gadgets/qa/drop_arrow_front.png"
+  ]
+ },
+ "pickup_locker": {
+  "file": "res://assets/gadgets/pickup_locker.glb",
+  "tris": 1042,
+  "tris_per_mesh": {
+   "Shelving": 1040,
+   "SignPanel": 2
+  },
+  "bbox_godot_size": [
+   1.607,
+   1.9,
+   0.453
+  ],
+  "bbox_godot_min": [
+   -0.8035,
+   0.0,
+   -0.225
+  ],
+  "bbox_godot_max": [
+   0.8035,
+   1.9,
+   0.228
+  ],
+  "nodes": [
+   "PickupLocker",
+   "Shelving",
+   "SignPanel",
+   "Slot_0",
+   "Slot_1",
+   "Slot_2",
+   "Slot_3",
+   "Slot_4",
+   "Slot_5"
+  ],
+  "materials": [
+   "LabelStrip",
+   "Pegboard",
+   "RubberFoot",
+   "ShelfWood",
+   "SignBacking",
+   "SignMat",
+   "SteelFrame"
+  ],
+  "extras": {
+   "slots": [
+    [
+     -0.4,
+     1.1,
+     0.0
+    ],
+    [
+     0.4,
+     1.1,
+     0.0
+    ],
+    [
+     -0.4,
+     0.62,
+     0.0
+    ],
+    [
+     0.4,
+     0.62,
+     0.0
+    ],
+    [
+     -0.4,
+     0.14,
+     0.0
+    ],
+    [
+     0.4,
+     0.14,
+     0.0
+    ]
+   ],
+   "slot_order": "Slot_0/1 top shelf left/right (seen from the front), 2/3 middle, 4/5 bottom",
+   "slot_size": [
+    0.75,
+    0.417,
+    0.43
+   ],
+   "sign_center": [
+    0.0,
+    1.74,
+    0.2238
+   ],
+   "sign_size": [
+    1.49,
+    0.24
+   ],
+   "sign_normal": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "extras_space": "godot_local"
+  },
+  "qa": [
+   "assets/gadgets/qa/pickup_locker.png",
+   "assets/gadgets/qa/pickup_locker_back.png",
+   "assets/gadgets/qa/pickup_locker_front.png"
+  ]
+ }
+}

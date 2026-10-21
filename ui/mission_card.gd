@@ -99,15 +99,27 @@ func complete() -> void:
 	tw.tween_property(self, "scale", Vector2.ONE * 1.04, 0.12)
 	tw.tween_property(self, "scale", Vector2.ONE, 0.2)
 
-func show_finished(bonus: String) -> void:
+## A standing goal (not a numbered task), e.g. saving up for the first bicycle.
+func set_goal(head: String, task: String, how: String, progress: float) -> void:
+	finished = false
+	_shown = -2
+	header.text = head
+	title.text = task
+	title.add_theme_color_override("font_color", WARM)
+	hint.text = how
+	bar.visible = true
+	bar.value = clampf(progress, 0.0, 1.0)
+	for c in pips.get_children(): c.queue_free()
+
+func show_finished(bonus: String, head := "TRAINING COMPLETE", task := "You're ready, courier!", how := "") -> void:
 	finished = true
 	_ticking = false
 	_shown = -1
 	visible = true
-	header.text = "TRAINING COMPLETE"
-	title.text = "You're ready, courier!"
+	header.text = head
+	title.text = task
 	title.add_theme_color_override("font_color", MINT)
-	hint.text = "%s bonus added to your wallet. Requests now arrive automatically while you're online. Lunch and dinner are the busy hours." % bonus
+	hint.text = how if how != "" else "%s bonus added to your wallet. Now save up for a bicycle: requests arrive automatically while you're online, and lunch and dinner are the busy hours." % bonus
 	bar.visible = false
 	for c in pips.get_children(): (c as ColorRect).color = MINT
 	var tw := create_tween()

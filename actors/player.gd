@@ -42,7 +42,8 @@ func setup_bicycle() -> void:
 
 func replace_vehicle(at: Vector3) -> void:
 	if is_instance_valid(bicycle): bicycle.queue_free()
-	bicycle = vehicle_scene_override.instantiate() if vehicle_scene_override else CityAssets.create_player_vehicle(ShopCatalog.vehicle_asset(session.active_vehicle))
+	var asset := ShopCatalog.vehicle_asset(session.active_vehicle) if session.active_vehicle != "" else "bicycle"
+	bicycle = vehicle_scene_override.instantiate() if vehicle_scene_override else CityAssets.create_player_vehicle(asset)
 	bicycle.name = "CourierBicycle"
 	get_parent().add_child(bicycle)
 	if bicycle.has_method("bind_driver"): bicycle.bind_driver(self)
@@ -55,6 +56,10 @@ func replace_vehicle(at: Vector3) -> void:
 	parking_shape.shape=parking_bounds
 	parking_shape.position.y=parking_bounds.size.y*.5+vehicle_collision_lift()
 	parked_body.add_child(parking_shape)
+	# A New Game starts on foot: the vehicle node exists (code keeps a reference) but is hidden
+	# and has no collision until a vehicle is bought.
+	bicycle.visible = has_vehicle()
+	if not has_vehicle(): parked_body.collision_layer = 0
 	wheels = CityAssets.wheel_nodes(bicycle)
 	steering_pivot = bicycle.find_child("SteeringPivot", true, false) as Node3D
 	steer_pivots.clear()
@@ -116,7 +121,12 @@ func apply_vehicle_camera() -> void:
 		body_collision.shape = capsule
 		body_collision.position.y = 0.9
 
+func has_vehicle() -> bool:
+	return session != null and session.active_vehicle != ""
+
 func toggle_bicycle() -> String:
+	if not mounted and not has_vehicle():
+		return "You don't have a bicycle yet. Save up and buy one at Cedar Cycles."
 	if mounted:
 		if absf(riding_speed) > 0.5:
 			return "Brake to a stop before dismounting."

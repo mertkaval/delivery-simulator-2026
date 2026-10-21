@@ -164,18 +164,12 @@ func fit_out(b: Dictionary, r: Array) -> void:
 		light(t * Vector3(RestaurantCatalog.bay_x(b, i), 2.75, -4.0), Color("ffd9a6"), 1.3, 7.5)
 	light(t * Vector3(xe, 2.7, -13.0), Color("f1f4ff"), 0.9, 7.0)
 	exterior(t, b, r, xe, e, bays, colours)
-	# People: a server at the register, a cook on the line, two diners at a table.
+	# People: a server at the register, a cook on the line, diners seated on the real chairs and
+	# a waiter serving them from the counter (TableService), and a few people at the sidewalk tables.
 	var seed := restaurants.size()
 	person(t, Vector3(xe + 0.6, 0.06, -7.95), 0.0, "Talk", seed * 3)
 	person(t, Vector3(xe + 0.2, 0.06, -14.25), PI, "Idle", seed * 3 + 1)
-	var table_bay := 0 if e != 0 else 1
-	var tx := RestaurantCatalog.bay_x(b, table_bay) + (0.7 if table_bay == 0 and r[4] != "tavern" else 0.0)
-	if table_bay == 0 and r[4] != "tavern":
-		person(t, Vector3(tx - 0.62, 0.06, -3.8), PI / 2, "Sit", seed * 3 + 2)
-		person(t, Vector3(tx + 0.62, 0.06, -3.8), -PI / 2, "Sit", seed * 3 + 5)
-	else:
-		person(t, Vector3(tx - 0.3, 0.06, -2.7 - 0.62), 0.0, "Sit", seed * 3 + 2)
-		person(t, Vector3(tx + 0.3, 0.06, -2.7 + 0.62), PI, "Sit", seed * 3 + 5)
+	dining(t, b, r, xe, e, bays, seed)
 	restaurants.append({"id": r[0], "name": r[1], "frame": t, "pickup": t * RestaurantCatalog.pickup_local(b),
 		"door": RestaurantCatalog.door_outside(b), "door_inside": t * Vector3(xe, 0, -2.0)})
 
@@ -249,6 +243,7 @@ func exterior(t: Transform3D, b: Dictionary, r: Array, xe: float, e: int, bays: 
 	label(t, str(r[3]), Vector3(xe, 3.3, 0.16), 16, Color("f1ead7"))
 
 var people: Array[Node3D] = []
+var services: Array[TableService] = []
 
 func person(t: Transform3D, at: Vector3, yaw: float, pose: String, index: int) -> void:
 	var model := LivingAssets.citizen(index)
@@ -278,3 +273,73 @@ func avenue(i: int) -> void:
 			piece("rs_pide_oven", t, colours, -4.4, 0, -4.45)
 			local_box(t, Vector3(-4.4, 0.9, -5.0), Vector3(2.0, 1.8, 1.8))
 	piece("rs_ayran_machine", t, colours, -5.6, 1.1, 0.0)
+
+## Restaurant chair (build_restaurants.chair) as a seat slot: base at floor level of the frame,
+## seat top 0.49, front edge +0.22, backrest plane -0.185; the dining floor is 0.06 high.
+func chair_slot(t: Transform3D, at: Vector3, yaw: float, top: float = 0.49, floor_y: float = 0.06) -> Dictionary:
+	return CitySeating.slot(t * Transform3D(Basis(Vector3.UP, yaw), at), at.y + top, 0.22, -0.185, at.y + floor_y, "rs_chair")
+
+## Diners and the waiter. Tables: each non-entrance bay's main table (table4 at z -2.7; the
+## booth in bay 0; the tavern's table4 at z -4.8). The waiter takes plates from the counter top
+## at the pass spot (customer side, left of the register), walks the main aisle (z -6.3) and up
+## the free lane beside the table, and serves from the table's open end.
+func dining(t: Transform3D, b: Dictionary, r: Array, xe: float, e: int, bays: int, seed: int) -> void:
+	var service := TableService.new()
+	service.name = "TableService_%s" % str(r[0])
+	service.transform = t
+	add_child(service)
+	services.append(service)
+	var xl := -int(b.bays) * 2.0
+	var pass_spot := Vector3(xe - 1.0, 0.06, -6.55)
+	var aisle := -6.3
+	var used := 0
+	for i in range(bays):
+		if i == e or used >= 2: continue
+		if posmod(seed + i, 3) == 2 and used > 0: continue
+		var x := RestaurantCatalog.bay_x(b, i)
+		var slots: Array[Dictionary] = []
+		var spots: Array[Vector3] = []
+		var approach: Vector3
+		var lane: float
+		var count := 2 + posmod(seed * 5 + i, 2)
+		if r[4] == "tavern" or i != 0:
+			var tx := x + (0.6 if r[4] == "tavern" else 0.0)
+			var tz := -4.8 if r[4] == "tavern" else -2.7
+			for k in range(count):
+				var sx: float = [-0.3, -0.3, 0.3][k]
+				var side: float = [1.0, -1.0, 1.0][k]
+				slots.append(chair_slot(t, Vector3(tx + sx, 0, tz + side * 0.62), PI if side > 0 else 0.0))
+				spots.append(Vector3(tx + sx, 0.755, tz + side * 0.2))
+			approach = Vector3(tx + 0.95, 0.06, tz)
+			lane = tx + 1.35
+		else:
+			# Booth: upholstered benches (top 0.56) facing the booth table at z -2.6.
+			var bx := xl + 0.62
+			for k in range(count):
+				var sx: float = [-0.25, -0.25, 0.25][k]
+				var side: float = [1.0, -1.0, 1.0][k]
+				slots.append(CitySeating.slot(t * Transform3D(Basis(Vector3.UP, PI if side > 0 else 0.0), Vector3(bx + sx, 0, -2.6 + side * 0.8)), 0.56, 0.25, -0.15, 0.06, "rs_booth"))
+				spots.append(Vector3(bx + 0.05 + sx, 0.755, -2.6 + side * 0.2))
+			approach = Vector3(bx + 0.88, 0.06, -2.6)
+			lane = bx + 0.85
+		var route := PackedVector3Array([pass_spot, Vector3(pass_spot.x, 0.06, aisle), Vector3(lane, 0.06, aisle), Vector3(lane, 0.06, approach.z), approach])
+		service.add_table(slots, spots, approach, PI / 2, route, seed * 11 + i * 3 + 2)
+		used += 1
+	if used > 0:
+		service.start_waiter(seed * 11 + 40, pass_spot, 0.0, Vector3(xe - 1.0, 1.045, -7.12))
+	# Sidewalk tables: one or two people outside, with tea.
+	for i in range(bays):
+		if i == e or posmod(seed + i, 2) == 1: continue
+		var x := RestaurantCatalog.bay_x(b, i)
+		var n := 1 + posmod(seed + i * 3, 2)
+		for k in range(n):
+			var side := -1.0 if k == 0 else 1.0
+			var s := chair_slot(t, Vector3(x + side * 0.55, 0.06, 1.7), PI / 2 if side < 0 else -PI / 2, 0.49, 0.0)
+			var p := CitySeating.seated_person(s, seed * 13 + i * 5 + k)
+			p.max_distance = 75.0
+			add_child(p)
+			CitySeating.sit(p, s, ["SitTalk", "SitPhone", "Sit"][posmod(seed + k, 3)])
+			people.append(p)
+			var glass := TableService.tea()
+			glass.transform = t * Transform3D(Basis.IDENTITY, Vector3(x + side * 0.16, 0.06 + 0.75, 1.7 + 0.1))
+			add_child(glass)

@@ -2,6 +2,8 @@ extends "res://world/city_life.gd"
 ## Concentrated avenue/transit activity; distant actors sleep with collision disabled.
 var vehicles: Array[Dictionary]=[]
 var hour := 12.0
+var clearance_hold := 0.0
+const CLEARANCE_MAX := 8.0
 func _ready() -> void:
 	for block_id in [0,1,3,4,6,7]:
 		var block := DowntownCatalog.blocks()[block_id]
@@ -9,6 +11,13 @@ func _ready() -> void:
 			var x: float=block.end.x+1.2+(i%2)*.6
 			var z: float=block.position.y+20+i*16
 			add_walker([Vector3(x,.09,z),Vector3(x,.09,z-12)],block_id*6+i)
+	# More people on the west and south pavements of every block.
+	for block_id in range(9):
+		var block := DowntownCatalog.blocks()[block_id]
+		for i in range(4):
+			var west := i%2==0
+			var at := Vector3(block.position.x-1.2,.09,block.position.y+14+i*22) if west else Vector3(block.position.x+14+i*18,.09,block.end.y+1.2)
+			add_walker([at,at+Vector3(0,0,-8)],100+block_id*4+i)
 	for i in range(5):
 		add_walker([Vector3(243.1,.09,-355+i),Vector3(243.1,.09,-355+i+.1)],40+i)
 	for i in range(6):
@@ -40,6 +49,7 @@ func _ready() -> void:
 		guard.rotation.y=PI/2
 		add_child(guard)
 	CitizenBrain.attach(self,pedestrians)
+	gather_benches()
 	var services := preload("res://world/living_city/service_traffic.gd").new()
 	services.name="CivicFleet"
 	add_child(services)
@@ -47,8 +57,13 @@ func _physics_process(delta: float) -> void:
 	var occupied := false
 	for walker in pedestrians:
 		if walker.body.visible and walker.body.get_meta("in_crossing",false): occupied=true
-	# Clearance holds all approaches red until the last pedestrian reaches the curb.
-	if not (fmod(elapsed,64)>63.7 and occupied): elapsed+=delta
+	# Clearance holds all approaches red until the last pedestrian reaches the curb, for at
+	# most CLEARANCE_MAX seconds per cycle (a stuck walker can never freeze the signals).
+	var holding: bool=fmod(elapsed,64)>63.7 and occupied
+	if holding and clearance_hold<CLEARANCE_MAX: clearance_hold+=delta
+	else:
+		elapsed+=delta
+		if fmod(elapsed,64)<1.0: clearance_hold=0.0
 	var phase := fmod(elapsed,64)
 	for i in range(3):
 		if UrbanKit.materials.has("Signal%d"%i): UrbanKit.materials["Signal%d"%i].set_shader_parameter("phase",phase)
@@ -123,3 +138,35 @@ func _physics_process(delta: float) -> void:
 			rider.joints["Hip"+side].rotation.x=1.1+sin(phase_offset)*.25
 			rider.joints["Knee"+side].rotation.x=-1.55-sin(phase_offset)*.4
 
+## Downtown kit benches (reuse_park_bench, batched by DowntownDistrict): courtyard benches get
+## people sitting on them, the others are free seats for passers-by. MultiMesh instance data
+## exists only with a renderer (headless runs skip this).
+func gather_benches() -> void:
+	if DisplayServer.get_name() == "headless": return
+	var district := get_parent()
+	var parts: Array = UrbanKit.get_parts("reuse_park_bench")
+	if parts.is_empty(): return
+	var piece: Transform3D = parts[0].transform
+	var k := 0
+	for batch in district.get_children():
+		if not batch is MultiMeshInstance3D or batch.get_meta("prop", "") != "reuse_park_bench": continue
+		var mm: MultiMesh = (batch as MultiMeshInstance3D).multimesh
+		if mm.mesh != parts[0].mesh: continue
+		for i in range(mm.instance_count):
+			var bench: Transform3D = (batch as Node3D).global_transform * mm.get_instance_transform(i) * piece.affine_inverse()
+			bench.origin.y = CitizenRoutes.ground_y(bench.origin)
+			var slots := CitySeating.bench_slots(bench, "reuse_park_bench")
+			var courtyard := false
+			for b in DowntownCatalog.blocks():
+				var c: Vector2 = b.get_center()
+				if absf(bench.origin.x - c.x) < 16 and absf(absf(bench.origin.z - c.y) - 9) < 12: courtyard = true
+			if courtyard and k % 2 == 0:
+				var s: Dictionary = slots[k % 3]
+				var sitter := CitySeating.seated_person(s, 600 + k)
+				sitter.max_distance = 80.0
+				add_child(sitter)
+				CitySeating.sit(sitter, s, ["SitPhone", "Sit", "SitTalk"][k % 3])
+				sitters.append(sitter)
+			k += 1
+			for s in slots:
+				if s.user == null: seats.append(s)

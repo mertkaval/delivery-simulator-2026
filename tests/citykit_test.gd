@@ -144,7 +144,12 @@ func run() -> void:
 	check(not hit.is_empty(), "Terrace facade is solid")
 	# Restaurants: open door, clear walk to the shelf, the shelf answers with its pickup id.
 	var interiors: RestaurantInteriors = game.world.restaurants
-	check(interiors.restaurants.size() == 13 and interiors.people.size() == 52, "13 fitted restaurants with staff and diners")
+	var waited := 0
+	for service: TableService in interiors.services:
+		var diners := 0
+		for table in service.tables: diners += table.diners.size()
+		if service.waiter != null and diners >= 2: waited += 1
+	check(interiors.restaurants.size() == 13 and interiors.people.size() >= 26 and waited == 13, "13 fitted restaurants with staff, seated diners and a waiter (%d served)" % waited)
 	check(interiors.spinners.size() >= 5, "Döner cones and kokoreç roll turn (%d)" % interiors.spinners.size())
 	var space: PhysicsDirectSpaceState3D = game.world.get_world_3d().direct_space_state
 	for r in interiors.restaurants:

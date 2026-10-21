@@ -28,7 +28,8 @@ func hits_at(space: PhysicsDirectSpaceState3D, route: SmoothRoute, s: float, siz
 	var out: Array[String] = []
 	for hit in space.intersect_shape(q, 8):
 		var c: Object = hit.collider
-		if c is CharacterBody3D or c is RigidBody3D: continue
+		# Moving vehicles (AI cars, buses on their AnimatableBody3D) are not static obstacles.
+		if c is CharacterBody3D or c is RigidBody3D or c is AnimatableBody3D: continue
 		var n := c as Node3D
 		out.append("%s@(%.0f,%.0f)" % [n.name, p.x, p.z])
 	return out
@@ -100,7 +101,9 @@ func run() -> void:
 	var services: Node = null
 	for n in game.world.find_children("*", "Node3D", true, false):
 		if n.get_script() == load("res://world/living_city/service_traffic.gd"): services = n
-	if services: for d in services.fleet: (d.body as Node3D).position.y = -80
+	if services:
+		for d in services.fleet: (d.body as Node3D).position.y = -80
+		for d in services.drivers: (d.body as Node3D).position.y = -80
 	await physics_frame
 	await physics_frame
 	var ids: Array[String] = ["car_sedan", "car_minivan", "ace11"]
@@ -119,11 +122,16 @@ func run() -> void:
 			if allowed and VehicleCatalog.turns_tight(id): check(cut.x < 0.25, "Traffic loop %d: %s stays off the kerb corners (%.2f m)" % [li, id, cut.x])
 	# Every vehicle actually spawned in the city loops is allowed there and on its route.
 	for d in traffic.drivers:
-		var li: int = traffic.drivers.find(d)
-		li = 0 if li < 5 else (1 if li < 10 else 2)
+		var li: int = traffic.loop_of[traffic.drivers.find(d)]
 		check(not VehicleCatalog.is_long(str(d.id)) or bool(traffic.LONG_OK[li]), "%s may drive loop %d" % [d.id, li])
 		check(d.route == traffic.route_for(li, str(d.id)), "%s drives its size's route" % d.id)
 	if services:
+		# Downtown street loops (everyday cars and the small service vehicles that drive them).
+		for li in range(services.loops.size()):
+			for id: String in ["car_sedan", "car_minivan", "civil_postvan"]:
+				var found := sweep(space, services.loops[li], id)
+				print("downtown loop %d %-14s %s" % [li, id, "clear" if found.is_empty() else str(found)])
+				check(found.is_empty(), "Downtown loop %d: %s sweeps clear of static colliders %s" % [li, id, found])
 		for d in services.fleet:
 			var found := sweep(space, d.route, str(d.id))
 			print("service %-22s %s" % [d.id, "clear" if found.is_empty() else str(found)])

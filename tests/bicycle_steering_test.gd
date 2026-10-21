@@ -23,10 +23,10 @@ func run() -> void:
 	game.close_menu()
 	var player: CourierPlayer = game.player
 	check(player.steering_pivot != null, "Bicycle has a steering pivot")
-	# Mount: stand next to the parked bike, open ground in front of the starter home.
-	player.bicycle.position = Vector3(3, 0.05, -20)
+	# Mount: stand next to the parked bike on open park lawn (the avenue now has traffic).
+	player.bicycle.position = Vector3(-52, 0.05, -128)
 	player.bicycle.rotation = Vector3.ZERO
-	player.position = Vector3(3.6, 0.05, -20)
+	player.position = Vector3(-51.4, 0.05, -128)
 	await physics_frame
 	var message: String = player.toggle_bicycle()
 	check(player.mounted, "Mounted: " + message)

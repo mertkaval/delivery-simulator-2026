@@ -66,7 +66,7 @@ func run() -> void:
 	var traffic: Node
 	for child in game.world.get_children():
 		if child.get_script() == load("res://world/traffic.gd"): traffic = child
-	check(traffic != null and traffic.cars.size() == 16, "Sixteen varied AI vehicles")
+	check(traffic != null and traffic.cars.size() >= 32, "Busy varied AI traffic (%d vehicles)" % traffic.cars.size())
 	traffic.set_physics_process(false)
 	game.player.position = Vector3(30, 0.1, 40)
 	var first: Dictionary = traffic.drivers[0]
@@ -74,13 +74,14 @@ func run() -> void:
 	first.speed = 7.0
 	TrafficDriver.place(first)
 	# Spread the rest of this loop's cars well ahead so none queues in front of the test car.
-	var k := 1
+	var same: Array[Dictionary] = []
 	for d in traffic.drivers:
-		if d != first and d.route == first.route:
-			d.s = float(first.s) + 120.0 * k
-			d.speed = 0.0
-			TrafficDriver.place(d)
-			k += 1
+		if d != first and d.route == first.route: same.append(d)
+	var loop_total: float = (first.route as SmoothRoute).total
+	for k in range(same.size()):
+		same[k].s = float(first.s) + 40.0 + (loop_total - 70.0) * float(k) / maxf(same.size(), 1)
+		same[k].speed = 0.0
+		TrafficDriver.place(same[k])
 	traffic.speeds[0] = 7
 	traffic.elapsed = 16
 	await physics_frame
@@ -90,7 +91,8 @@ func run() -> void:
 	check(traffic.speeds[0] < 0.1, "Red crossing reaches standstill")
 	traffic.elapsed = 0
 	var before: float = traffic.cars[0].position.z
-	for frame in range(60): traffic._physics_process(1.0 / 60.0)
+	# Drivers pull away after a short reaction time (up to ~1.1 s).
+	for frame in range(150): traffic._physics_process(1.0 / 60.0)
 	check(traffic.cars[0].position.z < before, "Green crossing resumes traffic")
 	var lead: Dictionary = traffic.drivers[0]
 	lead.s = (lead.route as SmoothRoute).project(Vector3(1.95, 0, -52))

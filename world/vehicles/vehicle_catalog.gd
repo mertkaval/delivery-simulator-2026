@@ -27,6 +27,9 @@ const PLAYER := {"hatchback": "car_hatchback", "suv": "car_suv", "van": "car_min
 const SPORT_PAINTS := ["d8dcdf", "b3261e", "1f3e6e", "202224", "e1b12c"]
 ## Seed for the service-vehicle draw in city traffic (-1 = a new mix every session).
 static var traffic_seed := -1
+## Benchmark switch: true spawns the pre-street-life traffic (16 city cars on three loops, the
+## downtown population's 18 cars) for before/after frame-time comparisons.
+static var legacy_traffic := false
 
 static var scenes: Dictionary = {}
 static var specs: Dictionary = {}

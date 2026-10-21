@@ -350,18 +350,8 @@ func road_details() -> void:
 				crossing(pose(Vector3(x+side*11,.17,z),PI/2),14,300+int(x+z))
 				place("stop_line",pose(Vector3(x+side*1.5,.09,z+side*12)),300+int(x+z),180)
 				place("turn_arrow",pose(Vector3(x+side*1.5,.09,z+side*20),0 if side>0 else PI),300+int(x+z),130)
-				module("traffic_signal",pose(Vector3(x+side*10,0,z+side*13),0 if side>0 else PI),300+int(x+z))
-				module("traffic_signal",pose(Vector3(x+side*13,0,z-side*10),PI/2 if side>0 else -PI/2),300+int(x+z))
-				module("crosswalk_signal",pose(Vector3(x+side*10,0,z-side*13),PI if side>0 else 0),300+int(x+z))
-				var crossing_text := Label3D.new()
-				crossing_text.text="WAIT"
-				crossing_text.position=Vector3(x+side*10,2.18,z-side*13-side*.115)
-				crossing_text.rotation.y=PI if side>0 else 0
-				crossing_text.font_size=20
-				crossing_text.pixel_size=.0028
-				crossing_text.visibility_range_end=70
-				add_child(crossing_text)
-				crossing_labels.append(crossing_text)
+				# Traffic and pedestrian signals: TrafficSignals (world/streets), on the
+				# population's signal phase (SignalPlan "downtown").
 				module("curb_ramp",pose(Vector3(x+side*9,.01,z-side*9),side*PI/2),300+int(x+z))
 	module("bus_shelter",pose(Vector3(241.5,0,-353),PI/2),400)
 	module("bus_sign",pose(Vector3(242.3,0,-348),PI/2),400)

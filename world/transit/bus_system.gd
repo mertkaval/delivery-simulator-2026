@@ -336,6 +336,7 @@ func _physics_process(delta: float) -> void:
 	if audio == null:
 		audio = get_tree().get_first_node_in_group("city_audio") as CityAudio
 	var space := get_world_3d().direct_space_state
+	var clocks := SignalPlan.clocks_for(get_parent()) if get_parent() != null else {}
 	for bus in buses:
 		var line: Dictionary = lines[bus.line]
 		var stop: Dictionary = line.stops[bus.next_stop]
@@ -348,6 +349,8 @@ func _physics_process(delta: float) -> void:
 		match bus.state:
 			"drive":
 				target = minf(target, sqrt(maxf(0.0, 2.0 * BRAKE * (to_stop - 0.3))) + 0.3)
+				# Traffic signals: stop at the stop line on red, and on amber when it can.
+				target = minf(target, SignalPlan.bus_limit(bus, line, clocks))
 				if to_stop < 0.4:
 					bus.state = "dwell"
 					bus.timer = 0.0
@@ -381,9 +384,10 @@ func _physics_process(delta: float) -> void:
 						break
 				step += 2.0
 			if blocker != null:
-				var vehicle := str(blocker.name).begins_with("TrafficCar") or str(blocker.name).begins_with("Bus_") or str(blocker.name).begins_with("DowntownVehicle")
+				# AI cars (TrafficDriver) queue at signals and always move on, so the bus waits for
+				# them; only two buses waiting on each other at a junction edge through.
+				var vehicle := str(blocker.name).begins_with("Bus_")
 				bus.blocked += delta
-				# Two vehicles waiting on each other at a junction: the bus edges through.
 				if not (vehicle and bus.blocked > 8.0): target = 0.0
 			else:
 				bus.blocked = 0.0

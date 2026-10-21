@@ -16,6 +16,7 @@ func run() -> void:
 		session.pickup(session.restaurant_id(),1)
 		session.deliver(int(session.order.address),1)
 	for id in ShopCatalog.ITEMS:
+		if ShopCatalog.is_supply(id): continue    # supplies are bought by quantity on the store computer
 		session.buy(id)
 		check(session.owns(id),"Purchase "+id)
 		var balance := session.wallet
@@ -63,10 +64,10 @@ func run() -> void:
 	event.pressed=true
 	game._unhandled_input(event)
 	await process_frame
-	check(game.mode=="phone" and game.modal.visible and game.modal.position.x>900,"Phone opens at lower right")
-	check(game.modal.size.x<350 and game.modal.size.y<600,"Phone retains compact frame")
+	check(game.mode=="phone" and game.phone.out and not game.modal.visible,"Tab raises the 3D phone")
+	check(game.phone.os.page=="home","Phone opens on its home screen")
 	game._unhandled_input(event)
-	check(game.mode=="" and not game.modal.visible,"Second Tab hides phone")
+	check(game.mode=="" and not game.phone.out,"Second Tab puts the phone away")
 	for id in ShopCatalog.LOCATIONS:
 		game.player.position=ShopCatalog.LOCATIONS[id]+Vector3(4,.12,2.7)
 		game.player.rotation=Vector3.ZERO
@@ -78,7 +79,7 @@ func run() -> void:
 			var route := CityCatalog.route(Vector3(x,0,z+10),CityCatalog.PICKUPS[0],true)
 			check(route.size()>5,"Apartment route connects through street network")
 	check(game.world.park_count==8,"Eight landscaped parks including roundabouts")
-	check(game.world.get_node("CityLife").pedestrians.size()==24,"Twenty-four pedestrians")
+	check(game.world.get_node("CityLife").pedestrians.size()>=60,"At least sixty neighbourhood pedestrians")
 	check(game.world.get_node("CityLife").cyclists.size()==6,"Six cyclists")
 	game.player.session=session
 	game.session=session

@@ -188,3 +188,92 @@ Verified with Godot 4.7.2 / Jolt: 11 new integration checks passed, existing sce
 - **Saving:** progress is in `DeliverySession.tutorial` and saved. Old saves and fresh sessions count as trained.
 - **Finishing** pays a one-time $15 bonus (ledger `bonus_tutorial`, validated) and turns dispatch on.
 - **Tests:** `tests/tutorial_test.gd` (39 checks) plays the whole training through the real input paths and is part of `run_tests.ps1`.
+
+## Townspeople behaviour pass (2026-10-21)
+
+- **Clips** (`tools/build_npc_clips.py`, headless Blender → `assets/animations/ual/ual_npc.glb`, retargeted like the library via `tools/setup_npc_clips.gd`): `Idle_Carry` / `Walk_Carry` (tray on both palms), `Idle_Phone`, `Sitting_Phone`, `Sitting_Eat` (plate → mouth → chew), `Idle_Look` (window shopping). Each starts from a library clip and re-poses arms/head per frame with two-bone IK on the library rig. `LivingAssets.CLIPS` adds `Carry, WalkCarry, Phone, SitPhone, SitEat, Look, SitDown, StandUp, WalkFormal`.
+- **Props** (`tools/build_npc_props.py` → `assets/props/npc/`): tray, plate of food, tea glass, phone.
+- **Outfits** (`tools/build_outfit_masks.py` → `assets/sketchup/people/<id>_outfit_mask.png`, `world/living_city/outfit.gdshader`): top/bottom clothing masks (rest-pose regions, minus the character's own skin tone and hair); one shared material per character surface, per-person hue/saturation/value through instance uniforms (`LivingAssets.outfit_colours`). Natural height variation 0.93–1.07.
+- **Walking** (`LivingCitizen`, `CitizenBrain`): playback scaled by ground speed / measured stride (`LivingAssets.STRIDE`, planted-foot speed of each retargeted body), smoothed velocity and turn rate, rounded corners, personal speeds 0.85–1.55 m/s, keep-right avoidance of people and the player, waits at signals and for gaps at junction zebras, phone / window / bench pauses, buildings entered at destinations. Heights follow the rendered walking surfaces (`CitizenRoutes.ground_y`; the ground collider is flat). The sidewalk graph now covers the cross streets and side roads. Animation runs only on screen (VisibleOnScreenEnabler3D) and at 30/15/8 Hz with distance; shadows within 38 m.
+- **Sitting** (`CitySeating`): seat slots measured from the meshes (bench_wood top 0.44, downtown bench 0.52, restaurant chair 0.49 on 0.06 floor, booth 0.56, avenue restaurant chair 0.50); the seated pose (Sitting_Idle buttock contact, back, soles per body) puts hips on the seat and feet on the floor (body/scale chosen per seat). Walkers sit on free benches with Sitting_Enter / Sitting_Exit.
+- **Restaurants** (`TableService`): diners on the real chairs/booths, a waiter takes a plate from the counter, carries it on a tray, sets plates down at the table (diners switch to eating), returns; sidewalk-table customers outside. Avenue restaurants get the same.
+- **Shops** (`ShopLife`): one browsing customer per shop (clear of the counter kiosk and the back-right pickup shelf); clerks cycle idle / talk / interact / phone (`LivingCitizen.routine`).
+- Counts: neighbourhood walkers 24 → 162 (96 avenue, 48 residential, 16 park strollers, 2 crossers), downtown 47 → 83. Captures: `tests/capture_npc_life.gd`.
+
+## Street life: busier traffic, signals, LED boards, street VFX (2026-10-21)
+
+- **Traffic** (`world/traffic.gd`, `world/living_city/service_traffic.gd`, `world/vehicles/traffic_driver.gd`):
+  - City cars: 16 → 70 on seven right-turn-only loops. The two Cedar loops and the south grid stay. New loops: the avenue south of Refet Bele St (SE southbound, SW northbound) and two cross-street loops (-398 eastbound, -538 westbound).
+  - Every merge happens at a signalised junction, so the phases keep merging cars apart.
+  - Downtown: 18 → 42 cars. `CivicFleet` takes over the population's loop cars (`CivicFleet.drivers`; `population.vehicles` is left empty) and adds east-west loops on -398 / -538. The civic fleet's east-west legs now use the loops' lanes (3 m off the centreline).
+  - Drivers (`TrafficDriver.think`) follow the car ahead smoothly: a 1.7–2.8 m standstill gap, about 1 s headway and a 0.35–1.1 s reaction time when pulling away. Route-following rays see the player, people, buses and other loops' cars.
+  - Distant cars (> 120 m) update at 1/3 rate without swept moves, and only cars within 60 m cast shadows.
+  - A car stranded against a pedestrian for more than 6 s edges past. The player is never driven through.
+- **Signals** (`world/streets/signal_plan.gd` `SignalPlan`, `traffic_signals.gd` `TrafficSignals`, Blender kit `world/streets/build_street_tech.py`):
+  - 24 junctions: 4 avenue × cross street, 2 side road × cross street, 2 mid-block crossings and the 16 downtown junctions. There are 82 galvanised mast-arm poles, each with an overhead 3-section head (yellow-bordered backplate) and a side-mounted head, plus 160 pedestrian heads (hand / walking figure) and push buttons.
+  - Programs: green → amber 3 s → all-red 2 s, never two conflicting directions at once. Walk signals run with the parallel green; downtown has a scramble phase.
+  - The mid-block crossings keep `CityTraffic.crossing_red()`. Downtown runs on `CivicFleet.signal_clock`, which follows the population's phase but keeps running if that phase is held.
+  - Cars and buses (`BusSystem`) stop at the stop line on red, and on amber when they can. They queue, and only enter a junction when the exit has room.
+  - Poles are placed through `PropPlacer` beyond the crosswalks, near the kerb and clear of every AI path. The old downtown kit signals and WAIT labels are removed.
+  - Lamps and symbols are per-junction MultiMeshes with one shared shader (LED cluster, glow sprites). Instance data changes only when a junction's aspect changes. Walk sounds are registered with `CityAudio.attach_signal_loop`.
+- **LED boards** (`world/streets/led_boards.gd` `LedBoards`, `led_board.gdshader`, 5×7 font `led_font.gd`):
+  - 28 scrolling dot-matrix marquees: wall boards on the 4 shop headers, double-sided blade signs on the 3 avenue and 13 corridor restaurants, and long boards on downtown storefront fascias.
+  - Messages carry the name, offers and prices (₺ for restaurants) and OPEN / PAKET SERVİS.
+  - One shared material and one CPU-built atlas texture (one texel per LED). The text steps one LED at a time.
+- **VFX** (`world/streets/street_vfx.gd` `StreetVFX`):
+  - exhaust puffs when cars pull away (16 pooled one-shot emitters),
+  - brake and tail-light glow (one MultiMesh),
+  - charcoal grill smoke from the rooftops of 5 corridor grill restaurants,
+  - tyre spray on wet roads (8 pooled emitters).
+  - These particles disable heightfield collision so the rain's roof collider cannot catch them.
+- `world/streets/street_life.gd` hooks the pass into `CedarNeighborhood`. `StreetLife.enabled` and `VehicleCatalog.legacy_traffic` give the "before" city for benchmarks (`tests/profile_streets.gd -- out.json before|after`).
+- **Tests:** `tests/traffic_signal_test.gd` is in `run_tests.ps1`. It covers phase safety for every junction, stop lines per loop, a red-light stop, a queue and green discharge, and a 300 s whole-city soak (no vehicle held, no overlaps).
+  - `city_test`, `street_grid_test`, `traffic_long_vehicle_test` and `prop_placement_test` were updated for the new loop set and the downtown takeover.
+  - Captures: `tests/capture_streets.gd -- <dir> [kit|life]`.
+
+## Courier career v2: phone, store computers, delivery zones (2026-10-21)
+
+- **New Game career** (`DeliverySession.start_career`, `economy = 2`): you start on foot with $100, offline, with no phone, no bag and no vehicle.
+  - The phone ($25), the bag ($35) and every vehicle are bought. The basic gray city bicycle is $120 at Cedar Cycles.
+  - The Jetta is no longer free ($2,600).
+  - Old saves (`economy` 1) keep their bicycle and phone.
+  - The player's vehicle node stays but is hidden, with no collision, until a vehicle is bought (`CourierPlayer.has_vehicle`).
+- **Store computers** (`world/delivery/store_terminals.gd`, `ui/store_terminal.gd`, `ui/icon_studio.gd`): a kiosk computer on each shop counter (`assets/gadgets/store_kiosk.glb`) opens a monitor-framed online shop.
+  - Product cards show a rendered thumbnail, price and features, with − / + quantity. The cart has per-line − / + / remove, total, wallet-after and Purchase.
+  - `DeliverySession.checkout()` charges the cart. Equipment is sold once; supplies (water bottle, energy bar) go by quantity, with ledger `store_order_N`.
+  - Paid items wait on the ONLINE ORDER PICKUP shelf (`pickup_locker.glb`) as real models with tags; E collects them (`collect`).
+  - Vehicles roll out in front of the store.
+  - Supplies are used with keys 1 (water) and 2 (energy bar).
+- **The phone** (`ui/phone/phone_device.gd`, `ui/phone/phone_os.gd`, `assets/gadgets/budget_phone.glb`): a 3D phone in first person. Tab raises it and the camera narrows its field of view; PhoneOS renders in a SubViewport on the "Screen" mesh, and mouse events are ray-cast onto the glass and pushed into the viewport.
+  - Status bar: time, network, battery.
+  - Home screen: a clock / date / weather widget, a day bar with the lunch and dinner rushes, and an app grid.
+  - Apps: CourierNow (shift on/off, offers with delivery method, active order and steps, earnings), Maps (city map), Wallet (balance, history, bicycle savings goal), Weather (now plus 6 hours of rain chance).
+  - Locked "coming soon" apps: Messages, Music, Camera, Bank, Chirp, Rides, Games, Settings.
+- **Delivery methods** (`order.method`: `door` / `meet`), with a `DropZone` (`world/delivery/drop_zone.gd`) at the customer's door once you have the package. The zone is a glowing lined rectangle with corner brackets, a pulsing fill, sparkles, a bobbing `drop_arrow.glb` and a method label.
+  - **Leave at door:** E at the area (the bag swings round and the order is set down) or G inside it. This takes a proof photo (flash + shutter) and calls `leave_at_door`.
+  - **Meet at door:** E on the door knocks; the customer (a citizen) comes out to the doorstep. E hands the order over (from the bag or your hands); they thank you and go back in.
+  - E works by proximity at the door, and the prompt says so.
+- **Training v2** (`TutorialDirector`), 15 tasks:
+  1. look
+  2. walk
+  3. walk to Trail & Tool
+  4. order the phone and bag on the computer
+  5. collect them
+  6. open the phone and CourierNow
+  7. start the shift
+  8. accept the first order (leave at door)
+  9. walk to Kebab House
+  10. take the right package
+  11. put it down / pick it up
+  12. pack it
+  13. leave it in the marked area
+  14. accept the second order (meet at door)
+  15. collect and hand it to the customer
+  - The director runs while the phone is open.
+  - Afterwards a goal card tracks saving for the bicycle.
+- **Gameplay sounds** come from the new CityAudio presets (phone raise / lower / taps, kiosk, cart, purchase, item pickup, package drop / place, bag zip, knock, door, shutter, delivery success, customer thanks, coins, step / mission complete). `auto_order_cues` is off; app_root plays order cues itself.
+- **Tests:** `tests/tutorial_test.gd` (55 checks) plays the whole career start through real input paths. The smoke test uses knock + customer handover.
+- **Frame time:** with more people and traffic, the busiest spot (avenue near the start) is about 20–25% heavier than before. Levers:
+  - `CityLife.AVENUE_WALKERS` / `RESIDENTIAL_WALKERS` (now 56 / 32)
+  - `CityTraffic.COUNTS` (now 50 cars)
+  - LivingCitizen animation rate tiers (full < 10 m, 20 Hz < 24 m, 10 Hz < 45 m, 5 Hz beyond)
