@@ -1,0 +1,670 @@
+{
+  "animation_player": "AnimationPlayer (root_node ../Model)",
+  "bike": {
+    "crank_length": 0.1725,
+    "hips": [
+      0.0,
+      1.0337,
+      0.3023
+    ],
+    "knees": [
+      [
+        0.0,
+        "Left",
+        80.2,
+        0.765
+      ],
+      [
+        0.0,
+        "Right",
+        78.6,
+        0.774
+      ],
+      [
+        12.0,
+        "Left",
+        87.9,
+        0.72
+      ],
+      [
+        12.0,
+        "Right",
+        70.7,
+        0.816
+      ],
+      [
+        24.0,
+        "Left",
+        95.2,
+        0.675
+      ],
+      [
+        24.0,
+        "Right",
+        62.8,
+        0.854
+      ],
+      [
+        36.0,
+        "Left",
+        101.8,
+        0.631
+      ],
+      [
+        36.0,
+        "Right",
+        55.2,
+        0.887
+      ],
+      [
+        48.0,
+        "Left",
+        107.6,
+        0.591
+      ],
+      [
+        48.0,
+        "Right",
+        48.1,
+        0.913
+      ],
+      [
+        60.0,
+        "Left",
+        112.3,
+        0.558
+      ],
+      [
+        60.0,
+        "Right",
+        42.0,
+        0.934
+      ],
+      [
+        72.0,
+        "Left",
+        115.5,
+        0.534
+      ],
+      [
+        72.0,
+        "Right",
+        37.4,
+        0.947
+      ],
+      [
+        84.0,
+        "Left",
+        117.1,
+        0.523
+      ],
+      [
+        84.0,
+        "Right",
+        35.0,
+        0.954
+      ],
+      [
+        96.0,
+        "Left",
+        116.8,
+        0.525
+      ],
+      [
+        96.0,
+        "Right",
+        35.4,
+        0.953
+      ],
+      [
+        108.0,
+        "Left",
+        114.8,
+        0.54
+      ],
+      [
+        108.0,
+        "Right",
+        38.4,
+        0.945
+      ],
+      [
+        120.0,
+        "Left",
+        111.2,
+        0.566
+      ],
+      [
+        120.0,
+        "Right",
+        43.4,
+        0.929
+      ],
+      [
+        132.0,
+        "Left",
+        106.2,
+        0.601
+      ],
+      [
+        132.0,
+        "Right",
+        49.8,
+        0.907
+      ],
+      [
+        144.0,
+        "Left",
+        100.1,
+        0.642
+      ],
+      [
+        144.0,
+        "Right",
+        57.0,
+        0.879
+      ],
+      [
+        156.0,
+        "Left",
+        93.3,
+        0.687
+      ],
+      [
+        156.0,
+        "Right",
+        64.7,
+        0.845
+      ],
+      [
+        168.0,
+        "Left",
+        85.9,
+        0.732
+      ],
+      [
+        168.0,
+        "Right",
+        72.6,
+        0.806
+      ],
+      [
+        180.0,
+        "Left",
+        78.1,
+        0.777
+      ],
+      [
+        180.0,
+        "Right",
+        80.5,
+        0.764
+      ],
+      [
+        192.0,
+        "Left",
+        70.2,
+        0.819
+      ],
+      [
+        192.0,
+        "Right",
+        88.1,
+        0.719
+      ],
+      [
+        204.0,
+        "Left",
+        62.3,
+        0.856
+      ],
+      [
+        204.0,
+        "Right",
+        95.4,
+        0.674
+      ],
+      [
+        216.0,
+        "Left",
+        54.6,
+        0.889
+      ],
+      [
+        216.0,
+        "Right",
+        102.0,
+        0.63
+      ],
+      [
+        228.0,
+        "Left",
+        47.4,
+        0.916
+      ],
+      [
+        228.0,
+        "Right",
+        107.8,
+        0.59
+      ],
+      [
+        240.0,
+        "Left",
+        41.2,
+        0.936
+      ],
+      [
+        240.0,
+        "Right",
+        112.5,
+        0.556
+      ],
+      [
+        252.0,
+        "Left",
+        36.6,
+        0.949
+      ],
+      [
+        252.0,
+        "Right",
+        115.7,
+        0.533
+      ],
+      [
+        264.0,
+        "Left",
+        34.2,
+        0.956
+      ],
+      [
+        264.0,
+        "Right",
+        117.3,
+        0.521
+      ],
+      [
+        276.0,
+        "Left",
+        34.6,
+        0.955
+      ],
+      [
+        276.0,
+        "Right",
+        117.1,
+        0.523
+      ],
+      [
+        288.0,
+        "Left",
+        37.7,
+        0.946
+      ],
+      [
+        288.0,
+        "Right",
+        115.1,
+        0.537
+      ],
+      [
+        300.0,
+        "Left",
+        42.8,
+        0.931
+      ],
+      [
+        300.0,
+        "Right",
+        111.5,
+        0.564
+      ],
+      [
+        312.0,
+        "Left",
+        49.3,
+        0.909
+      ],
+      [
+        312.0,
+        "Right",
+        106.5,
+        0.599
+      ],
+      [
+        324.0,
+        "Left",
+        56.7,
+        0.88
+      ],
+      [
+        324.0,
+        "Right",
+        100.5,
+        0.64
+      ],
+      [
+        336.0,
+        "Left",
+        64.4,
+        0.846
+      ],
+      [
+        336.0,
+        "Right",
+        93.7,
+        0.685
+      ],
+      [
+        348.0,
+        "Left",
+        72.4,
+        0.807
+      ],
+      [
+        348.0,
+        "Right",
+        86.3,
+        0.73
+      ],
+      [
+        360.0,
+        "Left",
+        80.2,
+        0.765
+      ],
+      [
+        360.0,
+        "Right",
+        78.6,
+        0.774
+      ]
+    ],
+    "lean_param": 47.6,
+    "seat": [
+      0.0,
+      0.8697,
+      0.3223
+    ],
+    "trunk_lean_deg": 35.9
+  },
+  "clips": {
+    "Bike_Pedal": {
+      "crank_deg_per_s": 360.0,
+      "kind": "bike",
+      "knee_flexion_max_deg": 117.3,
+      "knee_flexion_min_deg": 34.2,
+      "length": 1.0,
+      "loop": true,
+      "note": "one forward crank revolution; frame k <-> crank angle 360*k/30 deg from rest (right crank forward)",
+      "source": "Bike_Pedal"
+    },
+    "Bike_Seated": {
+      "hips_bike_space_godot": [
+        0.0,
+        1.0337,
+        0.3023
+      ],
+      "kind": "bike",
+      "length": 2.0,
+      "loop": true,
+      "note": "crank at rest (right pedal forward), breathing",
+      "source": "Bike_Seated"
+    },
+    "Idle": {
+      "kind": "standing",
+      "length": 2.5,
+      "loop": true,
+      "source": "Idle"
+    },
+    "Idle_Look": {
+      "kind": "standing",
+      "length": 7.5,
+      "loop": true,
+      "source": "Idle_Look"
+    },
+    "Idle_Shift": {
+      "kind": "standing",
+      "length": 7.5,
+      "loop": true,
+      "note": "weight shift idle variant",
+      "source": "Idle_Shift"
+    },
+    "Idle_Talk": {
+      "kind": "standing",
+      "length": 2.9333,
+      "loop": true,
+      "source": "Idle_Talk"
+    },
+    "Interact": {
+      "kind": "action",
+      "length": 2.0,
+      "loop": false,
+      "source": "Interact"
+    },
+    "Jog": {
+      "foot_slide_m": 0.005,
+      "kind": "locomotion",
+      "length": 0.6667,
+      "loop": true,
+      "move_direction": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "source": "Jog_Mixamo",
+      "speed": 2.95,
+      "speed_godot_joints": 2.94300007820129
+    },
+    "Jump": {
+      "kind": "jump",
+      "length": 2.5,
+      "loop": true,
+      "note": "air pose loop; same hips offset as Jump_Start",
+      "source": "Jump"
+    },
+    "Jump_Land": {
+      "kind": "jump",
+      "length": 1.2667,
+      "loop": false,
+      "source": "Jump_Land"
+    },
+    "Jump_Start": {
+      "kind": "jump",
+      "length": 1.3333,
+      "loop": false,
+      "source": "Jump_Start"
+    },
+    "Land_Hard": {
+      "kind": "jump",
+      "length": 1.2667,
+      "loop": false,
+      "note": "Jump_Land with a deep knee bend",
+      "source": "Land_Hard"
+    },
+    "PickUp": {
+      "kind": "action",
+      "length": 0.8333,
+      "loop": false,
+      "source": "PickUp"
+    },
+    "Run": {
+      "foot_slide_m": 0.004,
+      "kind": "locomotion",
+      "length": 0.9333,
+      "loop": true,
+      "move_direction": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "note": "library Jog_Fwd: a fast run",
+      "source": "Run",
+      "speed": 5.747,
+      "speed_godot_joints": 5.64400005340576
+    },
+    "Sprint": {
+      "foot_slide_m": 0.0,
+      "kind": "locomotion",
+      "length": 0.6667,
+      "loop": true,
+      "move_direction": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "source": "Sprint",
+      "speed": 8.517,
+      "speed_godot_joints": 8.31799983978271
+    },
+    "Strafe_L": {
+      "foot_slide_m": 0.006,
+      "kind": "locomotion",
+      "length": 0.6333,
+      "loop": true,
+      "move_direction": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "note": "side steps; the body moves to the character's left",
+      "source": "Strafe_L",
+      "speed": 0.688,
+      "speed_godot_joints": 0.665000021457672
+    },
+    "Strafe_R": {
+      "foot_slide_m": 0.005,
+      "kind": "locomotion",
+      "length": 0.6333,
+      "loop": true,
+      "move_direction": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "note": "side steps; the body moves to the character's right",
+      "source": "Strafe_R",
+      "speed": 0.687,
+      "speed_godot_joints": 0.666999995708466
+    },
+    "Turn_L_90": {
+      "kind": "turn",
+      "length": 1.0,
+      "loop": false,
+      "root_yaw_curve": "smoothstep(t / 0.85 s)",
+      "root_yaw_deg": 90.0,
+      "root_yaw_samples_30fps": [
+        0.0,
+        0.4,
+        1.57,
+        3.44,
+        5.95,
+        9.02,
+        12.6,
+        16.62,
+        21.02,
+        25.72,
+        30.67,
+        35.79,
+        41.03,
+        46.32,
+        51.6,
+        56.79,
+        61.83,
+        66.67,
+        71.22,
+        75.44,
+        79.25,
+        82.58,
+        85.38,
+        87.57,
+        89.1,
+        89.9,
+        90.0,
+        90.0,
+        90.0,
+        90.0,
+        90.0
+      ],
+      "source": "Turn_L_90"
+    },
+    "Turn_R_90": {
+      "kind": "turn",
+      "length": 1.0,
+      "loop": false,
+      "root_yaw_curve": "smoothstep(t / 0.85 s)",
+      "root_yaw_deg": -90.0,
+      "root_yaw_samples_30fps": [
+        0.0,
+        -0.4,
+        -1.57,
+        -3.44,
+        -5.95,
+        -9.02,
+        -12.6,
+        -16.62,
+        -21.02,
+        -25.72,
+        -30.67,
+        -35.79,
+        -41.03,
+        -46.32,
+        -51.6,
+        -56.79,
+        -61.83,
+        -66.67,
+        -71.22,
+        -75.44,
+        -79.25,
+        -82.58,
+        -85.38,
+        -87.57,
+        -89.1,
+        -89.9,
+        -90.0,
+        -90.0,
+        -90.0,
+        -90.0,
+        -90.0
+      ],
+      "source": "Turn_R_90"
+    },
+    "Walk": {
+      "foot_slide_m": 0.027,
+      "kind": "locomotion",
+      "length": 1.3333,
+      "loop": true,
+      "move_direction": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "source": "Walk",
+      "speed": 0.994,
+      "speed_godot_joints": 0.907000005245209
+    },
+    "Walk_Back": {
+      "foot_slide_m": 0.027,
+      "kind": "locomotion",
+      "length": 1.3333,
+      "loop": true,
+      "move_direction": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "note": "time-reversed Walk: toe-first steps; the body moves backwards",
+      "source": "Walk_Back",
+      "speed": 0.994,
+      "speed_godot_joints": 0.907000005245209
+    }
+  },
+  "facing": "Courier root faces -Z; the model inside is turned PI (retarget convention +Z)",
+  "height_m": 1.805,
+  "library": "res://assets/player/courier_anims.res",
+  "model": "res://assets/player/courier.glb",
+  "scene": "res://assets/player/courier.tscn",
+  "skeleton_path": "Model/Armature/GeneralSkeleton (unique name %GeneralSkeleton in Model)",
+  "triangles": 42430.0
+}

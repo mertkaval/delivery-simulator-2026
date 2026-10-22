@@ -76,5 +76,17 @@
     "clips": [],
     "rig": "auto (fitted humanoid, ARMATURE_AUTO after weld/normals repair, 0 verts patched)",
     "facing": "-Y blender / +Z godot (humanoid retarget convention)"
+  },
+  {
+    "id": "clothed_man",
+    "path": "res://assets/sketchup/people/clothed_man.glb",
+    "height": 1.8,
+    "tris": 23926,
+    "rest_pose": "T (library rest)",
+    "bones_total": 55,
+    "clips": [],
+    "facing": "-Y blender / +Z godot (humanoid retarget convention)",
+    "rig": "auto (fitted humanoid, ARMATURE_AUTO (solved at x10 scale), armpit/crotch fixes)",
+    "source": "source_assets/incoming_2026_10_22/character_with_clothes.glb"
   }
 ]

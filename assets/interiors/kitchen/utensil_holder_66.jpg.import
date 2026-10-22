@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dm7ro5x5fha4e"
-path="res://.godot/imported/utensil_holder_66.jpg-a6bd2c0bedbf05b339400c224e9c040a.ctex"
+path.s3tc="res://.godot/imported/utensil_holder_66.jpg-a6bd2c0bedbf05b339400c224e9c040a.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "78aaf01ea8fa010651a0f05a293f33ab"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/interiors/kitchen/utensil_holder_66.jpg"
-dest_files=["res://.godot/imported/utensil_holder_66.jpg-a6bd2c0bedbf05b339400c224e9c040a.ctex"]
+dest_files=["res://.godot/imported/utensil_holder_66.jpg-a6bd2c0bedbf05b339400c224e9c040a.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

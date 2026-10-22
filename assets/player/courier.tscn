@@ -1,0 +1,14 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://assets/player/courier.glb" id="1_ixgbv"]
+[ext_resource type="AnimationLibrary" path="res://assets/player/courier_anims.res" id="2_5bjoc"]
+
+[node name="Courier" type="Node3D" unique_id=1666794412]
+
+[node name="Model" type="Node3D" parent="." unique_id=1179006332 instance=ExtResource("1_ixgbv")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1722581737]
+root_node = NodePath("../Model")
+libraries/ = ExtResource("2_5bjoc")
+autoplay = &"Idle"

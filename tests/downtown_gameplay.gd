@@ -52,7 +52,10 @@ func run() -> void:
 			var approach: Array=approaches[i]
 			var direction: Vector3=approach[-2].direction_to(approach[-1])
 			player.position=Vector3(p.x,.10,p.z)-direction*1.5
-			player.camera.look_at(p)
+			# Aim from the eyes (the interaction ray's origin in first and third person).
+			var aim: Vector3=p-player.eye_position()
+			player.rotation=Vector3(0,atan2(-aim.x,-aim.z),0)
+			player.camera.rotation=Vector3(atan2(aim.y,Vector2(aim.x,aim.z).length()),0,0)
 			await physics_frame
 			var expected: String="pickup_"+CityCatalog.RESTAURANTS[i+3] if category==0 else "door_%d"%(36+i)
 			check(player.target().get("id")==expected,"Real interaction ray: "+expected)

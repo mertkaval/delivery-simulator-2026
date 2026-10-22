@@ -36,6 +36,44 @@ var car_steer_input := 0.0
 var car_yaw_rate := 0.0
 var car_camera_yaw := 0.0
 var car_look_timer := 0.0
+## View: third person (default) or first person, toggled with V (GameSettings "third_person").
+## The camera stays this node's child with rotation = aim; PlayerCameraRig moves it.
+var third_person := true
+var eye_height := 1.65
+var view: PlayerCameraRig
+var avatar: PlayerAvatar
+## Child of the camera that carries a held package: at the camera in first person, in the
+## character's hands in third person (app_root parents held packages here).
+var hold_socket: Node3D
+## Where a held package sits in the socket (first person: two hands, low right of the view).
+static var HOLD_POSE := Transform3D(Basis.from_euler(Vector3(0.15, -0.35, 0)), Vector3(0.22, -0.42, -0.55))
+## On-foot locomotion (m/s, m/s^2): hold Ctrl to walk, W runs, Shift sprints.
+const WALK_SPEED := 1.5
+const RUN_SPEED := 3.5
+const SPRINT_SPEED := 5.8
+const BACK_SPEED := 2.0
+const ACCEL := 11.0
+const DECEL := 16.0
+const AIR_ACCEL := 2.5
+const JUMP_SPEED := 5.0
+const GRAVITY := 20.0
+const COYOTE := 0.12
+const JUMP_BUFFER := 0.12
+var coyote_time := 0.0
+var jump_buffer := 0.0
+var last_fall_speed := 0.0
+var land_recovery := 0.0
+var _was_on_floor := true
+var _mouse_still := 0.0
+## Bicycle rider markers (Seat, GripL/R, Crank, PedalL/R) and drivetrain state.
+var bike_markers: Dictionary = {}
+var crank_angle := 0.0
+var pedalling := false
+var stopped_time := 0.0
+var coast_time := 0.0
+var stand_lean := 0.0
+const GEAR_RATIO := 2.2         ## wheel turns per crank turn (city bike, ~60 rpm at 18 km/h)
+var car_eye := Vector3.ZERO
 
 func setup_bicycle() -> void:
 	replace_vehicle(Vector3(-8, 0, 19))
@@ -72,6 +110,11 @@ func replace_vehicle(at: Vector3) -> void:
 	if steering_pivot != null and not steer_pivots.has(steering_pivot): steer_pivots.append(steering_pivot)
 	steering_wheel = bicycle.find_child("SteeringWheel", true, false) as Node3D
 	if steering_wheel != null and not steering_wheel.has_meta("rest"): steering_wheel.set_meta("rest", steering_wheel.transform)
+	# Driver's eyes for the in-car first-person view: behind and above the steering wheel.
+	car_eye = PlayerAvatar.relative(bicycle, steering_wheel).origin + Vector3(0, 0.34, 0.55) if steering_wheel != null else Vector3.ZERO
+	# Rider markers for two-wheelers (the body is hidden inside cars).
+	bike_markers = PlayerAvatar.bike_markers(bicycle, asset) if asset in ["bicycle", "scooter"] and not ShopCatalog.is_car(session.active_vehicle) else {}
+	crank_angle = 0.0
 	steer_angle = 0.0
 	lean = 0.0
 	refresh_equipment()
@@ -103,8 +146,8 @@ func apply_vehicle_camera() -> void:
 	if camera == null or body_collision == null: return
 	if is_instance_valid(parked_body): parked_body.collision_layer=0 if mounted else 1
 	if mounted and ShopCatalog.is_car(session.active_vehicle):
-		camera.position = CAR_CAMERA_OFFSET
-		camera.rotation = Vector3(-0.17, 0, 0)
+		camera.position = car_view_position(0.0)
+		camera.rotation = Vector3(-0.05 if car_first_person() else -0.17, 0, 0)
 		car_camera_yaw = 0.0
 		car_steer_input = 0.0
 		car_yaw_rate = 0.0
@@ -114,7 +157,8 @@ func apply_vehicle_camera() -> void:
 		body_collision.position.y = bounds.size.y / 2 + vehicle_collision_lift()
 	else:
 		# Riding eye height: a seated cyclist leaning forward sees from about 1.5 m, lower than walking.
-		camera.position = Vector3(0, 1.5 if mounted else 1.65, 0)
+		eye_height = 1.5 if mounted else 1.65
+		camera.position = Vector3(0, eye_height, 0)
 		var capsule := CapsuleShape3D.new()
 		capsule.radius = 0.3
 		capsule.height = 1.8
@@ -133,11 +177,13 @@ func toggle_bicycle() -> String:
 		for side in [-1, 1]:
 			var offset := global_basis.x * float(side) * (1.8 if ShopCatalog.is_car(session.active_vehicle) else 1.0)
 			if not test_move(global_transform, offset):
+				if avatar: avatar.begin_dismount()
 				mounted = false
 				rotation.y += camera.rotation.y
 				camera.rotation.y = 0
 				camera.rotation.z = 0
 				lean = 0.0
+				stand_lean = 0.0
 				steer_angle = 0.0
 				bicycle.rotation = Vector3(0, bicycle.rotation.y, 0)
 				apply_steering_visuals(0.0)
@@ -166,10 +212,15 @@ func toggle_bicycle() -> String:
 		if not get_world_3d().direct_space_state.intersect_shape(query,1).is_empty():
 			parked_body.collision_layer=1
 			return "The vehicle needs more clearance before mounting."
+	if avatar: avatar.begin_mount()
+	var view_yaw := global_rotation.y + camera.rotation.y
 	position += travel
 	rotation.y = bicycle.rotation.y
+	# Third person: keep looking the same way while the body swings onto the bike.
+	camera.rotation.y = clampf(angle_difference(rotation.y, view_yaw), -1.1, 1.1) if third_person and not ShopCatalog.is_car(session.active_vehicle) else 0.0
 	velocity = Vector3.ZERO
 	mounted = true
+	stopped_time = 0.0
 	riding_speed = 0
 	apply_vehicle_camera()
 	if ShopCatalog.is_car(session.active_vehicle):
@@ -191,13 +242,59 @@ func _ready() -> void:
 	camera.fov = 78
 	add_child(camera)
 	camera.make_current()
-	floor_snap_length = 0.25
+	floor_snap_length = 0.3
+	hold_socket = Node3D.new()
+	hold_socket.name = "HoldSocket"
+	camera.add_child(hold_socket)
+	view = PlayerCameraRig.new()
+	add_child(view)
+	view.setup(self)
+	avatar = PlayerAvatar.new()
+	add_child(avatar)
+	avatar.setup(self)
+	view.snap()
+
+## Settings: view mode and third-person distance (GameSettings.apply).
+func apply_view_settings(third: bool, distance: float) -> void:
+	var changed := third != third_person
+	third_person = third
+	if view != null:
+		view.target_distance = clampf(distance, PlayerCameraRig.MIN_DISTANCE, PlayerCameraRig.MAX_DISTANCE)
+	if changed: clamp_pitch()
+	apply_vehicle_camera()
+
+## V: first <-> third person (remembered in user://settings.cfg).
+func toggle_view() -> void:
+	third_person = not third_person
+	clamp_pitch()
+	GameSettings.set_value("third_person", third_person)
+	GameSettings.save_settings()
+	if mounted and ShopCatalog.is_car(session.active_vehicle): apply_vehicle_camera()
+
+func clamp_pitch() -> void:
+	if camera == null: return
+	var limits := pitch_limits()
+	camera.rotation.x = clampf(camera.rotation.x, limits.x, limits.y)
+
+func pitch_limits() -> Vector2:
+	if mounted and session != null and ShopCatalog.is_car(session.active_vehicle): return Vector2(-0.7, 0.3)
+	if third_person: return Vector2(PlayerCameraRig.PITCH_MIN, PlayerCameraRig.PITCH_MAX)
+	return Vector2(-1.3, 1.3)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		look(event.relative)
+	elif InputMap.has_action("camera_view") and event.is_action_pressed("camera_view"):
+		toggle_view()
+		get_viewport().set_input_as_handled()
+	elif event is InputEventMouseButton and event.pressed and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and third_person and view != null:
+		var button := (event as InputEventMouseButton).button_index
+		if button == MOUSE_BUTTON_WHEEL_UP or button == MOUSE_BUTTON_WHEEL_DOWN:
+			view.zoom(-1.0 if button == MOUSE_BUTTON_WHEEL_UP else 1.0)
+			get_viewport().set_input_as_handled()
 
 func look(relative: Vector2) -> void:
+	_mouse_still = 0.0
 	if mounted and ShopCatalog.is_car(session.active_vehicle):
 		# In a car the mouse only looks around; the view drifts back behind the car.
 		car_camera_yaw = clampf(car_camera_yaw - relative.x * sensitivity, -2.6, 2.6)
@@ -208,7 +305,50 @@ func look(relative: Vector2) -> void:
 		camera.rotation.y = clampf(camera.rotation.y - relative.x * sensitivity, -1.1, 1.1)
 	else:
 		rotate_y(-relative.x * sensitivity)
-	camera.rotation.x = clampf(camera.rotation.x - relative.y * sensitivity, -1.3, 1.3)
+	var limits := pitch_limits()
+	camera.rotation.x = clampf(camera.rotation.x - relative.y * sensitivity, limits.x, limits.y)
+
+## True once the mouse has rested a moment (turn-in-place waits for the view to settle).
+func holding_view_still() -> bool:
+	return _mouse_still > 0.15
+
+## The eyes: where the interaction ray starts in both views (2 m reach from the character).
+func eye_position() -> Vector3:
+	return global_transform * Vector3(0, eye_height, 0)
+
+## Which way the body faces (the avatar turns towards travel in third person).
+func body_forward() -> Vector3:
+	if avatar != null and avatar.ready_ok and not mounted:
+		return Vector3(-sin(avatar.facing), 0, -cos(avatar.facing))
+	var f := -global_basis.z
+	f.y = 0.0
+	return f.normalized()
+
+func body_yaw() -> float:
+	return avatar.facing if avatar != null and avatar.ready_ok and not mounted else global_rotation.y
+
+## Foot contacts since the last call (world positions; CityAudio plays the footsteps).
+func take_footsteps() -> Array[Vector3]:
+	var steps: Array[Vector3] = []
+	if avatar == null or not avatar.ready_ok: return steps
+	steps = avatar.footsteps.duplicate()
+	avatar.footsteps.clear()
+	return steps
+
+## The package node in the hands (child of hold_socket), if any.
+func held_package() -> Node3D:
+	if hold_socket == null: return null
+	for child in hold_socket.get_children():
+		if child is Node3D and (child as Node3D).visible: return child
+	return null
+
+func car_first_person() -> bool:
+	return not third_person and car_eye != Vector3.ZERO
+
+## Car camera: chase offset swung by the look yaw, or the driver's eyes.
+func car_view_position(yaw: float) -> Vector3:
+	if car_first_person(): return car_eye
+	return CAR_CAMERA_OFFSET.rotated(Vector3.UP, yaw)
 
 func _physics_process(delta: float) -> void:
 	if session == null:
@@ -231,28 +371,89 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		if is_on_wall(): riding_speed = 0.0
 		bicycle.position = position
-		bicycle.rotation = Vector3(0, rotation.y, lean)
+		# Stopped with a foot down, the bike leans a little onto that (left) foot.
+		stand_lean = lerpf(stand_lean, 0.09 * avatar.foot_down if avatar != null and avatar.ready_ok else 0.0, minf(delta * 5.0, 1.0))
+		bicycle.rotation = Vector3(0, rotation.y, lean + stand_lean)
 		if bicycle.has_method("update_driving_visuals"):
 			bicycle.update_driving_visuals(get_position_delta().dot(-global_basis.z), steer_angle, brake)
 		else:
 			var radius := float(bicycle.get_meta("wheel_radius", 0.35))   # per-model (Ace 11: 0.298 m)
 			for wheel in wheels:
 				wheel.rotate_x(-get_position_delta().length() / radius * signf(riding_speed))
+			drive_crank(delta, pedal, radius)
 		var fatigue := (0.0 if powered else absf(riding_speed) * 0.15) * (0.85 if session.owns("gloves") else 1.0)
 		session.energy = clampf(session.energy + (2.0 if absf(riding_speed) < 0.1 else -fatigue) * delta, 0, 100)
 		return
+	walk(delta)
+
+## On foot: camera-relative WASD with acceleration / deceleration curves; Ctrl walks, Shift
+## sprints. In third person the body must turn before it runs flat out (no sideways skating).
+## Jumps start from the floor or within COYOTE s of leaving it; a press just before landing is
+## kept for JUMP_BUFFER s; hard landings cost a moment of speed.
+func walk(delta: float) -> void:
+	_mouse_still += delta
 	var movement := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var direction := transform.basis * Vector3(movement.x, 0, movement.y)
 	var sprinting := Input.is_action_pressed("sprint") and session.energy > 0.0 and movement.length() > 0.0
-	var speed := 5.0 if sprinting else 3.5
-	velocity.x = move_toward(velocity.x, direction.x * speed, 22.0 * delta)
-	velocity.z = move_toward(velocity.z, direction.z * speed, 22.0 * delta)
-	if not is_on_floor():
-		velocity.y -= 20.0 * delta
-	elif Input.is_action_just_pressed("jump"):
-		velocity.y = 5.0
+	var walking := InputMap.has_action("walk") and Input.is_action_pressed("walk")
+	var speed := WALK_SPEED if walking else (SPRINT_SPEED if sprinting else RUN_SPEED)
+	if not third_person and movement.y > 0.5: speed = minf(speed, BACK_SPEED)
+	if third_person and avatar != null and avatar.ready_ok and direction.length() > 0.1:
+		var move_yaw := atan2(-direction.x, -direction.z)
+		var misalign := absf(angle_difference(avatar.facing, move_yaw))
+		speed *= lerpf(1.0, 0.4, smoothstep(deg_to_rad(50.0), deg_to_rad(150.0), misalign))
+	if land_recovery > 0.0:
+		land_recovery -= delta
+		speed *= 0.65
+	var on_floor := is_on_floor()
+	var h := Vector2(velocity.x, velocity.z)
+	var want := Vector2(direction.x, direction.z) * speed
+	var rate := (ACCEL if want.length() > h.length() + 0.01 else DECEL) if on_floor else AIR_ACCEL
+	h = h.move_toward(want, rate * delta)
+	velocity.x = h.x
+	velocity.z = h.y
+	coyote_time = COYOTE if on_floor else maxf(0.0, coyote_time - delta)
+	jump_buffer = JUMP_BUFFER if Input.is_action_just_pressed("jump") else maxf(0.0, jump_buffer - delta)
+	if not on_floor:
+		velocity.y -= GRAVITY * delta
+	if jump_buffer > 0.0 and coyote_time > 0.0 and velocity.y <= 0.5:
+		velocity.y = JUMP_SPEED
+		jump_buffer = 0.0
+		coyote_time = 0.0
+		if avatar: avatar.jumped()
+	var falling := -velocity.y
 	move_and_slide()
+	if is_on_floor() and not _was_on_floor:
+		last_fall_speed = falling
+		if falling > 6.5: land_recovery = 0.25
+	_was_on_floor = is_on_floor()
 	session.energy = clampf(session.energy + ((-4.8 if session.owns("backpack") else -6.0) if sprinting else 2.0) * delta, 0.0, 100.0)
+
+## Bicycle drivetrain: the crank turns with the rear wheel / gear ratio while pedalling and
+## freewheels when coasting (the rider then backpedals to level pedals); the pedal platforms
+## stay level.
+func drive_crank(delta: float, pedal: float, radius: float) -> void:
+	pedalling = pedal > 0.1 and riding_speed > 0.15
+	stopped_time = stopped_time + delta if absf(riding_speed) < 0.15 and not pedalling else 0.0
+	if bike_markers.is_empty() or bike_markers.get("footboard", false):
+		pedalling = false
+		return
+	var travelled := get_position_delta().dot(-global_basis.z)
+	if pedalling:
+		crank_angle += maxf(travelled, 0.0) / radius / GEAR_RATIO
+		coast_time = 0.0
+	else:
+		coast_time += delta
+		if coast_time > 0.35:
+			# Pedals level (crank angle 0 / PI) by turning backwards a little, never forwards.
+			var level := floorf(crank_angle / PI + 0.0001) * PI
+			if crank_angle - level < 1.3: crank_angle = move_toward(crank_angle, level, 2.2 * delta)
+	var crank := bike_markers.get("Crank") as Node3D
+	if is_instance_valid(crank):
+		crank.rotation.x = -crank_angle
+		for key in ["PedalL", "PedalR"]:
+			var pedal_node := bike_markers.get(key) as Node3D
+			if is_instance_valid(pedal_node): pedal_node.rotation.x = crank_angle
 
 ## Kinematic steering for bicycles, scooters and cars.
 ## A/D turn the handlebars; the mouse steers too: looking left or right makes the bike
@@ -292,7 +493,7 @@ func steer(delta: float) -> void:
 	# Two-wheelers lean into the turn: tan(lean) = v * yaw_rate / g.
 	var target_lean := 0.0 if car else clampf(atan(riding_speed * yaw_rate / 9.81), -0.45, 0.45)
 	lean = lerpf(lean, target_lean, minf(delta * 6.0, 1.0))
-	camera.rotation.z = lean * 0.35
+	camera.rotation.z = lean * (0.15 if third_person else 0.35)
 
 ## Smooth car handling. A/D build a steering input that eases in and out; the car's turn rate
 ## follows that input scaled by speed (sharp enough to park, calm at speed, never tighter than
@@ -324,7 +525,7 @@ func steer_car(delta: float) -> void:
 	if car_look_timer == 0.0:
 		car_camera_yaw = lerpf(car_camera_yaw, 0.0, 1.0 - exp(-CAR_CAMERA_LAG * delta))
 	car_camera_yaw = clampf(car_camera_yaw, -2.6, 2.6)
-	camera.position = CAR_CAMERA_OFFSET.rotated(Vector3.UP, car_camera_yaw)
+	camera.position = car_view_position(car_camera_yaw)
 	camera.rotation.y = car_camera_yaw
 	camera.rotation.z = 0.0
 
@@ -347,8 +548,10 @@ func vehicle_bounds() -> Vector3:
 func vehicle_collision_lift() -> float:
 	return float(bicycle.get_meta("collision_lift", 0.06)) if is_instance_valid(bicycle) else 0.06
 
+## What E would act on: a 2 m ray from the character's eyes along the view (the crosshair). In
+## third person the HUD crosshair is drawn where this ray points (PlayerCameraRig.reticle).
 func target() -> Dictionary:
-	var origin := camera.global_position
+	var origin := eye_position()
 	var query := PhysicsRayQueryParameters3D.create(origin, origin - camera.global_basis.z * 2.0, 1)
 	query.exclude = [get_rid()]
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)

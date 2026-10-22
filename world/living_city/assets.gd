@@ -67,7 +67,8 @@ static func standing_person(index: int) -> LivingCitizen:
 ## every library clip drives "%GeneralSkeleton:<ProfileBone>", so it plays on any of them.
 ## Extra clips authored on the library rig (tools/build_npc_clips.py -> ual_npc.glb) add
 ## carrying a tray, using a phone (standing / seated), eating at a table and window shopping.
-const HUMANOIDS := ["casual_male_tshirt", "business_man_eric", "sophia", "casual_female", "casual_male_2"]
+## clothed_man: the unrigged clothed figure rigged by tools/prepare_player.py -- clothed.
+const HUMANOIDS := ["casual_male_tshirt", "business_man_eric", "sophia", "casual_female", "casual_male_2", "clothed_man"]
 const UAL := "res://assets/animations/ual/ual_standard.glb"
 const UAL_NPC := "res://assets/animations/ual/ual_npc.glb"
 ## Game clip name -> library clip.
@@ -82,14 +83,17 @@ const CLIPS := {"Idle": "Idle", "Walk": "Walk", "Brisk": "Walk", "Run": "Jog_Fwd
 ## retargeted clips (stance frames of LeftToes/RightToes; tmp measurement, see PROJECT_STATE).
 ## Playback is scaled by ground_speed / (this * body scale), so feet never slide.
 const LOCOMOTION := ["Walk", "Brisk", "WalkFormal", "WalkCarry"]
-const STRIDE := {"casual_male_tshirt": 1.118, "business_man_eric": 1.100, "sophia": 1.017, "casual_female": 1.102, "casual_male_2": 1.095}
+const STRIDE := {"casual_male_tshirt": 1.118, "business_man_eric": 1.100, "sophia": 1.017, "casual_female": 1.102, "casual_male_2": 1.095,
+	"clothed_man": 1.041}
 const FORMAL_STRIDE := 0.98   ## Walk_Formal / Walk
 ## Seated pose, measured on the retargeted Sitting_Idle (= Sitting_Enter end = Sitting_Exit start)
 ## in body space at scale 1 (body faces +Z): lowest point of the buttocks / thighs (`seat`),
 ## the back's rearmost point (`back`, z) and the soles (`sole`). The pelvis rests behind the
 ## body origin: seat contact is ~0.35 m behind it, knees ~0.07 m in front.
 const SEATED := {"casual_male_tshirt": Vector3(0.453, -0.449, -0.004), "business_man_eric": Vector3(0.495, -0.443, -0.007),
-	"sophia": Vector3(0.427, -0.381, 0.017), "casual_female": Vector3(0.445, -0.439, 0.001), "casual_male_2": Vector3(0.437, -0.478, -0.009)}
+	"sophia": Vector3(0.427, -0.381, 0.017), "casual_female": Vector3(0.445, -0.439, 0.001), "casual_male_2": Vector3(0.437, -0.478, -0.009),
+	# clothed_man: casual_male_2's mesh measure shifted by the retargeted Sitting_Idle hips / toes difference
+	"clothed_man": Vector3(0.422, -0.466, -0.005)}
 static var clip_library: AnimationLibrary
 static var outfit_materials := {}
 
@@ -198,6 +202,45 @@ static func humanoid(index: int, size: float = -1.0) -> LivingCitizen:
 		proxy.name=joint
 		model.add_child(proxy)
 	return model
+
+## The realistic "meet at door" customer (Avaturn avatar, tools/prepare_player.py -- avaturn):
+## its own clip "Talk" (body + 72 face blend shapes, ping-pong looped) plays while it waits; Idle /
+## Interact / Wave-like clips come from the retargeted library. Faces -Z like the citizens.
+const DOOR_CUSTOMER := "res://assets/player/customer_avaturn.glb"
+static var door_customer_scene: PackedScene
+static var door_customer_clips: AnimationLibrary
+
+static func door_customer() -> Node3D:
+	if not ResourceLoader.exists(DOOR_CUSTOMER): return null
+	if door_customer_scene == null: door_customer_scene = load(DOOR_CUSTOMER)
+	var root := Node3D.new()
+	root.name = "Customer"
+	var body: Node3D = door_customer_scene.instantiate()
+	body.rotation.y = PI   # retarget convention faces +Z
+	root.add_child(body)
+	var own := body.get_node_or_null("AnimationPlayer") as AnimationPlayer
+	if door_customer_clips == null:
+		door_customer_clips = AnimationLibrary.new()
+		if own != null and own.has_animation("Talk"):
+			var talk := own.get_animation("Talk").duplicate() as Animation
+			talk.loop_mode = Animation.LOOP_PINGPONG
+			door_customer_clips.add_animation("Talk", talk)
+		var lib := game_clips()
+		for clip: String in ["Idle", "Interact", "Wait"]:
+			if lib.has_animation(clip): door_customer_clips.add_animation(clip, lib.get_animation(clip))
+	if own != null:
+		body.remove_child(own)
+		own.free()
+	for mesh: MeshInstance3D in body.find_children("*", "MeshInstance3D", true, false):
+		var keep := Node.new()   # keeps static batching away from the skinned meshes
+		keep.name = "Skinned"
+		mesh.add_child(keep)
+	var animator := AnimationPlayer.new()
+	animator.name = "AnimationPlayer"
+	body.add_child(animator)
+	animator.root_node = NodePath("..")
+	animator.add_animation_library("", door_customer_clips)
+	return root
 
 static func citizen(index: int=-1) -> Node3D:
 	if index<0:

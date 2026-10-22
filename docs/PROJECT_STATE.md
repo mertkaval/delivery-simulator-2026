@@ -358,3 +358,32 @@ Verified with Godot 4.7.2 / Jolt: 11 new integration checks passed, existing sce
   - It then reloads `EditorPreview` in the open scene.
   - A manual rebake is under Project > Tools > Rebake city preview.
   - `city_preview.scn` and `signature.txt` are machine-local (git-ignored).
+
+## Third-person courier, rideable bike rig, new NPCs (2026-10-22)
+
+- **Player body:** `assets/player/courier.tscn`, from the supplied Mixamo Ch42 + Jog Forward (`tools/prepare_player.py`, `tools/setup_player.gd`). It is 1.805 m, 42k tris, with a humanoid-retargeted `%GeneralSkeleton`.
+  - The clips are in `assets/player/courier_anims.res`:
+    - idles (Idle, Idle_Shift, Idle_Look, Idle_Talk)
+    - Walk / Walk_Back / Strafe_L / Strafe_R
+    - Jog (the supplied Mixamo jog) / Run / Sprint
+    - Turn_L_90 / Turn_R_90
+    - Jump_Start / Jump / Jump_Land / Land_Hard
+    - Interact / PickUp
+    - Bike_Seated / Bike_Pedal
+  - Speeds and turn curves are in `clips.json`.
+- **Camera** (`actors/player_camera.gd`): one Camera3D. Third person is the default: an over-the-shoulder SpringArm3D with collision, zoom 1.6–6 m on the mouse wheel, pitch -60..+35°. V toggles first person; the choice and the zoom are saved in `GameSettings`. Phone and bag views blend the camera to the eyes. The car keeps its chase camera, and V there gives an in-car view. The interaction ray (`target()`) starts at the character's eyes.
+- **Body** (`actors/player_avatar.gd`, `actors/player_body_ik.gd`): an AnimationTree.
+  - Locomotion is speed-matched, so there is no foot sliding.
+  - Turn-in-place steps, physics-driven jumps with coyote time, and foot placement on steps.
+  - The body turns at a limited rate toward travel and leans.
+  - Footsteps fire on foot contacts.
+  - Ctrl walks, W jogs, Shift sprints.
+- **Gray bicycle drivetrain** (`tools/build_gray_bicycle.py`): a new 42T chainring, 172.5 mm cranks and pedals on a rotating `Crank`. Markers: `Seat` (0.870 m), `GripL` / `GripR` (on SteeringPivot) and `PedalL` / `PedalR`.
+  - The rider sits at the bike root using Bike_Seated / Bike_Pedal: hips on the saddle, hands IK'd to the grips, feet on the pedals.
+  - The crank turns with the rear wheel ÷ 2.2, and stops when coasting.
+  - When stopped, the rider puts the left foot down.
+  - Mounting and dismounting are 0.55 s blends.
+  - The previous bike is in `assets/bicycles/archive/v1/`.
+- **City cyclists** (`world/living_city/bike_rider.gd`, `BikeRider`): townspeople play the same Bike_Pedal clip with the crank synced, so they also sit on the saddle with their feet on the pedals.
+- **NPCs:** the Avaturn avatar is the meet-at-door customer (`LivingAssets.door_customer()`, its own talking clip with face blendshapes). `character_with_clothes` was rigged in Blender and is pedestrian variant `clothed_man`.
+- **Tests:** `tests/third_person_test.gd` (40 checks). Captures are in `tests/capture_third_person.gd` and `tests/capture_player_assets.gd`.

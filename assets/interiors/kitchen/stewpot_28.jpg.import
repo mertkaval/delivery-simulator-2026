@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bggh7pn4ewsc0"
-path="res://.godot/imported/stewpot_28.jpg-f605ad585adc82781fcf4ce418abf677.ctex"
+path.s3tc="res://.godot/imported/stewpot_28.jpg-f605ad585adc82781fcf4ce418abf677.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "5cb55c8e53100a51d9d89968a4759b01"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/interiors/kitchen/stewpot_28.jpg"
-dest_files=["res://.godot/imported/stewpot_28.jpg-f605ad585adc82781fcf4ce418abf677.ctex"]
+dest_files=["res://.godot/imported/stewpot_28.jpg-f605ad585adc82781fcf4ce418abf677.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

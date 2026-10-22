@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cblhw6w0yopri"
-path="res://.godot/imported/kitchen_range_2.jpg-59ccf1e4a57500c35d22ad305273eff3.ctex"
+path.s3tc="res://.godot/imported/kitchen_range_2.jpg-59ccf1e4a57500c35d22ad305273eff3.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "39dd009d2e66b6ed571b60e9297894a5"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/interiors/kitchen/kitchen_range_2.jpg"
-dest_files=["res://.godot/imported/kitchen_range_2.jpg-59ccf1e4a57500c35d22ad305273eff3.ctex"]
+dest_files=["res://.godot/imported/kitchen_range_2.jpg-59ccf1e4a57500c35d22ad305273eff3.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

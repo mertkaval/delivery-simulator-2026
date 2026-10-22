@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://w10hkdo8dwtn"
-path="res://.godot/imported/airfryer_7.jpg-72751cec443f87600bc7d984fa892068.ctex"
+path.s3tc="res://.godot/imported/airfryer_7.jpg-72751cec443f87600bc7d984fa892068.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "2640687817ae6e2bcfff1eadc33f0da1"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/interiors/kitchen/airfryer_7.jpg"
-dest_files=["res://.godot/imported/airfryer_7.jpg-72751cec443f87600bc7d984fa892068.ctex"]
+dest_files=["res://.godot/imported/airfryer_7.jpg-72751cec443f87600bc7d984fa892068.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

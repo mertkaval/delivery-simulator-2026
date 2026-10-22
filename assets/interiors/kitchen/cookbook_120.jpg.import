@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ndrdt83hpq8y"
-path="res://.godot/imported/cookbook_120.jpg-f7627399e4a9a107e1abf9796e474858.ctex"
+path.s3tc="res://.godot/imported/cookbook_120.jpg-f7627399e4a9a107e1abf9796e474858.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "cd74a34159a83fc85aa123d0e1a56a9d"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/interiors/kitchen/cookbook_120.jpg"
-dest_files=["res://.godot/imported/cookbook_120.jpg-f7627399e4a9a107e1abf9796e474858.ctex"]
+dest_files=["res://.godot/imported/cookbook_120.jpg-f7627399e4a9a107e1abf9796e474858.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

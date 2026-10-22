@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bxes28f565nbw"
-path="res://.godot/imported/bed_blue_0.jpg-156667b9db808e625fb20db7aac3a66d.ctex"
+path.s3tc="res://.godot/imported/bed_blue_0.jpg-156667b9db808e625fb20db7aac3a66d.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "fc6be4969bbd41be3f0f018e02714618"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/interiors/bedroom/bed_blue_0.jpg"
-dest_files=["res://.godot/imported/bed_blue_0.jpg-156667b9db808e625fb20db7aac3a66d.ctex"]
+dest_files=["res://.godot/imported/bed_blue_0.jpg-156667b9db808e625fb20db7aac3a66d.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

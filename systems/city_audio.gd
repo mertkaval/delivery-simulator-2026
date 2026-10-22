@@ -356,6 +356,11 @@ func ride_sounds(player: CourierPlayer, delta: float) -> void:
 		one_shot_at("bike_bell", player.global_position + Vector3(0, 1.0, 0) - player.global_basis.z * 0.6, -6.0)
 
 func walk_sounds(player: CourierPlayer, delta: float) -> void:
+	# With a visible body the steps land on its foot contacts (PlayerAvatar).
+	if player.avatar != null and player.avatar.ready_ok:
+		for at in player.take_footsteps():
+			one_shot_at(footstep_for(at), at, randf_range(-20.0, -17.0), 2.0, randf_range(0.9, 1.1), 25.0)
+		return
 	if player.mounted or not player.is_on_floor(): return
 	var speed := Vector2(player.velocity.x, player.velocity.z).length()
 	if speed < 0.6:

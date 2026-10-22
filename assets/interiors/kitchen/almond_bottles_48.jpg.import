@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://caolcg0s0ir68"
-path="res://.godot/imported/almond_bottles_48.jpg-08edde1621e6c7bf2478cfaf3e616762.ctex"
+path.s3tc="res://.godot/imported/almond_bottles_48.jpg-08edde1621e6c7bf2478cfaf3e616762.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "9ba9238c0a3860072589ad0a78e9fb75"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/interiors/kitchen/almond_bottles_48.jpg"
-dest_files=["res://.godot/imported/almond_bottles_48.jpg-08edde1621e6c7bf2478cfaf3e616762.ctex"]
+dest_files=["res://.godot/imported/almond_bottles_48.jpg-08edde1621e6c7bf2478cfaf3e616762.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

@@ -178,6 +178,12 @@ func add_cyclist(index: int) -> void:
 	var bike := CityAssets.create("bicycle", 100)
 	body.add_child(bike)
 	var rider: Node3D
+	if BikeRider.available():
+		# A townsperson riding like the courier: hips on the saddle, hands on the grips, feet on
+		# the pedals of the turning crank (world/living_city/bike_rider.gd).
+		rider = BikeRider.mount(bike, index)
+		cyclists.append({"body": body, "rider": rider, "bike": bike, "wheels": CityAssets.wheel_nodes(bike), "joints": {}, "direction": -side, "phase": float(index), "speed": 0.0, "crank": float(index)})
+		return
 	if index % 2 == 0:
 		# The supplied model's own rider, sitting exactly on the gray bike (static pose; the
 		# wheels spin). Joint proxies keep the shared pedalling code valid.
@@ -254,6 +260,9 @@ func _physics_process(delta: float) -> void:
 		if camera != null and body.position.distance_squared_to(camera.global_position) > 100 * 100: continue
 		rider.phase += delta * rider.speed * 2
 		for wheel in rider.wheels: wheel.rotate_x(-rider.speed * delta / 0.35)
+		if rider.joints.is_empty():
+			BikeRider.ride(rider, rider.speed * delta)
+			continue
 		for s in ["L", "R"]:
 			var phase: float = rider.phase + (PI if s == "R" else 0)
 			rider.joints["Hip" + s].rotation.x = 1.1 + sin(phase) * 0.25

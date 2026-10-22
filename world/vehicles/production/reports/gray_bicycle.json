@@ -1,13 +1,17 @@
 {
   "path": "res://assets/bicycles/gray_bicycle.glb",
   "source": "sketchup_assets/woman_riding_a_gray_bicycle.glb",
-  "triangles": 24752,
+  "triangles": 21769,
   "parts": {
-    "Frame": 11000,
+    "Chain": 416,
+    "CrankMesh": 1940,
+    "PedalL_Body": 260,
+    "PedalR_Body": 260,
+    "Frame": 5378,
     "Saddle": 808,
-    "ForkAndBars": 6112,
-    "FrontWheelMesh": 3216,
-    "RearWheelMesh": 3616
+    "ForkAndBars": 6111,
+    "FrontWheelMesh": 3212,
+    "RearWheelMesh": 3384
   },
   "wheelbase": 1.1015,
   "wheel_radius": 0.35,
@@ -45,5 +49,131 @@
   ],
   "texture": 1024,
   "facing": "+Y blender / -Z godot",
-  "rider_triangles": 14000
+  "rider_triangles": 14000,
+  "crank_length": 0.1725,
+  "bb_height": 0.273,
+  "bb": [
+    0.0,
+    -0.155,
+    0.273
+  ],
+  "seat_height": 0.8697,
+  "seat": [
+    0.0,
+    -0.3223,
+    0.8697
+  ],
+  "seat_to_bb": 0.6197,
+  "seat_tube_axis": [
+    -0.0016,
+    -0.2406,
+    0.9706
+  ],
+  "saddle_raise": -0.05,
+  "pedal_centre_x": 0.146,
+  "chainline": 0.054,
+  "chainring_teeth": 42,
+  "cog_teeth": 18,
+  "grips": {
+    "GripL": {
+      "centre": [
+        -0.2838,
+        0.3146,
+        1.0048
+      ],
+      "axis_outward": [
+        -0.6749,
+        -0.7305,
+        0.1042
+      ]
+    },
+    "GripR": {
+      "centre": [
+        0.2874,
+        0.3141,
+        1.0044
+      ],
+      "axis_outward": [
+        0.6928,
+        -0.7155,
+        0.09
+      ]
+    }
+  },
+  "nodes_godot": {
+    "Crank": {
+      "parent": "GrayBicycle",
+      "position_bike_space": [
+        0.0,
+        0.273,
+        0.155
+      ]
+    },
+    "PedalL": {
+      "parent": "Crank",
+      "position_bike_space": [
+        -0.146,
+        0.273,
+        0.3275
+      ]
+    },
+    "PedalR": {
+      "parent": "Crank",
+      "position_bike_space": [
+        0.146,
+        0.273,
+        -0.0175
+      ]
+    },
+    "Seat": {
+      "parent": "GrayBicycle",
+      "position_bike_space": [
+        0.0,
+        0.8697,
+        0.3223
+      ]
+    },
+    "SteeringPivot": {
+      "parent": "GrayBicycle",
+      "position_bike_space": [
+        -0.001,
+        0.7577,
+        -0.3641
+      ]
+    },
+    "GripL": {
+      "parent": "SteeringPivot",
+      "position_bike_space": [
+        -0.2838,
+        1.0048,
+        -0.3146
+      ]
+    },
+    "GripR": {
+      "parent": "SteeringPivot",
+      "position_bike_space": [
+        0.2874,
+        1.0044,
+        -0.3141
+      ]
+    },
+    "WheelFront": {
+      "parent": "SteeringPivot",
+      "position_bike_space": [
+        0.0,
+        0.35,
+        -0.5508
+      ]
+    },
+    "WheelRear": {
+      "parent": "GrayBicycle",
+      "position_bike_space": [
+        0.0,
+        0.35,
+        0.5508
+      ]
+    }
+  },
+  "crank_rest": "right crank points forward (Godot -Z), left back; Crank turns about its local X",
+  "pedalling": "forward pedalling = Crank.rotation.x decreasing (rotate_x(-angle)); keep pedals level with PedalL/PedalR.rotation.x = -Crank.rotation.x"
 }

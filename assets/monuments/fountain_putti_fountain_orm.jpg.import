@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b5ego0gi41ctv"
-path="res://.godot/imported/fountain_putti_fountain_orm.jpg-b84805892104a63931d19ea0fc5ac353.ctex"
+path.s3tc="res://.godot/imported/fountain_putti_fountain_orm.jpg-b84805892104a63931d19ea0fc5ac353.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "7da73fdb88448ab1c928150e5c9b52dc"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/monuments/fountain_putti_fountain_orm.jpg"
-dest_files=["res://.godot/imported/fountain_putti_fountain_orm.jpg-b84805892104a63931d19ea0fc5ac353.ctex"]
+dest_files=["res://.godot/imported/fountain_putti_fountain_orm.jpg-b84805892104a63931d19ea0fc5ac353.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

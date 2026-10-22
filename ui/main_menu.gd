@@ -209,6 +209,8 @@ func show_page(which: String) -> void:
 			slider_row("Field of view", "fov", 60.0, 100.0, 1.0, false)
 			toggle_row("Fullscreen", "fullscreen")
 			toggle_row("Vertical sync", "vsync")
+			toggle_row("Third-person view (V)", "third_person")
+			slider_row("Camera distance", "camera_distance", PlayerCameraRig.MIN_DISTANCE, PlayerCameraRig.MAX_DISTANCE, 0.1, false)
 			menu_button("Back", func(): back())
 	for c in column.get_children():
 		var focusable := c as Control
@@ -297,7 +299,7 @@ func slider_row(label: String, key: String, lo: float, hi: float, step: float, p
 	value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	row.add_child(value)
 	var show_value := func(v: float) -> void:
-		value.text = "%d%%" % roundi(v * 100.0) if percent else ("%d°" % roundi(v) if key == "fov" else "%.2f×" % v)
+		value.text = "%d%%" % roundi(v * 100.0) if percent else ("%d°" % roundi(v) if key == "fov" else ("%.1f m" % v if key == "camera_distance" else "%.2f×" % v))
 	show_value.call(s.value)
 	s.value_changed.connect(func(v: float) -> void:
 		show_value.call(v)

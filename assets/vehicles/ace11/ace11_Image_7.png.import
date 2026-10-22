@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cc4mdymvajo58"
-path="res://.godot/imported/ace11_Image_7.png-e80df2343a70c38cd6a120f5228effdf.ctex"
+path.s3tc="res://.godot/imported/ace11_Image_7.png-e80df2343a70c38cd6a120f5228effdf.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0cdb905c99669ffe0a881748ff99041e"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/vehicles/ace11/ace11_Image_7.png"
-dest_files=["res://.godot/imported/ace11_Image_7.png-e80df2343a70c38cd6a120f5228effdf.ctex"]
+dest_files=["res://.godot/imported/ace11_Image_7.png-e80df2343a70c38cd6a120f5228effdf.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

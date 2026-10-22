@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://crsv5e5d8503e"
-path="res://.godot/imported/wine_rack_114.jpg-63e6d0d28b8b72028be1fbc4fa3d41b2.ctex"
+path.s3tc="res://.godot/imported/wine_rack_114.jpg-63e6d0d28b8b72028be1fbc4fa3d41b2.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "fe970de53e5fe3b217af1a3572121dd0"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/interiors/kitchen/wine_rack_114.jpg"
-dest_files=["res://.godot/imported/wine_rack_114.jpg-63e6d0d28b8b72028be1fbc4fa3d41b2.ctex"]
+dest_files=["res://.godot/imported/wine_rack_114.jpg-63e6d0d28b8b72028be1fbc4fa3d41b2.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cq36o1okacj78"
-path="res://.godot/imported/basketball_court_court_M_Hoop.jpg-9e41092b86c0e8a234770518f6f4130f.ctex"
+path.s3tc="res://.godot/imported/basketball_court_court_M_Hoop.jpg-9e41092b86c0e8a234770518f6f4130f.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "b601266d51006451db1daa1949692714"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/monuments/basketball_court_court_M_Hoop.jpg"
-dest_files=["res://.godot/imported/basketball_court_court_M_Hoop.jpg-9e41092b86c0e8a234770518f6f4130f.ctex"]
+dest_files=["res://.godot/imported/basketball_court_court_M_Hoop.jpg-9e41092b86c0e8a234770518f6f4130f.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

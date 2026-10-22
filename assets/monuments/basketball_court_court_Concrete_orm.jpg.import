@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dihdstru7u2rm"
-path="res://.godot/imported/basketball_court_court_Concrete_orm.jpg-ef891678678f9306966156ea24c64e66.ctex"
+path.s3tc="res://.godot/imported/basketball_court_court_Concrete_orm.jpg-ef891678678f9306966156ea24c64e66.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "ab86ec0258dbfe49172cff8cd36ad543"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/monuments/basketball_court_court_Concrete_orm.jpg"
-dest_files=["res://.godot/imported/basketball_court_court_Concrete_orm.jpg-ef891678678f9306966156ea24c64e66.ctex"]
+dest_files=["res://.godot/imported/basketball_court_court_Concrete_orm.jpg-ef891678678f9306966156ea24c64e66.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

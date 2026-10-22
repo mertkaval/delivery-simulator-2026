@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://qor2gr7e32bq"
-path="res://.godot/imported/garbage_truck_Image_4.png-fe1c64645f54a9d49d0dd45b6e8da745.ctex"
+path.s3tc="res://.godot/imported/garbage_truck_Image_4.png-fe1c64645f54a9d49d0dd45b6e8da745.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "5699dc75ff5ba319d94f0e75944bf2a9"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/vehicles/civil/garbage_truck_Image_4.png"
-dest_files=["res://.godot/imported/garbage_truck_Image_4.png-fe1c64645f54a9d49d0dd45b6e8da745.ctex"]
+dest_files=["res://.godot/imported/garbage_truck_Image_4.png-fe1c64645f54a9d49d0dd45b6e8da745.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

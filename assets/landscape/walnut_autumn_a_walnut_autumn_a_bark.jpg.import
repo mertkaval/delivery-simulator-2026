@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b36ylg1xvbpqt"
-path="res://.godot/imported/walnut_autumn_a_walnut_autumn_a_bark.jpg-3aaf5bbcab8e843682dbd3fb3643b4cf.ctex"
+path.s3tc="res://.godot/imported/walnut_autumn_a_walnut_autumn_a_bark.jpg-3aaf5bbcab8e843682dbd3fb3643b4cf.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "63a389cd3a3b78fcb433dd117d652842"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/landscape/walnut_autumn_a_walnut_autumn_a_bark.jpg"
-dest_files=["res://.godot/imported/walnut_autumn_a_walnut_autumn_a_bark.jpg-3aaf5bbcab8e843682dbd3fb3643b4cf.ctex"]
+dest_files=["res://.godot/imported/walnut_autumn_a_walnut_autumn_a_bark.jpg-3aaf5bbcab8e843682dbd3fb3643b4cf.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

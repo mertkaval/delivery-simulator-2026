@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://kg72vx8g4tig"
-path="res://.godot/imported/basketball_court_court_rope_002.jpg-47bda5d35fa0ecaa503bf9520b221c7a.ctex"
+path.s3tc="res://.godot/imported/basketball_court_court_rope_002.jpg-47bda5d35fa0ecaa503bf9520b221c7a.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "f389efd40df7505ff63fe5aa383eb307"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/monuments/basketball_court_court_rope_002.jpg"
-dest_files=["res://.godot/imported/basketball_court_court_rope_002.jpg-47bda5d35fa0ecaa503bf9520b221c7a.ctex"]
+dest_files=["res://.godot/imported/basketball_court_court_rope_002.jpg-47bda5d35fa0ecaa503bf9520b221c7a.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cirw2e0fdsue5"
-path="res://.godot/imported/tray_rolls_23.png-c5c795b9a060950221f4e96a7cb28291.ctex"
+path.s3tc="res://.godot/imported/tray_rolls_23.png-c5c795b9a060950221f4e96a7cb28291.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "ab0b2d4302f691199ab052eeb9de155b"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/interiors/bakery/tray_rolls_23.png"
-dest_files=["res://.godot/imported/tray_rolls_23.png-c5c795b9a060950221f4e96a7cb28291.ctex"]
+dest_files=["res://.godot/imported/tray_rolls_23.png-c5c795b9a060950221f4e96a7cb28291.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

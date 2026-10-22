@@ -27,7 +27,7 @@ func wait_step(id: String) -> bool:
 
 func look_at_point(target: Vector3) -> void:
 	var p: CourierPlayer = game.player
-	var d := target - p.camera.global_position
+	var d := target - p.eye_position()
 	p.rotation.y = atan2(-d.x, -d.z)
 	p.camera.rotation = Vector3(atan2(d.y, Vector2(d.x, d.z).length()), 0, 0)
 

@@ -173,7 +173,9 @@ func _process(delta: float) -> void:
 ## Meet at door: the customer opens the door and waits on the doorstep.
 func call_customer(order: Dictionary) -> void:
 	if customer != null or method != "meet": return
-	var who: Node3D = LivingAssets.humanoid(absi(hash(str(order.get("customer", "")))) % 6)
+	# The realistic talking avatar (assets/player/customer_avaturn.glb); a townsperson if missing.
+	var who: Node3D = LivingAssets.door_customer()
+	if who == null: who = LivingAssets.humanoid(absi(hash(str(order.get("customer", "")))) % 6)
 	customer = who
 	who.name = "Customer"
 	get_parent().add_child(who)
@@ -184,7 +186,7 @@ func call_customer(order: Dictionary) -> void:
 	var players := who.find_children("*", "AnimationPlayer", true, false)
 	if not players.is_empty():
 		var ap := players[0] as AnimationPlayer
-		for clip: String in ["Idle", "Idle_Loop", "Talk"]:
+		for clip: String in ["Talk", "Idle", "Idle_Loop"]:
 			if ap.has_animation(clip):
 				ap.play(clip)
 				break

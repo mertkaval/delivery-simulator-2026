@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://1t4ego3y74mj"
-path="res://.godot/imported/radio_10.jpg-eb4d8a08f267ec54f30ec62fe8098931.ctex"
+path.s3tc="res://.godot/imported/radio_10.jpg-eb4d8a08f267ec54f30ec62fe8098931.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "366a0db96122df72758c67d049d148fa"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/interiors/bedroom/radio_10.jpg"
-dest_files=["res://.godot/imported/radio_10.jpg-eb4d8a08f267ec54f30ec62fe8098931.ctex"]
+dest_files=["res://.godot/imported/radio_10.jpg-eb4d8a08f267ec54f30ec62fe8098931.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

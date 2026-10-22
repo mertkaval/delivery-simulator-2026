@@ -1,0 +1,19 @@
+{
+ "model": "res://assets/player/customer_avaturn.glb",
+ "source": "source_assets/incoming_2026_10_22/model-_anim-_talking_visio_win.glb",
+ "height_m": 1.824,
+ "triangles": 27625,
+ "bones": 55,
+ "blend_shape_meshes": {
+  "Customer_mesh_1": 11,
+  "Customer_mesh_2": 32,
+  "Customer_mesh_3": 31,
+  "Customer_Head": 72,
+  "Customer_mesh_5": 20,
+  "Customer_mesh_6": 21
+ },
+ "clip": "Talk",
+ "clip_seconds": 15.667,
+ "fps": 24.0,
+ "textures_max": 1024
+}

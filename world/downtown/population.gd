@@ -133,6 +133,9 @@ func _physics_process(delta: float) -> void:
 			body.position.x=473.1 if rider.direction<0 else 475.1
 		rider.phase+=delta*rider.speed*2
 		for wheel in rider.wheels: wheel.rotate_x(-rider.speed*delta/.35)
+		if rider.joints.is_empty():
+			BikeRider.ride(rider,rider.speed*delta)
+			continue
 		for side in ["L","R"]:
 			var phase_offset: float=rider.phase+(PI if side=="R" else 0)
 			rider.joints["Hip"+side].rotation.x=1.1+sin(phase_offset)*.25

@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://01hjly5rl6f4"
-path="res://.godot/imported/plane_tree_plane_tree_bark_n.jpg-4c1b8c41fe69e5a3a0502c3468d68d56.ctex"
+path.s3tc="res://.godot/imported/plane_tree_plane_tree_bark_n.jpg-4c1b8c41fe69e5a3a0502c3468d68d56.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "116186905dd7b582d06ac6019675edb2"
@@ -14,17 +15,17 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/landscape/plane_tree_plane_tree_bark_n.jpg"
-dest_files=["res://.godot/imported/plane_tree_plane_tree_bark_n.jpg-4c1b8c41fe69e5a3a0502c3468d68d56.ctex"]
+dest_files=["res://.godot/imported/plane_tree_plane_tree_bark_n.jpg-4c1b8c41fe69e5a3a0502c3468d68d56.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

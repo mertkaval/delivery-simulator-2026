@@ -46,6 +46,7 @@ var needs_label: Label
 var current_shop := "equipment"
 var save_enabled := true
 var audio: CityAudio
+var crosshair: Label
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -138,7 +139,7 @@ func bind_inputs() -> void:
 		var bike_key := InputEventKey.new()
 		bike_key.physical_keycode = KEY_B
 		InputMap.action_add_event("bicycle", bike_key)
-	var actions := {"move_forward": KEY_W, "move_back": KEY_S, "move_left": KEY_A, "move_right": KEY_D, "sprint": KEY_SHIFT, "jump": KEY_SPACE, "interact": KEY_E, "phone": KEY_TAB, "map": KEY_M, "pause_game": KEY_ESCAPE, "bell": KEY_Q, "bag": KEY_F, "drop": KEY_G, "use_water": KEY_1, "use_snack": KEY_2}
+	var actions := {"move_forward": KEY_W, "move_back": KEY_S, "move_left": KEY_A, "move_right": KEY_D, "sprint": KEY_SHIFT, "jump": KEY_SPACE, "interact": KEY_E, "phone": KEY_TAB, "map": KEY_M, "pause_game": KEY_ESCAPE, "bell": KEY_Q, "bag": KEY_F, "drop": KEY_G, "use_water": KEY_1, "use_snack": KEY_2, "camera_view": KEY_V, "walk": KEY_CTRL}
 	for action in actions:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action)
@@ -210,6 +211,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	if mode == "bag": update_bag_drag(delta)
+	# Third person: the crosshair marks where the interaction ray from the head points.
+	if crosshair and player.view: crosshair.position = player.view.reticle - Vector2(7, 17)
 	if get_tree().paused:
 		return
 	session.tick(delta)
@@ -432,12 +435,13 @@ func build_hud() -> void:
 	navigation_label = make_label("", 15, Color("b6f3d1"))
 	navigation_label.position = Vector2(36, 641)
 	hud.add_child(navigation_label)
-	var controls := make_label("%s  Move     %s  Sprint     %s  Interact     %s  Bag     %s  Drop     %s  Phone     %s  Map     %s  Pause" % ["WASD", binding("sprint"), binding("interact"), binding("bag"), binding("drop"), binding("phone"), binding("map"), binding("pause_game")], 16)
+	var controls := make_label("%s Move   %s Sprint   %s Walk   Space Jump   %s Interact   %s Bag   %s Drop   %s Phone   %s Map   %s View   Wheel Zoom   %s Pause" % ["WASD", binding("sprint"), binding("walk"), binding("interact"), binding("bag"), binding("drop"), binding("phone"), binding("map"), binding("camera_view"), binding("pause_game")], 15)
 	controls.position = Vector2(24, 679)
 	hud.add_child(controls)
 	var center := make_label("+", 24)
 	center.position = Vector2(633, 343)
 	hud.add_child(center)
+	crosshair = center
 	prompt = make_label("", 20)
 	prompt.position = Vector2(350, 585)
 	prompt.size = Vector2(580, 40)
@@ -882,7 +886,7 @@ func update_held_package() -> void:
 		var body := shelves.make_package(info)
 		body.collision_layer = 0
 		held_package = body
-		player.camera.add_child(held_package)
+		player.hold_socket.add_child(held_package)
 		_held_for = id
 		if _pickup_from is Transform3D:
 			held_package.global_transform = _pickup_from
@@ -892,10 +896,11 @@ func update_held_package() -> void:
 	_pickup_from = null
 	if held_package: held_package.visible = want
 
-## Where a held package sits: two hands, low and to the right of the view.
-var HOLD_POSE := Transform3D(Basis.from_euler(Vector3(0.15, -0.35, 0)), Vector3(0.22, -0.42, -0.55))
+## Where a held package sits: two hands, low and to the right of the view (in third person the
+## player's hold socket puts the same pose into the character's hands).
+var HOLD_POSE := CourierPlayer.HOLD_POSE
 
-## Animate a package (child of the camera) into the hands.
+## Animate a package (child of the player's hold socket) into the hands.
 func to_hands(node: Node3D) -> void:
 	var tw := create_tween()
 	tw.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
@@ -907,9 +912,7 @@ func drop_held() -> void:
 	if not session.holding_package():
 		notify("You're not holding anything.")
 		return
-	var forward := -player.global_basis.z
-	forward.y = 0.0
-	forward = forward.normalized()
+	var forward := player.body_forward()
 	var from := player.global_position + forward * 0.8 + Vector3(0, 1.4, 0)
 	var q := PhysicsRayQueryParameters3D.create(from, from + Vector3(0, -3.0, 0))
 	q.exclude = [player.get_rid()]
@@ -918,7 +921,7 @@ func drop_held() -> void:
 		notify("There's no flat spot to put it down here.")
 		return
 	var start: Variant = held_package.global_transform if is_instance_valid(held_package) else null
-	var result := session.drop_package(hit.position, player.rotation.y)
+	var result := session.drop_package(hit.position, player.body_yaw())
 	if session.order.get("state") == "DROPPED":
 		if is_instance_valid(held_package): held_package.queue_free()
 		held_package = null
@@ -1009,7 +1012,7 @@ func bag_click(slot: String) -> void:
 		# Lift it out of the compartment back into your hands.
 		var node := bag_rig.take_out()
 		if node:
-			player.camera.add_child(node)
+			player.hold_socket.add_child(node)
 			node.global_transform = node.get_meta("from")
 			held_package = node
 			_held_for = str(session.order.get("id", ""))
@@ -1292,7 +1295,7 @@ func smoke_test() -> void:
 	interact()
 	await get_tree().create_timer(1.5).timeout
 	assert(drop_zone != null and drop_zone.customer != null, "Knocking brings the customer to the door")
-	var face := drop_zone.customer.global_position + Vector3(0, 1.1, 0) - player.camera.global_position
+	var face := drop_zone.customer.global_position + Vector3(0, 1.1, 0) - player.eye_position()
 	player.rotation.y = atan2(-face.x, -face.z)
 	player.camera.rotation = Vector3(atan2(face.y, Vector2(face.x, face.z).length()), 0, 0)
 	await get_tree().physics_frame

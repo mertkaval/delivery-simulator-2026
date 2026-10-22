@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cayri2veryt4j"
-path="res://.godot/imported/fruit_bowl_99.jpg-7a79da9dd1df51f710fe025727e49947.ctex"
+path.s3tc="res://.godot/imported/fruit_bowl_99.jpg-7a79da9dd1df51f710fe025727e49947.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "c413323145dca4bdfbdf73b4b9d65dd2"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/interiors/kitchen/fruit_bowl_99.jpg"
-dest_files=["res://.godot/imported/fruit_bowl_99.jpg-7a79da9dd1df51f710fe025727e49947.ctex"]
+dest_files=["res://.godot/imported/fruit_bowl_99.jpg-7a79da9dd1df51f710fe025727e49947.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

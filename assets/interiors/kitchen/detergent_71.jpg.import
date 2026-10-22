@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cgas15jgnrd6h"
-path="res://.godot/imported/detergent_71.jpg-e554da22c0209d404fc07506f67f9672.ctex"
+path.s3tc="res://.godot/imported/detergent_71.jpg-e554da22c0209d404fc07506f67f9672.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "89a76e53e3034550e826dc7cf0591802"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/interiors/kitchen/detergent_71.jpg"
-dest_files=["res://.godot/imported/detergent_71.jpg-e554da22c0209d404fc07506f67f9672.ctex"]
+dest_files=["res://.godot/imported/detergent_71.jpg-e554da22c0209d404fc07506f67f9672.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

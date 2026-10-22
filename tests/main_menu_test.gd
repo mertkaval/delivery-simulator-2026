@@ -45,7 +45,7 @@ func run() -> void:
 	for row in menu.column.get_children():
 		for c in row.get_children():
 			if c is HSlider: sliders.append(c)
-	check(sliders.size() == 5, "settings has 5 sliders")
+	check(sliders.size() == 6, "settings has 6 sliders (audio x3, mouse, FOV, camera distance)")
 	sliders[3].value = 2.0
 	sliders[4].value = 90.0
 	check(is_equal_approx(game.player.sensitivity, 0.004) and is_equal_approx(game.player.camera.fov, 90.0), "sensitivity and FOV apply to the player")

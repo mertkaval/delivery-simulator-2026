@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bx7fqgj08rqjj"
-path="res://.godot/imported/gray_bicycle_GrayBicycle_basecolor.jpg-2fb7357a1bcefbe12a3bc1d7e8fb9c0c.ctex"
+path.s3tc="res://.godot/imported/gray_bicycle_GrayBicycle_basecolor.jpg-2fb7357a1bcefbe12a3bc1d7e8fb9c0c.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "5cd48ea5f6096d11f01318b5fb6ccebc"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/bicycles/gray_bicycle_GrayBicycle_basecolor.jpg"
-dest_files=["res://.godot/imported/gray_bicycle_GrayBicycle_basecolor.jpg-2fb7357a1bcefbe12a3bc1d7e8fb9c0c.ctex"]
+dest_files=["res://.godot/imported/gray_bicycle_GrayBicycle_basecolor.jpg-2fb7357a1bcefbe12a3bc1d7e8fb9c0c.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0
