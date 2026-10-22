@@ -703,7 +703,9 @@
    "BagBody",
    "DeliveryBag",
    "Flap",
-   "LogoPanel"
+   "LogoPanel",
+   "StrapL",
+   "StrapR"
   ]
  },
  "delivery_bag_open": {
@@ -806,7 +808,9 @@
    "Slot_Bottom",
    "Slot_MiddleLeft",
    "Slot_MiddleRight",
-   "Slot_Top"
+   "Slot_Top",
+   "StrapL",
+   "StrapR"
   ]
  },
  "food_bag_s": {

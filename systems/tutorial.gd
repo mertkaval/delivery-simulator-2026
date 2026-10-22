@@ -1,13 +1,14 @@
 class_name TutorialDirector
 extends Node
-## First-shift training, started by New Game: fifteen mandatory tasks done in order that teach
+## First-shift training, started by New Game: thirteen mandatory tasks done in order that teach
 ## the controls and the delivery loop on foot: the store computer and pickup shelf (phone + bag),
-## the phone and its CourierNow app, the restaurant pickup shelf, holding / putting down a package,
-## packing the backpack, and both delivery methods (leave at door, meet at door). Afterwards an
-## optional goal card tracks saving up for the first bicycle.
+## the phone and its CourierNow app, finding your package among other couriers' orders (one
+## press picks it up and packs it in the backpack), and both delivery methods (leave at door,
+## meet at door), each one button press. Afterwards an optional goal card tracks saving up for
+## the first bicycle.
 ## While training is running, normal dispatch is off (the director sends the first order
-## itself), and rejecting, going offline, packing or delivering before their task are refused
-## with a hint (gate()). Progress lives in DeliverySession.tutorial, so it saves and resumes.
+## itself), and rejecting, going offline or delivering before their task are refused with a
+## hint (gate()). Progress lives in DeliverySession.tutorial, so it saves and resumes.
 ## Finishing pays a one-time bonus (DeliverySession.finish_tutorial).
 
 const STEPS := [
@@ -20,12 +21,10 @@ const STEPS := [
 	{"id": "online", "title": "Start your shift", "hint": "In CourierNow, tap 'Start shift · go online'. A first request will come in."},
 	{"id": "accept", "title": "Accept your first order", "hint": "Tap Accept on the request in CourierNow, then put the phone away ({phone})."},
 	{"id": "ride", "title": "Walk to {restaurant}", "hint": "Follow the mint route on the minimap to the restaurant's pickup shelf."},
-	{"id": "take", "title": "Take the right package", "hint": "Read the receipts on the pickup shelf. Take the one for {customer} · {ticket} with {interact}."},
-	{"id": "drop", "title": "Put it down, pick it up", "hint": "Press {drop} to set the package down, then look at it and press {interact} to pick it up again."},
-	{"id": "pack", "title": "Pack it in your backpack", "hint": "Press {bag}, move the package over the {slot} and click to drop it in (or press {interact}). Close with {bag}."},
-	{"id": "leave", "title": "Leave it at the door", "hint": "This customer chose LEAVE AT DOOR. Go to {address} and put the order inside the yellow marked area: press {interact} on the area (or hold it and press {drop} there)."},
+	{"id": "take", "title": "Find {customer}'s package", "hint": "Several couriers' orders wait on the shelf, mixed up. Read the name tags and find {customer} · {ticket} ({package}). Look at it and press {use}: you pick it up and pack it in your backpack."},
+	{"id": "leave", "title": "Leave it at the door", "hint": "This customer chose LEAVE AT DOOR. Go to {address} and press {use} at the yellow marked area: you take the order out of your bag, set it down and snap a proof photo."},
 	{"id": "accept2", "title": "Accept the next order", "hint": "A new request is waiting: this one is MEET AT DOOR. Open the phone ({phone}) and accept it."},
-	{"id": "meet", "title": "Meet the customer", "hint": "Collect {customer}'s order at {restaurant} and pack it. At {address}, knock ({interact} on the door), then hand the order over with {interact} when they come out."},
+	{"id": "meet", "title": "Meet the customer", "hint": "Find {customer}'s package at {restaurant} ({use}). At {address}, knock ({use} on the door), then press {use} again to hand it over when they come out."},
 ]
 const LOOK_GOAL := 2.4     ## radians of looking around
 const WALK_GOAL := 12.0    ## metres on foot
@@ -65,7 +64,7 @@ static func index_of(id: String) -> int:
 
 ## New Game: training from the first task.
 func start() -> void:
-	session().tutorial = {"done": false, "step": 0}
+	session().tutorial = {"done": false, "step": 0, "v": 3}
 	_last_pos = Vector3.INF
 	enter("look")
 	refresh()
@@ -78,19 +77,16 @@ func gate(action: String) -> String:
 			return "training"
 		"reject", "offline":
 			return "Training shift: accept this first order and learn the route."
-		"stow":
-			if step() < index_of("pack"):
-				return "Training: first practise putting the package down (%s) and picking it up (%s)." % [game.binding("drop"), game.binding("interact")]
 		"deliver":
 			if step() < index_of("leave"):
-				return "Training: pack the order in your backpack first (%s)." % game.binding("bag")
+				return "Training: find your package on the shelf and pack it first (%s)." % game.use_hint()
 	return ""
 
 ## Things the director can't see from state alone.
 func event(name: String) -> void:
 	if not active(): return
 	var t: Dictionary = session().tutorial
-	if name == step_id() or (name == "dropped" and step_id() == "drop") or (name == "app_courier" and step_id() == "phone"):
+	if name == step_id() or (name == "app_courier" and step_id() == "phone"):
 		t[name] = true
 
 func _process(delta: float) -> void:
@@ -145,16 +141,15 @@ func done(id: String) -> bool:
 			var p: Vector3 = game.player.position
 			var at := s.pickup_position()
 			return state != "ACCEPTED" or Vector2(p.x - at.x, p.z - at.z).length() < 9.0
-		"take": return state in ["IN_HAND", "DROPPED", "CARRYING"]
-		"drop": return bool(t.get("dropped", false)) and state == "IN_HAND"
-		"pack": return state == "CARRYING" and closed
-		"leave", "meet": return state == "COMPLETED" and closed
+		# Taken off the shelf and packed (the pack sequence runs by itself after the pickup).
+		"take": return state == "CARRYING" and closed and not game.sequence.running
+		"leave", "meet": return state == "COMPLETED" and closed and not game.sequence.running
 	return false
 
 func advance() -> void:
 	var t: Dictionary = session().tutorial
 	for key in t.keys():
-		if key != "done" and key != "step": t.erase(key)
+		if key != "done" and key != "step" and key != "v": t.erase(key)
 	t["step"] = step() + 1
 	if step() >= STEPS.size():
 		finish()
@@ -214,11 +209,11 @@ func refresh() -> void:
 	var s := session()
 	var kind: String = s.order.get("kind", "bag")
 	var info := {"sprint": game.binding("sprint"), "phone": game.binding("phone"), "map": game.binding("map"),
-		"interact": game.binding("interact"), "bag": game.binding("bag"), "drop": game.binding("drop"),
+		"interact": game.binding("interact"), "bag": game.binding("bag"), "drop": game.binding("drop"), "use": game.use_hint(),
 		"restaurant": s.restaurant_name() if not s.order.is_empty() else "the restaurant",
 		"customer": str(s.order.get("customer", "your customer")), "ticket": str(s.order.get("ticket", "")),
 		"address": DeliverySession.ADDRESSES[int(s.order.get("address", 0))],
-		"slot": str(OrderDetails.SLOT_NAMES.get(OrderDetails.best_slot(kind), "top compartment")).to_lower()}
+		"package": OrderDetails.package_label(kind, s.order.get("items", [])).to_lower()}
 	var t: Dictionary = s.tutorial
 	var progress := 0.0
 	match step_id():
@@ -226,9 +221,13 @@ func refresh() -> void:
 		"collect": progress = (0.5 if s.has_phone() else 0.0) + (0.5 if s.has_bag() else 0.0)
 		"look": progress = float(t.get("look", 0.0)) / LOOK_GOAL
 		"walk": progress = float(t.get("walk", 0.0)) / WALK_GOAL
-		"drop": progress = 0.5 if bool(t.get("dropped", false)) else 0.0
+		"take": progress = 0.5 if s.order.get("state") == "IN_HAND" else 0.0
 	var hint := str(STEPS[i].hint).format(info)
-	if step_id() == "drop" and s.order.get("state") == "DROPPED":
-		hint = "Now look at the package and press %s to pick it up." % game.binding("interact")
+	if step_id() == "take" and s.order.get("state") == "IN_HAND" and not game.sequence.running:
+		hint = "Press %s to pack it in your backpack." % game.use_hint()
 	card.set_task(i, STEPS.size(), str(STEPS[i].title).format(info), hint, progress)
+	# The name to look for, big on the card, while there is an order to collect or deliver.
+	var state: String = s.order.get("state", "")
+	if state in DeliverySession.ACTIVE: card.set_target(str(s.order.get("customer", "")), str(s.order.get("ticket", "")), OrderDetails.package_label(kind, s.order.get("items", [])))
+	else: card.set_target("", "", "")
 	card.visible = true

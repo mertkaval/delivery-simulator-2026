@@ -19,7 +19,8 @@ func frames(n: int) -> void:
 	for i in range(n): await process_frame
 
 func wait_step(id: String) -> bool:
-	for i in range(400):
+	var until := Time.get_ticks_msec() + 12000
+	while Time.get_ticks_msec() < until:
 		if game.tutorial.step_id() == id: return true
 		await process_frame
 	print("  (still at '%s')" % game.tutorial.step_id())
@@ -38,23 +39,26 @@ func stand_and_look(at: Vector3, from: Vector3) -> void:
 	look_at_point(at)
 	for i in range(3): await physics_frame
 
+## Find your package among the others on the shelf by its name tag and press E on it (real
+## ray): it is picked up and packed in one go. True when it ends up packed.
 func take_my_package() -> bool:
 	var s: DeliverySession = game.session
 	await frames(3)
-	var mine: Node3D = null
-	for pkg: Node3D in game.shelves.packages.get(s.restaurant_id(), []):
-		if (pkg.get_meta("package", {}) as Dictionary).get("customer", "") == s.order.get("customer", "?"): mine = pkg
+	var mine: Node3D = game.shelves.mine()
 	if mine == null: return false
-	await stand_and_look(mine.global_position + Vector3(0, 0.12, 0), mine.global_position + Vector3(0.0, -1.0, 1.25))
+	await stand_and_look(game.shelves.look_point(mine), game.shelves.stand_point(mine))
+	if game.player.target().get("node") != mine: return false
 	game.interact()
-	return s.holding_package()
+	if not s.holding_package() or not game.sequence.running: return false
+	return await sequence_done() and s.order.get("state") == "CARRYING"
 
-func pack() -> void:
-	game.show_menu("bag")
-	await create_timer(0.7).timeout
-	game.bag_click(OrderDetails.best_slot(str(game.session.order.kind)))
-	await create_timer(0.5).timeout
-	game.close_menu()
+## Wait for the one-button sequence (pack / leave / hand over) to finish.
+func sequence_done() -> bool:
+	var until := Time.get_ticks_msec() + 20000
+	while Time.get_ticks_msec() < until:
+		if not game.sequence.running: return true
+		await process_frame
+	return false
 
 func run() -> void:
 	root.size = Vector2i(1280, 720)
@@ -149,25 +153,20 @@ func run() -> void:
 	game.on_phone_action("accept", "")
 	game.close_menu()
 	check(await wait_step("ride"), "accepting completes 'accept'")
-	# 9 ride (walk) to the restaurant, 10 take, 11 drop, 12 pack
-	var mine_ok: bool = await take_my_package()
-	check(mine_ok, "E on your package on the shelf picks it up")
-	check(await wait_step("drop"), "reaching the restaurant and taking the package advance training")
-	game.bag_click("top")
-	check(s.holding_package(), "packing is refused before practising put down / pick up")
-	look_at_point(game.player.global_position + Vector3(0, 0, -1.0))
-	await physics_frame
-	game.drop_held()
-	check(s.order.get("state") == "DROPPED" and game.dropped_package != null, "G puts the package down")
-	await create_timer(0.6).timeout
-	await stand_and_look(game.dropped_package.global_position + Vector3(0, 0.1, 0), game.player.position)
+	# 9 ride (walk) to the restaurant, 10 find the package (picked up and packed in one press)
+	var gate_msg: String = t.gate("deliver")
+	check(gate_msg != "" and gate_msg.contains("find your package"), "delivering before taking the package is refused with a hint")
+	check(game.tutorial.card.target_box.visible and game.tutorial.card.target_name.text == str(s.order.customer).to_upper(), "the training card shows the customer's name to look for (%s)" % game.tutorial.card.target_name.text)
+	var decoy: Node3D = null
+	for p: Node3D in game.shelves.packages.get(s.restaurant_id(), []):
+		if decoy == null and not s.is_mine(p.get_meta("package")): decoy = p
+	await stand_and_look(game.shelves.look_point(decoy), game.shelves.stand_point(decoy))
 	game.interact()
-	check(s.holding_package(), "E on it picks it up again")
-	check(await wait_step("pack"), "'drop' completes")
-	await pack()
-	check(s.order.get("state") == "CARRYING", "packed in the backpack")
-	check(await wait_step("leave"), "'pack' completes")
-	# 13 leave at door: the marked area appears; E on it delivers with a proof photo
+	check(s.order.get("state") == "ACCEPTED" and game.notice.text.begins_with("This one is for %s" % (decoy.get_meta("package") as Dictionary).customer), "another courier's package is refused: " + game.notice.text)
+	var mine_ok: bool = await take_my_package()
+	check(mine_ok, "E on your package picks it up and packs it in the backpack in one go")
+	check(await wait_step("leave"), "reaching the restaurant and taking + packing the package advance training (no put-down practice)")
+	# 11 leave at door: the marked area appears; one press there: out of the bag, set down, photo
 	await frames(3)
 	var zone: DropZone = game.drop_zone
 	check(zone != null and zone.method == "door", "the delivery area is marked at the door")
@@ -176,7 +175,9 @@ func run() -> void:
 	await stand_and_look(zone.global_position, zone.global_position + facing * 0.9 + Vector3(0, 0.1, 0))
 	check(str(game.player.target().get("id", "")) == "dropzone", "the area can be targeted")
 	game.interact()
-	check(s.order.get("state") == "COMPLETED" and s.order.get("proof") == "photo", "leaving it in the area completes the delivery")
+	check(game.sequence.running and game.sequence.kind == "leave", "E at the area starts the leave-at-door sequence")
+	check(await sequence_done(), "the leave-at-door sequence finishes")
+	check(s.order.get("state") == "COMPLETED" and s.order.get("proof") == "photo", "leaving it in the area completes the delivery with a photo (%s, %s, third person %s)" % [s.order.get("state"), game.notice.text, game.player.third_person])
 	game.close_menu()
 	check(await wait_step("accept2"), "'leave' completes")
 	# 14 second order: meet at door
@@ -188,8 +189,7 @@ func run() -> void:
 	game.close_menu()
 	check(await wait_step("meet"), "accepting completes 'accept2'")
 	mine_ok = await take_my_package()
-	check(mine_ok, "second package taken")
-	await pack()
+	check(mine_ok, "second package found, taken and packed")
 	address = int(s.order.address)
 	facing = CityCatalog.address_facing(address)
 	game.player.position = game.world.doors[address] + facing * 1.6 + Vector3(0, -0.92, 0)
@@ -203,6 +203,8 @@ func run() -> void:
 	check(str(game.player.target().get("id", "")) == "customer", "the customer can be targeted")
 	var before := s.wallet
 	game.interact()
+	check(game.sequence.running and game.sequence.kind == "meet", "E next to the customer starts the handover sequence")
+	check(await sequence_done(), "the handover sequence finishes")
 	check(s.order.get("state") == "COMPLETED" and s.wallet > before, "E hands the order to the customer")
 	game.close_menu()
 	for i in range(200):
@@ -214,6 +216,18 @@ func run() -> void:
 	var copy := DeliverySession.new()
 	check(copy.restore(s.snapshot()) and copy.economy == 2 and not copy.owns("bicycle") and copy.has_phone(), "career save restores (no bike, phone owned)")
 	check(t.gate("dispatch") == "" and t.gate("reject") == "", "after training, dispatch and declining are back")
+	check(TutorialDirector.STEPS.size() == 13 and TutorialDirector.index_of("drop") < 0 and TutorialDirector.index_of("pack") < 0, "training has 13 tasks, no put-down / drag-pack practice")
+	# A v2 save in the middle of the old put-down / pack tasks resumes at the new 'take' task.
+	var old := s.snapshot()
+	(old.ledger as Dictionary).erase("bonus_tutorial")
+	old.wallet = int(old.wallet) - DeliverySession.TUTORIAL_BONUS
+	old.tutorial = {"done": false, "step": 11}
+	var resumed := DeliverySession.new()
+	resumed.restore(old)
+	check(int(resumed.tutorial.step) == TutorialDirector.index_of("take") and int(resumed.tutorial.v) == 3, "old training save (step 11 of 15) resumes at 'take' (%d)" % int(resumed.tutorial.step))
+	old.tutorial = {"done": false, "step": 13}
+	resumed.restore(old)
+	check(int(resumed.tutorial.step) == TutorialDirector.index_of("accept2"), "old save at 'accept2' keeps its task")
 	await create_timer(0.2).timeout
 	print("TUTORIAL PASS: %d checks, %d failures" % [checks, failures] if failures == 0 else "TUTORIAL FAIL: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 else 0)

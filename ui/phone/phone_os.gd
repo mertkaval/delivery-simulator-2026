@@ -309,11 +309,13 @@ func build_courier() -> void:
 	status.add_child(toggle)
 	if state == "OFFERED":
 		var c := card(col, Color("fff4ec"))
-		c.add_child(text("NEW REQUEST", 16, Color("ff6a2b"), true))
-		c.add_child(wrapped(text(s.restaurant_name(), 30, Color("1d2427"), true)))
+		c.add_child(text("NEW REQUEST  ·  CUSTOMER", 16, Color("ff6a2b"), true))
+		c.add_child(customer_name(s))
+		c.add_child(order_chips(s))
+		c.add_child(wrapped(text("Pick up at " + s.restaurant_name(), 24, Color("1d2427"), true)))
 		c.add_child(method_chip(str(s.order.get("method", "door"))))
-		c.add_child(wrapped(text("%s · %s\n%s" % [s.order.get("customer", "?"), s.order.get("ticket", ""), items_text(s)], 19, Color("3a4448"))))
-		c.add_child(text(DeliverySession.money(int(s.order.quote)) + "  + tip", 38, Color("1d2427"), true))
+		c.add_child(wrapped(text(items_text(s), 18, Color("3a4448"))))
+		c.add_child(text(DeliverySession.money(int(s.order.quote)) + "  + tip", 34, Color("1d2427"), true))
 		c.add_child(wrapped(text("Pickup %d m · Drop-off %d m\n%s" % [int(s.order.pickup_distance), int(s.order.distance), DeliverySession.ADDRESSES[int(s.order.address)]], 18, Color("5f6b70"))))
 		_countdown = text("", 18, Color("ff6a2b"), true)
 		c.add_child(_countdown)
@@ -331,18 +333,20 @@ func build_courier() -> void:
 	elif state in DeliverySession.ACTIVE:
 		var c := card(col, Color("eef8f2"))
 		var picked := state != "ACCEPTED"
-		c.add_child(text("ACTIVE ORDER · " + str(s.order.get("ticket", "")), 16, Color("1f8a63"), true))
-		c.add_child(wrapped(text(("1  Pick up at " + s.restaurant_name()) if not picked else ("2  Deliver to " + str(s.order.get("customer", ""))), 26, Color("1d2427"), true)))
+		c.add_child(text("ACTIVE ORDER  ·  " + ("STEP 1 OF 2" if not picked else "STEP 2 OF 2"), 16, Color("1f8a63"), true))
+		c.add_child(text("LOOK FOR" if not picked else "DELIVER TO", 15, Color("5f6b70"), true))
+		c.add_child(customer_name(s))
+		c.add_child(order_chips(s))
+		c.add_child(wrapped(text(("Pick up at " + s.restaurant_name()) if not picked else DeliverySession.ADDRESSES[int(s.order.address)], 24, Color("1d2427"), true)))
 		c.add_child(method_chip(str(s.order.get("method", "door"))))
-		var where: String = s.restaurant_name() if not picked else DeliverySession.ADDRESSES[int(s.order.address)]
-		c.add_child(wrapped(text("%s\n%s" % [where, items_text(s)], 19, Color("3a4448"))))
-		var how := {"ACCEPTED": "Find the package with your customer's name on the pickup shelf.",
-			"IN_HAND": "In your hands. Pack it in the backpack (F) or put it down (G).",
-			"DROPPED": "You put it down. Go back and pick it up (E).",
+		c.add_child(wrapped(text(items_text(s), 18, Color("3a4448"))))
+		var how := {"ACCEPTED": "Several orders wait on the pickup shelf. Read the name tags and take the one with this name (E / click): it goes straight into your backpack.",
+			"IN_HAND": "In your hands. E / click packs it in your backpack.",
+			"DROPPED": "You put it down. Go back and pick it up (E / click).",
 			"CARRYING": "Packed in your backpack."}
 		c.add_child(wrapped(text(str(how.get(state, "")), 17, Color("5f6b70"))))
 		if picked:
-			c.add_child(wrapped(text("At the door: " + ("leave it inside the yellow marked area." if s.order.get("method", "door") == "door" else "knock (E on the door), then hand it over (E)."), 17, Color("1f8a63"), true)))
+			c.add_child(wrapped(text("At the door: " + ("press E / click at the yellow marked area." if s.order.get("method", "door") == "door" else "knock (E / click on the door), then E / click to hand it over."), 17, Color("1f8a63"), true)))
 		var nav := big_button("Navigate", Color("2e9e6a"))
 		nav.pressed.connect(func() -> void: action.emit("maps", ""))
 		c.add_child(nav)
@@ -423,6 +427,29 @@ func card(parent: Control, bg := Color.WHITE) -> VBoxContainer:
 	col.add_theme_constant_override("separation", 8)
 	p.add_child(col)
 	return col
+
+## The customer's name: the biggest thing on the order card.
+func customer_name(s: DeliverySession) -> Label:
+	var l := wrapped(text(str(s.order.get("customer", "?")), 44, Color("111619"), true))
+	l.name = "CustomerName"
+	return l
+
+## Order code and what it travels in ("CE-012" / "Food bag · medium").
+func order_chips(s: DeliverySession) -> Control:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	for part: Array in [[str(s.order.get("ticket", "")), Color("1d2427")], [OrderDetails.package_label(str(s.order.get("kind", "bag")), s.order.get("items", [])), Color("8a6a2a")]]:
+		var chip := text(str(part[0]), 19, Color.WHITE, true)
+		var st := StyleBoxFlat.new()
+		st.bg_color = part[1]
+		st.set_corner_radius_all(10)
+		st.content_margin_left = 10
+		st.content_margin_right = 10
+		st.content_margin_top = 3
+		st.content_margin_bottom = 3
+		chip.add_theme_stylebox_override("normal", st)
+		row.add_child(chip)
+	return row
 
 func method_chip(method: String) -> Control:
 	var chip := text(("⌂  LEAVE AT DOOR" if method == "door" else "☺  MEET AT DOOR"), 17, Color.WHITE, true)

@@ -37,6 +37,15 @@ var _arm_ticks := 0             ## physics ticks the SpringArm3D has swept since
 var reticle := Vector2(640, 360)
 var aim_point := Vector3.ZERO
 var _save_in := -1.0
+## Browsing a pickup shelf (set by the game while you stand at it with an order to collect): the
+## third-person camera comes in over the shoulder so the name tags are easy to read.
+var browse := false
+var _browse_amount := 0.0
+const BROWSE_DISTANCE := 0.6
+## A courier action is playing (CourierSequence): the camera frames the character a little
+## closer and from the side the action happens on.
+var action_frame := false
+const ACTION_DISTANCE := 2.6
 
 func setup(owner_player: CourierPlayer) -> void:
 	player = owner_player
@@ -103,12 +112,16 @@ func _process(delta: float) -> void:
 	var want := 1.0 if player.third_person and not overridden() else 0.0
 	blend = move_toward(blend, want, delta / BLEND_TIME)
 	var e := eased()
-	distance = lerpf(distance, target_distance, 1.0 - exp(-10.0 * delta))
+	_browse_amount = move_toward(_browse_amount, 1.0 if browse and not player.mounted else 0.0, delta / 0.6)
+	var want_distance := lerpf(target_distance, minf(target_distance, BROWSE_DISTANCE), smoothstep(0.0, 1.0, _browse_amount))
+	if action_frame: want_distance = minf(want_distance, ACTION_DISTANCE)
+	distance = lerpf(distance, want_distance, 1.0 - exp(-(10.0 if not action_frame else 4.0) * delta))
 	var cam := player.camera
 	var eye_local := Vector3(0, player.eye_height, 0)
 	place_third_person(delta)
 	var tp_local := player.global_transform.affine_inverse() * (pivot + arm_dir() * minf(clear, arm_length))
 	cam.position = eye_local.lerp(tp_local, e) if e > 0.0 else eye_local
+	action_view(delta, e)
 	# Held package: in first person it sits at HOLD_POSE in front of the camera; in third person
 	# the same socket carries it into the character's hands.
 	if e > 0.0 and player.avatar != null and player.avatar.ready_ok:
@@ -117,6 +130,7 @@ func _process(delta: float) -> void:
 	else:
 		player.hold_socket.transform = Transform3D.IDENTITY
 	if player.avatar != null: player.avatar.update_visibility()
+	if player.avatar != null and player.avatar.backpack != null: player.avatar.backpack.fade_near(cam.global_position, delta, 0.6 * smoothstep(0.0, 1.0, _browse_amount))
 	update_reticle(delta, e)
 	fade_people(delta)
 
@@ -176,6 +190,63 @@ func scan_people(full: bool) -> void:
 				if child is LivingCitizen: found.append(child as Node3D)
 	_people = found
 
+var _action_amount := 0.0
+var _action_held := false
+var _action_xf := Transform3D.IDENTITY
+var _saved_rotation := Vector3.ZERO
+
+## Courier action (third person): the camera swings round to a three-quarter / side view of the
+## courier's hands (the first clear one of a few), and back to the player's view afterwards.
+## The aim (camera rotation) is kept and restored, so the view returns where it was.
+## A second camera does the swing, so the player's camera (the aim, the interaction ray) is never
+## moved: it is made current while the action view is blended in, and the player's camera again
+## once it has blended back.
+var action_cam: Camera3D
+func action_view(delta: float, e: float) -> void:
+	var cam := player.camera
+	_action_amount = move_toward(_action_amount, 1.0 if action_frame and e > 0.5 else 0.0, delta / 0.55)
+	if action_cam == null:
+		action_cam = Camera3D.new()
+		action_cam.name = "ActionCamera"
+		action_cam.top_level = true
+		player.add_child(action_cam)
+	if _action_amount <= 0.0:
+		if _action_held:
+			_action_held = false
+			if action_cam.current: cam.make_current()
+		return
+	if not _action_held:
+		_action_held = true
+		_action_xf = pick_action_view()
+	action_cam.fov = cam.fov
+	action_cam.global_transform = cam.global_transform.interpolate_with(_action_xf, smoothstep(0.0, 1.0, _action_amount))
+	if cam.current: action_cam.make_current()
+
+func pick_action_view() -> Transform3D:
+	var a := player.avatar
+	var yaw := player.global_rotation.y
+	if a != null: yaw = a.face_goal if not is_nan(a.face_goal) else a.facing
+	var b := Basis(Vector3.UP, yaw)
+	var base := player.global_position
+	var focus := base + b * Vector3(-0.12, 1.05, -0.2)
+	var space := player.get_world_3d().direct_space_state
+	# Left side first (the bag comes round on the left), then three-quarter views; the way to
+	# each must be clear for a 0.3 m sphere (never peeking over a counter edge or through a rail).
+	var probe := SphereShape3D.new()
+	probe.radius = 0.3
+	for off: Vector3 in [Vector3(-2.35, 1.5, -0.35), Vector3(-1.8, 1.6, -1.5), Vector3(-1.6, 1.7, 1.7), Vector3(2.35, 1.5, -0.35), Vector3(1.8, 1.6, -1.5), Vector3(1.6, 1.75, 2.0)]:
+		var want := base + b * off
+		var q := PhysicsShapeQueryParameters3D.new()
+		q.shape = probe
+		q.transform = Transform3D(Basis.IDENTITY, focus)
+		q.motion = want - focus
+		q.collision_mask = 1 | 16
+		q.exclude = [player.get_rid()]
+		var free := space.cast_motion(q)
+		if free.is_empty() or float(free[0]) < 0.97: continue
+		return Transform3D(Basis.looking_at(focus - want, Vector3.UP), want)
+	return player.camera.global_transform
+
 var _dir := Vector3.BACK
 func arm_dir() -> Vector3:
 	return _dir
@@ -193,7 +264,9 @@ func place_third_person(delta: float) -> void:
 		pivot = Vector3(h.x, lerpf(pivot.y, target.y, 1.0 - exp(-11.0 * delta)), h.y)
 	var aim := player.camera.global_basis.orthonormalized()
 	var reach := distance + (BIKE_EXTRA if on_bike else 0.0)
-	var offset := aim * Vector3(SHOULDER, RAISE, reach)
+	# Browsing a shelf: further over the shoulder and a little higher, past the head and the bag.
+	var b := smoothstep(0.0, 1.0, _browse_amount)
+	var offset := aim * Vector3(lerpf(SHOULDER, 0.6, b), lerpf(RAISE, 0.12, b), reach)
 	arm_length = offset.length()
 	_dir = offset / maxf(arm_length, 0.001)
 	arm.global_transform = Transform3D(basis_towards(_dir), pivot)

@@ -80,7 +80,7 @@ func start_career() -> void:
 	economy = 2
 	active_vehicle = ""
 	online = false
-	tutorial = {"done": false, "step": 0}
+	tutorial = {"done": false, "step": 0, "v": 3}
 ## Every new courier starts with $100 (recorded in the ledger like any other money movement).
 const STARTING_FUNDS := 10000
 
@@ -323,11 +323,18 @@ func take_package(package: Dictionary, distance: float) -> String:
 	if not is_finite(distance) or distance < 0 or distance > 2.5:
 		return "Move closer to the shelf."
 	if str(package.get("customer", "")) != str(order.get("customer", "")) or str(package.get("ticket", "")) != str(order.get("ticket", "")):
-		return "Wrong package: this receipt says %s (order %s). Look for %s, order %s." % [package.get("customer", "?"), package.get("ticket", "?"), order.get("customer", "?"), order.get("ticket", "?")]
+		return wrong_package_text(package)
 	order.state = "IN_HAND"
 	order.deadline = clock + float(order.distance) / 3.5 * 1.35 + 60.0 + (30.0 if bag_upgrade else 0.0)
 	changed.emit()
-	return "Picked up %s's %s. Press F to put it in your delivery bag." % [order.customer, str(OrderDetails.KIND_NAMES.get(order.get("kind", "bag"), "order")).to_lower()]
+	return "Picked up %s's %s." % [order.customer, str(OrderDetails.KIND_NAMES.get(order.get("kind", "bag"), "order")).to_lower()]
+
+## Another courier's package: who it is for, and who you are looking for.
+func wrong_package_text(package: Dictionary) -> String:
+	return "This one is for %s — you're looking for %s (%s)." % [package.get("customer", "someone else"), order.get("customer", "?"), order.get("ticket", "?")]
+
+func is_mine(package: Dictionary) -> bool:
+	return str(package.get("customer", "")) == str(order.get("customer", "")) and str(package.get("ticket", "")) == str(order.get("ticket", ""))
 
 ## Put the package you are holding into a bag compartment.
 func stow(slot: String) -> String:
@@ -611,6 +618,12 @@ func restore(data: Dictionary) -> bool:
 	bladder = float(life.get("bladder", 0))
 	purchase_serial = int(life.get("purchase_serial", 0))
 	tutorial = (data.get("tutorial", {"done": true, "step": 0}) as Dictionary).duplicate(true)
+	# Training v2 had 15 tasks; v3 dropped "put it down / pick it up" and folded packing into
+	# taking the package (it now packs itself): steps 10-11 -> 9, 12+ -> two earlier.
+	if not bool(tutorial.get("done", true)) and int(tutorial.get("v", 2)) < 3:
+		var at := int(tutorial.get("step", 0))
+		tutorial["step"] = at if at < 10 else (9 if at < 12 else at - 2)
+	tutorial["v"] = 3
 	economy = int(data.get("economy", 1))
 	var st: Dictionary = data.get("store", {})
 	pickups = (st.get("pickups", []) as Array).duplicate(true)

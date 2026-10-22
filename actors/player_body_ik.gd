@@ -51,6 +51,8 @@ var rest_foot_forward: Array[Vector3] = [Vector3.BACK, Vector3.BACK]
 var rest_global := {}
 ## Last solved positions (world) for tests / debugging.
 var solved := {}
+## Last final bone frames (world) of the chest bones.
+var solved_xf := {}
 
 func _ready() -> void:
 	bind()
@@ -128,6 +130,9 @@ func _process_modification_with_delta(_delta: float) -> void:
 		var xf := skeleton.global_transform
 		for key in ["hips", "l_hand", "r_hand", "l_knuckle", "r_knuckle", "l_foot", "r_foot", "l_toes", "r_toes", "head", "l_upper_arm", "r_upper_arm"]:
 			if bone_id(key) >= 0: solved[key] = xf * gpose(bone_id(key)).origin
+		# The final chest frame (what is drawn), for things worn on the body (WornBackpack).
+		for key in ["upper_chest", "chest"]:
+			if bone_id(key) >= 0: solved_xf[key] = xf * gpose(bone_id(key))
 
 ## Hips to the seat point, then bend the spine so the torso points along `up`.
 func seat(hips_at: Vector3, up: Vector3, w: float) -> void:

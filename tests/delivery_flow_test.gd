@@ -47,13 +47,25 @@ func run() -> void:
 		else: decoy = p
 	check(mine != null, "Your customer's package is on the shelf")
 	check(decoy != null, "Other customers' packages are on the shelf too")
-	var receipt_text := ""
-	for c in mine.get_children():
-		if c is Label3D and c.has_meta("receipt"): receipt_text = c.text
-	check(receipt_text.contains(str(o.customer).to_upper()), "Receipt tag shows the customer's name")
-	# Wrong package is refused, right one is taken.
+	var tag_lines := PackedStringArray()
+	for tag in mine.get_children().filter(func(n: Node) -> bool: return n.has_meta("receipt")):
+		for l in tag.find_children("*", "Label3D", true, false):
+			if l.has_meta("name_line"): tag_lines.append((l as Label3D).text)
+	var first := str(o.customer).get_slice(" ", 0).to_upper()
+	var last := str(o.customer).substr(str(o.customer).find(" ") + 1).to_upper()
+	check(tag_lines.has(first) and tag_lines.has(last), "Name tags on the package show the customer's first and last name (%s)" % ", ".join(tag_lines))
+	check(mine.get_children().filter(func(n: Node) -> bool: return n.has_meta("receipt")).size() >= 2, "Name tags on several faces of the package")
+	var names := {}
+	var same_as_mine := 0
+	for p in list:
+		var who := str((p.get_meta("package") as Dictionary).customer)
+		names[who] = int(names.get(who, 0)) + 1
+		if who == str(o.customer): same_as_mine += 1
+	check(same_as_mine == 1 and names.size() == list.size(), "no decoy carries your customer's full name, no two tags alike (%s)" % ", ".join(names.keys()))
+	check(list.size() >= 1 + PickupShelves.DECOYS_MIN and list.size() <= 1 + PickupShelves.DECOYS_MAX, "4-7 other couriers' orders around yours (%d packages)" % list.size())
+	# Wrong package is refused with who it is for; the right one is taken.
 	var refused := s.take_package(decoy.get_meta("package"), 1.0)
-	check(refused.begins_with("Wrong package") and s.order.state == "ACCEPTED", "Another customer's package is refused")
+	check(refused.begins_with("This one is for %s — you're looking for %s" % [(decoy.get_meta("package") as Dictionary).customer, o.customer]) and s.order.state == "ACCEPTED", "Another customer's package is refused: " + refused)
 	s.take_package(mine.get_meta("package"), 1.0)
 	check(s.holding_package(), "Your package is now in your hands")
 	check(DeliverySession.validate(s.snapshot()), "Save validates while holding a package")

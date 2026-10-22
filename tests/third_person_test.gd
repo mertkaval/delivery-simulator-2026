@@ -89,6 +89,14 @@ func run() -> void:
 	game.close_menu()
 	await create_timer(0.6, true).timeout
 	check(camera_distance() > 2.0, "backpack closed: back to third person")
+	# --- The delivery bag on the back (owned above): worn scene on the UpperChest, straps, arm variants ---
+	player.refresh_equipment()
+	await ticks(10)
+	var bp: WornBackpack = player.avatar.backpack
+	check(bp.has_bag() and bp.model.is_visible_in_tree() and bp.attachment.bone_name == "UpperChest", "owned delivery bag worn on the back (BoneAttachment3D on UpperChest)")
+	if bp.scene_mode():
+		check(bp.straps.size() == 2 and bp.straps.all(func(n: Node3D) -> bool: return n.visible), "body straps shown while the bag is worn")
+		check(player.avatar.bag_worn and player.avatar.worn_clip("Walk") == "Walk_Bag" and player.avatar.worn_clip(player.avatar.clip("idle")) == "Bag_Worn_Idle", "locomotion uses the arms-round-the-bag variants (Walk_Bag, Bag_Worn_Idle)")
 	# --- Zoom clamps ---
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	for i in range(40): player.view.zoom(-1.0)

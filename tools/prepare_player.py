@@ -20,6 +20,11 @@ stages:
   qa        QA renders of the courier (rest views, clip frames) -> assets/player/qa/.
   fit       rider fit on the gray bicycle (Bike_Seated / Bike_Pedal at 0/90/180/270 deg) ->
             world/vehicles/production/renders/gray_bicycle/rider_fit_*.png
+  bag       development stage of the backpack work (tools/courier_bag.py): builds the courier and
+            its clips, the worn fit, the body-fitted straps and the bag / carry clips, renders the
+            bag QA to assets/player/qa/bag_*.png; exports nothing. Options: --no-qa, --no-worn,
+            --clips=Bag_TakeOff,Bag_PutOn (QA sheets of those clips only).
+            The `player` stage does all of this too and bakes the clips / straps into courier.glb.
 
 Conventions (same as the townspeople, see tools/prepare_characters.py / match_ual_rest.py):
 characters face Blender -Y = Godot +Z (the humanoid retarget convention), metres, feet on z 0,
@@ -42,6 +47,7 @@ FIT_DIR = os.path.join(ROOT, "world", "vehicles", "production", "renders", "gray
 PEOPLE = os.path.join(ROOT, "assets", "sketchup", "people")
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 FPS = 30
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # ----------------------------------------------------------------------------- humanoid profile
 FINGERS = [("Thumb", ["Metacarpal", "Proximal", "Distal"]), ("Index", ["Proximal", "Intermediate", "Distal"]),
@@ -1717,6 +1723,39 @@ def checker_ground():
     return g
 
 
+def bag_parts(C, R):
+    """Worn backpack fit, skinned shoulder straps and the bag / carry clips (tools/courier_bag.py)."""
+    import courier_bag
+    courier_bag.bind(globals())
+    BW = courier_bag.BagWork(C, R)
+    BW.run()
+    return BW
+
+
+def bag_args():
+    only = None
+    for a in ARGS:
+        if a.startswith("--clips="):
+            only = set(a.split("=", 1)[1].split(","))
+    return only
+
+
+def bag_stage():
+    lib = load_library()
+    arm, mesh, src = build_courier(lib)
+    C = Clips(arm, mesh, lib, src)
+    R = C.library_clips()
+    C.mixamo_jog()
+    C.strafe(R, +1)
+    C.turn(R, +1)
+    C.land_hard(R)
+    C.bike_clips(R)
+    BW = bag_parts(C, R)
+    if "--no-qa" not in ARGS:
+        BW.qa(C.bike, worn="--no-worn" not in ARGS, only=bag_args())
+    log("bag stage done; clips:", list(BW.clips))
+
+
 def player_stage():
     lib = load_library()
     arm, mesh, src = build_courier(lib)
@@ -1730,6 +1769,7 @@ def player_stage():
     C.idle_shift(R)
     C.land_hard(R)
     pedal, seated = C.bike_clips(R)
+    BW = bag_parts(C, R)
     bike_objs = C.bike["objects"]
     for o in bike_objs:
         o.hide_render = True
@@ -1755,11 +1795,16 @@ def player_stage():
     shoot(cam, os.path.join(FIT_DIR, "rider_fit_seated_closeup_hands.png"), (-0.5, -0.8, 0.5), C.bike["GripR"], 0.55)
     shoot(cam, os.path.join(FIT_DIR, "rider_fit_seated_closeup_feet.png"), (-1, -0.15, 0.1), C.bike["Crank"] + UP * 0.05, 0.8)
     shoot(cam, os.path.join(FIT_DIR, "rider_fit_seated_closeup_seat.png"), (-1, 0.2, 0.15), C.bike["Seat"], 0.6)
+    if "--no-qa" not in ARGS:
+        BW.qa(C.bike, worn="--no-worn" not in ARGS, only=bag_args())
+    for o in BW.strap_objs.values():
+        o.hide_render = True
     for o in C.bike["objects"]:
-        bpy.data.objects.remove(o)
+        if o.name in bpy.data.objects:
+            bpy.data.objects.remove(o)
     # --- QA: clip strips (side view, checker ground for foot sliding)
     for name, poses, meta in C.out:
-        if meta["kind"] == "bike":
+        if meta["kind"] == "bike" or name in BW.clips or "--no-qa" in ARGS:
             continue
         view = (1, 0, 0.06) if "Strafe" not in name else (0, -1, 0.06)
         render_strip(arm, poses, os.path.join(QA, "clip_%s.png" % name), count=8, view=view)
@@ -1769,12 +1814,14 @@ def player_stage():
     set_action(arm, bpy.data.actions.get("Idle_Loop"))
     for pb in arm.pose.bones:
         pb.matrix_basis = Matrix.Identity(4)
+    BW.export_plain_worn()
+    straps = list(BW.strap_objs.values())
     for o in list(bpy.data.objects):
-        if o not in (arm, mesh):
+        if o not in [arm, mesh] + straps:
             bpy.data.objects.remove(o)
     set_action(arm, None)
     path = os.path.join(OUT, "courier.glb")
-    export_rigged([arm, mesh], path, True)
+    export_rigged([arm, mesh] + straps, path, True)
     V = mesh_np(mesh)
     clips = {}
     for name, poses, meta in C.out:
@@ -1787,7 +1834,7 @@ def player_stage():
             "bike": {"seat": [round(c, 4) for c in to_godot_bike(C.bike["Seat"])], "lean_param": round(C.bike_lean, 1), "trunk_lean_deg": round(C.trunk, 1),
                      "hips": [round(c, 4) for c in to_godot_bike(C.bike_hips)],
                      "crank_length": round(C.bike["crank_len"], 4), "knees": C.knees},
-            "fps": FPS, "clips": clips}
+            "fps": FPS, "clips": clips, "backpack": BW.bag_meta}
     with open(os.path.join(OUT, "clips_blender.json"), "w") as f:
         json.dump(info, f, indent=1)
     log("info written; clips:", list(clips))
@@ -2159,6 +2206,8 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     if stage == "player":
         player_stage()
+    if stage == "bag":
+        bag_stage()
     if stage == "avaturn":
         avaturn_stage()
     if stage == "clothed":

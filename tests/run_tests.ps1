@@ -1,7 +1,7 @@
 param([string]$Godot = 'C:\Godot\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-stable_win64_console.exe')
 $ErrorActionPreference = 'Stop'
 $projectPath = Split-Path $PSScriptRoot -Parent
-foreach ($testFile in @('economy_smoke.gd', 'dispatch_test.gd', 'regression.gd', 'city_test.gd', 'lifestyle_test.gd', 'street_grid_test.gd', 'citykit_test.gd', 'bicycle_steering_test.gd', 'car_steering_test.gd', 'ace11_drive_test.gd', 'traffic_long_vehicle_test.gd', 'prop_placement_test.gd', 'landscape_test.gd', 'higgsfield_housing.gd', 'downtown_gameplay.gd', 'urban_access.gd', 'delivery_flow_test.gd', 'cedar_house_test.gd', 'main_menu_test.gd', 'tutorial_test.gd', 'traffic_signal_test.gd', 'npc_life_test.gd', 'monuments_test.gd', 'audio_test.gd', 'house_conflict_test.gd', 'third_person_test.gd')) {
+foreach ($testFile in @('economy_smoke.gd', 'dispatch_test.gd', 'regression.gd', 'city_test.gd', 'lifestyle_test.gd', 'street_grid_test.gd', 'citykit_test.gd', 'bicycle_steering_test.gd', 'car_steering_test.gd', 'ace11_drive_test.gd', 'traffic_long_vehicle_test.gd', 'prop_placement_test.gd', 'landscape_test.gd', 'higgsfield_housing.gd', 'downtown_gameplay.gd', 'urban_access.gd', 'delivery_flow_test.gd', 'cedar_house_test.gd', 'main_menu_test.gd', 'tutorial_test.gd', 'easy_delivery_test.gd', 'traffic_signal_test.gd', 'npc_life_test.gd', 'monuments_test.gd', 'audio_test.gd', 'house_conflict_test.gd', 'third_person_test.gd')) {
     $result = & $Godot --headless --path $projectPath --quit-after 30000 --script "res://tests/$testFile" 2>&1
     $status = $LASTEXITCODE
     $result | Write-Output

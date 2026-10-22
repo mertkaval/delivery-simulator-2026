@@ -12,6 +12,9 @@ Output (assets/delivery/):
   drink_carrier.glb       two-cup carrier box
   delivery_bag.glb        black insulated courier backpack, front flap closed
   delivery_bag_open.glb   same bag, front flap dropped open on its straps, foil shelves
+                          (both bags: nodes BagBody, Flap (hinge origin, rotation about X), LogoPanel,
+                          StrapL / StrapR = the free shoulder straps, named for the wearer;
+                          the open bag adds FlapStraps, Dividers, Slot_*)
   archive/v1/             the previous orange top-lid bag and handled food bag
   qa/<name>.png           workbench front three-quarter renders (10 cm red reference cube), glyph sheet
   qa/build_report.json    tri counts, extras, glyph metrics
@@ -1305,16 +1308,21 @@ def build_bag(open_lid):
     sweep(P, hp, hprof, cap=True, side=(0, 1, 0), mat=2, v_scale=3.0)
     for sx in (-1, 1):
         rbox(P, (0.035, 0.05, 0.006), (sx * 0.085, 0.0), HB - 0.001, rv=0.005, sv=1, mat=2)
-    # shoulder straps on the back (+Y)
+    # shoulder straps on the back (+Y): free loops of their own (StrapL / StrapR, named for the
+    # wearer: the bag is worn turned round, so bag -X is the wearer's left). The worn courier hides
+    # them and shows the body-fitted straps of assets/player/courier.glb instead (prepare_player.py).
     strap = [(0.008, -0.026), (0.008, 0.026), (0.003, 0.03), (-0.003, 0.03),
              (-0.008, 0.026), (-0.008, -0.026), (-0.003, -0.03), (0.003, -0.03)]
+    strap_parts = []
     for sx in (-1, 1):
         x = sx * 0.105
         path = []
         for k in range(15):
             t = k / 14
             path.append(Vector((x, D / 2 + 0.007 + 0.055 * math.sin(math.pi * t) ** 1.3 * (1.15 - 0.3 * t), HB - 0.03 - t * 0.37)))
-        sweep(P, path, strap, cap=True, side=(1, 0, 0), mat=2, v_scale=3.0)
+        SP = Part("StrapL" if sx < 0 else "StrapR")
+        sweep(SP, path, strap, cap=True, side=(1, 0, 0), mat=0, v_scale=3.0)
+        strap_parts.append(SP)
         rbox(P, (0.065, 0.008, 0.04), (x, D / 2 + 0.002), HB - 0.05, rv=0.003, sv=1, mat=2)
         rbox(P, (0.05, 0.01, 0.03), (x, D / 2 + 0.003), 0.04, rv=0.004, sv=1, mat=2)
         rbox(P, (0.03, 0.006, 0.008), (x, D / 2 + 0.008), 0.052, mat=1)
@@ -1325,6 +1333,8 @@ def build_bag(open_lid):
         rbox(P, (0.002, 0.22, 0.01), (sx * (W / 2 + 0.05), -0.01), 0.14, mat=1)
         rbox(P, (0.004, 0.03, 0.03), (sx * (W / 2 + 0.057), -0.01), 0.225, rv=0.004, sv=1, mat=2)   # snap
     replace_mesh(body, P, smooth=40.0)
+    for SP in strap_parts:
+        to_object(SP, [trim], parent=root, smooth=40.0)
     # front flap, hinged on the bottom front edge; origin on the hinge
     P = Part("Flap")
     fs = rbox(P, (W, HB, FLAP_T), (0, HB / 2), 0.0, rv=CORNER, sv=3, rt=0.008, st=1, mat=0, uvscale=3.0)

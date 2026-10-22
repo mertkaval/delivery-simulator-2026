@@ -62,6 +62,52 @@ static func menu(restaurant_id: String) -> Array:
 static func random_customer(rng: RandomNumberGenerator) -> String:
 	return "%s %s" % [FIRST[rng.randi() % FIRST.size()], LAST[rng.randi() % LAST.size()]]
 
+## "Elif Kaya" -> "Elif K."
+static func short_name(full: String) -> String:
+	var parts := full.strip_edges().split(" ", false)
+	if parts.size() < 2: return full
+	return "%s %s." % [parts[0], parts[parts.size() - 1].left(1)]
+
+## A name a courier could mix up with `target` (same first name, or the same last name, or a
+## first name and last initial alike), never `target` itself or anything in `taken`.
+static func confusable_name(rng: RandomNumberGenerator, target: String, taken: Dictionary) -> String:
+	var parts := target.split(" ", false)
+	if parts.size() < 2: return random_customer(rng)
+	var first: String = parts[0]
+	var last: String = parts[parts.size() - 1]
+	for attempt in range(24):
+		var candidate := ""
+		match rng.randi() % 3:
+			0:
+				# Same first name, a last name with the same initial when there is one.
+				var alike: Array = []
+				for l: String in LAST:
+					if l != last and l.left(1) == last.left(1): alike.append(l)
+				var pick: String = alike[rng.randi() % alike.size()] if not alike.is_empty() and rng.randf() < 0.7 else LAST[rng.randi() % LAST.size()]
+				candidate = "%s %s" % [first, pick]
+			1:
+				candidate = "%s %s" % [FIRST[rng.randi() % FIRST.size()], last]
+			_:
+				# A first name with the same initial and the same last initial.
+				var firsts: Array = []
+				for f: String in FIRST:
+					if f != first and f.left(1) == first.left(1): firsts.append(f)
+				var lasts: Array = []
+				for l: String in LAST:
+					if l.left(1) == last.left(1): lasts.append(l)
+				if firsts.is_empty() or lasts.is_empty(): continue
+				candidate = "%s %s" % [firsts[rng.randi() % firsts.size()], lasts[rng.randi() % lasts.size()]]
+		if candidate != target and not taken.has(candidate): return candidate
+	return ""
+
+## Takeaway bag size word for the receipt / phone ("small", "medium", "large").
+const SIZE_WORDS := {"s": "small", "m": "medium", "l": "large"}
+
+## What the order travels in, as the phone and the tag describe it: "Food bag · medium".
+static func package_label(kind: String, items: Array) -> String:
+	if kind == "bag": return "Food bag · %s" % SIZE_WORDS[bag_size(items)]
+	return str(KIND_NAMES.get(kind, kind))
+
 ## Customer, items and totals for an order, deterministic from its serial.
 static func build(serial: int, restaurant_id: String, seed: int) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
@@ -95,5 +141,5 @@ static func receipt_text(details: Dictionary, restaurant_name: String, address: 
 	lines.append("------------------------------")
 	lines.append("Subtotal %s   Tax %s" % [DeliverySession.money(subtotal), DeliverySession.money(tax)])
 	lines.append("TOTAL %s   %s" % [DeliverySession.money(subtotal + tax), details.payment_method])
-	lines.append("Package: " + str(KIND_NAMES.get(details.kind, details.kind)))
+	lines.append("Package: " + package_label(str(details.kind), details.items))
 	return "\n".join(lines)

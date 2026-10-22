@@ -54,10 +54,25 @@ const COURIER_CLIPS := {
 	"jump_air": {"name": "Jump"},
 	"jump_land": {"name": "Jump_Land", "offset": 0.03},
 	"bike": {"name": "Bike_Seated"},
-	"carry": {"name": "Idle_Carry"},
+	"carry": {"name": "Carry_Idle"},
+	"carry_walk": {"name": "Carry_Walk"},
 	"turn_left": {"name": "Turn_L_90", "yaw": 1.5708, "done": 0.85},
 	"turn_right": {"name": "Turn_R_90", "yaw": -1.5708, "done": 0.85},
+	# One-shot courier actions (CourierSequence); until the clips exist the sequence poses the
+	# arms with IK (placeholder) instead.
+	"pick_up": {"name": "PickUp"},
+	"bag_take_off": {"name": "Bag_TakeOff"},
+	"bag_hold": {"name": "Bag_Hold"},
+	"bag_pack": {"name": "Bag_PackItem"},
+	"bag_take": {"name": "Bag_TakeItem"},
+	"bag_put_on": {"name": "Bag_PutOn"},
+	"bag_put_on_holding": {"name": "Bag_PutOn_Holding"},
+	"bag_strap_right": {"name": "Bag_StrapRight"},
+	"handover": {"name": "Handover"},
+	"place_down": {"name": "PlaceDown"},
 }
+## Action roles CourierSequence can play as one-shots.
+const ACTION_ROLES := ["pick_up", "bag_take_off", "bag_hold", "bag_pack", "bag_take", "bag_put_on", "handover", "place_down"]
 ## Body facing correction (the retargeted bodies face +Z; the game faces -Z) and scale.
 var body_yaw := PI
 ## Rig bone names for the humanoid-profile names PlayerBodyIK uses (only where they differ).
@@ -127,6 +142,16 @@ var view_first_person := false
 var footsteps: Array[Vector3] = []
 var step_count := 0
 var _visible_mode := -1
+## The bag on the back (WornBackpack): the delivery bag or plain backpack once owned.
+var backpack: WornBackpack
+## Courier actions (CourierSequence): the body turns to face_goal (world yaw, NAN = free) and the
+## hands go to hand_goals (markers: origin = palm centre, -Z = fingers, -Y = palm normal) with
+## hand_goal_weight; the playing one-shot clip role (or "").
+var face_goal := NAN
+var hand_goals: Array[Node3D] = [null, null]
+var hand_goal_weight := 0.0
+var action_role := ""
+var _action_clip: AnimationNodeAnimation
 
 func setup(owner_player: CourierPlayer) -> void:
 	player = owner_player
@@ -150,6 +175,9 @@ func setup(owner_player: CourierPlayer) -> void:
 		if bone_map.has(str(ik.names[key])): ik.names[key] = bone_map[str(ik.names[key])]
 	skeleton.add_child(ik)
 	build_tree()
+	backpack = WornBackpack.new()
+	add_child(backpack)
+	backpack.setup(self)
 	ready_ok = true
 	facing = player.global_rotation.y
 	global_transform = Transform3D(Basis(Vector3.UP, facing), player.global_position)
@@ -259,6 +287,8 @@ func anim_node(role: String, normalised: bool = false, backward: bool = false) -
 	var node := AnimationNodeAnimation.new()
 	var name_ := clip(role) if has_clip(role) else clip("idle")
 	node.animation = StringName(name_)
+	if not _role_nodes.has(role): _role_nodes[role] = []
+	(_role_nodes[role] as Array).append(node)
 	if not library.has_animation(name_): return node
 	var a := library.get_animation(name_)
 	var offset := clip_value(role, "offset", 0.0)
@@ -279,7 +309,7 @@ func anim_node(role: String, normalised: bool = false, backward: bool = false) -
 	return node
 
 func build_tree() -> void:
-	for role in ["idle", "walk", "walk_back", "jog", "sprint", "jump_air", "bike", "carry"]:
+	for role in ["idle", "walk", "walk_back", "jog", "sprint", "jump_air", "bike", "carry", "carry_walk"]:
 		if has_clip(role): library.get_animation(clip(role)).loop_mode = Animation.LOOP_LINEAR
 	for role in ["walk", "walk_back", "jog", "sprint"]:
 		if has_clip(role) and not (clips[role] as Dictionary).has("phase"): measure_clip(role)
@@ -304,7 +334,17 @@ func build_tree() -> void:
 	move.add_node("sprint", anim_node("sprint", true), Vector2(0, 450))
 	# Backing up: the body's own walk-backwards clip, else the walk played in reverse.
 	move.add_node("back", anim_node("walk_back", true) if has_clip("walk_back") else anim_node("walk", true, true), Vector2(0, 600))
-	move.add_node("carry_pose", anim_node("carry"), Vector2(0, 750))
+	# Carrying by hand: Carry_Idle standing, Carry_Walk moving (arms only), when the body has them.
+	if has_clip("carry_walk"):
+		var carry_gait := AnimationNodeBlend2.new()
+		carry_gait.sync = true
+		move.add_node("carry_idle", anim_node("carry"), Vector2(-200, 750))
+		move.add_node("carry_walk", anim_node("carry_walk"), Vector2(-200, 850))
+		move.add_node("carry_pose", carry_gait, Vector2(0, 750))
+		move.connect_node("carry_pose", 0, "carry_idle")
+		move.connect_node("carry_pose", 1, "carry_walk")
+	else:
+		move.add_node("carry_pose", anim_node("carry"), Vector2(0, 750))
 	for blend_name in ["gait1", "gait2", "backward", "moving"]:
 		var b := AnimationNodeBlend2.new()
 		b.sync = true
@@ -333,7 +373,19 @@ func build_tree() -> void:
 	move.connect_node("moving", 1, "backward")
 	move.connect_node("carry", 0, "moving")
 	move.connect_node("carry", 1, "carry_pose")
-	move.connect_node("output", 0, "carry")
+	# Courier actions (bag off / pack / take out / put on, hand over, place down) over the whole
+	# body: the clip's time is set every tick (action_time), so the bag / package tracks published
+	# with each clip line up frame for frame, and chained clips follow each other without a fade.
+	var action := AnimationNodeBlend2.new()
+	move.add_node("action", action, Vector2(400, 300))
+	_action_clip = AnimationNodeAnimation.new()
+	_action_clip.animation = StringName(clip("idle"))
+	move.add_node("action_clip", _action_clip, Vector2(0, 900))
+	move.add_node("action_seek", AnimationNodeTimeSeek.new(), Vector2(200, 900))
+	move.connect_node("action_seek", 0, "action_clip")
+	move.connect_node("action", 0, "carry")
+	move.connect_node("action", 1, "action_seek")
+	move.connect_node("output", 0, "action")
 	var land := AnimationNodeBlendTree.new()
 	land.add_node("idle", anim_node("idle"))
 	land.add_node("land", anim_node("jump_land"))
@@ -454,6 +506,113 @@ func begin_mount() -> void:
 	mount_from = global_transform
 	mount_t = 0.0
 
+## Play a courier action clip (ACTION_ROLES) once over the body. Returns its length (s), or
+## -1.0 when the body has no such clip (the caller poses it procedurally instead).
+func play_action(role: String) -> float:
+	if not ready_ok or not has_clip(role) or _action_clip == null: return -1.0
+	var name_ := worn_clip(clip(role))
+	var a := library.get_animation(name_)
+	action_loop = bool(contract_clip(name_).get("loop", false))
+	a.loop_mode = Animation.LOOP_LINEAR if action_loop else Animation.LOOP_NONE
+	_action_clip.animation = StringName(name_)
+	action_role = role
+	action_clip_name = name_
+	action_time = 0.0
+	action_length = a.length
+	action_target = 1.0
+	if state != "Move": go("Move")
+	return a.length
+
+func set_hand_goals(left: Node3D, right: Node3D) -> void:
+	hand_goals[0] = left
+	hand_goals[1] = right
+
+## Back to normal animation (the action layer fades out).
+func stop_action() -> void:
+	action_role = ""
+	action_target = 0.0
+
+## Action layer per tick: the clip's time, its weight (0.2 s fades), held on its last frame.
+var action_time := 0.0
+var action_length := 0.0
+var action_loop := false
+var action_weight := 0.0
+var action_target := 0.0
+var action_clip_name := ""
+func tick_action(delta: float) -> void:
+	action_weight = move_toward(action_weight, action_target, delta / 0.2)
+	if action_weight <= 0.0 and action_target <= 0.0:
+		tree.set("parameters/Move/action/blend_amount", 0.0)
+		return
+	tree.set("parameters/Move/action_seek/seek_request", action_time)
+	tree.set("parameters/Move/action/blend_amount", smoothstep(0.0, 1.0, action_weight))
+	action_time += delta
+	if action_loop and action_length > 0.0: action_time = fmod(action_time, action_length)
+	else: action_time = minf(action_time, maxf(0.0, action_length - 0.001))
+
+# --- Bag worn: the contract's arm variants (arms round the bag) ---------------------------------
+
+var _role_nodes := {}          ## role -> [AnimationNodeAnimation] using that role's clip
+var bag_worn := false
+var _contract_cache: Dictionary = {}
+
+## clips.json, read once.
+func contract() -> Dictionary:
+	if _contract_cache.is_empty(): _contract_cache = read_contract()
+	return _contract_cache
+
+## The clips.json entry of a clip by name ({} if none).
+func contract_clip(clip_name: String) -> Dictionary:
+	var by_name: Variant = contract().get("clips", {})
+	if by_name is Dictionary and (by_name as Dictionary).get(clip_name, null) is Dictionary: return (by_name as Dictionary)[clip_name]
+	return {}
+
+## The clip to play for `clip_name` with the bag on the back: its "_Bag" variant when it has one.
+func worn_clip(clip_name: String) -> String:
+	if not bag_worn: return clip_name
+	var v := str(_bag_variants().get(clip_name, ""))
+	return v if v != "" and library.has_animation(v) else clip_name
+
+var _variants: Dictionary = {}
+func _bag_variants() -> Dictionary:
+	if _variants.is_empty():
+		var by_name: Variant = contract().get("clips", {})
+		if by_name is Dictionary:
+			for n: String in (by_name as Dictionary):
+				var e: Variant = (by_name as Dictionary)[n]
+				if e is Dictionary and (e as Dictionary).has("bag_variant_of"): _variants[str((e as Dictionary).bag_variant_of)] = n
+		if library.has_animation("Bag_Worn_Idle"): _variants[clip("idle")] = "Bag_Worn_Idle"
+		_variants["_"] = ""
+	return _variants
+
+## The bag goes on / comes off the back: locomotion, idle, jumps and turns switch to (or back
+## from) their bag variants.
+func set_bag_worn(on: bool) -> void:
+	if on == bag_worn: return
+	bag_worn = on
+	for role: String in _role_nodes:
+		var base := clip(role) if has_clip(role) else clip("idle")
+		var want := worn_clip(base)
+		if library.has_animation(want):
+			var a := library.get_animation(want)
+			var b := library.get_animation(base)
+			a.loop_mode = b.loop_mode
+		for node: AnimationNodeAnimation in _role_nodes[role]:
+			node.animation = StringName(want)
+
+## Contract package pose while carrying by hand (Carry_Idle's package_track, courier-root space).
+func carry_local() -> Transform3D:
+	var info := contract_clip("Carry_Idle")
+	if info.get("package_track", null) is Array and not (info.package_track as Array).is_empty():
+		return CourierSequence.track_xf(info.package_track, 0.0)
+	return Transform3D(Basis.IDENTITY, Vector3(0, 1.0, -0.34))
+
+## Re-apply the visibility mode (after nodes were added to the body).
+func refresh_visibility() -> void:
+	var mode := _visible_mode
+	_visible_mode = -1
+	if mode >= 0 and body != null: set_mode(mode)
+
 ## Dismounting: blend from the saddle to standing beside the bike.
 func begin_dismount() -> void:
 	mount_from = global_transform
@@ -478,6 +637,11 @@ func tick(delta: float) -> void:
 	seat_blend = move_toward(seat_blend, 1.0 if on_bike else 0.0, delta / 0.5)
 	if on_bike: ride(delta)
 	else: walk(delta)
+	tick_action(delta)
+	if action_weight > 0.0:
+		# The action clip poses the arms and head itself.
+		ik.look_weight *= 1.0 - action_weight
+		for side in range(2): ik.arm_weight[side] = float(ik.arm_weight[side]) * (1.0 - action_weight)
 	tree.advance(delta)
 
 ## Called every frame by the camera rig (also while the game is paused for the phone / bag).
@@ -498,7 +662,7 @@ func set_mode(mode: int) -> void:
 	if mode == _visible_mode: return
 	_visible_mode = mode
 	visible = mode != 2
-	for gi: GeometryInstance3D in body.find_children("*", "GeometryInstance3D", true, false):
+	for gi: GeometryInstance3D in find_children("*", "GeometryInstance3D", true, false):
 		gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY if mode == 1 else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 
 # --- On foot ---------------------------------------------------------------------------------
@@ -524,6 +688,13 @@ func walk(delta: float) -> void:
 			target_yaw = move_yaw
 		turning = false
 		_turn_wait = 0.0
+	elif not is_nan(face_goal):
+		# A courier action: face the shelf / the door / the customer.
+		target_yaw = face_goal
+		turning = false
+		_turn_wait = 0.0
+	elif p.busy:
+		target_yaw = facing
 	elif not third:
 		target_yaw = aim_yaw
 	else:
@@ -618,6 +789,7 @@ func walk(delta: float) -> void:
 	tree.set("parameters/Move/back_rate/scale", maxf(back_rate, 0.5))
 	tree.set("parameters/Move/backward/blend_amount", back_amount)
 	tree.set("parameters/Move/carry/blend_amount", carry_amount)
+	if has_clip("carry_walk"): tree.set("parameters/Move/carry_pose/blend_amount", move_amount)
 	# Footsteps on the clip's foot contacts (phase 0 = left, `right` = right foot).
 	if state == "Move" and move_amount > 0.4 and grounded:
 		var rate_now := (back_rate if backing else gait_rate)
@@ -648,7 +820,19 @@ func walk(delta: float) -> void:
 	if third and state in ["Move", "Land"]: look_w = lerpf(0.75, 0.35, clampf(speed / 5.0, 0.0, 1.0))
 	ik.look_weight = lerpf(ik.look_weight, look_w, 1.0 - exp(-6.0 * delta))
 	ik.look_dir = -p.camera.global_basis.z
-	ik.look_pitch_limit = 0.55
+	if p.busy:
+		# Courier action: eyes on the hands (the bag / the package).
+		var sum := Vector3.ZERO
+		var n := 0
+		for g: Node3D in hand_goals:
+			if is_instance_valid(g):
+				sum += g.global_position
+				n += 1
+		if n > 0:
+			var head := global_position + Vector3.UP * 1.6 * body_scale
+			ik.look_dir = (sum / float(n) - head).normalized()
+			ik.look_weight = lerpf(ik.look_weight, 0.85, 1.0 - exp(-6.0 * delta))
+	ik.look_pitch_limit = 0.55 if not p.busy else 0.8
 	ik.head_level = 0.0
 	ik.seat_weight = seat_blend * (1.0 - mount_blend) if mount_t < 1.0 else 0.0
 	if mount_t < 1.0:
@@ -748,8 +932,12 @@ func measure_sole(delta: float) -> void:
 	lift = clampf(lift, -0.05, 0.12)
 	sole_lift = lift if lift < sole_lift else lerpf(sole_lift, lift, 1.0 - exp(-2.5 * delta))
 
-## Hands onto the sides of the package carried in front of the body.
+## Hands onto the sides of the package carried in front of the body (or onto the markers a
+## courier action gives them).
 func carry_hands(delta: float, holding: bool) -> void:
+	if hand_goals[0] != null or hand_goals[1] != null or hand_goal_weight > 0.01:
+		action_hands(delta)
+		return
 	var pkg := player.held_package()
 	var w := carry_amount if holding and pkg != null else 0.0
 	for side in range(2):
@@ -767,6 +955,24 @@ func carry_hands(delta: float, holding: bool) -> void:
 		ik.hand_palm[side] = -right * s
 		ik.elbow_pole[side] = (right * s * 0.6 + Vector3.DOWN * 0.8 - fwd * 0.2).normalized()
 
+## Courier action hands: each hand to its marker (palm centre, fingers along -Z, palm normal -Y),
+## faded by hand_goal_weight; a hand without a marker goes back to the clip.
+func action_hands(delta: float) -> void:
+	var right := global_basis.x.normalized()
+	var fwd := -global_basis.z.normalized()
+	for side in range(2):
+		var goal: Node3D = hand_goals[side]
+		var w := hand_goal_weight if is_instance_valid(goal) else 0.0
+		ik.arm_weight[side] = lerpf(float(ik.arm_weight[side]), w, 1.0 - exp(-14.0 * delta))
+		if float(ik.arm_weight[side]) < 0.005: ik.arm_weight[side] = 0.0
+		if not is_instance_valid(goal): continue
+		var s := -1.0 if side == 0 else 1.0
+		var b := goal.global_basis.orthonormalized()
+		ik.arm_target[side] = goal.global_position
+		ik.hand_fingers[side] = -b.z
+		ik.hand_palm[side] = -b.y
+		ik.elbow_pole[side] = (right * s * 0.7 + Vector3.DOWN * 0.7 - fwd * 0.1).normalized()
+
 func package_box(pkg: Node3D) -> AABB:
 	if pkg.has_meta("hold_box"): return pkg.get_meta("hold_box")
 	var box := AABB(Vector3(-0.1, 0, -0.07), Vector3(0.2, 0.3, 0.14))
@@ -779,10 +985,14 @@ func package_box(pkg: Node3D) -> AABB:
 	pkg.set_meta("hold_box", box)
 	return box
 
-## Where a carried package sits (world): in front of the belly, held in both hands.
+## Where a carried package sits (world): in front of the belly, held in both hands (the
+## Carry_Idle clip's package pose when the contract has it).
 func carry_transform() -> Transform3D:
 	var flat := Basis(Vector3.UP, facing)
-	return Transform3D(flat, global_position + flat * Vector3(0, 1.0 * body_scale, -0.34 * body_scale))
+	if _carry_local == null: _carry_local = carry_local()
+	var local: Transform3D = _carry_local
+	return Transform3D(flat, global_position) * Transform3D(local.basis, local.origin * body_scale)
+var _carry_local: Variant = null
 
 # --- On the bicycle --------------------------------------------------------------------------
 

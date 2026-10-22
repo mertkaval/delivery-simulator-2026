@@ -54,6 +54,46 @@ func _ready() -> void:
 	pips = HBoxContainer.new()
 	pips.add_theme_constant_override("separation", 4)
 	col.add_child(pips)
+	# "LOOK FOR" plate: the customer's name, big, while there is an order to collect / deliver.
+	target_box = PanelContainer.new()
+	var plate := StyleBoxFlat.new()
+	plate.bg_color = Color("f7f1df")
+	plate.set_corner_radius_all(8)
+	plate.content_margin_left = 12
+	plate.content_margin_right = 12
+	plate.content_margin_top = 6
+	plate.content_margin_bottom = 7
+	target_box.add_theme_stylebox_override("panel", plate)
+	target_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var tcol := VBoxContainer.new()
+	tcol.add_theme_constant_override("separation", 0)
+	target_box.add_child(tcol)
+	var head := Label.new()
+	head.text = "ORDER FOR"
+	head.add_theme_font_size_override("font_size", 12)
+	head.add_theme_color_override("font_color", Color("8a6a2a"))
+	tcol.add_child(head)
+	target_name = Label.new()
+	target_name.add_theme_font_size_override("font_size", 27)
+	target_name.add_theme_color_override("font_color", Color("15191a"))
+	tcol.add_child(target_name)
+	target_info = Label.new()
+	target_info.add_theme_font_size_override("font_size", 14)
+	target_info.add_theme_color_override("font_color", Color("4a4434"))
+	tcol.add_child(target_info)
+	target_box.visible = false
+	col.add_child(target_box)
+
+var target_box: PanelContainer
+var target_name: Label
+var target_info: Label
+
+## The customer to look for (empty name hides the plate).
+func set_target(customer: String, ticket: String, package: String) -> void:
+	if target_box == null: return
+	target_box.visible = customer != ""
+	target_name.text = customer.to_upper()
+	target_info.text = "%s   ·   %s" % [ticket, package]
 
 func label(size: int, colour: Color) -> Label:
 	var l := Label.new()
@@ -102,6 +142,7 @@ func complete() -> void:
 ## A standing goal (not a numbered task), e.g. saving up for the first bicycle.
 func set_goal(head: String, task: String, how: String, progress: float) -> void:
 	finished = false
+	set_target("", "", "")
 	_shown = -2
 	header.text = head
 	title.text = task
@@ -116,6 +157,7 @@ func show_finished(bonus: String, head := "TRAINING COMPLETE", task := "You're r
 	_ticking = false
 	_shown = -1
 	visible = true
+	set_target("", "", "")
 	header.text = head
 	title.text = task
 	title.add_theme_color_override("font_color", MINT)

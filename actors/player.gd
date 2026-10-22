@@ -74,6 +74,9 @@ var coast_time := 0.0
 var stand_lean := 0.0
 const GEAR_RATIO := 2.2         ## wheel turns per crank turn (city bike, ~60 rpm at 18 km/h)
 var car_eye := Vector3.ZERO
+## A courier action is playing (pack / leave / hand over): no walking or jumping, the view
+## stays (CourierSequence).
+var busy := false
 
 func setup_bicycle() -> void:
 	replace_vehicle(Vector3(-8, 0, 19))
@@ -124,12 +127,10 @@ func refresh_equipment() -> void:
 	if is_instance_valid(equipment): equipment.queue_free()
 	equipment = Node3D.new()
 	bicycle.add_child(equipment)
-	# The insulated delivery bag is worn as a backpack (BagRig, first person); only the plain
-	# courier backpack rides on the rack.
-	if session.owns("backpack") and not session.owns("delivery_bag"):
-		var bag := CityAssets.create("backpack", 80)
-		bag.position = Vector3(0, 0.75, 0.6)
-		equipment.add_child(bag)
+	# The delivery bag (or the plain courier backpack) is worn on the back: seen on the
+	# character in third person (WornBackpack), swung round in first person (BagRig).
+	if avatar != null and avatar.backpack != null:
+		avatar.backpack.refresh("delivery_bag" if session.owns("delivery_bag") else ("backpack" if session.owns("backpack") else ""))
 	if session.owns("helmet"):
 		var helmet := CityAssets.create("helmet", 60)
 		helmet.position = Vector3(0, 1.05, 0.32)
@@ -285,7 +286,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		look(event.relative)
 	elif InputMap.has_action("camera_view") and event.is_action_pressed("camera_view"):
-		toggle_view()
+		if not busy: toggle_view()
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton and event.pressed and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and third_person and view != null:
 		var button := (event as InputEventMouseButton).button_index
@@ -392,7 +393,7 @@ func _physics_process(delta: float) -> void:
 ## kept for JUMP_BUFFER s; hard landings cost a moment of speed.
 func walk(delta: float) -> void:
 	_mouse_still += delta
-	var movement := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var movement := Input.get_vector("move_left", "move_right", "move_forward", "move_back") if not busy else Vector2.ZERO
 	var direction := transform.basis * Vector3(movement.x, 0, movement.y)
 	var sprinting := Input.is_action_pressed("sprint") and session.energy > 0.0 and movement.length() > 0.0
 	var walking := InputMap.has_action("walk") and Input.is_action_pressed("walk")
@@ -413,7 +414,7 @@ func walk(delta: float) -> void:
 	velocity.x = h.x
 	velocity.z = h.y
 	coyote_time = COYOTE if on_floor else maxf(0.0, coyote_time - delta)
-	jump_buffer = JUMP_BUFFER if Input.is_action_just_pressed("jump") else maxf(0.0, jump_buffer - delta)
+	jump_buffer = JUMP_BUFFER if Input.is_action_just_pressed("jump") and not busy else maxf(0.0, jump_buffer - delta)
 	if not on_floor:
 		velocity.y -= GRAVITY * delta
 	if jump_buffer > 0.0 and coyote_time > 0.0 and velocity.y <= 0.5:
