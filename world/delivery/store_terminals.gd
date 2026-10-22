@@ -13,6 +13,7 @@ var session: DeliverySession
 var shelves: Dictionary = {}       ## store -> {"frame": Transform3D, "slots": Array}
 var items: Array[Node3D] = []
 var _shown := ""
+var solids: PropColliders
 
 func setup(s: DeliverySession) -> void:
 	session = s
@@ -70,6 +71,9 @@ func place_shelf(store: String, frame: Transform3D) -> void:
 		var locker: Node3D = (load(LOCKER) as PackedScene).instantiate()
 		locker.transform = frame
 		add_child(locker)
+		# The shelving frame is solid on the prop layer: the E ray (mask 1) still reaches the items.
+		if solids == null: solids = PropColliders.new(self, "LockerProps")
+		solids.solid("pickup_locker", frame)
 		for n: Node in [locker] + locker.get_children():
 			var extras: Variant = n.get_meta("extras", {})
 			if extras is Dictionary and (extras as Dictionary).has("slots"):

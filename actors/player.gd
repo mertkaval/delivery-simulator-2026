@@ -229,7 +229,9 @@ func toggle_bicycle() -> String:
 	return "Mounted · W pedal · A/D or mouse steer · Space brake · Q bell · E dismount"
 
 func _ready() -> void:
-	collision_mask = 1 | 4 | 16   # 16: traffic-circle islands (ignored by AI traffic rays)
+	# 16: traffic-circle islands (ignored by AI traffic rays); 32 / 64: instanced street and yard
+	# props (fences, hedges, bins, benches, poles, sheds - PropColliders), seen only by the player.
+	collision_mask = 1 | 4 | 16 | PropColliders.LAYER_THIN | PropColliders.LAYER_BULKY
 	var shape := CollisionShape3D.new()
 	body_collision = shape
 	var capsule := CapsuleShape3D.new()

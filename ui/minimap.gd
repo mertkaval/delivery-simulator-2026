@@ -27,9 +27,11 @@ func road(a: Vector3, b: Vector3, width: float = 10) -> void:
 func _draw() -> void:
 	if not is_instance_valid(player) or session == null or not is_instance_valid(world): return
 	var center := size * 0.5
-	draw_circle(center, radius() + 7, Color(0.02, 0.04, 0.055, 0.95))
-	draw_circle(center, radius(), Color("253c36"))
-	draw_arc(center, radius() + 3, 0, TAU, 96, Color("77948c"), 1.5, true)
+	# HudStyle: dark translucent rim, a thin light ring, muted green ground.
+	draw_circle(center, radius() + 8, Color(0, 0, 0, 0.16))
+	draw_circle(center, radius() + 6, HudStyle.PANEL_STRONG)
+	draw_circle(center, radius(), Color(0.13, 0.2, 0.19, 0.94))
+	draw_arc(center, radius() + 2.5, 0, TAU, 96, Color(1, 1, 1, 0.22), 1.0, true)
 	road(Vector3(0, 0, -690), Vector3(0, 0, 50), 12)
 	for x in [-64, 64]: road(Vector3(x, 0, -678), Vector3(x, 0, -258))
 	for z in CityCatalog.CROSS_STREETS + [48]: road(Vector3(-69, 0, z), Vector3(69, 0, z))
@@ -70,7 +72,13 @@ func _draw() -> void:
 	var arrow := PackedVector2Array()
 	for p in [Vector2(0, -9), Vector2(6, 7), Vector2(0, 4), Vector2(-6, 7)]: arrow.append(center + p.rotated(-player.rotation.y))
 	draw_colored_polygon(arrow, Color.WHITE)
-	draw_string(ThemeDB.fallback_font, Vector2(center.x - 5, 21), "N", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
+	# North marker: a small pill on the rim.
+	var north := Vector2(center.x, center.y - radius() - 2)
+	draw_circle(north, 7.5, HudStyle.PANEL_STRONG)
+	draw_arc(north, 7.5, 0, TAU, 32, Color(1, 1, 1, 0.25), 1.0, true)
+	var f := HudStyle.font(HudStyle.Face.DISPLAY, HudStyle.BOLD)
+	var w := f.get_string_size("N", HORIZONTAL_ALIGNMENT_LEFT, -1, HudStyle.CAPTION).x
+	draw_string(f, north + Vector2(-w * 0.5, f.get_ascent(HudStyle.CAPTION) * 0.5 - 1), "N", HORIZONTAL_ALIGNMENT_LEFT, -1, HudStyle.CAPTION, HudStyle.ACCENT)
 var _nav_cache := PackedVector3Array()
 var _nav_from := Vector3(INF, 0, INF)
 var _nav_goal := Vector3(INF, 0, INF)

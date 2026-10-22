@@ -13,18 +13,18 @@ extends Node
 
 const STEPS := [
 	{"id": "look", "title": "Look around", "hint": "Move the mouse to look around the street."},
-	{"id": "walk", "title": "Take a walk", "hint": "Walk with W A S D. Hold {sprint} to jog. You start on foot: a bicycle comes later."},
+	{"id": "walk", "title": "Take a walk", "hint": "Walk with W A S D; hold {sprint} to jog. You start on foot: a bicycle comes later."},
 	{"id": "store", "title": "Walk to Trail & Tool", "hint": "Follow the mint route on the minimap to the equipment store."},
-	{"id": "order", "title": "Order a phone and a delivery bag", "hint": "Use the store computer on the counter ({interact}). Add the Nova budget phone and the insulated delivery bag to the cart and press Purchase. You have $100."},
-	{"id": "collect", "title": "Collect your order", "hint": "Your items wait on the ONLINE ORDER PICKUP shelf at the back of the store. Look at each one and press {interact}."},
+	{"id": "order", "title": "Order a phone and a delivery bag", "hint": "Use the computer on the counter ({interact}): buy the Nova budget phone and the insulated delivery bag. You have $100."},
+	{"id": "collect", "title": "Collect your order", "hint": "They wait on the ONLINE ORDER PICKUP shelf at the back of the store. Look at each and press {interact}."},
 	{"id": "phone", "title": "Open your phone and CourierNow", "hint": "Press {phone} to take out your phone, then tap the orange CourierNow app."},
 	{"id": "online", "title": "Start your shift", "hint": "In CourierNow, tap 'Start shift · go online'. A first request will come in."},
-	{"id": "accept", "title": "Accept your first order", "hint": "Tap Accept on the request in CourierNow, then put the phone away ({phone})."},
+	{"id": "accept", "title": "Accept your first order", "hint": "Tap Accept on the request, then put the phone away ({phone})."},
 	{"id": "ride", "title": "Walk to {restaurant}", "hint": "Follow the mint route on the minimap to the restaurant's pickup shelf."},
-	{"id": "take", "title": "Find {customer}'s package", "hint": "Several couriers' orders wait on the shelf, mixed up. Read the name tags and find {customer} · {ticket} ({package}). Look at it and press {use}: you pick it up and pack it in your backpack."},
-	{"id": "leave", "title": "Leave it at the door", "hint": "This customer chose LEAVE AT DOOR. Go to {address} and press {use} at the yellow marked area: you take the order out of your bag, set it down and snap a proof photo."},
-	{"id": "accept2", "title": "Accept the next order", "hint": "A new request is waiting: this one is MEET AT DOOR. Open the phone ({phone}) and accept it."},
-	{"id": "meet", "title": "Meet the customer", "hint": "Find {customer}'s package at {restaurant} ({use}). At {address}, knock ({use} on the door), then press {use} again to hand it over when they come out."},
+	{"id": "take", "title": "Find {customer}'s package", "hint": "The shelf holds other couriers' orders too. Read the name tags, look at {ticket} ({package}) and press {use}: it goes straight into your backpack."},
+	{"id": "leave", "title": "Leave it at the door", "hint": "LEAVE AT DOOR: go to {address} and press {use} in the yellow marked area. You set it down and snap a proof photo."},
+	{"id": "accept2", "title": "Accept the next order", "hint": "A new request is waiting, this one MEET AT DOOR. Open the phone ({phone}) and accept it."},
+	{"id": "meet", "title": "Meet the customer", "hint": "Take {customer}'s package at {restaurant}. At {address}, knock ({use} on the door) and press {use} again to hand it over."},
 ]
 const LOOK_GOAL := 2.4     ## radians of looking around
 const WALK_GOAL := 12.0    ## metres on foot
@@ -41,8 +41,12 @@ func setup(owner_game: Node) -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS     # tasks done on the phone advance while it's open
 	card = MissionCard.new()
 	card.name = "MissionCard"
-	game.gameplay_ui.add_child(card)
-	card.position = Vector2(24, 156)
+	# The HUD's left column stacks objective, order chip and this card (no overlaps).
+	var stack: Control = game.get("hud_stack")
+	if stack != null: stack.add_child(card)
+	else:
+		game.gameplay_ui.add_child(card)
+		card.position = Vector2(16, 120)
 	card.hide()
 
 func session() -> DeliverySession:

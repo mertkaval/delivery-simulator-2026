@@ -7,6 +7,11 @@ var doors: Array[Dictionary] = []
 ## Furnishing props are only drawn within this distance (interiors only matter up close).
 const FURNISHING_RANGE := 30.0
 var furnishing: Array[Node3D] = []
+## Floor plants and planter boxes without furniture colliders: pot box (x width, y height, z depth).
+const PLANTERS := {"potted_plant_tall": Vector3(0.42, 1.0, 0.42), "potted_plant_floor": Vector3(0.4, 0.85, 0.4),
+	"planter_box_a": Vector3(0.5, 0.59, 0.5), "planter_box_b": Vector3(0.5, 0.59, 0.5), "planter_box_c": Vector3(0.5, 0.59, 0.5),
+	"planter_trough_a": Vector3(0.99, 0.6, 0.5), "planter_trough_b": Vector3(0.99, 0.6, 0.5), "planter_trough_c": Vector3(0.99, 0.6, 0.5)}
+var solids: PropColliders
 
 func point(v: Array) -> Vector3:
 	return Vector3(float(v[0]), float(v[2]), -float(v[1]))
@@ -118,6 +123,12 @@ func furnish(path: String) -> void:
 		furnishing.append(node)
 		var collide: bool = item.get("collide", InteriorProps.entry(id).get("collision", false)) and not item.get("snap", false)
 		if collide: InteriorProps.add_box_collider(body, id, xform)
+		elif PLANTERS.has(id) and not item.get("snap", false):
+			# Floor plants and planters: a box round the pot (the leaves stay soft), on the prop
+			# layer so the interaction ray and the camera arm look past them (PropColliders).
+			if solids == null: solids = PropColliders.new(self, "FurnishingProps")
+			var pot: Vector3 = PLANTERS[id]
+			solids.box(xform * Vector3(0, pot.y * 0.5, 0), pot, xform.basis, false, id)
 
 func toggle_door(index: int) -> void:
 	if index < 0 or index >= doors.size():

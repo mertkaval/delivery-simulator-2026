@@ -115,6 +115,7 @@ func fit_out(b: Dictionary, r: Array) -> void:
 	piece("rs_condiments", t, colours, xl + 0.6, 0, -6.75, PI / 2)
 	# Corner plant between the window-ledge stools and the last bay's table (it stood in the ledge).
 	piece("rs_plant", t, colours, xr - 0.72, 0, -1.75)
+	solids().solid("rs_plant", t * Transform3D(Basis.IDENTITY, Vector3(xr - 0.72, 0, -1.75)))
 	# --- kitchen line along the back wall, under the hood ---------------------------------------
 	var kz := -15.05
 	piece("rs_fryer", t, colours, xe - 1.0, 0, kz)
@@ -269,9 +270,11 @@ func exterior(t: Transform3D, b: Dictionary, r: Array, xe: float, e: int, bays: 
 		piece("rs_sidewalk_set", t, colours, x, SIDEWALK_Y, 1.7, 0.0, 120.0)
 		local_box(t, Vector3(x, 0.4, 1.7), Vector3(1.5, 0.8, 0.8))
 	piece("rs_aframe", t, colours, xe + 1.5, SIDEWALK_Y, 1.0, PI / 2, 90.0)
+	solids().solid("rs_aframe", t * Transform3D(Basis(Vector3.UP, PI / 2), Vector3(xe + 1.5, SIDEWALK_Y, 1.0)))
 	RestaurantDressing.terrace(self, t, b, e, bays)
 	for x in [xe - 1.4, xe + 1.4]:
 		piece("rs_planter", t, colours, x, SIDEWALK_Y, 0.45, 0.0, 120.0)
+		solids().solid("rs_planter", t * Transform3D(Basis.IDENTITY, Vector3(x, SIDEWALK_Y, 0.45)))
 	label(t, str(r[3]), Vector3(xe, 3.3, 0.16), 16, Color("f1ead7"))
 
 var people: Array[Node3D] = []

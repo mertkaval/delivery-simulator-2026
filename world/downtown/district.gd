@@ -38,7 +38,13 @@ func pose(at: Vector3, yaw: float=0, scale_factor: Vector3=Vector3.ONE) -> Trans
 ## Kit props replaced by the converted realistic props (PropKit) where one exists.
 const PROP_SWAP := {"dumpster":"dumpster_large","bollard":"bollard_metal","barrier":"water_barrier_white","trash_bin":"litter_bin_green",
 	"recycle_bin":"wheelie_bin_blue","hydrant":"fire_hydrant","cone":"traffic_cone"}
+## Primitive colliders for the street props, café furniture and campus signs (PropColliders).
+var _solids: PropColliders
+func solids() -> PropColliders:
+	if _solids==null: _solids=PropColliders.new(self,"DowntownProps")
+	return _solids
 func place(asset: String, transform: Transform3D, group: int, end: float=180, start: float=0) -> void:
+	if start==0 and PropColliders.has(asset): solids().solid(asset,transform)
 	var pieces := UrbanKit.get_parts(asset)
 	if PROP_SWAP.has(asset) and PropKit.has(PROP_SWAP[asset]): pieces = PropKit.get_parts(PROP_SWAP[asset])
 	var cell := Vector2i(floori(transform.origin.x/64),floori(transform.origin.z/64))

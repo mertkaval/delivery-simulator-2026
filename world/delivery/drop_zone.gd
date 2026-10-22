@@ -232,10 +232,13 @@ func customer_leaves(package: Node3D) -> void:
 	tw2.tween_interval(2.4)
 	tw2.tween_callback(func() -> void: who.rotate_y(PI))
 	tw2.tween_property(who, "global_position", door_point - facing * 0.6 + Vector3(0, who.global_position.y - door_point.y, 0), 1.2)
-	tw2.tween_callback(func() -> void:
+	tw2.tween_callback(who.queue_free)
+	# The door shuts behind them (a tween on this zone, so it dies with the zone).
+	var tw3 := create_tween()
+	tw3.tween_interval(3.6)
+	tw3.tween_callback(func() -> void:
 		var audio := get_tree().get_first_node_in_group("city_audio") as CityAudio
 		if audio: audio.one_shot_at("door_close", door_point + Vector3(0, 1.2, 0), -6.0, 4.0))
-	tw2.tween_callback(who.queue_free)
 
 func clear() -> void:
 	if customer: customer.queue_free()

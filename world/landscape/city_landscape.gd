@@ -43,6 +43,7 @@ var placer: PropPlacer
 var groups: Dictionary = {}        ## key -> {"mesh", "begin", "end", "shadow", "xf": Array[Transform3D], "cust": Array[Color]}
 var counts: Dictionary = {}        ## asset -> instance count
 var trunks: StaticBody3D
+var solids: PropColliders
 var rng := RandomNumberGenerator.new()
 var lights: Array[Vector3] = []
 
@@ -252,6 +253,11 @@ func add_tree(sid: String, at: Vector3, yaw: float, scale: float, collide: bool 
 func add_prop(id: String, xf: Transform3D, end: float, shadow: bool, cell: float = 64.0, begin: float = 0.0) -> bool:
 	var p := prop(id)
 	if p.is_empty(): return false
+	# Pots and rocks are solid (PropColliders: rocks only when tall enough to matter); shrubs, grass,
+	# flower beds and forest cards stay walk-through.
+	if begin == 0.0 and PropColliders.has(id):
+		if solids == null: solids = PropColliders.new(self, "LandscapeProps")
+		solids.solid(id, xf)
 	queue(id + ("_far" if begin > 0.0 else ""), p.mesh, xf, cell, begin, end, shadow, tint())
 	counts[id] = int(counts.get(id, 0)) + 1
 	return true

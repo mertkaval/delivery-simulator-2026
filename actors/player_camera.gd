@@ -58,7 +58,8 @@ func setup(owner_player: CourierPlayer) -> void:
 	var probe := SphereShape3D.new()
 	probe.radius = PROBE_RADIUS
 	arm.shape = probe
-	arm.collision_mask = 1 | 16
+	# Not the thin prop layer (fences, poles, bins): the arm would twitch along every fence run.
+	arm.collision_mask = 1 | 16 | PropColliders.LAYER_BULKY
 	arm.margin = 0.04
 	arm.spring_length = distance
 	player.add_child(arm)
@@ -240,7 +241,7 @@ func pick_action_view() -> Transform3D:
 		q.shape = probe
 		q.transform = Transform3D(Basis.IDENTITY, focus)
 		q.motion = want - focus
-		q.collision_mask = 1 | 16
+		q.collision_mask = 1 | 16 | PropColliders.LAYER_THIN | PropColliders.LAYER_BULKY
 		q.exclude = [player.get_rid()]
 		var free := space.cast_motion(q)
 		if free.is_empty() or float(free[0]) < 0.97: continue

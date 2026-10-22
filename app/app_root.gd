@@ -6,8 +6,8 @@ var street_label: Label
 var player: CourierPlayer
 var hud: CanvasLayer
 var objective: Label
-var stats: Label
-var prompt: Label
+## The interaction prompt as "[E / Click]  Take ..."; drawn as key caps + text in prompt_bar.
+var prompt_text := ""
 var notice: Label
 var modal: PanelContainer
 var modal_body: VBoxContainer
@@ -42,11 +42,10 @@ var menu_shade: ColorRect
 var menu_camera: Camera3D
 var phone_width: float = 390.0
 var calendar_label: Label
-var needs_label: Label
 var current_shop := "equipment"
 var save_enabled := true
 var audio: CityAudio
-var crosshair: Label
+var crosshair: Control
 ## One-button courier actions (pack at the shelf, leave at door, hand over): CourierSequence.
 var sequence: CourierSequence
 var order_plate: PanelContainer
@@ -54,6 +53,31 @@ var order_plate_name: Label
 var order_plate_info: Label
 var receipt_name: Label
 var receipt_head: Label
+## HUD layout (HudStyle): left column (objective, order chip, training card), right column
+## (clock, wallet, needs; package name tag under it), bottom-left (backpack line, minimap, route
+## distance), bottom centre (interaction prompt, controls), bottom right (riding speed).
+var hud_stack: VBoxContainer
+var status_panel: PanelContainer
+var clock_label: Label
+var weather_label: Label
+var wallet_label: Label
+var need_bars: Dictionary = {}
+var supplies_row: HBoxContainer
+var prompt_bar: PanelContainer
+var prompt_row: HBoxContainer
+var _prompt_shown := "~"
+var controls_bar: PanelContainer
+var controls_row: HBoxContainer
+var _controls_shown := ""
+var _controls_age := 0.0
+var speed_panel: PanelContainer
+var speed_label: Label
+var bag_chip: PanelContainer
+var bag_head: Label
+var bag_keys: HBoxContainer
+var _bag_key_shown := "~"
+var nav_pill: PanelContainer
+var _supplies_shown := "~"
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -99,6 +123,8 @@ func _ready() -> void:
 	route_marker.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	route_marker.no_depth_test = true
 	route_marker.modulate = Color("b6f3d1")
+	route_marker.font = HudStyle.font(HudStyle.Face.DISPLAY, HudStyle.SEMIBOLD)
+	route_marker.outline_size = 10
 	add_child(route_marker)
 	session.changed.connect(update_hud)
 	bag_rig = BagRig.new()
@@ -234,8 +260,12 @@ func _process(delta: float) -> void:
 	if mode == "bag": update_bag_drag(delta)
 	# Third person: the crosshair marks where the interaction ray from the head points.
 	if crosshair and player.view:
-		crosshair.position = player.view.reticle - Vector2(7, 17)
-		crosshair.visible = not sequence.running
+		crosshair.position = player.view.reticle - crosshair.size * 0.5
+		crosshair.visible = not sequence.running and mode == ""
+	# Phone, bag, menus: their own instructions replace the prompt and the controls bar.
+	if mode != "" and controls_bar:
+		controls_bar.visible = false
+		prompt_bar.visible = false
 	if get_tree().paused:
 		return
 	session.tick(delta)
@@ -251,7 +281,7 @@ func _process(delta: float) -> void:
 	notification_time -= delta
 	notice.visible = notification_time > 0
 	var target := player.target() if not sequence.running else {}
-	prompt.text = ""
+	prompt_text = ""
 	# At the pickup shelf with an order to collect, the camera comes in so the tags read well.
 	player.view.browse = session.order.get("state") == "ACCEPTED" and not player.mounted and Vector2(player.position.x - session.pickup_position().x, player.position.z - session.pickup_position().z).length() < 4.2
 	if not target.is_empty():
@@ -279,18 +309,19 @@ func _process(delta: float) -> void:
 			title = "Browse delivery equipment"
 		elif title == "home":
 			title = "Rest and save"
-		prompt.text = "[%s]  %s" % [use_hint(), title]
+		prompt_text = "[%s]  %s" % [use_hint(), title]
 	# At the door, E works by proximity (see interact): say so whatever the crosshair is on.
 	if drop_zone and session.order.get("state") in ["IN_HAND", "CARRYING"] and not sequence.running and (target.is_empty() or str(target.id).begins_with("door_") or target.id == "dropzone"):
 		if drop_zone.method == "door" and near_zone(3.0):
-			prompt.text = "[%s]  Leave %s's order in the marked area" % [use_hint(), session.order.get("customer", "the customer")]
+			prompt_text = "[%s]  Leave %s's order in the marked area" % [use_hint(), session.order.get("customer", "the customer")]
 		elif drop_zone.customer != null and player.position.distance_to(drop_zone.customer.global_position) < 2.6:
-			prompt.text = "[%s]  Hand the order to %s" % [use_hint(), session.order.get("customer", "the customer")]
+			prompt_text = "[%s]  Hand the order to %s" % [use_hint(), session.order.get("customer", "the customer")]
 	elif session.holding_package() and session.has_bag() and target.is_empty() and not sequence.running:
-		prompt.text = "[%s]  Pack it in your backpack" % use_hint()
+		prompt_text = "[%s]  Pack it in your backpack" % use_hint()
 	show_receipt(target)
 	update_held_package()
 	update_hud()
+	layout_hud(delta)
 
 func interact() -> void:
 	if sequence.running: return
@@ -405,9 +436,9 @@ func make_label(text: String, size: int = 20, color: Color = Color("e6efeb")) ->
 	label.text = text
 	label.add_theme_font_size_override("font_size", size)
 	label.add_theme_color_override("font_color", color)
-	label.add_theme_color_override("font_shadow_color",Color(0,0,0,.85))
-	label.add_theme_constant_override("shadow_offset_x",1)
-	label.add_theme_constant_override("shadow_offset_y",2)
+	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.5))
+	label.add_theme_constant_override("shadow_offset_x", 0)
+	label.add_theme_constant_override("shadow_offset_y", 1)
 	return label
 
 func build_hud() -> void:
@@ -416,75 +447,168 @@ func build_hud() -> void:
 	gameplay_ui = Control.new()
 	gameplay_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	gameplay_ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	gameplay_ui.theme = HudStyle.theme()
 	hud.add_child(gameplay_ui)
+	var m := HudStyle.MARGIN
+	# Left column: objective, order chip, training card (TutorialDirector adds it). A VBox, so the
+	# blocks stack whatever their text and never overlap.
+	hud_stack = VBoxContainer.new()
+	hud_stack.name = "HudStack"
+	hud_stack.position = Vector2(m, m)
+	hud_stack.custom_minimum_size.x = HudStyle.COLUMN
+	hud_stack.add_theme_constant_override("separation", HudStyle.GAP)
+	hud_stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	gameplay_ui.add_child(hud_stack)
 	var top := PanelContainer.new()
-	top.position = Vector2(24, 24)
-	top.custom_minimum_size = Vector2(445, 120)
-	top.add_theme_stylebox_override("panel", style_panel(Color(0.055, 0.11, 0.12, 0.94)))
-	hud.add_child(top)
+	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	top.add_theme_stylebox_override("panel", HudStyle.panel())
+	hud_stack.add_child(top)
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 8)
+	column.add_theme_constant_override("separation", 1)
 	top.add_child(column)
-	street_label = make_label("ATATÜRK AVENUE  /  DELIVERY SIMULATOR", 15, Color("9bceb7"))
+	street_label = HudStyle.eyebrow("", HudStyle.ACCENT)
+	street_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	column.add_child(street_label)
-	objective = make_label("", 21)
+	objective = HudStyle.label("", HudStyle.TITLE, HudStyle.INK, HudStyle.Face.TEXT, HudStyle.SEMIBOLD)
+	objective.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	objective.custom_minimum_size.x = HudStyle.COLUMN - 24
+	objective.max_lines_visible = 2
 	column.add_child(objective)
-	stats = make_label("", 16)
-	column.add_child(stats)
-	var calendar_bar := PanelContainer.new()
-	calendar_bar.position = Vector2(610, 24)
-	calendar_bar.custom_minimum_size = Vector2(646, 94)
-	calendar_bar.add_theme_stylebox_override("panel", style_panel(Color(0.035, 0.065, 0.085, 0.94)))
-	hud.add_child(calendar_bar)
-	var calendar_column := VBoxContainer.new()
-	calendar_bar.add_child(calendar_column)
-	calendar_label = make_label("", 18, Color("e1e9ee"))
-	calendar_column.add_child(calendar_label)
-	needs_label = make_label("", 14, Color("9db9b0"))
-	calendar_column.add_child(needs_label)
+	order_plate = HudStyle.order_chip()
+	order_plate.name = "OrderChip"
+	order_plate_name = order_plate.get_node("Col/Name") as Label
+	order_plate_info = order_plate.get_node("Col/Info") as Label
+	order_plate.visible = false
+	hud_stack.add_child(order_plate)
+	# Right column: clock, date and weather, wallet; energy / food / water / WC meters.
+	status_panel = PanelContainer.new()
+	status_panel.name = "StatusPanel"
+	status_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	status_panel.add_theme_stylebox_override("panel", HudStyle.panel(Color(0, 0, 0, 0), HudStyle.PANEL, 12, 8))
+	status_panel.custom_minimum_size.x = STATUS_WIDTH
+	status_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	status_panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	status_panel.offset_right = -m
+	status_panel.offset_left = -m - STATUS_WIDTH
+	status_panel.offset_top = m
+	gameplay_ui.add_child(status_panel)
+	var status_col := VBoxContainer.new()
+	status_col.add_theme_constant_override("separation", 6)
+	status_panel.add_child(status_col)
+	var clock_row := HBoxContainer.new()
+	clock_row.add_theme_constant_override("separation", 8)
+	status_col.add_child(clock_row)
+	clock_label = HudStyle.label("12:00", HudStyle.CLOCK, HudStyle.INK, HudStyle.Face.DISPLAY, HudStyle.SEMIBOLD)
+	clock_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	clock_row.add_child(clock_label)
+	var date_col := VBoxContainer.new()
+	date_col.add_theme_constant_override("separation", 1)
+	date_col.alignment = BoxContainer.ALIGNMENT_CENTER
+	date_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	clock_row.add_child(date_col)
+	calendar_label = HudStyle.eyebrow("", HudStyle.INK_SOFT)
+	date_col.add_child(calendar_label)
+	weather_label = HudStyle.eyebrow("", HudStyle.MUTED)
+	date_col.add_child(weather_label)
+	wallet_label = HudStyle.label("", 15, HudStyle.ACCENT, HudStyle.Face.DISPLAY, HudStyle.SEMIBOLD)
+	wallet_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	wallet_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	clock_row.add_child(wallet_label)
+	var needs_row := HBoxContainer.new()
+	needs_row.add_theme_constant_override("separation", 8)
+	status_col.add_child(needs_row)
+	for need in ["ENERGY", "FOOD", "WATER", "WC"]:
+		var cell := VBoxContainer.new()
+		cell.add_theme_constant_override("separation", 2)
+		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		needs_row.add_child(cell)
+		cell.add_child(HudStyle.eyebrow(need, HudStyle.MUTED, HudStyle.MICRO))
+		var bar := HudStyle.meter(0.0, 3.0)
+		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		cell.add_child(bar)
+		need_bars[need] = bar
+	supplies_row = HBoxContainer.new()
+	supplies_row.add_theme_constant_override("separation", 4)
+	supplies_row.visible = false
+	status_col.add_child(supplies_row)
+	# Bottom left: backpack line, minimap, route distance.
 	minimap = preload("res://ui/minimap.gd").new()
 	minimap.player = player
 	minimap.session = session
 	minimap.world = world
-	minimap.position = Vector2(24, 414)
-	minimap.size = Vector2(220, 220)
-	hud.add_child(minimap)
-	navigation_label = make_label("", 15, Color("b6f3d1"))
-	navigation_label.position = Vector2(36, 641)
-	hud.add_child(navigation_label)
-	var controls := make_label("%s Move   %s Sprint   %s Walk   Space Jump   %s / Click Use   %s Bag   %s Phone   %s Map   %s View   Wheel Zoom   %s Pause" % ["WASD", binding("sprint"), binding("walk"), binding("interact"), binding("bag"), binding("phone"), binding("map"), binding("camera_view"), binding("pause_game")], 15)
-	controls.position = Vector2(24, 679)
-	hud.add_child(controls)
-	var center := make_label("+", 24)
-	center.position = Vector2(633, 343)
-	hud.add_child(center)
-	crosshair = center
-	prompt = make_label("", 20)
-	prompt.position = Vector2(350, 585)
-	prompt.size = Vector2(580, 40)
-	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hud.add_child(prompt)
-	notice = make_label("", 18)
-	notice.position = Vector2(330, 480)
-	notice.size = Vector2(620, 100)
+	minimap.size = Vector2(MINIMAP_SIZE, MINIMAP_SIZE)
+	gameplay_ui.add_child(minimap)
+	nav_pill = PanelContainer.new()
+	nav_pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	nav_pill.add_theme_stylebox_override("panel", HudStyle.pill(HudStyle.PANEL_STRONG, 9, 2))
+	gameplay_ui.add_child(nav_pill)
+	navigation_label = HudStyle.label("", HudStyle.SMALL, HudStyle.ACCENT, HudStyle.Face.TEXT, HudStyle.SEMIBOLD)
+	nav_pill.add_child(navigation_label)
+	bag_chip = PanelContainer.new()
+	bag_chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bag_chip.add_theme_stylebox_override("panel", HudStyle.panel(Color(0, 0, 0, 0), HudStyle.PANEL, 8, 4))
+	gameplay_ui.add_child(bag_chip)
+	var bag_row := HBoxContainer.new()
+	bag_row.add_theme_constant_override("separation", 6)
+	bag_chip.add_child(bag_row)
+	bag_keys = HBoxContainer.new()
+	bag_keys.add_theme_constant_override("separation", 3)
+	bag_row.add_child(bag_keys)
+	bag_head = HudStyle.eyebrow("BACKPACK", HudStyle.WARM)
+	bag_head.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	bag_row.add_child(bag_head)
+	bag_label = HudStyle.label("", HudStyle.SMALL, HudStyle.INK_SOFT)
+	bag_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	bag_row.add_child(bag_label)
+	# Bottom centre: the interaction prompt over a quiet, context-aware controls bar.
+	prompt_bar = PanelContainer.new()
+	prompt_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	prompt_bar.add_theme_stylebox_override("panel", HudStyle.pill(HudStyle.PANEL_STRONG, 12, 5))
+	gameplay_ui.add_child(prompt_bar)
+	prompt_row = HBoxContainer.new()
+	prompt_row.add_theme_constant_override("separation", 5)
+	prompt_bar.add_child(prompt_row)
+	controls_bar = PanelContainer.new()
+	controls_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	controls_bar.add_theme_stylebox_override("panel", HudStyle.pill(Color(0.03, 0.05, 0.06, 0.5), 10, 3))
+	gameplay_ui.add_child(controls_bar)
+	controls_row = HBoxContainer.new()
+	controls_row.add_theme_constant_override("separation", 3)
+	controls_bar.add_child(controls_row)
+	# Bottom right: riding speed.
+	speed_panel = PanelContainer.new()
+	speed_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	speed_panel.add_theme_stylebox_override("panel", HudStyle.panel(Color(0, 0, 0, 0), HudStyle.PANEL, 12, 4))
+	speed_panel.visible = false
+	gameplay_ui.add_child(speed_panel)
+	var speed_row := HBoxContainer.new()
+	speed_row.add_theme_constant_override("separation", 4)
+	speed_panel.add_child(speed_row)
+	speed_label = HudStyle.label("0", HudStyle.SPEED, HudStyle.INK, HudStyle.Face.DISPLAY, HudStyle.SEMIBOLD)
+	speed_row.add_child(speed_label)
+	var unit := HudStyle.eyebrow("KM/H", HudStyle.MUTED)
+	unit.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+	unit.size_flags_vertical = Control.SIZE_SHRINK_END
+	speed_row.add_child(unit)
+	# Third person: a small dot where the interaction ray points.
+	crosshair = Reticle.new()
+	crosshair.size = Vector2(12, 12)
+	crosshair.position = Vector2(634, 354)
+	gameplay_ui.add_child(crosshair)
+	# Toasts: a compact pill at the top centre, between the two columns.
+	notice = HudStyle.label("", HudStyle.BODY, HudStyle.INK, HudStyle.Face.TEXT, HudStyle.MEDIUM)
 	notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	notice.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	notice.add_theme_color_override("font_color", Color("ffffff"))
-	notice.add_theme_color_override("font_shadow_color", Color.BLACK)
-	notice.add_theme_constant_override("shadow_offset_x", 2)
-	notice.add_theme_constant_override("shadow_offset_y", 2)
-	var notice_bg := StyleBoxFlat.new()
-	notice_bg.bg_color = Color(0.02, 0.04, 0.05, 0.62)
-	notice_bg.set_corner_radius_all(12)
-	notice_bg.content_margin_left = 16
-	notice_bg.content_margin_right = 16
-	notice_bg.content_margin_top = 8
-	notice_bg.content_margin_bottom = 8
+	notice.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	notice.add_theme_constant_override("line_spacing", -1)
+	var notice_bg := HudStyle.panel(Color(0, 0, 0, 0), HudStyle.PANEL_STRONG, 14, 6)
+	notice_bg.border_width_bottom = 2
+	notice_bg.border_color = HudStyle.ACCENT
+	notice_bg.border_width_left = 0
+	notice_bg.border_width_right = 0
+	notice_bg.border_width_top = 0
 	notice.add_theme_stylebox_override("normal", notice_bg)
-	notice.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
-	notice.size = Vector2(455, 0)
-	notice.position = Vector2(486, 128)
-	hud.add_child(notice)
+	gameplay_ui.add_child(notice)
 	# Keep gameplay chrome out of the title menu.
 	for child in hud.get_children():
 		if child != gameplay_ui:
@@ -498,6 +622,7 @@ func build_hud() -> void:
 	modal.position = Vector2(720, 28)
 	modal.custom_minimum_size = Vector2(525, 620)
 	modal.add_theme_stylebox_override("panel", style_panel(Color("10252b")))
+	modal.theme = HudStyle.theme()
 	hud.add_child(modal)
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -507,8 +632,86 @@ func build_hud() -> void:
 	modal_body.add_theme_constant_override("separation", 12)
 	scroll.add_child(modal_body)
 
+const STATUS_WIDTH := 248.0
+const MINIMAP_SIZE := 148.0
+const NOTICE_MAX := 460.0
+
+## The crosshair: a dot with a dark ring, readable on any background.
+class Reticle extends Control:
+	func _ready() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+	func _draw() -> void:
+		var c := size * 0.5
+		draw_circle(c, 3.2, Color(0, 0, 0, 0.45))
+		draw_circle(c, 2.0, Color(1, 1, 1, 0.92))
+
+## Display name for a key ("Escape" -> "Esc").
+func key_name(action: String) -> String:
+	var k := binding(action)
+	return {"Escape": "Esc", "Ctrl": "Ctrl", "Shift": "Shift"}.get(k, k)
+
+## Positions of the anchored HUD blocks for the current canvas size, the prompt / controls
+## rendering and the controls bar fade. Called every frame (cheap: only moves controls).
+func layout_hud(delta: float) -> void:
+	var view := gameplay_ui.size
+	var m := HudStyle.MARGIN
+	# Bottom left: minimap with the distance pill hanging off its lower edge, backpack line above.
+	minimap.size = Vector2(MINIMAP_SIZE, MINIMAP_SIZE)
+	minimap.position = Vector2(m, view.y - m - 10 - MINIMAP_SIZE)
+	nav_pill.reset_size()
+	nav_pill.position = Vector2(maxf(m * 0.5, m + MINIMAP_SIZE * 0.5 - nav_pill.size.x * 0.5), minimap.position.y + MINIMAP_SIZE - 6)
+	bag_chip.reset_size()
+	bag_chip.position = Vector2(m, minimap.position.y - HudStyle.GAP - bag_chip.size.y)
+	# The left column must end above the backpack line: drop the training instruction to fewer
+	# lines on short canvases (never happens at 16:9, kept as a guard).
+	var floor_y := (bag_chip.position.y if bag_chip.visible else minimap.position.y) - HudStyle.GAP
+	if tutorial and tutorial.card and tutorial.card.visible:
+		var hint: Label = tutorial.card.hint
+		if hud_stack.position.y + hud_stack.size.y > floor_y and hint.max_lines_visible > 1: hint.max_lines_visible -= 1
+		elif hud_stack.position.y + hud_stack.size.y + 16 < floor_y and hint.max_lines_visible < 4: hint.max_lines_visible += 1
+	hud_stack.reset_size()
+	# Interaction prompt.
+	if prompt_text != _prompt_shown:
+		_prompt_shown = prompt_text
+		HudStyle.fill_keys(prompt_row, HudStyle.parse_keys(prompt_text), HudStyle.PROMPT, HudStyle.INK, HudStyle.CAPTION, HudStyle.SEMIBOLD)
+		prompt_bar.reset_size()
+	prompt_bar.visible = prompt_text != "" and mode == ""
+	controls_bar.visible = mode == ""
+	# Controls bar: what the keys do right now; quiet, and fades further once you're moving.
+	var mounted := player.mounted
+	var car := mounted and ShopCatalog.is_car(session.active_vehicle)
+	var controls := ""
+	if mounted:
+		controls = "[W / S] %s  [A / D] Steer  [Space] Brake  [%s] %s  [%s] Phone  [%s] View  [%s] Pause" % ["Drive" if car else "Pedal", key_name("interact"), "Exit" if car else "Dismount", key_name("phone"), key_name("camera_view"), key_name("pause_game")]
+	else:
+		controls = "[WASD] Move  [%s] Sprint  [%s] Walk  [Space] Jump  [%s / Click] Use  [%s] Bag  [%s] Phone  [%s] Map  [%s] View  [Wheel] Zoom  [%s] Pause" % [key_name("sprint"), key_name("walk"), key_name("interact"), key_name("bag"), key_name("phone"), key_name("map"), key_name("camera_view"), key_name("pause_game")]
+	if controls != _controls_shown:
+		_controls_shown = controls
+		_controls_age = 0.0
+		HudStyle.fill_keys(controls_row, HudStyle.parse_keys(controls), HudStyle.CAPTION, HudStyle.INK_SOFT, HudStyle.MICRO, HudStyle.REGULAR)
+		controls_bar.reset_size()
+	_controls_age += delta
+	controls_bar.modulate.a = lerpf(controls_bar.modulate.a, 0.95 if _controls_age < 12.0 else 0.5, minf(1.0, delta * 2.0))
+	controls_bar.position = Vector2(round((view.x - controls_bar.size.x) * 0.5), view.y - 8 - controls_bar.size.y)
+	prompt_bar.position = Vector2(round((view.x - prompt_bar.size.x) * 0.5), controls_bar.position.y - 10 - prompt_bar.size.y)
+	# Riding speed, bottom right.
+	speed_panel.visible = mounted
+	if mounted:
+		speed_label.text = "%d" % int(absf(player.riding_speed) * 3.6)
+		speed_panel.reset_size()
+		speed_panel.position = Vector2(view.x - m - speed_panel.size.x, view.y - m - speed_panel.size.y)
+	# Toast: as wide as its text, up to NOTICE_MAX, wrapping beyond.
+	if notice.visible:
+		var f := notice.get_theme_font("font")
+		var natural := f.get_multiline_string_size(notice.text, HORIZONTAL_ALIGNMENT_LEFT, -1, HudStyle.BODY).x
+		var w := clampf(natural + 30.0, 140.0, NOTICE_MAX)
+		notice.custom_minimum_size.x = w
+		notice.size = Vector2(w, 0)     # shrinks to the wrapped text's height
+		notice.position = Vector2(round((view.x - notice.size.x) * 0.5), m)
+
+
 func add_text(text: String, size: int = 20, color: Color = Color("e6efeb")) -> void:
-	if mode in ["phone", "map"]: size = int(size * 0.83)
+	size = roundi(size * (0.7 if mode in ["phone", "map"] else 0.8))     # HudStyle type scale
 	var label := make_label(text, size, color)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.custom_minimum_size.x = 0
@@ -517,8 +720,9 @@ func add_text(text: String, size: int = 20, color: Color = Color("e6efeb")) -> v
 func button(text: String, callback: Callable) -> void:
 	var control := Button.new()
 	control.text = text
-	control.custom_minimum_size.y = 46
-	control.add_theme_font_size_override("font_size", 16 if mode in ["phone", "map"] else 19)
+	control.custom_minimum_size.y = 36
+	control.add_theme_font_size_override("font_size", 13 if mode in ["phone", "map"] else 15)
+	control.add_theme_font_override("font", HudStyle.font(HudStyle.Face.TEXT, HudStyle.SEMIBOLD))
 	control.add_theme_stylebox_override("normal", style_panel(Color("23424a")))
 	control.add_theme_stylebox_override("hover", style_panel(Color("376357")))
 	control.add_theme_stylebox_override("focus", style_panel(Color("376357")))
@@ -554,10 +758,11 @@ func show_menu(which: String) -> void:
 	modal_body.add_theme_constant_override("separation",8 if is_phone else 12)
 	player.camera.make_current()
 	modal.custom_minimum_size = Vector2.ZERO
-	modal.position = Vector2(830, 28)
-	modal.size = Vector2(420, 640)
-	var style := style_panel(Color(0.04, 0.075, 0.09, 0.92))
-	style.set_corner_radius_all(28 if which == "phone" else 10)
+	# Right column, under the status panel (HudStyle).
+	var top_y := status_panel.position.y + status_panel.size.y + HudStyle.GAP
+	modal.size = Vector2(420, gameplay_ui.size.y - HudStyle.MARGIN - top_y)
+	modal.position = Vector2(gameplay_ui.size.x - HudStyle.MARGIN - 420, top_y)
+	var style := HudStyle.panel(Color(0, 0, 0, 0), Color(0.03, 0.05, 0.06, 0.93), 20, 16)
 	if is_phone:
 		modal.position = Vector2(924, 132)
 		modal.size = Vector2(328, 566)
@@ -852,7 +1057,7 @@ func flash_notice(colour: Color) -> void:
 	notice.add_theme_color_override("font_color", colour)
 	var tw := create_tween()
 	tw.tween_interval(2.5)
-	tw.tween_callback(func() -> void: notice.add_theme_color_override("font_color", Color.WHITE))
+	tw.tween_callback(func() -> void: notice.add_theme_color_override("font_color", HudStyle.INK))
 
 func delivered(method: String, show_receipt_now := true) -> void:
 	sound("delivery_success")
@@ -937,37 +1142,33 @@ func order_items_text() -> String:
 ## Receipt panel while looking at a package on a shelf: read it before you take it.
 func show_receipt(target: Dictionary) -> void:
 	if receipt_panel == null:
+		# The package's name tag, read before you take it: a paper card in the right column,
+		# under the status panel. Who it is for and the order code big, the printed receipt under it.
 		receipt_panel = PanelContainer.new()
-		receipt_panel.add_theme_stylebox_override("panel", style_panel(Color(0.97, 0.96, 0.92, 0.97)))
-		receipt_panel.position = Vector2(950, 150)
+		receipt_panel.name = "NameTag"
+		receipt_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var paper := HudStyle.panel(HudStyle.AMBER, HudStyle.PAPER, 12, 9)
+		paper.shadow_color = Color(0, 0, 0, 0.3)
+		receipt_panel.add_theme_stylebox_override("panel", paper)
+		receipt_panel.custom_minimum_size.x = STATUS_WIDTH
 		var col := VBoxContainer.new()
-		col.add_theme_constant_override("separation", 6)
+		col.add_theme_constant_override("separation", 3)
 		receipt_panel.add_child(col)
-		receipt_head = Label.new()
-		receipt_head.add_theme_font_size_override("font_size", 13)
-		receipt_head.add_theme_color_override("font_color", Color("8a6a2a"))
+		receipt_head = HudStyle.eyebrow("", HudStyle.PAPER_MUTED, HudStyle.MICRO)
 		col.add_child(receipt_head)
-		receipt_name = Label.new()
-		var heavy := SystemFont.new()
-		heavy.font_names = PackedStringArray(["Arial Black", "Segoe UI Black", "Arial", "sans-serif"])
-		heavy.font_weight = 900
-		receipt_name.add_theme_font_override("font", heavy)
-		receipt_name.add_theme_font_size_override("font_size", 30)
-		receipt_name.add_theme_color_override("font_color", Color("111111"))
-		receipt_name.add_theme_constant_override("line_spacing", -4)
+		receipt_name = HudStyle.label("", HudStyle.TAG, HudStyle.PAPER_INK, HudStyle.Face.DISPLAY, HudStyle.BOLD)
+		receipt_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		receipt_name.custom_minimum_size.x = STATUS_WIDTH - 27
+		receipt_name.add_theme_constant_override("line_spacing", -3)
 		col.add_child(receipt_name)
 		var rule := ColorRect.new()
-		rule.color = Color("ffc53d")
-		rule.custom_minimum_size = Vector2(0, 4)
+		rule.color = HudStyle.AMBER
+		rule.custom_minimum_size = Vector2(0, 2)
 		col.add_child(rule)
-		receipt_label = Label.new()
-		receipt_label.add_theme_font_size_override("font_size", 14)
-		receipt_label.add_theme_color_override("font_color", Color("1d1b18"))
-		var mono := SystemFont.new()
-		mono.font_names = PackedStringArray(["Consolas", "Courier New", "monospace"])
-		receipt_label.add_theme_font_override("font", mono)
+		receipt_label = HudStyle.label("", 9, Color("2a2722"), HudStyle.Face.MONO)
+		receipt_label.add_theme_constant_override("line_spacing", -1)
 		col.add_child(receipt_label)
-		hud.add_child(receipt_panel)
+		gameplay_ui.add_child(receipt_panel)
 	var showing: bool = not target.is_empty() and target.id == "package"
 	receipt_panel.visible = showing
 	if showing:
@@ -977,6 +1178,8 @@ func show_receipt(target: Dictionary) -> void:
 		receipt_head.text = "NAME TAG  ·  " + OrderDetails.package_label(str(info.kind), info.get("items", [])).to_upper()
 		receipt_name.text = "%s\n%s" % [str(info.customer).to_upper(), info.ticket]
 		receipt_label.text = OrderDetails.receipt_text(info, name, DeliverySession.ADDRESSES[int(info.get("address", 0))], session.calendar_minutes)
+		receipt_panel.reset_size()
+		receipt_panel.position = Vector2(gameplay_ui.size.x - HudStyle.MARGIN - receipt_panel.size.x, status_panel.position.y + status_panel.size.y + HudStyle.GAP)
 
 ## The package in your hands (bottom-right of the view) while it is out of the bag.
 func update_held_package() -> void:
@@ -1292,7 +1495,7 @@ func update_hud() -> void:
 	if objective == null:
 		return
 	var state: String = session.order.get("state", "")
-	street_label.text = "◆  " + StreetNames.describe(player.position).to_upper()
+	street_label.text = StreetNames.describe(player.position).to_upper()
 	objective.text = ("Online · requests arrive automatically" if session.online else "Offline · open your phone to go online")
 	if session.online and session.demand().begins_with("Kitchen closed"):
 		objective.text = "Kitchen closed · opens 08:00"
@@ -1300,7 +1503,7 @@ func update_hud() -> void:
 	var who := str(session.order.get("customer", ""))
 	var address_short: String = DeliverySession.ADDRESSES[int(session.order.get("address", 0))].replace(" Avenue", " Ave").replace(" Street", " St")
 	if state == "OFFERED":
-		objective.text = "New offer for %s  /  [%s] Open phone" % [who, binding("phone")]
+		objective.text = "New offer: %s · open phone (%s)" % [who, binding("phone")]
 	elif state == "ACCEPTED":
 		objective.text = "Collect %s's order at %s" % [who, session.restaurant_name()]
 		route_marker.position = session.pickup_position() + Vector3(0, 2, 0)
@@ -1314,31 +1517,58 @@ func update_hud() -> void:
 		route_marker.position = world.doors[int(session.order.address)] + Vector3(0, 2.5, 0)
 		route_marker.text = "%s\n%d m" % [who.to_upper(), int(player.position.distance_to(world.doors[int(session.order.address)]))]
 	update_order_plate(state)
-	if bag_label == null:
-		bag_label = make_label("", 14, Color("f4e7c4"))
-		bag_label.position = Vector2(36, 380)
-		hud.add_child(bag_label)
-	var bag_state := ""
+	# Backpack line: [key] HEAD  what's in it / what you're doing with the order.
+	var bag_key := ""
+	var bag_title := ""
+	var bag_text := ""
 	if session.has_bag():
-		bag_state = "BACKPACK  ·  " + ("%s's %s in the %s" % [who, str(OrderDetails.KIND_NAMES.get(session.order.get("kind", "bag"), "order")).to_lower(), str(OrderDetails.SLOT_NAMES.get(session.order.get("slot", ""), "bag")).to_lower()] if state == "CARRYING" else "empty") + "   [%s] look inside" % binding("bag")
+		bag_key = binding("bag")
+		bag_title = "BACKPACK"
+		bag_text = ("%s's %s · %s" % [who, str(OrderDetails.KIND_NAMES.get(session.order.get("kind", "bag"), "order")).to_lower(), str(OrderDetails.SLOT_NAMES.get(session.order.get("slot", ""), "bag")).to_lower()]) if state == "CARRYING" else "Empty · look inside"
 	if sequence != null and sequence.running:
-		bag_state = {"pack": "Packing %s's order…", "leave": "Leaving %s's order at the door…", "meet": "Handing the order to %s…"}.get(sequence.kind, "%s's order…") % who
+		bag_key = ""
+		bag_title = str({"pack": "PACKING", "leave": "LEAVING AT DOOR", "meet": "HANDING OVER"}.get(sequence.kind, "ORDER"))
+		bag_text = "%s's order…" % who
 	elif state == "IN_HAND":
-		bag_state = "HOLDING %s's order  ·  %s" % [who, ("[%s] pack it in your backpack" % use_hint()) if session.has_bag() else "no bag: carry it by hand"]
+		bag_key = use_hint() if session.has_bag() else ""
+		bag_title = "HOLDING"
+		bag_text = "%s's order · %s" % [who, "pack it" if session.has_bag() else "no bag: carry it by hand"]
 	elif state == "DROPPED":
-		bag_state = "%s's order is on the ground  ·  [%s] pick it up" % [who, use_hint()]
-	bag_label.text = bag_state
-	stats.text = "Day %d  ·  %02d:%02d  |  %s  |  Energy %d%%" % [int(session.calendar_minutes / 1440) + 1, int(session.hour()), int(session.calendar_minutes) % 60, DeliverySession.money(session.wallet), int(session.energy)]
-	calendar_label.text = "DAY %02d   ·   %s" % [int(session.calendar_minutes / 1440) + 1, session.date_text()]
-	if world.weather != null: calendar_label.text += "   ·   " + world.weather.describe().to_upper()
-	needs_label.text = "FOOD %d%%   WATER %d%%   WC %d%%   ·   %s" % [int(session.hunger), int(session.hydration), int(session.bladder), "Night" if session.hour() < 6 or session.hour() >= 20 else "Daylight"]
+		bag_key = use_hint()
+		bag_title = "ON THE GROUND"
+		bag_text = "%s's order · pick it up" % who
+	bag_chip.visible = bag_title != ""
+	if bag_key != _bag_key_shown:
+		_bag_key_shown = bag_key
+		HudStyle.fill_keys(bag_keys, HudStyle.parse_keys(("[%s]" % bag_key) if bag_key != "" else ""), HudStyle.SMALL, HudStyle.INK, HudStyle.CAPTION)
+		bag_keys.visible = bag_key != ""
+	bag_head.text = bag_title
+	bag_label.text = bag_text
+	# Status: clock, date · day, weather, wallet, needs.
+	var day := int(session.calendar_minutes / 1440) + 1
+	var date := session.calendar()
+	clock_label.text = "%02d:%02d" % [int(date.hour), int(date.minute)]
+	var weekdays := ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+	var months := ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
+	calendar_label.text = "%s %d %s  ·  DAY %d" % [weekdays[int(date.weekday)], int(date.day), months[int(date.month) - 1], day]
+	weather_label.text = world.weather.describe().replace("  ", " · ").to_upper() if world.weather != null else ("NIGHT" if session.hour() < 6 or session.hour() >= 20 else "DAYLIGHT")
+	wallet_label.text = DeliverySession.money(session.wallet)
+	set_need("ENERGY", session.energy / 100.0, false)
+	set_need("FOOD", session.hunger / 100.0, false)
+	set_need("WATER", session.hydration / 100.0, false)
+	set_need("WC", session.bladder / 100.0, true)
 	var water := int(session.supplies.get("water_bottle", 0))
 	var snack := int(session.supplies.get("energy_bar", 0))
-	if water + snack > 0: needs_label.text += "   ·   [%s] water ×%d   [%s] bar ×%d" % [binding("use_water"), water, binding("use_snack"), snack]
+	var supplies := ("[%s] Water ×%d  [%s] Energy bar ×%d" % [binding("use_water"), water, binding("use_snack"), snack]) if water + snack > 0 else ""
+	if supplies != _supplies_shown:
+		_supplies_shown = supplies
+		HudStyle.fill_keys(supplies_row, HudStyle.parse_keys(supplies), HudStyle.CAPTION, HudStyle.INK_SOFT, HudStyle.MICRO)
+		supplies_row.visible = supplies != ""
+		status_panel.reset_size()
 	if player.mounted:
-		prompt.text = "Space: brake   ·   E: dismount   ·   %d km/h" % int(absf(player.riding_speed) * 3.6)
+		prompt_text = "[Space]  Brake   [%s]  %s" % [binding("interact"), "Exit" if ShopCatalog.is_car(session.active_vehicle) else "Dismount"]
 	elif player.has_vehicle() and player.position.distance_to(player.bicycle.position) < 2:
-		prompt.text = "E: mount " + session.active_vehicle.replace("_", " ")
+		prompt_text = "[%s]  Ride the %s" % [binding("interact"), session.active_vehicle.replace("_", " ")]
 	if navigation_label == null:
 		return
 	if state == "OFFERED":
@@ -1349,7 +1579,6 @@ func update_hud() -> void:
 	elif state == "DROPPED":
 		navigation_label.text = "%d m · your package" % int(player.position.distance_to(session.dropped_position()))
 	elif state in ["CARRYING", "IN_HAND"]:
-		var destination := world.doors[int(session.order.address)]
 		var distance := CityCatalog.distance(minimap.route_points())
 		navigation_label.text = "%d m · %s" % [int(distance), DeliverySession.ADDRESSES[int(session.order.address)]]
 	elif not CityNavigation.target.is_empty():
@@ -1361,54 +1590,26 @@ func update_hud() -> void:
 		navigation_label.text = "%d m · %s" % [int(CityCatalog.distance(minimap.route_points())), CityNavigation.target.name]
 		route_marker.visible = true
 		route_marker.position = goal + Vector3(0, 3, 0)
-		route_marker.text = "%s
-%d m" % [CityNavigation.target.name, int(player.position.distance_to(goal))]
+		route_marker.text = "%s\n%d m" % [CityNavigation.target.name, int(player.position.distance_to(goal))]
 	else:
 		navigation_label.text = "Online · awaiting requests" if session.online else "Offline · open phone to work"
 
-## "ORDER FOR / ELIF KAYA / CE-012 · Food bag · medium" under the top panel while an order is
-## active (the training card shows the same plate itself).
+## One needs meter: full is good (energy, food, water) or bad (WC).
+func set_need(need: String, value: float, high_is_bad: bool) -> void:
+	var bar: ProgressBar = need_bars.get(need)
+	if bar == null: return
+	bar.value = clampf(value, 0.0, 1.0)
+	var level := 1.0 - value if high_is_bad else value
+	HudStyle.set_meter_colour(bar, HudStyle.ACCENT if level > 0.35 else (HudStyle.AMBER if level > 0.15 else HudStyle.DANGER))
+
+## The order chip under the objective while an order is active (the training card shows the
+## same chip itself): "ORDER FOR / ELIF KAYA / CE-012 · Food bag · medium".
 func update_order_plate(state: String) -> void:
-	if order_plate == null:
-		order_plate = PanelContainer.new()
-		var st := StyleBoxFlat.new()
-		st.bg_color = Color("f7f1df")
-		st.set_corner_radius_all(10)
-		st.border_width_left = 6
-		st.border_color = Color("ffc53d")
-		st.content_margin_left = 16
-		st.content_margin_right = 16
-		st.content_margin_top = 8
-		st.content_margin_bottom = 9
-		order_plate.add_theme_stylebox_override("panel", st)
-		order_plate.position = Vector2(24, 156)
-		order_plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var col := VBoxContainer.new()
-		col.add_theme_constant_override("separation", 0)
-		order_plate.add_child(col)
-		var head := Label.new()
-		head.text = "ORDER FOR"
-		head.add_theme_font_size_override("font_size", 12)
-		head.add_theme_color_override("font_color", Color("8a6a2a"))
-		col.add_child(head)
-		order_plate_name = Label.new()
-		var heavy := SystemFont.new()
-		heavy.font_names = PackedStringArray(["Arial Black", "Segoe UI Black", "Arial", "sans-serif"])
-		heavy.font_weight = 900
-		order_plate_name.add_theme_font_override("font", heavy)
-		order_plate_name.add_theme_font_size_override("font_size", 28)
-		order_plate_name.add_theme_color_override("font_color", Color("111111"))
-		col.add_child(order_plate_name)
-		order_plate_info = Label.new()
-		order_plate_info.add_theme_font_size_override("font_size", 14)
-		order_plate_info.add_theme_color_override("font_color", Color("4a4434"))
-		col.add_child(order_plate_info)
-		gameplay_ui.add_child(order_plate)
 	var plate_on: bool = state in DeliverySession.ACTIVE and tutorial != null and not tutorial.active()
 	order_plate.visible = plate_on
 	if plate_on:
 		order_plate_name.text = str(session.order.get("customer", "")).to_upper()
-		order_plate_info.text = "%s   ·   %s" % [session.order.get("ticket", ""), OrderDetails.package_label(str(session.order.get("kind", "bag")), session.order.get("items", []))]
+		order_plate_info.text = "%s  ·  %s" % [session.order.get("ticket", ""), OrderDetails.package_label(str(session.order.get("kind", "bag")), session.order.get("items", []))]
 
 func smoke_test() -> void:
 	# Scene integration test uses the same commands, world raycast and persistence path.

@@ -21,6 +21,7 @@ var groups := {}
 var body: StaticBody3D
 var placed: Array[Dictionary] = [] ## {"asset", "at"} for tests
 var placer: PropPlacer
+var solids: PropColliders
 
 func _ready() -> void:
 	var hood := get_parent()
@@ -69,6 +70,10 @@ func put(asset: String, at: Vector3, yaw: float, solid: Vector3 = Vector3.ZERO, 
 		shape.transform = Transform3D(t.basis, at + Vector3(0, solid.y * 0.5, 0))
 		shape.set_meta("prop", asset)
 		body.add_child(shape)
+	elif PropColliders.has(asset):
+		# Pieces without a kerbside proxy box (flower planters): a prop-layer solid (PropColliders).
+		if solids == null: solids = PropColliders.new(self, "FurnitureProps")
+		solids.solid(asset, t)
 	placed.append({"asset": asset, "at": at})
 	return at
 

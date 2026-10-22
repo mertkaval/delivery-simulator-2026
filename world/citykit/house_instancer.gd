@@ -32,6 +32,12 @@ var house_count := 0
 var lot_lod_keys := {}
 var last_lod_key := ""
 var wire_key := "wire"
+## Primitive colliders for the yard props (fences, hedges, bins, sheds, mailboxes...; PropColliders).
+var _solids: PropColliders
+
+func solids() -> PropColliders:
+	if _solids == null: _solids = PropColliders.new(self, "YardProps")
+	return _solids
 
 func _ready() -> void:
 	# A/B benchmark switch (tests/profile_streets.gd): the old independent LOD ranges and per-cell
@@ -231,9 +237,17 @@ func build_lot(lot: Dictionary) -> void:
 		var lot_w: float = lot.width
 		var sections := floori(lot_w / 2.4)
 		var x := -float(sections) * 1.2 + 1.2
-		for k in range(sections):
-			if absf(x - door.x) > 1.6:
-				add("hedge" if lot.fence == "hedge" else "fence_picket", t * Transform3D(Basis.IDENTITY, Vector3(x, 0, line)), colours)
+		var hedge: bool = lot.fence == "hedge"
+		var run_start := INF
+		for k in range(sections + 1):
+			var open := k == sections or absf(x - door.x) <= 1.6
+			if not open:
+				add("hedge" if hedge else "fence_picket", t * Transform3D(Basis.IDENTITY, Vector3(x, 0, line)), colours)
+				if run_start == INF: run_start = x - 1.2
+			elif run_start != INF:
+				# One solid box per unbroken run of sections (no seams to snag on), open at the walk.
+				solids().run(t * Vector3(run_start, 0, line), t * Vector3(x - 1.2, 0, line), 1.17 if hedge else 0.9, 0.8 if hedge else 0.1, "hedge" if hedge else "fence_picket")
+				run_start = INF
 			x += 2.4
 	# Back yard: side fences to the lane, then a garage, shed or patio.
 	var depth: float = lot.depth
@@ -259,8 +273,10 @@ func build_lot(lot: Dictionary) -> void:
 		var taken: Array[Rect2] = []
 		if lot.rear == "shed":
 			add("shed", t * Transform3D(Basis(Vector3.UP, PI), Vector3(lot.width / 2 - 1.8, 0, back + 1.4)), colours)
+			solids().solid("shed", t * Transform3D(Basis(Vector3.UP, PI), Vector3(lot.width / 2 - 1.8, 0, back + 1.4)))
 			taken.append(Rect2(lot.width / 2 - 3.05, back + 1.35, 2.5, 2.0))
 		add("patio_set", t * Transform3D(Basis.IDENTITY, Vector3(-1.0, 0, -d - 2.4)), colours)
+		solids().solid("patio_set", t * Transform3D(Basis.IDENTITY, Vector3(-1.0, 0, -d - 2.4)))
 		taken.append(Rect2(-2.55, -d - 3.95, 3.1, 3.1))
 		var bed := Rect2(-lot.width / 2 + 0.35, back + 0.55, 2.5, 1.3)
 		var grill := Rect2(1.05, -d - 1.5, 1.1, 0.6)
@@ -269,9 +285,14 @@ func build_lot(lot: Dictionary) -> void:
 		for r in taken:
 			if r.intersects(bed): bed_free = false
 			if r.intersects(grill): grill_free = false
-		if int(lot.front.z) % 2 == 0 and bed_free: add("raised_bed", t * Transform3D(Basis.IDENTITY, Vector3(-lot.width / 2 + 1.6, 0, back + 1.2)), colours)
-		elif grill_free: add("bbq", t * Transform3D(Basis.IDENTITY, Vector3(1.6, 0, -d - 1.2)), colours)
+		if int(lot.front.z) % 2 == 0 and bed_free:
+			add("raised_bed", t * Transform3D(Basis.IDENTITY, Vector3(-lot.width / 2 + 1.6, 0, back + 1.2)), colours)
+			solids().solid("raised_bed", t * Transform3D(Basis.IDENTITY, Vector3(-lot.width / 2 + 1.6, 0, back + 1.2)))
+		elif grill_free:
+			add("bbq", t * Transform3D(Basis.IDENTITY, Vector3(1.6, 0, -d - 1.2)), colours)
+			solids().solid("bbq", t * Transform3D(Basis.IDENTITY, Vector3(1.6, 0, -d - 1.2)))
 	add("bins_trio", t * Transform3D(Basis(Vector3.UP, PI), Vector3(-lot.width / 2 + 1.4, 0, back - 0.6)), colours)
+	solids().solid("bins_trio", t * Transform3D(Basis(Vector3.UP, PI), Vector3(-lot.width / 2 + 1.4, 0, back - 0.6)))
 	# Delivery houses: door interaction, number plate, mailbox, porch light.
 	if lot.delivery >= 0:
 		var index: int = lot.delivery
@@ -298,6 +319,7 @@ func build_lot(lot: Dictionary) -> void:
 		post.transform = Transform3D(t.basis, t * Vector3(door.x - 1.25, 0.62, ResidentialLayout.SETBACK - 0.65))
 		post.visibility_range_end = 90.0
 		add_child(post)
+		solids().solid("address_post", Transform3D(t.basis, t * Vector3(door.x - 1.25, 0.0, ResidentialLayout.SETBACK - 0.65)))
 		# Digits stand 1.7 cm proud of their plates (no faces within a few mm of each other).
 		var above := GlyphText.build(digits, 0.26, true, 0.017)
 		above.transform = Transform3D(t.basis, t * Vector3(door.x - 1.25, 1.12, ResidentialLayout.SETBACK - 0.6))
@@ -309,11 +331,13 @@ func build_lot(lot: Dictionary) -> void:
 		var mailbox := CityAssets.create("mailbox", 85)
 		mailbox.transform = Transform3D(t.basis, t * Vector3(door.x + 1.2, 0, ResidentialLayout.SETBACK - 0.6))
 		add_child(mailbox)
+		solids().solid("mailbox", mailbox.transform)
 		if spec.has("door2"):
 			# Up/down duplex: the upper flat has its own mailbox beside the first.
 			var upper := CityAssets.create("mailbox", 85)
 			upper.transform = Transform3D(t.basis, t * Vector3(door.x + 1.75, 0, ResidentialLayout.SETBACK - 0.6))
 			add_child(upper)
+			solids().solid("mailbox", upper.transform)
 		var lamp := OmniLight3D.new()
 		lamp.position = t * Vector3(door.x, door.y + 2.4, door.z + 0.6)
 		lamp.light_color = Color("ffd9a0")

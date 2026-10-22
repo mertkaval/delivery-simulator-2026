@@ -33,6 +33,8 @@ var placer: PropPlacer
 var monuments: CityMonuments
 ## Trees, shrubs, flower beds, grass clumps and the edge / horizon forest (CityLandscape).
 var landscape: CityLandscape
+## Colliders for the showroom vehicles (PropColliders).
+var prop_solids: PropColliders
 
 func set_time(hour: float) -> void:
 	var amount := smoothstep(-0.12, 0.35, sin((hour - 6.0) / 24.0 * TAU))
@@ -500,6 +502,10 @@ func build_park(at: Vector3) -> void:
 		tree(at + delta)
 	for x in [-6.5, -2.5]:
 		for z in [4, 8]: box(at + Vector3(x, 1.42, z), Vector3(0.16, 2.84, 0.16), "9c8060").hide()
+	# The garden's two raised concrete flower planters (2.0 x 1.5 m rims, 0.47 m tall).
+	if prop_solids == null: prop_solids = PropColliders.new(self, "ParkProps")
+	for p: Vector3 in [Vector3(-5.0, 0, -7.0), Vector3(5.0, 0, 8.0)]:
+		prop_solids.box(garden.position + p + Vector3(0, 0.25, 0), Vector3(1.9, 0.5, 1.42), Basis.IDENTITY, false, "park_planter")
 
 ## Avenue plane trees and the original park trees: instanced LOD trees with a trunk collider
 ## (CityLandscape.street_tree picks the species from the location).
@@ -665,6 +671,7 @@ func build_store(id: String, at: Vector3) -> void:
 			if id=="equipment": model.position=at+Vector3(-5+(i%2)*3,.46+(i/2)*.7,-4.5)
 			# Three cars side by side, clear of the counter at x + 2.5 .. 5.5.
 			if id=="cars": model.position=at+Vector3(-4.6+i*3.1,.12,-1.8)
+			if id!="equipment": display_solid(model, id=="cars")
 		# Converted Sketchfab people: a clerk at the counter and a guard at the door.
 		var shop_index: int = ShopCatalog.LOCATIONS.keys().find(id)
 		var clerk: Node3D = LivingAssets.standing_person(1 + shop_index)
@@ -681,6 +688,30 @@ func build_store(id: String, at: Vector3) -> void:
 	light.light_energy=1.4
 	light.omni_range=10
 	add_child(light)
+
+## Showroom vehicles are solid: a box round the model's meshes (cars on the bulky prop layer, so the
+## camera does not clip into them; bicycles and scooters on the thin one).
+func display_solid(model: Node3D, bulky: bool) -> void:
+	if prop_solids == null: prop_solids = PropColliders.new(self, "ShowroomProps")
+	var box := AABB()
+	var first := true
+	for node in model.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		if mi.mesh == null: continue
+		var xf := Transform3D.IDENTITY
+		var n: Node = mi
+		while n != null and n != model:
+			if n is Node3D: xf = (n as Node3D).transform * xf
+			n = n.get_parent()
+		var b := xf * mi.mesh.get_aabb()
+		box = b if first else box.merge(b)
+		first = false
+	if first: return
+	# 4 cm inside the bodywork (mirrors and wheel arches), from the floor to the roof.
+	var top := model.position.y + box.end.y
+	var centre := model.transform * Vector3(box.get_center().x, 0.0, box.get_center().z)
+	centre.y = top * 0.5
+	prop_solids.box(centre, Vector3(maxf(box.size.x - 0.08, 0.2), top, maxf(box.size.z - 0.08, 0.2)), model.transform.basis.orthonormalized(), bulky, "showroom_vehicle")
 
 func build_cedar_home() -> void:
 	cedar_house = preload("res://world/cedar_house/cedar_house.tscn").instantiate()
