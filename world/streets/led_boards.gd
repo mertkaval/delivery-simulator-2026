@@ -49,7 +49,10 @@ func _ready() -> void:
 	for b in RestaurantCatalog.corridor_buildings():
 		var r: Array = RestaurantCatalog.LIST[k]
 		var x := -int(b.bays) * 2.0 + RestaurantCatalog.restaurant_width(b)
-		specs.append({"kind": "led_board_blade", "xf": RestaurantCatalog.frame(b) * Transform3D(Basis.IDENTITY, Vector3(x, 4.45, 0.1)),
+		# On the pier between the restaurant fascia and the lobby, below the cornice band (y 4.06):
+		# wall plate 3.32-3.94 m set 2 mm into the fascia face (z 0.012; it floated 9 mm off it),
+		# screens above the awnings.
+		specs.append({"kind": "led_board_blade", "xf": RestaurantCatalog.frame(b) * Transform3D(Basis.IDENTITY, Vector3(x, 4.0, 0.010)),
 			"business": String(r[1]), "message": restaurant_message(r)})
 		k += 1
 	var used := {}
@@ -60,7 +63,8 @@ func _ready() -> void:
 			if int(used.get(name, 0)) >= 2: continue
 			used[name] = int(used.get(name, 0)) + 1
 			var frame := Transform3D(Basis(Vector3.UP, float(b.yaw)), b.root)
-			specs.append({"kind": "led_board_long", "xf": frame * Transform3D(Basis.IDENTITY, Vector3(-float(b.width) * 0.5 + 2.4, 3.6, 0.12)),
+			# Bracket plates 9 mm off the fascia face (z 0): the board used to float 12 cm in front of it.
+			specs.append({"kind": "led_board_long", "xf": frame * Transform3D(Basis.IDENTITY, Vector3(-float(b.width) * 0.5 + 2.4, 3.6, 0.009)),
 				"business": name, "message": DOWNTOWN[name]})
 	var messages: Array = []
 	for s in specs: messages.append(s.message)

@@ -291,15 +291,17 @@ def signal_head(collection):
     w, h = 0.78, SECTION * 3 + 0.28
     zt, zb = top + 0.14, top - SECTION * 3 - 0.14
     yb = DEPTH / 2 + 0.01
-    b.box((-w / 2, yb, zb), (w / 2, yb + 0.012, zt), "SignalBlack")
+    # The plate's face sits 1.6 cm behind the yellow border's (the border used to stand 3 mm proud
+    # of it - a sliver that fought with the plate at a distance).
+    b.box((-w / 2, yb + 0.016, zb), (w / 2, yb + 0.028, zt), "SignalBlack")
     border = 0.05
     for lo, hi in [((-w / 2, zt - border), (w / 2, zt)), ((-w / 2, zb), (w / 2, zb + border)),
                    ((-w / 2, zb + border), (-w / 2 + border, zt - border)), ((w / 2 - border, zb + border), (w / 2, zt - border))]:
-        b.box((lo[0], yb - 0.003, lo[1]), (hi[0], yb + 0.001, hi[1]), "SignalYellow")
+        b.box((lo[0], yb, lo[1]), (hi[0], yb + 0.017, hi[1]), "SignalYellow")
     # Struts joining the backplate to the housing.
     for sx in (-1, 1):
         for zz in (zt - 0.25, zb + 0.25):
-            b.box((sx * 0.14 - 0.015, DEPTH / 2 - 0.01, zz - 0.015), (sx * 0.14 + 0.015, yb, zz + 0.015), "SignalBlack")
+            b.box((sx * 0.14 - 0.015, DEPTH / 2 - 0.01, zz - 0.015), (sx * 0.14 + 0.015, yb + 0.016, zz + 0.015), "SignalBlack")
     return b.emit("signal_head", collection)
 
 
@@ -376,7 +378,8 @@ def led_wall(collection, name="led_board_wall", screen_w=2.40, screen_h=0.46):
     rim = 0.045
     W, H = screen_w + 2 * rim, screen_h + 2 * rim
     back, front = -0.06, -0.15
-    b.box((-W / 2, front + 0.012, -H / 2), (W / 2, back, H / 2), "LedFrame", bevel=0.01)
+    # Frame body 2.4 cm behind the screen (it used to sit 6 mm behind it, under the whole screen).
+    b.box((-W / 2, front + 0.03, -H / 2), (W / 2, back, H / 2), "LedFrame", bevel=0.01)
     # Raised bezel lips round the screen.
     for lo, hi in [((-W / 2, H / 2 - rim), (W / 2, H / 2)), ((-W / 2, -H / 2), (W / 2, -H / 2 + rim)),
                    ((-W / 2, -H / 2 + rim), (-W / 2 + rim, H / 2 - rim)), ((W / 2 - rim, -H / 2 + rim), (W / 2, H / 2 - rim))]:
@@ -388,11 +391,10 @@ def led_wall(collection, name="led_board_wall", screen_w=2.40, screen_h=0.46):
     for x in (-W / 2 + 0.3, W / 2 - 0.3):
         b.box((x - 0.03, back, -0.12), (x + 0.03, 0.0, 0.12), "LedBracket", bevel=0.004)
         b.box((x - 0.07, -0.008, -0.16), (x + 0.07, 0.0, 0.16), "LedBracket")
-    b.cylinder((W / 2 - 0.12, -0.03, H / 2 - 0.02), (W / 2 - 0.12, -0.03, H / 2 + 0.45), 0.014, 0.014, "LedBracket", segments=8)
-    # Ventilation slots along the bottom edge.
-    for i in range(9):
-        x = -W / 2 + 0.2 + i * (W - 0.4) / 8
-        b.box((x - 0.05, front + 0.03, -H / 2 - 0.003), (x + 0.05, back - 0.01, -H / 2 + 0.002), "LedScreen")
+    # Cable conduit up the wall, stopping 17 cm above the frame (at 45 cm it ran up through the
+    # storefront cornice band over the downtown boards).
+    b.cylinder((W / 2 - 0.12, -0.03, H / 2 - 0.02), (W / 2 - 0.12, -0.03, H / 2 + 0.17), 0.014, 0.014, "LedBracket", segments=8)
+    # (No ventilation slots: their boxes stood 2-3 mm out of the frame's underside.)
     return b.emit(name, collection)
 
 
@@ -414,7 +416,13 @@ def led_blade(collection, screen_l=1.30, screen_h=0.40):
     b.cylinder((0, y0 - 0.2, zc + H / 2 + 0.06), (0, y0 - 0.2, zc + H / 2 + 0.005), 0.012, 0.012, "LedBracket", segments=8)
     ya, yb = y0 - rim, y1 + rim
     za, zb = zc - screen_h / 2, zc + screen_h / 2
-    x = T / 2 + 0.002
+    # Screens 1.6 cm proud of the frame's sides, inside a bezel rim of the same depth (they used to
+    # lie 2 mm off the frame faces).
+    x = T / 2 + 0.016
+    for sx in (-1, 1):
+        x0, x1 = sorted((sx * (T / 2 - 0.002), sx * (T / 2 + 0.02)))
+        for lo, hi in [((y1, za - rim), (y0, za)), ((y1, zb), (y0, zb + rim)), ((y1, za), (yb, zb)), ((ya, za), (y0, zb))]:
+            b.box((x0, lo[0], lo[1]), (x1, hi[0], hi[1]), "LedFrame")
     # +X face: its viewer's right is +Y (toward the wall), so u grows with y.
     b.quad_uv([(x, yb, za), (x, ya, za), (x, ya, zb), (x, yb, zb)], [(0, 0), (1, 0), (1, 1), (0, 1)], "LedScreen")
     # -X face: its viewer's right is -Y (away from the wall).

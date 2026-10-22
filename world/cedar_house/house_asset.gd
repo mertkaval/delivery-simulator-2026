@@ -68,7 +68,31 @@ func _ready() -> void:
 		body.set_meta("interaction", "cedar_door_%d" % doors.size())
 		var opening_angle := deg_to_rad(100.0) if str(item.name) in ["DoorFrontPivot", "DoorRearPivot"] else -deg_to_rad(100.0)
 		doors.append({"pivot": pivot, "body": body, "closed_angle": pivot.rotation.y, "opening_angle": opening_angle, "open": false})
+	single_sided()
 	furnish(package_path.path_join("furnishing.json"))
+
+## The house GLB's materials arrive double-sided (glTF doubleSided), but the shell is built from
+## coincident faces turned against each other - plaster linings on the wall boards, skirting on the
+## plaster, the oak floor on the joists - and with both drawn from both sides they fought over the
+## whole interior. tools/cedar_shell_offsets.py re-wound the GLB (solids face out, linings face away
+## from what they line and stand 3 mm off it, free sheets have a back face), so back-face culling
+## for every opaque material shows one face per side; glass and foliage stay double-sided.
+func single_sided() -> void:
+	var swapped := {}
+	for node in find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		if mi.mesh == null: continue
+		for surface in range(mi.mesh.get_surface_count()):
+			var mat := mi.get_active_material(surface) as BaseMaterial3D
+			if mat == null or mat.cull_mode != BaseMaterial3D.CULL_DISABLED: continue
+			var mat_name := mat.resource_name.to_lower()
+			if mat_name.contains("glass") or mat_name.contains("leaf") or mat_name.contains("leaves"): continue
+			if mat.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED: continue
+			if not swapped.has(mat):
+				var culled := mat.duplicate() as BaseMaterial3D
+				culled.cull_mode = BaseMaterial3D.CULL_BACK
+				swapped[mat] = culled
+			mi.set_surface_override_material(surface, swapped[mat])
 
 ## Place the furnishing props (house coordinates, Blender axes, yaw in degrees about up) and give
 ## the furniture box colliders. Small decor (snapped onto counters and shelves) has no collision.

@@ -52,6 +52,7 @@ func junction_sign(j: Dictionary) -> void:
 		if StreetNames.on_carriageway(p): continue
 		var origin := Vector3(p.x, 0.12, p.y)
 		add("street_sign", Transform3D(Basis.IDENTITY, origin), {}, SIGN_RANGE)
+		post_below_blades(Transform3D(Basis.IDENTITY, origin))
 		box_collider(origin + Vector3(0, 1.6, 0), Vector3(0.1, 3.2, 0.1), Basis.IDENTITY)
 		# Blade A runs along x and names the east-west street; blade B names the north-south one.
 		for side in [1.0, -1.0]:
@@ -59,6 +60,26 @@ func junction_sign(j: Dictionary) -> void:
 			blade_text(j.x_street, origin + Vector3(side * 0.026, 2.74, 0), side * PI * 0.5)
 		signs.append({"at": origin, "x_street": j.x_street, "z_street": j.z_street})
 		record_prop("street_sign", origin, 0.1)
+		return
+
+## The street_sign post (KitFrameLight, 3.32 m) ran up through the middle of both name blades, in
+## front of the centre of every street name. It now stops under the lower blade (2.62 m), and a
+## short clamp joins the two blades (2.855-2.905 m) - the names read across the whole blade.
+const POST_TOP := 2.62
+func post_below_blades(placement: Transform3D) -> void:
+	var list := get_parts("street_sign", "near")
+	for i in range(list.size()):
+		if not str(list[i].get("name", "")).begins_with("KitFrameLight"): continue
+		var cell := Vector2i(floori(placement.origin.x / 128.0), floori(placement.origin.z / 128.0))
+		var key := "%s|%d|%d_%d" % ["street_sign", i, cell.x, cell.y]
+		if not groups.has(key): return
+		var items: Array = groups[key].items
+		var height: float = (list[i].mesh as Mesh).get_aabb().end.y
+		var colour: Color = items[-1][1]
+		items[-1] = [placement * Transform3D(Basis.from_scale(Vector3(1, POST_TOP / height, 1)), Vector3.ZERO) * list[i].transform, colour]
+		# Clamp 2.5 mm inside both blades' faces (at 0.6 of the post's 7 cm its faces were 1 mm off
+		# the blades' and their trims'): only the 4 cm between the blades shows.
+		items.append([placement * Transform3D(Basis.from_scale(Vector3(0.5, 0.05 / height, 0.5)), Vector3(0, 2.855, 0)) * list[i].transform, colour])
 		return
 
 ## Registers a placed sign with the city's PropPlacer so later furniture keeps clear of it.

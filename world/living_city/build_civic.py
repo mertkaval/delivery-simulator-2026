@@ -31,14 +31,18 @@ def facade(w,d,floors,material):
     for side in [-1,1]: panel('Return wall',(side*(w/2-.15),height/2,-d/2),(.3,height,d),material,.035)
     for level in range(floors):
         y=level*3.6
-        panel('Floor edge',(0,y+.13,-d/2),(w,.26,d),CREAM,.025)
+        # Floor edge and spandrel course 2 cm proud of the return walls at both ends (their end
+        # faces lay in the return walls' outer planes).
+        # ... and 2 cm proud of the facade: its front face lay in the masonry piers' face plane.
+        panel('Floor edge',(0,y+.13,-d/2+.02),(w+.04,.26,d),CREAM,.025)
         for j in range(int(w/3)):
             x=-w/2+1.5+j*3
             if level==0 and abs(x)<3.1: continue
             panel('Masonry pier',(x,y+1.8,-.17),(2.98,3.4,.34),material,.02)
             window(x,y+2.1,.03,2.2,1.9)
-        panel('Spandrel course',(0,y+3.35,0),(w,.43,.38),CREAM,.02)
-    panel('Insulated roof',(0,height+.12,-d/2),(w+.45,.24,d+.45),CREAM,.025)
+        panel('Spandrel course',(0,y+3.35,0),(w+.04,.43,.38),CREAM,.02)
+    # 3 mm above the wall heads: its underside lay on their tops (both drawn double-sided).
+    panel('Insulated roof',(0,height+.123,-d/2),(w+.45,.24,d+.45),CREAM,.025)
     for x in [-w/2,w/2]: panel('Parapet return',(x,height+.43,-d/2),(.22,.55,d),CREAM,.018)
     for z in [0,-d]: panel('Parapet coping',(0,height+.45,z),(w,.58,.22),CREAM,.018)
     for x in [-w*.25,w*.25]:
@@ -77,14 +81,14 @@ def civic(kind):
         for x in [-15,15]: panel('Station return',(x,4.3,-11.5),(.35,8.6,23),CLAY,.03)
         panel('Hall floor',(0,.10,-11.5),(30,.20,23),CREAM,.02)
         for x in [-14,-4.7,4.7,14]: panel('Garage brick pier',(x,2.8,-.15),(.85,5.6,.6),CLAY,.03)
-        panel('Crew floor edge',(0,5.7,-11.5),(30,.30,23),CREAM,.02)
+        panel('Crew floor edge',(0,5.7,-11.48),(30,.30,23),CREAM,.02)   # 2 cm proud of the crew facade
         panel('Crew facade',(0,7.2,-.2),(30,2.8,.4),CLAY,.03)
         for x in [-12,-8,-4,0,4,8,12]: window(x,7.3,.08,2.5,1.7)
         for x in [-9.3,0,9.3]:
             panel('Raised sectional door',(x,5.18,-.15),(8.3,.65,.20),FRAME,.025)
             for y in [4.95,5.15,5.35]: panel('Door horizontal rib',(x,y,.0),(8.3,.025,.025),STEEL,.005)
             for side in [-1,1]: tube('Garage guide rail',[(x+side*4.3,.1,-.12),(x+side*4.3,5.5,-.12)],.035,STEEL,8)
-        panel('Station roof',(0,8.75,-11.5),(30.7,.3,23.7),FRAME,.03)
+        panel('Station roof',(0,8.753,-11.5),(30.7,.3,23.7),FRAME,.03)   # 3 mm above the wall heads
         lettering('FIRE & RESCUE  /  STATION 04',(0,6.05,.23),.53)
         for x in [-11,-7]:
             panel('Equipment locker',(x,1.15,-21),(1.4,2.3,.6),RED,.04)
@@ -131,7 +135,8 @@ def signs():
 
 def cycle_kit():
     clear(); panel('Coloured asphalt wearing course',(0,.008,0),(2.0,.016,6),GREEN,.0)
-    for x in [-.96,.96]: panel('Lane boundary',(x,.019,0),(.07,.008,6),WHITE,0)
+    # Boundary lines 1 cm short of the tile ends: their end faces lay in the tile's end faces.
+    for x in [-.96,.96]: panel('Lane boundary',(x,.019,0),(.07,.008,5.98),WHITE,0)
     finish('cycle_lane')
     clear()
     for z in [-.48,.48]:

@@ -8,16 +8,22 @@ extends HouseInstancer
 ## tints; döner cones and kokoreç rolls are real nodes that turn.
 
 const INTERIOR_END := 70.0
+## Top of the corridor sidewalk in front of the restaurants (CedarNeighborhood connector sidewalk):
+## the sidewalk sets, A-frames and planters stand on it (at 0.06 their feet sat 2 cm into it).
+const SIDEWALK_Y := 0.08
+## Booth centre from the restaurant's left edge: its 1.1 m benches end 1 cm clear of the side wall's
+## picture rail and skirting (wall face xl + 0.3, mouldings 4 cm proud).
+const BOOTH_X := 0.91
 const SIGNATURE := {
-	"mangal_doner": [["rs_doner", -1.0, -9.35], ["rs_grill", 1.2, -9.4]],
+	"mangal_doner": [["rs_doner", -1.0, -9.25], ["rs_grill", 1.2, -9.4]],
 	"mangal": [["rs_grill", -1.1, -9.4], ["rs_grill", 1.3, -9.4]],
 	"pide": [["rs_pide_oven", -0.6, -8.45]],
 	"kokorec": [["rs_kokorec", -0.6, -9.4]],
 	"fish": [["rs_grill", 0.8, -9.4], ["rs_fish_display", -2.6, -7.3]],
-	"iskender": [["rs_doner", -0.9, -9.35], ["rs_range", 1.0, -9.4]],
+	"iskender": [["rs_doner", -0.9, -9.25], ["rs_range", 1.0, -9.4]],
 	"dessert": [["rs_dessert_vitrine", -2.6, -7.3], ["rs_range", 0.4, -9.4]],
 	"soup": [["rs_soup_station", 0.2, -9.3]],
-	"doner": [["rs_doner", -1.2, -9.35], ["rs_doner", 0.3, -9.35]],
+	"doner": [["rs_doner", -1.2, -9.25], ["rs_doner", 0.3, -9.25]],
 	"diner": [["rs_bain_marie", -2.7, -7.3], ["rs_range", 0.6, -9.4]],
 	"tavern": [["rs_bar", 0.2, -9.45]],
 	"pastry": [["rs_simit_rack", -1.0, -9.55], ["rs_dessert_vitrine", -2.6, -7.3]],
@@ -70,15 +76,26 @@ func fit_out(b: Dictionary, r: Array) -> void:
 	# --- shell -----------------------------------------------------------------------------
 	for i in range(bays):
 		var x := RestaurantCatalog.bay_x(b, i)
-		piece("rs_floor_wood" if wood else "rs_floor", t, colours, x, 0, 0)
-		piece("rs_floor_kitchen", t, colours, x, 0, 0)
-		piece("rs_ceiling", t, colours, x, 0, 0)
-		piece("rs_back", t, colours, x, 0, 0.45)
-		piece("rs_pass" if i == e else ("rs_door" if i == door_bay else "rs_plain"), t, colours, x, 0, 0)
+		# The ceiling stops at the side walls' inner faces (xl + 0.3, xr - 0.1): it used to run on
+		# into the side facade, across the upper part of its windows. The floors too: their end
+		# faces lay in the facade piers' end faces at the restaurant's edges.
+		var c0 := maxf(x - 2.0, xl + 0.3)
+		var c1 := minf(x + 2.0, xr - 0.1)
+		var span := Transform3D(Basis.IDENTITY.scaled(Vector3((c1 - c0) / 4.0, 1, 1)), Vector3((c0 + c1) * 0.5, 0, 0))
+		add("rs_floor_wood" if wood else "rs_floor", t * span, colours, INTERIOR_END)
+		add("rs_floor_kitchen", t * span, colours, INTERIOR_END)
+		add("rs_ceiling", t * Transform3D(Basis.IDENTITY.scaled(Vector3((c1 - c0) / 4.0, 1, 1)), Vector3((c0 + c1) * 0.5, 0, 0)), colours, INTERIOR_END)
+		# Back wall and kitchen partition trimmed to the side walls too (they ran into the side
+		# facade's window reveals).
+		var trim := Transform3D(Basis.IDENTITY.scaled(Vector3((c1 - c0) / 4.0, 1, 1)), Vector3((c0 + c1) * 0.5, 0, 0))
+		add("rs_back", t * trim * Transform3D(Basis.IDENTITY, Vector3(0, 0, 0.45)), colours, INTERIOR_END)
+		add("rs_pass" if i == e else ("rs_door" if i == door_bay else "rs_plain"), t * trim, colours, INTERIOR_END)
 		pass   # the old blank menu boards are replaced by one readable MenuBoard (menu())
 	# Dining side walls: 4 m modules plus a half-length one, 10 m deep on each side.
 	var wall := "rs_wall_wood" if r[6] == "wood" else "rs_wall"
-	for run in [[0.0, 1.0], [-4.0, 1.0], [-8.0, 0.5]]:
+	# The first stretch starts behind the storefront frames (z -0.32): from the facade plane it ran
+	# through the corner window's frame.
+	for run in [[-0.32, 0.92], [-4.0, 1.0], [-8.0, 0.5]]:
 		add(wall, t * Transform3D(Basis.IDENTITY.scaled(Vector3(1, 1, run[1])), Vector3(xl + 0.3, 0, run[0])), colours, INTERIOR_END)
 		add(wall, t * Transform3D(Basis(Vector3.UP, PI).scaled(Vector3(1, 1, run[1])), Vector3(xr - 0.1, 0, run[0] - 4.0 * run[1])), colours, INTERIOR_END)
 	piece("rs_wall_kitchen", t, colours, xl + 0.3, 0, 0)
@@ -94,14 +111,17 @@ func fit_out(b: Dictionary, r: Array) -> void:
 		RestaurantDressing.counter(self, t, r, xe)   # bakery trays / bread baskets
 	piece("rs_pickup_shelf", t, colours, xe + 3.2, 0, -7.3)
 	piece("rs_drink_fridge", t, colours, xr - 0.45, 0, -7.6, -PI / 2)
-	piece("rs_condiments", t, colours, xl + 0.6, 0, -6.6, PI / 2)
-	piece("rs_plant", t, colours, xr - 0.5, 0, -0.9)
+	# Condiment station 15 cm further back: it touched the rear booth (z -6.05) in the first bay.
+	piece("rs_condiments", t, colours, xl + 0.6, 0, -6.75, PI / 2)
+	# Corner plant between the window-ledge stools and the last bay's table (it stood in the ledge).
+	piece("rs_plant", t, colours, xr - 0.72, 0, -1.75)
 	# --- kitchen line along the back wall, under the hood ---------------------------------------
 	var kz := -15.05
 	piece("rs_fryer", t, colours, xe - 1.0, 0, kz)
 	piece("rs_range", t, colours, xe, 0, kz)
-	piece("rs_grill" if r[4] != "pide" else "rs_range", t, colours, xe + 1.15, 0, kz)
-	piece("rs_hood", t, colours, xe, 0, kz + 0.1)
+	# Grill 8 cm further along (it overlapped the range by 6 cm), hood clear of the back wall.
+	piece("rs_grill" if r[4] != "pide" else "rs_range", t, colours, xe + 1.23, 0, kz)
+	piece("rs_hood", t, colours, xe, 0, kz + 0.14)
 	piece("rs_prep", t, colours, xe - 2.9, 0, kz)
 	piece("rs_shelf", t, colours, xe - 2.9, 0, kz - 0.18)
 	piece("rs_sink", t, colours, xe + 2.8, 0, kz)
@@ -126,17 +146,20 @@ func fit_out(b: Dictionary, r: Array) -> void:
 			piece("rs_table4", t, colours, x + 0.6, 0, -4.8)
 			local_box(t, Vector3(x - 0.9, 0.5, -2.6), Vector3(0.8, 1.0, 0.8))
 		elif i == 0:
-			piece("rs_booth", t, colours, xl + 0.62, 0, -2.6)
-			piece("rs_booth", t, colours, xl + 0.62, 0, -5.0)
-			piece("rs_table2", t, colours, x + 0.7, 0, -3.8)
-			local_box(t, Vector3(xl + 0.65, 0.5, -3.8), Vector3(1.2, 1.0, 4.3))
+			# Booth backs (the 1.1 m benches' -x end) against the side wall's inner face at xl + 0.3.
+			piece("rs_booth", t, colours, xl + BOOTH_X, 0, -2.6)
+			piece("rs_booth", t, colours, xl + BOOTH_X, 0, -5.0)
+			piece("rs_table2", t, colours, x + 1.0, 0, -3.8)
+			local_box(t, Vector3(xl + BOOTH_X, 0.5, -3.8), Vector3(1.2, 1.0, 4.3))
 		else:
 			piece("rs_table4", t, colours, x, 0, -2.7)
 			piece("rs_table2", t, colours, x, 0, -5.0)
 		if i != 0 or r[4] == "tavern":
 			local_box(t, Vector3(x, 0.45, -2.7), Vector3(1.1, 0.9, 1.6))
 			local_box(t, Vector3(x, 0.45, -5.0), Vector3(1.7, 0.9, 0.7))
-		piece("rs_bar_ledge", t, colours, x, 0, -0.55)
+		# Window ledge: in the first bay it stops at the side wall (xl + 0.3) instead of running into it.
+		if i == 0: add("rs_bar_ledge", t * Transform3D(Basis.IDENTITY.scaled(Vector3(3.54 / 3.8, 1, 1)), Vector3(xl + 0.35 + 1.77, 0, -0.55)), colours, INTERIOR_END)
+		else: piece("rs_bar_ledge", t, colours, x, 0, -0.55)
 		local_box(t, Vector3(x, 0.55, -0.75), Vector3(3.8, 1.1, 0.8))
 		for z in [-2.7, -5.0]: piece("rs_pendant", t, colours, x, 0, z)
 	piece("rs_pendant", t, colours, xe + 0.5, 0, -7.3)
@@ -152,7 +175,7 @@ func fit_out(b: Dictionary, r: Array) -> void:
 	local_box(t, Vector3((xl + door0) * 0.5, 1.6, -0.15), Vector3(door0 - xl, 3.2, 0.3))
 	local_box(t, Vector3((door1 + xr) * 0.5, 1.6, -0.15), Vector3(xr - door1, 3.2, 0.3))
 	local_box(t, Vector3(xr - 0.45, 1.0, -7.6), Vector3(0.6, 2.0, 0.7))
-	local_box(t, Vector3(xl + 0.6, 0.5, -6.6), Vector3(0.5, 1.0, 1.0))
+	local_box(t, Vector3(xl + 0.6, 0.5, -6.75), Vector3(0.5, 1.0, 1.0))
 	# --- pickup interaction, labels, lights, exterior ------------------------------------------
 	var pickup := StaticBody3D.new()
 	pickup.set_meta("interaction", "pickup_" + str(r[0]))
@@ -209,10 +232,11 @@ func menu(t: Transform3D, r: Array, xe: float, _e: int, _door_bay: int, _bays: i
 	# A large readable menu board on the back wall above the kitchen line, and a smaller one
 	# beside the entrance outside (MenuBoard: full menu, dollar prices, high-contrast type).
 	var accent := Color(str(r[8]))
-	var xl := -int(b.bays) * 2.0
-	var cx := xl + RestaurantCatalog.restaurant_width(b) * 0.5
+	# Over the plain partition bay at the far end (the last dining bay): centred on the restaurant it
+	# hung across the pass-through window and its order rail; top 3.07, under the 3.1 m ceiling.
+	var board_x := RestaurantCatalog.bay_x(b, int(b.bays) - 2)
 	var inside := MenuBoard.build(str(r[0]), Vector2(3.4, 1.15), accent)
-	inside.transform = Transform3D(t.basis, t * Vector3(cx, 2.55, -9.86))
+	inside.transform = Transform3D(t.basis, t * Vector3(board_x, 2.45, -9.86))
 	add_child(inside)
 	var outside := MenuBoard.build(str(r[0]), Vector2(0.95, 1.25), accent)
 	outside.transform = Transform3D(t.basis, t * Vector3(xe + 1.55, 1.55, 0.1))
@@ -234,18 +258,20 @@ func light(at: Vector3, colour: Color, energy: float, range_m: float) -> void:
 ## Facade dressing: projecting blade sign, sidewalk tables and parasols, A-frame menu, planters.
 func exterior(t: Transform3D, b: Dictionary, r: Array, xe: float, e: int, bays: int, colours: Dictionary) -> void:
 	var xl := -int(b.bays) * 2.0
-	piece("rs_blade_sign", t, colours, xl + 0.2, 3.5, 0.0, 0.0, 160.0)
+	# Drawn with the near facade LOD only (to KitBuilder.NEAR_END): its bracket runs into the
+	# simplified far facade's plane.
+	piece("rs_blade_sign", t, colours, xl + 0.2, 3.5, 0.0, 0.0, KitBuilder.NEAR_END)
 	for side in [1.0, -1.0]:
 		label(t, str(r[1]).to_upper(), Vector3(xl + 0.2 + side * 0.035, 3.0, 0.7), 22, Color("fff3dc"), side * PI * 0.5, 0.7)
 	for i in range(bays):
 		if i == e: continue
 		var x := RestaurantCatalog.bay_x(b, i)
-		piece("rs_sidewalk_set", t, colours, x, 0.06, 1.7, 0.0, 120.0)
+		piece("rs_sidewalk_set", t, colours, x, SIDEWALK_Y, 1.7, 0.0, 120.0)
 		local_box(t, Vector3(x, 0.4, 1.7), Vector3(1.5, 0.8, 0.8))
-	piece("rs_aframe", t, colours, xe + 1.5, 0.06, 1.0, PI / 2, 90.0)
+	piece("rs_aframe", t, colours, xe + 1.5, SIDEWALK_Y, 1.0, PI / 2, 90.0)
 	RestaurantDressing.terrace(self, t, b, e, bays)
 	for x in [xe - 1.4, xe + 1.4]:
-		piece("rs_planter", t, colours, x, 0.06, 0.45, 0.0, 120.0)
+		piece("rs_planter", t, colours, x, SIDEWALK_Y, 0.45, 0.0, 120.0)
 	label(t, str(r[3]), Vector3(xe, 3.3, 0.16), 16, Color("f1ead7"))
 
 var people: Array[Node3D] = []
@@ -320,7 +346,7 @@ func dining(t: Transform3D, b: Dictionary, r: Array, xe: float, e: int, bays: in
 			lane = tx + 1.35
 		else:
 			# Booth: upholstered benches (top 0.56) facing the booth table at z -2.6.
-			var bx := xl + 0.62
+			var bx := xl + BOOTH_X
 			for k in range(count):
 				var sx: float = [-0.25, -0.25, 0.25][k]
 				var side: float = [1.0, -1.0, 1.0][k]
@@ -340,12 +366,12 @@ func dining(t: Transform3D, b: Dictionary, r: Array, xe: float, e: int, bays: in
 		var n := 1 + posmod(seed + i * 3, 2)
 		for k in range(n):
 			var side := -1.0 if k == 0 else 1.0
-			var s := chair_slot(t, Vector3(x + side * 0.55, 0.06, 1.7), PI / 2 if side < 0 else -PI / 2, 0.49, 0.0)
+			var s := chair_slot(t, Vector3(x + side * 0.55, SIDEWALK_Y, 1.7), PI / 2 if side < 0 else -PI / 2, 0.49, 0.0)
 			var p := CitySeating.seated_person(s, seed * 13 + i * 5 + k)
 			p.max_distance = 75.0
 			add_child(p)
 			CitySeating.sit(p, s, ["SitTalk", "SitPhone", "Sit"][posmod(seed + k, 3)])
 			people.append(p)
 			var glass := TableService.tea()
-			glass.transform = t * Transform3D(Basis.IDENTITY, Vector3(x + side * 0.16, 0.06 + 0.75, 1.7 + 0.1))
+			glass.transform = t * Transform3D(Basis.IDENTITY, Vector3(x + side * 0.16, SIDEWALK_Y + 0.75, 1.7 + 0.1))
 			add_child(glass)

@@ -1,7 +1,7 @@
 {
  "house_craftsman": {
   "near": {
-   "triangles": 2870,
+   "triangles": 3060,
    "materials": [
     "KitConcrete",
     "KitTrimPaint",
@@ -16,7 +16,7 @@
    ]
   },
   "far": {
-   "triangles": 802,
+   "triangles": 828,
    "materials": [
     "KitConcrete",
     "KitTrimPaint",
@@ -31,7 +31,7 @@
  },
  "house_special": {
   "near": {
-   "triangles": 2540,
+   "triangles": 2488,
    "materials": [
     "KitBrickRed",
     "KitTrimPaint",
@@ -48,7 +48,7 @@
    ]
   },
   "far": {
-   "triangles": 1190,
+   "triangles": 1178,
    "materials": [
     "KitBrickRed",
     "KitTrimPaint",
@@ -65,7 +65,7 @@
  },
  "house_modern": {
   "near": {
-   "triangles": 1534,
+   "triangles": 1546,
    "materials": [
     "KitCedar",
     "KitTrimPaint",
@@ -78,7 +78,7 @@
    ]
   },
   "far": {
-   "triangles": 824,
+   "triangles": 872,
    "materials": [
     "KitCedar",
     "KitTrimPaint",
@@ -91,7 +91,7 @@
  },
  "house_foursquare": {
   "near": {
-   "triangles": 4128,
+   "triangles": 4282,
    "materials": [
     "KitConcrete",
     "KitTrimPaint",
@@ -107,7 +107,7 @@
    ]
   },
   "far": {
-   "triangles": 1348,
+   "triangles": 1312,
    "materials": [
     "KitConcrete",
     "KitShingleSiding",
@@ -123,7 +123,7 @@
  },
  "house_splitlevel": {
   "near": {
-   "triangles": 1710,
+   "triangles": 1712,
    "materials": [
     "KitBrickRed",
     "KitTrimPaint",
@@ -138,7 +138,7 @@
    ]
   },
   "far": {
-   "triangles": 864,
+   "triangles": 872,
    "materials": [
     "KitBrickRed",
     "KitTrimPaint",
@@ -152,7 +152,7 @@
  },
  "house_laneway": {
   "near": {
-   "triangles": 1090,
+   "triangles": 1098,
    "materials": [
     "KitCedar",
     "KitTrimPaint",
@@ -166,7 +166,7 @@
    ]
   },
   "far": {
-   "triangles": 544,
+   "triangles": 554,
    "materials": [
     "KitCedar",
     "KitTrimPaint",
@@ -179,7 +179,7 @@
  },
  "house_bungalow": {
   "near": {
-   "triangles": 2512,
+   "triangles": 2612,
    "materials": [
     "KitHouseStucco",
     "KitTrimPaint",
@@ -195,7 +195,7 @@
    ]
   },
   "far": {
-   "triangles": 840,
+   "triangles": 844,
    "materials": [
     "KitHouseStucco",
     "KitTrimPaint",
@@ -211,7 +211,7 @@
  },
  "fence_privacy": {
   "near": {
-   "triangles": 72,
+   "triangles": 58,
    "materials": [
     "KitCedar"
    ]
@@ -225,7 +225,7 @@
  },
  "fence_lattice": {
   "near": {
-   "triangles": 300,
+   "triangles": 286,
    "materials": [
     "KitCedar"
    ]
@@ -253,13 +253,13 @@
  },
  "hedge": {
   "near": {
-   "triangles": 22,
+   "triangles": 20,
    "materials": [
     "KitHedge"
    ]
   },
   "far": {
-   "triangles": 12,
+   "triangles": 10,
    "materials": [
     "KitHedge"
    ]
@@ -283,7 +283,7 @@
  },
  "raised_bed": {
   "near": {
-   "triangles": 456,
+   "triangles": 440,
    "materials": [
     "KitCedar",
     "KitSoil",
@@ -291,7 +291,7 @@
    ]
   },
   "far": {
-   "triangles": 60,
+   "triangles": 44,
    "materials": [
     "KitCedar",
     "KitSoil"
@@ -353,7 +353,7 @@
  },
  "garage_single": {
   "near": {
-   "triangles": 316,
+   "triangles": 314,
    "materials": [
     "KitBoardBatten",
     "KitTrimPaint",
@@ -365,7 +365,7 @@
    ]
   },
   "far": {
-   "triangles": 104,
+   "triangles": 114,
    "materials": [
     "KitBoardBatten",
     "KitTrimPaint",
@@ -376,7 +376,7 @@
  },
  "shed": {
   "near": {
-   "triangles": 148,
+   "triangles": 150,
    "materials": [
     "KitCedar",
     "KitTrimPaint",
@@ -385,7 +385,7 @@
    ]
   },
   "far": {
-   "triangles": 40,
+   "triangles": 50,
    "materials": [
     "KitCedar",
     "KitTrimPaint",
@@ -535,6 +535,20 @@
    "triangles": 532,
    "materials": [
     "KitBronze"
+   ]
+  }
+ },
+ "fence_post": {
+  "near": {
+   "triangles": 10,
+   "materials": [
+    "KitCedar"
+   ]
+  },
+  "far": {
+   "triangles": 10,
+   "materials": [
+    "KitCedar"
    ]
   }
  }

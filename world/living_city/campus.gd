@@ -12,13 +12,25 @@ static func model(d: DowntownDistrict,asset: String,at: Vector3,yaw: float=0,lar
 static func build(d: DowntownDistrict) -> void:
 	d.flat(Vector3(560,-.15,-468),Vector3(140,.30,444),"737773",true)
 	d.flat(Vector3(520,.025,-468),Vector3(14,.05,434),"3a4249")
-	for side in [-1,1]: d.flat(Vector3(520+side*9,.07,-468),Vector3(4,.14,420),"bdc2b8")
+	# Civic road sidewalks in runs between the cross streets (z +-7): one 420 m slab each side used
+	# to run straight across the four cross-street carriageways as a 14 cm concrete band.
+	for side in [-1,1]:
+		for run in [Vector2(-671,-545),Vector2(-531,-405),Vector2(-391,-265)]:
+			d.flat(Vector3(520+side*9,.07,(run.x+run.y)*.5),Vector3(4,.14,run.y-run.x),"bdc2b8")
 	for z in DowntownCatalog.STREET_Z:
-		d.flat(Vector3(552,.025,z),Vector3(160,.05,14),"3a4249")
-		for side in [-1,1]: d.flat(Vector3(574,.07,z+side*9),Vector3(112,.14,4),"bdc2b8")
+		# Carriageway from the east avenue's edge (x 475) to x 632, in two pieces either side of the
+		# civic road (x 513-527): it used to start at 472, over the avenue, and run through the civic
+		# road's slab - coincident asphalt at the same height both places.
+		d.flat(Vector3(494,.025,z),Vector3(38,.05,14),"3a4249")
+		d.flat(Vector3(579.5,.025,z),Vector3(105,.05,14),"3a4249")
+		# Cross-street sidewalks start at the civic road's east sidewalk (x 531): they used to run
+		# 9 m on over its carriageway (x 513-527), across the crosswalk at the same spot.
+		for side in [-1,1]: d.flat(Vector3(580.5,.07,z+side*9),Vector3(99,.14,4),"bdc2b8")
 		for x in [511,529]:
 			model(d,"stop",Vector3(x,0,z+9),0 if x==511 else PI)
-		for x in range(514,528,2): d.place("crosswalk",d.pose(Vector3(x,.10,z+8),0),1000,150)
+		# Crosswalk tiles (3.58 m wide) at a 3.6 m pitch, 4 mm over the asphalt (top 0.05): they
+		# were laid every 2 m (each overlapping the next) and floated 5 cm above the road.
+		for k in range(4): d.place("crosswalk",d.pose(Vector3(514.8+k*3.6,.054,z+8),0),1000,150)
 	# Linear rain-garden park between the cycleway and civic road, with clear cross paths.
 	var planting := RandomNumberGenerator.new()
 	planting.seed=8192
@@ -51,15 +63,21 @@ static func build(d: DowntownDistrict) -> void:
 		d.add_child(light)
 		d.lights.append(light)
 	for site in SITES:
-		model(d,site.asset,site.at,-PI/2,true)
+		# Full model out to 620 m: the decimated lod1 / lod2 merged the facade's stone courses into
+		# the brick's planes (coincident faces fighting at a distance); it is ~3-16 k triangles.
+		var site_t := d.pose(site.at,-PI/2)
+		d.place("living_"+site.asset,site_t,1000,620)
 		var w: float=site.width
 		var depth: float=site.depth
 		var h: float=site.height
 		var base := d.pose(site.at,-PI/2)
 		# Accessible forecourt, driveway and shallow vestibule; apparatus bays stay clear.
-		d.flat(Vector3(548,.04,site.at.z),Vector3(30,.08,w+16),"bdc2b8")
+		# Forecourt and driveway stop 5 cm short of the building line (x 563): their end faces lay
+		# in the plane of the civic buildings' front floor slabs.
+		d.flat(Vector3(547.975,.04,site.at.z),Vector3(29.95,.08,w+16),"bdc2b8")
 		var driveway_z: float=site.at.z+(13 if site.asset=="hospital" else 0)
-		d.flat(Vector3(542,.075,driveway_z),Vector3(42,.15,10 if site.asset!="fire_station" else 28),"3a4249")
+		# Driveway top 0.165: 2 cm over the civic road's sidewalk it crosses (top 0.144; it was 6-10 mm).
+		d.flat(Vector3(541.975,.09,driveway_z),Vector3(41.95,.15,10 if site.asset!="fire_station" else 28),"3a4249")
 		if site.asset=="fire_station":
 			d.collider(base*Vector3(0,2.5,-21.5),Vector3(w,5,3),-PI/2)
 			for x in [-14,-4.7,4.7,14]: d.collider(base*Vector3(x,2.7,0),Vector3(.85,5.4,.6),-PI/2)

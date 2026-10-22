@@ -4,6 +4,8 @@ const PICKUP = Vector3(-14, 1.0, 12)
 var doors: Array[Vector3] = []
 var cedar_house: Node3D
 const CEDAR_HOME_ORIGIN = Vector3(17.9, 0.015, 29.6)
+## How far the grass plane is drawn below y 0 (see _ready).
+const GROUND_DROP := 0.02
 var materials: Dictionary = {}
 var daylight: DirectionalLight3D
 var atmosphere: Environment
@@ -77,6 +79,8 @@ func street_light_at(pole: Vector3, face: Vector3, old_height: float) -> void:
 		lamp_at(pole + Vector3(0, old_height, 0))
 		return
 	var light := PropKit.create("street_light", 180)
+	# On the 8 cm side-road / cross-street sidewalks the base plate (top 7 cm) is set 1 cm into the
+	# paving, the pole rising out of it (the avenue's 5 cm sidewalks leave the plate 2 cm proud).
 	light.transform = Transform3D(Basis(Vector3.UP, atan2(face.x, face.z)), pole + face * 1.93)
 	add_child(light)
 	var collision := box(pole + Vector3(0, 3.0, 0), Vector3(0.25, 6.0, 0.25), "394a50")   # pole collision
@@ -200,7 +204,10 @@ func _ready() -> void:
 	sun.shadow_blur = 1.4
 	sun.light_angular_distance = 0.5
 	add_child(sun)
-	var ground := box(Vector3(0, -0.3, -320), Vector3(240, 0.6, 780), '66765e')
+	# The grass plane is drawn 2 cm under y 0 (its collision stays at 0): every slab, path, plinth,
+	# deck and post foot that rests on the ground used to share its plane with the grass.
+	var ground := box(Vector3(0, -0.3 - GROUND_DROP, -320), Vector3(240, 0.6, 780), '66765e')
+	(ground.get_child(0) as Node3D).position.y = GROUND_DROP
 	var grass_surface := ShaderMaterial.new()
 	grass_surface.shader = preload('res://world/ground.gdshader')
 	grass_surface.set_shader_parameter("grass_color", load("res://world/city_assets/textures/leafy_grass_Diffuse.jpg"))
@@ -220,9 +227,11 @@ func _ready() -> void:
 	circles.name = "TrafficCircles"
 	add_child(circles)
 	# Avenue sidewalks stop at z = 44, where Nezahat Onbaşı Street (and its own sidewalk) begins.
+	# Sidewalk slabs start at the back of the street kit's curb (half width + 0.2 m): their road end
+	# used to stand in the curb face, the two surfaces fighting along every kerb.
 	for run in sidewalk_runs(-690, 44):
 		for side in [-1, 1]:
-			box(Vector3(side * 8, 0.025, (run.x + run.y) * 0.5), Vector3(4, 0.05, run.y - run.x), "bdc2b8", false)
+			box(Vector3(side * 8.1, 0.025, (run.x + run.y) * 0.5), Vector3(3.8, 0.05, run.y - run.x), "bdc2b8", false)
 	# Real collision boundaries, with visible hedges at the edge of the block.
 	box(Vector3(-119,2,-320),Vector3(2,4,780),"40594b").hide()
 	var boundary_start := -710.0
@@ -260,7 +269,7 @@ func _ready() -> void:
 	build_cedar_home()
 	box(Vector3(7, 2.8, 19), Vector3(1.8, 0.38, 0.08), "254e44", false)
 	label_at("ATATÜRK AVENUE", Vector3(7, 2.8, 19.06), 26)
-	box(Vector3(7, 1.4, 19), Vector3(0.08, 2.8, 0.08), "394a50")
+	box(Vector3(7, 1.4, 19), Vector3(0.06, 2.8, 0.06), "394a50")   # 6 cm: at 8 cm its faces lay in the plate's
 	placer.record("sign", Vector3(7, 0, 19), 0.1, "avenue_name_sign")
 	for z in range(-246, 48, 3):
 		for x in [-8, 8]:
@@ -275,6 +284,9 @@ func _ready() -> void:
 			stop.material_override = streets.surface("PaintWhite", null)
 			stop.name = "StopLine_%d_%d" % [z, side]
 	for z in [-38, -140, -216]:
+		# Not where the front of a residential lot (a house or its porch) is: one of the three stood
+		# half inside a foursquare's porch.
+		if CityLayout.blocked(Vector3(12, 0, z), 0.8): continue
 		bench(Vector3(12, 0, z))
 	for z in [-110, -190]:
 		for x in [-92, 92]:
@@ -413,7 +425,9 @@ func finish_residence(node: Node, index: int) -> void:
 func sidewalk_runs(from_z: float, to_z: float) -> Array[Vector2]:
 	var junctions: Array[Vector2] = []
 	for crossing in CityCatalog.CROSS_STREETS:
-		junctions.append(Vector2(crossing - 5, crossing + 5))
+		# Stop at the back of the cross street's curb (5.2 m): the run's end face used to stand in
+		# the curb face.
+		junctions.append(Vector2(crossing - 5.2, crossing + 5.2))
 	var runs: Array[Vector2] = []
 	for run in StreetGrid.subtract(Vector2(from_z, to_z), junctions):
 		if run.y - run.x > 0.5: runs.append(run)
@@ -439,14 +453,14 @@ func expanded_blocks() -> void:
 	for x in CityCatalog.SIDE_ROADS:
 		for run in sidewalk_runs(-678, -258):
 			for side in [-1, 1]:
-				box(Vector3(x + side * 7, 0.04, (run.x + run.y) * 0.5), Vector3(4, 0.08, run.y - run.x), "bdc2b8", false)
+				box(Vector3(x + side * 7.1, 0.04, (run.x + run.y) * 0.5), Vector3(3.8, 0.08, run.y - run.x), "bdc2b8", false)
 	for z in CityCatalog.CROSS_STREETS:
 		for side in [-1, 1]:
 			for x in [-32.5, 32.5]:
-				box(Vector3(x, 0.04, z + side * 7), Vector3(45, 0.08, 4), "bdc2b8", false)
+				box(Vector3(x, 0.04, z + side * 7.1), Vector3(45, 0.08, 3.8), "bdc2b8", false)
 			# Connector sidewalk from the east side-road sidewalk to downtown, wide enough
 			# to cover the downtown connector's collision slab (z +-11).
-			box(Vector3(96.5, 0.04, z + side * 8), Vector3(47, 0.08, 6), "bdc2b8", false)
+			box(Vector3(96.5, 0.04, z + side * 8.1), Vector3(47, 0.08, 5.8), "bdc2b8", false)
 	for row in range(12):
 		var z: float = CityCatalog.address_position(12 + row * 2).z - 1.3
 		for side in [-1, 1]:
@@ -468,7 +482,9 @@ func expanded_blocks() -> void:
 func build_park(at: Vector3) -> void:
 	park_count += 1
 	var garden := CityAssets.create("park_garden", 200)
-	garden.position = at
+	# The block parks sit beside the residential rear lanes, whose asphalt (top 0.032) ran 3 mm under
+	# the gravel promenade (0.035): the garden is set 2 cm up there.
+	garden.position = at + (Vector3(0, 0.02, 0) if at.z < -300.0 else Vector3.ZERO)
 	add_child(garden)
 	# Fountain with animated water, the Atatürk bust memorial, sculptures, or (Halime Çavuş Park)
 	# the equestrian monument: CityMonuments (world/monuments/city_monuments.gd).
@@ -623,7 +639,7 @@ func build_store(id: String, at: Vector3) -> void:
 		box(at+Vector3(0,.015,9),Vector3(16,.03,8),"bdc2b8",false)
 	# Street number on the shop front in 3D glyphs (easy to find on the map and from the road).
 	var shop_number: String = {"equipment": "1250", "bikes": "1180", "cars": "1170", "scooters": "1260", "wc": "1010"}.get(id, "1000")
-	var number_plate := GlyphText.build(shop_number, 0.38)
+	var number_plate := GlyphText.build(shop_number, 0.38, true, 0.017)   # digits 1.7 cm proud of the plate
 	number_plate.position = at + Vector3(-5.6, 3.5, 5.3)
 	add_child(number_plate)
 	var sign_label := label_at("PUBLIC WC · WATER" if id=="wc" else ShopCatalog.TITLES[id],at+Vector3(0,3.5,5.23),64)

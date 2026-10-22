@@ -12,7 +12,13 @@ extends Node3D
 ## (0.1) stand on, so wheels and feet sit on the surface instead of inside it.
 const ROAD_Y := 0.036
 const KERB := 0.064        ## kerb height above the carriageway (sidewalk top ~0.10)
-const STEP := 0.0025       ## height step between overlapping paths
+## Height step between overlapping paths. Every path gets the lowest level not used by a path it
+## overlaps (it used to be index % 6 at 2.5 mm, so paths six apart shared a plane and neighbours
+## sat 2.5 mm apart - both fight in the depth buffer at a distance); markings sit half a step
+## above their own level, so they clear the next level's asphalt by 3 mm too.
+const STEP := 0.006
+const MARK_LIFT := 0.009
+var levels: PackedInt32Array = []
 
 ## spec: {"path": PackedVector3Array, "width": carriageway width, "walk": sidewalk width,
 ##        "ring": bool (closed one-way loop), "centre_line": bool}
@@ -40,6 +46,7 @@ func _ready() -> void:
 	stop_at_forecourts()
 	extend_into_junctions()
 	for spec in specs: spec.path = densify(spec.path, 1.0)
+	assign_levels()
 	for i in range(specs.size()):
 		build(specs[i], i)
 	street_lights()
@@ -68,7 +75,10 @@ func extend_into_junctions() -> void:
 		var spec: Dictionary = specs[i]
 		var path: PackedVector3Array = spec.path
 		if spec.get("ring", false) or path.size() < 2: continue
-		for end in [0, path.size() - 1]:
+		for at_start: bool in [true, false]:
+			# The last index is read after the start may have been extended (a list built up front
+			# pointed one short: p was the old start again and the path ran back over itself).
+			var end := 0 if at_start else path.size() - 1
 			var p := path[end]
 			var inward := path[1] - path[0] if end == 0 else path[end - 1] - path[end]
 			inward = inward.normalized()
@@ -109,6 +119,35 @@ static func densify(path: PackedVector3Array, step: float) -> PackedVector3Array
 		for k in range(n): out.append(a.lerp(b, float(k) / n))
 	out.append(path[-1])
 	return out
+
+## Greedy level per path: the lowest one not taken by an earlier path whose cross-section
+## (carriageway + sidewalks) overlaps it.
+func assign_levels() -> void:
+	levels.resize(specs.size())
+	for i in range(specs.size()):
+		var used := {}
+		for j in range(i):
+			if paths_touch(i, j): used[levels[j]] = true
+		var level := 0
+		while used.has(level): level += 1
+		levels[i] = level
+
+func paths_touch(i: int, j: int) -> bool:
+	var a: PackedVector3Array = specs[i].path
+	var b: PackedVector3Array = specs[j].path
+	var reach: float = float(specs[i].get("width", 8.0)) * 0.5 + float(specs[i].get("walk", 2.2)) + float(specs[j].get("width", 8.0)) * 0.5 + float(specs[j].get("walk", 2.2))
+	var box_a := AABB(a[0], Vector3.ZERO)
+	for p in a: box_a = box_a.expand(p)
+	var box_b := AABB(b[0], Vector3.ZERO)
+	for p in b: box_b = box_b.expand(p)
+	if not box_a.grow(reach).intersects(box_b): return false
+	# Densified to 1 m: every 3rd point / 3 m chords are plenty for a reach of 10+ m.
+	for k in range(0, a.size(), 3):
+		if not box_b.grow(reach).has_point(a[k]): continue
+		for m in range(3, b.size() + 2, 3):
+			var q := b[mini(m, b.size() - 1)]
+			if Geometry3D.get_closest_point_to_segment(a[k], b[m - 3], q).distance_to(a[k]) < reach: return true
+	return false
 
 ## True where point p lies on another path's carriageway (a junction): sidewalks and kerbs
 ## are left open there so the roads actually connect.
@@ -157,7 +196,13 @@ func open_runs(path: PackedVector3Array, offsets: Array, own: int) -> Array:
 			run = PackedVector3Array()
 		else:
 			run.append(path[i])
-	if run.size() >= 2: runs.append(run)
+	var closed := path.size() > 3 and path[0].distance_to(path[-1]) < 0.01
+	if closed and run.size() >= 2 and runs.size() >= 1 and (runs[0] as PackedVector3Array)[0] == path[0]:
+		# Ring: the run through the seam is one run (two runs ending at the seam overlapped there).
+		var first: PackedVector3Array = runs[0]
+		run.append_array(first.slice(1))
+		runs[0] = run
+	elif run.size() >= 2: runs.append(run)
 	return runs
 
 static func paint(c: Color) -> StandardMaterial3D:
@@ -170,10 +215,13 @@ func build(spec: Dictionary, index: int) -> void:
 	var path: PackedVector3Array = spec.path
 	var half: float = float(spec.get("width", 8.0)) * 0.5
 	var walk: float = spec.get("walk", 2.2)
-	var y := ROAD_Y + STEP * (index % 6)
+	var y := ROAD_Y + STEP * levels[index]
 	var ring: bool = spec.get("ring", false)
-	# Carriageway (trimmed back to the far kerb where the road was carried through a junction).
-	add_strip(trim(path, float(spec.get("trim_start", 0.0)), float(spec.get("trim_end", 0.0))), -half, half, y, y, _asphalt)
+	# Carriageway (trimmed back to the far kerb where the road was carried through a junction, and
+	# to the kerb line of a street-grid road it ends on: it ran on over the grid's deck and paint).
+	var cut_start: float = maxf(float(spec.get("trim_start", 0.0)), grid_overlap(path, true))
+	var cut_end: float = maxf(float(spec.get("trim_end", 0.0)), grid_overlap(path, false))
+	add_strip(trim(path, cut_start, cut_end), -half, half, y, y, _asphalt)
 	# Sidewalks with kerb faces on both sides, open wherever another road joins.
 	for side: float in [-1.0, 1.0]:
 		var inner := half * side
@@ -182,13 +230,45 @@ func build(spec: Dictionary, index: int) -> void:
 			add_strip(run, minf(inner, outer), maxf(inner, outer), y + KERB, y + KERB, _concrete)
 			add_wall(run, inner, y, y + KERB, side)
 	# Markings, inset from both ends of open paths.
-	var mark_y := y + 0.006
+	var mark_y := y + MARK_LIFT
 	if spec.get("centre_line", not ring):
-		add_dashes(path, 0.0, 0.14, 3.0, 3.0, mark_y, _yellow, 6.0 if not ring else 0.0)
+		# Per open run: the dashes stop short of every carriageway the path crosses or joins (they
+		# ran on under a ring's / a higher path's asphalt, 3 mm below its surface).
+		for run: PackedVector3Array in open_runs(path, [0.0], index):
+			add_dashes(run, 0.0, 0.14, 3.0, 3.0, mark_y, _yellow, 6.0 if not ring else 0.0)
 	if ring:
 		for side: float in [-1.0, 1.0]:
 			for run: PackedVector3Array in open_runs(path, [(half + 0.3) * side], index):
 				add_dashes(run, (half - 0.35) * side, 0.14, 1000.0, 0.0, mark_y, _white, 0.0)
+
+## How far an open path's end runs onto a straight street-grid carriageway (0 when it does not).
+func grid_overlap(path: PackedVector3Array, from_start: bool) -> float:
+	if path.size() < 2 or path[0].distance_to(path[-1]) < 0.5: return 0.0
+	var i := 0 if from_start else path.size() - 1
+	var dir := 1 if from_start else -1
+	var travelled := 0.0
+	var last := grid_excess(path[i])
+	if last >= 0.0: return 0.0
+	while true:
+		var j := i + dir
+		if j < 0 or j >= path.size(): return 0.0
+		var step := path[i].distance_to(path[j])
+		var e := grid_excess(path[j])
+		if e >= 0.0: return travelled + step * (-last) / maxf(e - last, 0.0001)
+		travelled += step
+		last = e
+		i = j
+	return 0.0
+
+## Distance from p to the nearest street-grid carriageway edge (negative inside a carriageway).
+static func grid_excess(p: Vector3) -> float:
+	var q := Vector3(p.x, 0, p.z)
+	var best := 1e9
+	for road in StreetGrid.roads():
+		var a := Vector3(road.a.x, 0, road.a.y)
+		var b := Vector3(road.b.x, 0, road.b.y)
+		best = minf(best, Geometry3D.get_closest_point_to_segment(q, a, b).distance_to(q) - float(road.profile.half))
+	return best
 
 ## Street lights every LIGHT_SPACING metres on the outer sidewalk, alternating sides on two-way
 ## roads and on the outside of rings, arm over the carriageway; batched into one MultiMesh per
@@ -274,6 +354,11 @@ func street_lights() -> void:
 ## Lateral frame at each point (tangent x up), averaged over neighbours for smooth curves.
 static func across(path: PackedVector3Array, i: int) -> Vector3:
 	var t := (path[mini(i + 1, path.size() - 1)] - path[maxi(0, i - 1)])
+	# Closed loop (ring): the seam's two end points share the wrapped tangent, so the first and
+	# last quads meet edge to edge instead of overlapping in a wedge.
+	var last := path.size() - 1
+	if last > 2 and path[0].distance_to(path[last]) < 0.01 and (i == 0 or i == last):
+		t = path[1] - path[last - 1]
 	t.y = 0
 	return t.normalized().cross(Vector3.UP)
 

@@ -43,7 +43,10 @@ static func _load() -> void:
 	_paint.emission_energy_multiplier = 0.55
 
 ## Text `height` metres tall (cap height), centred on the origin, front facing +Z, on a plate.
-static func build(text: String, height: float, plate := true) -> Node3D:
+## proud > 0: the digits are deepened so their faces stand `proud` metres in front of the plate
+## (their backs sunk 3 mm into it) - house numbers use 1.7 cm so the faces never sit within a few
+## mm of the plate (z-fighting at distance). Default: the original thin glyphs 2 mm above it.
+static func build(text: String, height: float, plate := true, proud := 0.0) -> Node3D:
 	_load()
 	var root := Node3D.new()
 	root.name = "Number_" + text
@@ -76,6 +79,12 @@ static func build(text: String, height: float, plate := true) -> Node3D:
 		mi.material_override = _paint
 		mi.scale = Vector3.ONE * height
 		mi.position = Vector3(float(p[1]) - width * 0.5, -height * 0.5, 0.0205 if plate else 0.0)   # plate front is at z 0.02
+		if plate and proud > 0.0:
+			var aabb: AABB = (g.mesh as Mesh).get_aabb()
+			if aabb.size.z > 1e-5:
+				# Plate face at 0.018 (plate mesh front 0.02, plate node at -0.002).
+				mi.scale.z = (proud + 0.003) / aabb.size.z
+				mi.position.z = 0.015 - aabb.position.z * mi.scale.z
 		mi.visibility_range_end = 70.0
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		root.add_child(mi)

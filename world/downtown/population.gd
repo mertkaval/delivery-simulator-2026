@@ -30,7 +30,7 @@ func _ready() -> void:
 	for i in range(4): add_walker([Vector3(241-(i%2)*.7,.09,-389.7+i*.6),Vector3(263,.09,-389.7+i*.6)],70+i,true)
 	for i in range(3):
 		add_cyclist(i)
-		cyclists[-1].body.position=Vector3(473.1,.08,-310-i*95)
+		cyclists[-1].body.position=Vector3(473.1,.055,-310-i*95)
 		cyclists[-1].direction=-1
 	# Downtown loops around the blocks, with rounded corners (SmoothRoute) and the converted fleet.
 	var loops: Array[SmoothRoute]=[]

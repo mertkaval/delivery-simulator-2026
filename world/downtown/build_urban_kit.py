@@ -176,7 +176,10 @@ def signs():
         save('sign_'+str(i))
 
 def infrastructure():
-    clear(); panel('Sidewalk slab',(0,-.08,0),(4,.16,4),STONE,.012)
+    # Pavement slabs are stretched to parcel size in DowntownDistrict.flat() (a 4 m piece to 100 m
+    # and more), so they carry no edge bevel: a 4-12 mm chamfer scaled 25x became a 10-30 cm
+    # sloped groove along every seam and slab end (visible dark lines across the campus junctions).
+    clear(); panel('Sidewalk slab',(0,-.08,0),(4,.16,4),STONE,0)
     for a in [-1,1]: panel('Saw cut joint',(a,0,0),(.012,.008,4),METAL,.0)
     save('sidewalk',[4,.16,4])
     clear(); panel('Chamfered curb',(0,.075,0),(4,.15,.20),STONE,.035); save('curb')
@@ -186,7 +189,7 @@ def infrastructure():
         for z in [.4,.65,.9]: ellipsoid('Tactile dome',(x,.06,z),(.027,.015,.027),ORANGE,n=8,m=4)
     save('curb_ramp',[2,.15,2])
     for name,w,d in [('road_segment',4,12),('intersection',18,18),('alley_pavement',8,8)]:
-        clear(); panel('Pavement',(0,-.025,0),(w,.05,d),ASPHALT,.004); save(name)
+        clear(); panel('Pavement',(0,-.025,0),(w,.05,d),ASPHALT,0); save(name)
     clear()
     for x in [-1.5,-.5,.5,1.5]: panel('Crossing stripe',(x,.006,0),(.58,.012,2.5),PAINT,.004)
     save('crosswalk')

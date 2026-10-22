@@ -18,6 +18,9 @@ const MID_END := 45.0
 const FAR_END := 700.0
 const BODY_MATS := ["KitLapSiding", "KitShingleSiding", "KitBoardBatten", "KitHouseStucco", "KitSidingPaint"]
 
+## Tests (tests/house_conflict_test.gd): keep every placed piece (mesh, world transforms, LOD).
+static var record := false
+var recorded: Array[Dictionary] = []
 var groups := {}
 var parts := {}
 var body: StaticBody3D
@@ -25,9 +28,17 @@ var doors: Array[Vector3] = []
 var paths: Array[MeshInstance3D] = []
 var porch_lamps: Array[OmniLight3D] = []
 var house_count := 0
+## lot front (world) -> the lod_key of its house's LOD nodes (tests).
+var lot_lod_keys := {}
+var last_lod_key := ""
 var wire_key := "wire"
 
 func _ready() -> void:
+	# A/B benchmark switch (tests/profile_streets.gd): the old independent LOD ranges and per-cell
+	# imported-house groups.
+	if OS.get_environment("DS_OLD_HOUSE_LOD") == "1":
+		lod_parents = false
+		imported_per_house = false
 	body = StaticBody3D.new()
 	body.name = "ResidentialCollision"
 	add_child(body)
@@ -75,18 +86,27 @@ func add(asset: String, placement: Transform3D, colours: Dictionary, end: float 
 	var imported := asset in ResidentialLayout.IMPORTED
 	var range_end: float = (MID_END if imported else NEAR_END) if is_house else (end if end > 0.0 else 75.0)
 	var list := get_parts(asset, "near")
+	# Houses: near, far and massing of one (asset, cell) switch through visibility parents (flush).
+	# Imported houses switch near -> far at only 45 m, measured to their node's AABB centre, so
+	# each one gets its own near / far nodes (a cell-wide node could put the centre 40+ m away
+	# and drop the detailed model while you stand at the door). They are few (46 of 183).
+	var group_id := "%d_%d" % [cell.x, cell.y] if not (imported and imported_per_house) else "h%d" % house_count
+	var lod_key := "%s|%s" % [asset, group_id]
+	if is_house: last_lod_key = lod_key
 	for i in range(list.size()):
-		var key := "%s|%d|%d_%d" % [asset, i, cell.x, cell.y]
+		var key := "%s|%d|%s" % [asset, i, group_id]
 		if not groups.has(key):
-			groups[key] = {"piece": list[i], "begin": 0.0, "end": range_end, "shadows": true, "items": []}
+			groups[key] = {"piece": list[i], "begin": 0.0, "end": range_end, "shadows": true, "items": [],
+				"lod": "near" if is_house else "", "lod_key": lod_key, "cell": cell, "asset": asset}
 		groups[key].items.append([placement * list[i].transform, tint(list[i].name, colours)])
 	if imported:
-		# Same HOUSE_CELL cells, so near and far LOD of one house always switch together.
+		# Same group as the near LOD, so near and far of one house always switch together.
 		var far := get_parts(asset, "far")
 		for i in range(far.size()):
-			var key := "%s_far|%d|%d_%d" % [asset, i, cell.x, cell.y]
+			var key := "%s_far|%d|%s" % [asset, i, group_id]
 			if not groups.has(key):
-				groups[key] = {"piece": far[i], "begin": MID_END, "end": NEAR_END, "shadows": true, "items": []}
+				groups[key] = {"piece": far[i], "begin": MID_END, "end": NEAR_END, "shadows": true, "items": [],
+					"lod": "far", "lod_key": lod_key, "cell": cell, "asset": asset}
 			groups[key].items.append([placement * far[i].transform, tint(far[i].name, colours)])
 	if is_house: add_massing(asset, placement, colours)
 
@@ -108,7 +128,8 @@ func add_massing(asset: String, placement: Transform3D, colours: Dictionary) -> 
 	for part in [["wall", wall, colours.get("body", Color.WHITE)], ["roof", roof, colours.get("roof", Color.WHITE)]]:
 		var key := "massing|%s|%d_%d" % [part[0], cell.x, cell.y]
 		if not groups.has(key):
-			groups[key] = {"piece": massing_piece(part[0]), "begin": NEAR_END, "end": FAR_END, "shadows": false, "items": []}
+			groups[key] = {"piece": massing_piece(part[0]), "begin": NEAR_END, "end": FAR_END, "shadows": false, "items": [],
+				"lod": "massing", "lod_key": "massing|%d_%d" % [cell.x, cell.y], "cell": cell, "asset": "massing"}
 		groups[key].items.append([placement * part[1], part[2]])
 
 static func massing_piece(kind: String) -> Dictionary:
@@ -176,6 +197,7 @@ func build_lot(lot: Dictionary) -> void:
 	var t := ResidentialLayout.transform(lot)
 	var colours: Dictionary = lot.colours
 	add(lot.type, t, colours)
+	lot_lod_keys[lot.front] = last_lod_key
 	house_count += 1
 	# Collision: body (split around a recessed entry), porch decks, stair ramps.
 	var w: float = spec.w
@@ -203,17 +225,16 @@ func build_lot(lot: Dictionary) -> void:
 	add_slab(t * Vector3(door.x, 0.0, ResidentialLayout.SETBACK + 0.2 - walk_len / 2 + 0.6), Vector3(1.26, 0.03, walk_len - 1.2), t.basis, "c1bbaa", lot.delivery >= 0)
 	add("garden_bed", t * Transform3D(Basis.IDENTITY, Vector3(-w / 2 + 1.4, 0, 1.4)), colours)
 	if lot.fence != "":
-		# Front fence/hedge along the property line, open at the walk.
+		# Front fence/hedge along the property line, open at the walk. Whole 2.4 m sections centred
+		# in the lot: none reaches past the lot edge into the neighbour's fence on the same line.
 		var line := ResidentialLayout.SETBACK - 0.3
 		var lot_w: float = lot.width
-		var x := -lot_w / 2 + 1.2
-		var panel := 0
-		while x < lot_w / 2 - 0.6:
+		var sections := floori(lot_w / 2.4)
+		var x := -float(sections) * 1.2 + 1.2
+		for k in range(sections):
 			if absf(x - door.x) > 1.6:
-				# Alternate panels step 1.2 cm so the overlapping ends of neighbours never share a plane.
-				add("hedge" if lot.fence == "hedge" else "fence_picket", t * Transform3D(Basis.IDENTITY, Vector3(x, 0, line + 0.012 * (panel % 2))), colours)
+				add("hedge" if lot.fence == "hedge" else "fence_picket", t * Transform3D(Basis.IDENTITY, Vector3(x, 0, line)), colours)
 			x += 2.4
-			panel += 1
 	# Back yard: side fences to the lane, then a garage, shed or patio.
 	var depth: float = lot.depth
 	var back := -(depth - ResidentialLayout.SETBACK)
@@ -222,11 +243,11 @@ func build_lot(lot: Dictionary) -> void:
 		# 8 cm inside its own line so the two never occupy the same plane (no z-fighting).
 		var fence_x: float = side * (lot.width / 2 - 0.08)
 		var z := -d - 1.2
-		var panel := 0
+		# Panels end to end, each with its post at the house end; a lone post closes the run.
 		while z > back + 1.2:
-			add("fence_privacy", t * Transform3D(Basis(Vector3.UP, PI / 2), Vector3(fence_x - side * 0.012 * (panel % 2), 0, z)), colours)
+			add("fence_privacy", t * Transform3D(Basis(Vector3.UP, PI / 2), Vector3(fence_x, 0, z)), colours)
 			z -= 2.4
-			panel += 1
+		if z < -d - 1.2: add("fence_post", t * Transform3D(Basis(Vector3.UP, PI / 2), Vector3(fence_x, 0, z + 1.2)), colours)
 		box_collider(t * Vector3(fence_x, 0.9, (-d + back) / 2), Vector3(0.12, 1.8, absf(back + d)), t.basis)
 	if lot.rear == "garage":
 		add("garage_single", t * Transform3D(Basis(Vector3.UP, PI), Vector3(lot.width / 2 - 2.6, 0, back + 0.2)), colours)
@@ -234,11 +255,22 @@ func build_lot(lot: Dictionary) -> void:
 	elif lot.type in ResidentialLayout.IMPORTED and -d - 2.4 < back + 0.6:
 		pass  # deep imported house (duplex, suburban on a 22 m lot): no room for yard furniture behind it
 	else:
+		# Yard pieces never overlap each other (lot-local footprints, x by z).
+		var taken: Array[Rect2] = []
 		if lot.rear == "shed":
 			add("shed", t * Transform3D(Basis(Vector3.UP, PI), Vector3(lot.width / 2 - 1.8, 0, back + 1.4)), colours)
+			taken.append(Rect2(lot.width / 2 - 3.05, back + 1.35, 2.5, 2.0))
 		add("patio_set", t * Transform3D(Basis.IDENTITY, Vector3(-1.0, 0, -d - 2.4)), colours)
-		if int(lot.front.z) % 2 == 0: add("raised_bed", t * Transform3D(Basis.IDENTITY, Vector3(-lot.width / 2 + 1.6, 0, back + 1.2)), colours)
-		else: add("bbq", t * Transform3D(Basis.IDENTITY, Vector3(1.6, 0, -d - 1.2)), colours)
+		taken.append(Rect2(-2.55, -d - 3.95, 3.1, 3.1))
+		var bed := Rect2(-lot.width / 2 + 0.35, back + 0.55, 2.5, 1.3)
+		var grill := Rect2(1.05, -d - 1.5, 1.1, 0.6)
+		var bed_free := true
+		var grill_free := true
+		for r in taken:
+			if r.intersects(bed): bed_free = false
+			if r.intersects(grill): grill_free = false
+		if int(lot.front.z) % 2 == 0 and bed_free: add("raised_bed", t * Transform3D(Basis.IDENTITY, Vector3(-lot.width / 2 + 1.6, 0, back + 1.2)), colours)
+		elif grill_free: add("bbq", t * Transform3D(Basis.IDENTITY, Vector3(1.6, 0, -d - 1.2)), colours)
 	add("bins_trio", t * Transform3D(Basis(Vector3.UP, PI), Vector3(-lot.width / 2 + 1.4, 0, back - 0.6)), colours)
 	# Delivery houses: door interaction, number plate, mailbox, porch light.
 	if lot.delivery >= 0:
@@ -266,10 +298,11 @@ func build_lot(lot: Dictionary) -> void:
 		post.transform = Transform3D(t.basis, t * Vector3(door.x - 1.25, 0.62, ResidentialLayout.SETBACK - 0.65))
 		post.visibility_range_end = 90.0
 		add_child(post)
-		var above := GlyphText.build(digits, 0.26)
+		# Digits stand 1.7 cm proud of their plates (no faces within a few mm of each other).
+		var above := GlyphText.build(digits, 0.26, true, 0.017)
 		above.transform = Transform3D(t.basis, t * Vector3(door.x - 1.25, 1.12, ResidentialLayout.SETBACK - 0.6))
 		add_child(above)
-		var beside := GlyphText.build(digits, 0.14)
+		var beside := GlyphText.build(digits, 0.14, true, 0.017)
 		var plate: Vector3 = spec.get("number", Vector3(door.x + 0.85, door.y + 1.6, door.z + 0.04))
 		beside.transform = Transform3D(t.basis, t * plate)
 		add_child(beside)
@@ -322,7 +355,17 @@ func build_lane(lane: Dictionary) -> void:
 	var i := 0
 	while z < lane.z1 - 3.0:
 		var pole := Vector3(px, 0, z)
-		add("utility_pole_transformer" if i % 4 == 2 else "utility_pole", Transform3D(Basis(Vector3.UP, PI / 2), pole), {})
+		# A lane run can pass a pocket park: slide the pole out of its planting beds (or drop it).
+		var shift := 0.0
+		while shift < 12.0 and pole.z + shift < lane.z1 - 3.0 and pole_blocked(pole + Vector3(0, 0, shift)):
+			shift += 1.0
+		if pole_blocked(pole + Vector3(0, 0, shift)) or pole.z + shift >= lane.z1 - 3.0:
+			z += 30.0
+			i += 1
+			continue
+		pole.z += shift
+		# Crossarm across the lane (local x = world x), so the conductors run side by side along it.
+		add("utility_pole_transformer" if i % 4 == 2 else "utility_pole", Transform3D(Basis.IDENTITY, pole), {})
 		box_collider(pole + Vector3(0, 2.0, 0), Vector3(0.3, 4.0, 0.3), Basis.IDENTITY)
 		poles.append(pole)
 		z += 30.0
@@ -330,8 +373,14 @@ func build_lane(lane: Dictionary) -> void:
 	wire_key = "wire_%d" % roundi(lane.x * 10 + lane.z0)
 	for k in range(1, poles.size()):
 		for offset in [-1.05, -0.35, 0.35, 1.05]:
-			wire(poles[k - 1] + Vector3(0, 9.5, offset), poles[k] + Vector3(0, 9.5, offset), 0.55)
-		wire(poles[k - 1] + Vector3(0, 7.4, 0.4), poles[k] + Vector3(0, 7.4, 0.4), 0.7)
+			wire(poles[k - 1] + Vector3(offset, 9.5, 0), poles[k] + Vector3(offset, 9.5, 0), 0.55)
+		wire(poles[k - 1] + Vector3(0.4, 7.4, 0), poles[k] + Vector3(0.4, 7.4, 0), 0.7)
+
+static func pole_blocked(p: Vector3) -> bool:
+	var r := Rect2(p.x - 0.6, p.z - 0.6, 1.2, 1.2)
+	for e in ResidentialLayout.exclusions():
+		if e.intersects(r): return true
+	return false
 
 ## Catenary approximated by 6 straight spans of a thin dark beam (instanced).
 func wire(a: Vector3, b: Vector3, sag: float) -> void:
@@ -341,7 +390,11 @@ func wire(a: Vector3, b: Vector3, sag: float) -> void:
 		var p := a.lerp(b, u) - Vector3(0, sag * 4.0 * u * (1.0 - u), 0)
 		var mid := (prev + p) * 0.5
 		var dir := (p - prev)
-		var basis := Basis.looking_at(dir.normalized(), Vector3.UP).scaled(Vector3(0.025, 0.025, dir.length()))
+		# Every other span is turned 45 degrees about its own axis: where consecutive spans overlap at
+		# a joint their side faces then never lie (nearly) in one plane.
+		var basis := Basis.looking_at(dir.normalized(), Vector3.UP)
+		if s % 2 == 1: basis = basis * Basis(Vector3.BACK, PI / 4.0)
+		basis = basis.scaled_local(Vector3(0.025, 0.025, dir.length()))
 		var key := wire_key
 		if not groups.has(key):
 			groups[key] = {"piece": {"mesh": unit_box(), "material": wire_material(), "transform": Transform3D.IDENTITY}, "begin": 0.0, "end": 260.0, "shadows": false, "items": []}
@@ -359,7 +412,39 @@ static func wire_material() -> StandardMaterial3D:
 	m.roughness = 0.6
 	return m
 
+## False = the old independent per-node visibility ranges (A/B checks in house_conflict_test).
+static var lod_parents := true
+## True: every imported house has its own near / far nodes (see add()).
+static var imported_per_house := true
+
+static func items_aabb(mesh: Mesh, items: Array) -> AABB:
+	var box := mesh.get_aabb()
+	var out := AABB()
+	for i in range(items.size()):
+		var b: AABB = (items[i][0] as Transform3D) * box
+		out = b if i == 0 else out.merge(b)
+	return out
+
+## One MultiMesh per group. House LODs: Godot measures a visibility range to the centre of each
+## node's AABB, so separate near / far / massing nodes (and the material parts of one LOD) used to
+## switch at slightly different distances - for a few metres two LODs of the same house could be
+## drawn on top of each other (z-fighting) or none at all. Now every LOD node of one (asset, cell)
+## shares one custom AABB, and the levels hang off each other as visibility parents
+## (near -> far -> massing): a child is only drawn while its parent is hidden for being too close,
+## so exactly one level of a house is visible at any distance.
 func flush() -> void:
+	var union := {}
+	for data: Dictionary in groups.values():
+		var lod: String = data.get("lod", "")
+		if lod == "": continue
+		var box := items_aabb(data.piece.mesh, data.items)
+		data["aabb"] = box
+		var k: String = data.lod_key
+		union[k] = box if not union.has(k) else (union[k] as AABB).merge(box)
+	var massing_nodes := {}
+	var far_nodes := {}
+	var lod_nodes: Array[Array] = []
+	var index := 0
 	for data: Dictionary in groups.values():
 		var items: Array = data.items
 		var multi := MultiMesh.new()
@@ -374,6 +459,8 @@ func flush() -> void:
 			multi.set_instance_transform(i, tr)
 			multi.set_instance_color(i, items[i][1])
 		var node := MultiMeshInstance3D.new()
+		node.name = "G%d" % index
+		index += 1
 		node.multimesh = multi
 		node.material_override = data.piece.material
 		node.position = origin
@@ -382,5 +469,35 @@ func flush() -> void:
 		node.visibility_range_begin_margin = 8.0 if data.begin > 0.0 else 0.0
 		node.visibility_range_end_margin = 8.0
 		if not data.shadows: node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var lod: String = data.get("lod", "")
+		if lod != "":
+			node.set_meta("lod", lod)
+			node.set_meta("lod_key", data.lod_key)
+			node.set_meta("cell", data.cell)
+			node.set_meta("asset", data.asset)
+			node.set_meta("aabb", data.aabb)
+			if lod_parents:
+				var shared: AABB = union[data.lod_key]
+				node.custom_aabb = AABB(shared.position - origin, shared.size)
+				if lod == "massing": massing_nodes[data.cell] = node
+				elif lod == "far":
+					if not far_nodes.has(data.lod_key): far_nodes[data.lod_key] = node
+					node.visibility_range_end = 0.0
+				else:
+					node.visibility_range_end = 0.0
+					node.visibility_range_end_margin = 0.0
+				lod_nodes.append([node, lod, data.lod_key, data.cell])
+		if record:
+			var xforms: Array[Transform3D] = []
+			for it in items: xforms.append(it[0])
+			recorded.append({"mesh": data.piece.mesh, "name": data.piece.get("name", ""), "lod": lod,
+				"asset": data.get("asset", ""), "xforms": xforms, "node": node})
 		add_child(node)
+	for entry in lod_nodes:
+		var node: MultiMeshInstance3D = entry[0]
+		var parent: Node = null
+		match entry[1]:
+			"near": parent = far_nodes.get(entry[2], massing_nodes.get(entry[3]))
+			"far": parent = massing_nodes.get(entry[3])
+		if parent != null: node.visibility_parent = node.get_path_to(parent)
 	groups.clear()

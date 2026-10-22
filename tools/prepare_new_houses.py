@@ -60,6 +60,12 @@ HOUSES = {
         # The front door leaf beside its sidelight is white trim in the source: paint it per house.
         "recolour_regions": [("KitTrimPaint", "KitDoorPaint", (-3.92, 0.02, -3.13), (-2.97, 2.40, -3.03))],
         "budget": 20000, "far_ratio": 0.33,
+        # porch, carport and side-deck floors lie on the lawn (y = 0): raised 4 cm
+        "lift_floor": ("KitDeckBoards",),
+        # corner boards the automatic pass cannot see: the 7 cm wall return under the right-hand
+        # eave (x 7.915 / z -5.576), Godot (lo, hi) boxes
+        "extra_boards": [((7.915, 3.14, -5.686), (7.970, 4.10, -5.576), ()), ((7.890, 3.14, -5.576), (7.970, 4.10, -5.541), ("-z",)),
+                         ((7.905, 3.14, -3.511), (7.970, 3.20, -3.476), ())],
     },
     "house_duplex": {
         "src": "duplex_house.glb", "scale": 0.0254, "yaw": 0.0,
@@ -316,6 +322,21 @@ def visibility_pass(obj):
             flip.append(f)
         elif not front:
             kill.append(f)
+    # A face of a flat surface whose coplanar neighbour (same material) is visible is visible too:
+    # the ray samples miss small triangles in corners (under the porch roof, beside columns), and
+    # deleting them punched triangular holes into the ends of the siding courses (the saw-tooth).
+    killed = set(kill)
+    keep_n = {f: f.normal.copy() for f in bm.faces}
+    stack = [f for f in bm.faces if f not in killed]
+    while stack:
+        f = stack.pop()
+        for e in f.edges:
+            for g in e.link_faces:
+                if g in killed and g.material_index == f.material_index and keep_n[g].length > 0.5 \
+                        and keep_n[g].dot(keep_n[f]) > 0.9995 and g.calc_area() < 0.06:
+                    killed.discard(g)
+                    stack.append(g)
+    kill = [f for f in kill if f in killed]
     for f in flip:
         f.normal_flip()
     # Doubled faces get their own (reversed) copy of the vertices so they never share winding.
@@ -465,6 +486,890 @@ def fix_coplanar(obj, tol=0.004, push=0.006):
         bm.to_mesh(obj.data)
         bm.free()
     return total
+
+
+# ------------------------------------------------------------------ conflict fixes (no z-fighting)
+# Tolerances shared with tests/house_conflict_test.gd: faces of different parts closer than TOL
+# (1.5 cm, within a few degrees) that overlap count as a conflict. Detail layers are lifted to
+# LAYER_GAP in front of what they cover by extruding them (with real side faces, no floating
+# decals); flat floors at the lawn level are raised; boards half sunk into a wall are cut at its
+# face; open siding corners get corner boards.
+DEBUG_LAYERS = False
+TOL = 0.015
+LAYER_GAP = 0.018
+NUDGE = 0.006          # one paint, one plane: the smaller piece moves this far in front
+FIGHT = 0.004
+BODY = {"KitSidingPaint", "KitLapSiding", "KitBrickRed", "KitPlinthDark"}
+# Layer order where coplanar faces overlap: higher ranks are lifted in front of lower ones.
+LAYER = {"KitSidingPaint": 1, "KitLapSiding": 1, "KitBrickRed": 1, "KitConcrete": 1, "KitPlinthDark": 1,
+         "KitAsphaltShingles": 1, "KitDeckBoards": 1, "KitGlass": 2, "KitTrimPaint": 3, "KitRailBlack": 4,
+         "KitFrameDark": 4, "KitDoorWood": 4, "KitDoorPaint": 4, "KitLampGlow": 5}
+
+
+def tri_inside(p, a, b, c, margin=0.02):
+    v0, v1, v2 = c - a, b - a, p - a
+    d00, d01, d11, d20, d21 = v0.dot(v0), v0.dot(v1), v1.dot(v1), v2.dot(v0), v2.dot(v1)
+    den = d00 * d11 - d01 * d01
+    if abs(den) < 1e-14:
+        return False
+    u = (d11 * d20 - d01 * d21) / den
+    v = (d00 * d21 - d01 * d20) / den
+    return u > margin and v > margin and u + v < 1 - margin
+
+
+def face_samples(f, n=6):
+    """Barycentric grid over the (triangulated) face: long thin triangles are covered too."""
+    vs = [v.co for v in f.verts]
+    pts = []
+    for k in range(1, len(vs) - 1):
+        a, b, c = vs[0], vs[k], vs[k + 1]
+        for i in range(n):
+            for j in range(n - i):
+                u, v = (i + 0.33) / n, (j + 0.33) / n
+                if u + v < 0.999:
+                    pts.append(a + (b - a) * u + (c - a) * v)
+    return pts
+
+
+def clip_convex_2d(subject, clip):
+    """Sutherland-Hodgman: convex polygon `subject` clipped by convex counter-clockwise `clip`."""
+    out = subject
+    n = len(clip)
+    for k in range(n):
+        a, b = clip[k], clip[(k + 1) % n]
+        if not out:
+            break
+        inp, out = out, []
+        def inside(p):
+            return (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]) >= -1e-12
+        for i in range(len(inp)):
+            p, q = inp[i], inp[(i + 1) % len(inp)]
+            ip, iq = inside(p), inside(q)
+            if ip:
+                out.append(p)
+            if ip != iq:
+                dx, dy = q[0] - p[0], q[1] - p[1]
+                ex, ey = b[0] - a[0], b[1] - a[1]
+                den = dx * ey - dy * ex
+                if abs(den) > 1e-15:
+                    t = ((a[0] - p[0]) * ey - (a[1] - p[1]) * ex) / den
+                    out.append((p[0] + dx * t, p[1] + dy * t))
+    return out
+
+
+def poly_area_2d(poly):
+    return 0.5 * sum(poly[i][0] * poly[(i + 1) % len(poly)][1] - poly[(i + 1) % len(poly)][0] * poly[i][1] for i in range(len(poly)))
+
+
+def overlapping_pairs(bm, mats, tol=TOL, same_material=False, min_area=2e-6, cos_max=0.98):
+    """Same-facing faces of different materials (or of one material, `same_material`) within
+    ~10 degrees whose projections overlap (exact convex clipping) and lie closer than tol there:
+    [(i, j, signed distance of j in front of i along i's normal)]."""
+    bm.faces.ensure_lookup_table()
+    info = []
+    cells = {}
+    cs = 0.5
+    for f in bm.faces:
+        n = f.normal
+        if n.length < 0.5 or f.calc_area() < 1e-6:
+            info.append(None)
+            continue
+        vs = [v.co.copy() for v in f.verts]
+        info.append((n.copy(), vs))
+        lo = [min(v[k] for v in vs) - tol for k in range(3)]
+        hi = [max(v[k] for v in vs) + tol for k in range(3)]
+        nk = (round(n.x * 6), round(n.y * 6), round(n.z * 6))
+        c0 = [math.floor(lo[k] / cs) for k in range(3)]
+        c1 = [math.floor(hi[k] / cs) for k in range(3)]
+        for x in range(c0[0], c1[0] + 1):
+            for y in range(c0[1], c1[1] + 1):
+                for z in range(c0[2], c1[2] + 1):
+                    cells.setdefault((x, y, z, nk), []).append(f.index)
+    seen = set()
+    out = []
+    for key, ids in cells.items():
+        x, y, z, nk = key
+        cand = []
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                for dz in (-1, 0, 1):
+                    other = cells.get((x, y, z, (nk[0] + dx, nk[1] + dy, nk[2] + dz)))
+                    if other:
+                        cand += other
+        for i in ids:
+            ni, vi = info[i]
+            mi = bm.faces[i].material_index
+            # orthonormal basis of i's plane
+            ref = Vector((1, 0, 0)) if abs(ni.x) < 0.9 else Vector((0, 1, 0))
+            u = ni.cross(ref).normalized()
+            w = ni.cross(u)
+            o = vi[0]
+            pi = [((v - o).dot(u), (v - o).dot(w)) for v in vi]
+            if poly_area_2d(pi) < 0:
+                pi = list(reversed(pi))
+            for j in cand:
+                if j == i:
+                    continue
+                pk = (i, j) if i < j else (j, i)
+                if pk in seen:
+                    continue
+                nj, vj = info[j]
+                if ni.dot(nj) < cos_max:
+                    continue
+                if (bm.faces[j].material_index == mi) != same_material:
+                    continue
+                seen.add(pk)
+                # quick reject: all of j's vertices beyond tol on one side of i's plane
+                ds = [ni.dot(v - o) for v in vj]
+                if min(ds) > tol or max(ds) < -tol:
+                    continue
+                pj = [((v - o).dot(u), (v - o).dot(w)) for v in vj]
+                if poly_area_2d(pj) < 0:
+                    pj = list(reversed(pj))
+                poly = clip_convex_2d(pj, pi)
+                if len(poly) < 3 or abs(poly_area_2d(poly)) < min_area:
+                    continue
+                # separation of j's plane above i's plane at the overlap's corners
+                den = nj.dot(ni)
+                seps = []
+                for (a, b) in poly:
+                    q = o + u * a + w * b
+                    seps.append(nj.dot(vj[0] - q) / den)
+                if min(abs(t) for t in seps) >= tol:
+                    continue
+                out.append((i, j, sum(seps) / len(seps), abs(poly_area_2d(poly))))
+    return out
+
+
+def extrude_regions(bm, amounts):
+    """amounts: {face index: distance}. Connected faces of one material with about the same
+    amount are extruded together along their normal (side faces made, the old cap removed)."""
+    bm.faces.ensure_lookup_table()
+    todo = {bm.faces[i]: a for i, a in amounts.items()}
+    done = set()
+    moved = 0
+    for f0, a0 in list(todo.items()):
+        if f0 in done:
+            continue
+        region, stack = [], [f0]
+        done.add(f0)
+        while stack:
+            f = stack.pop()
+            region.append(f)
+            for e in f.edges:
+                for g in e.link_faces:
+                    if g in todo and g not in done and g.material_index == f0.material_index and \
+                            abs(todo[g] - a0) < 0.003 and g.normal.dot(f0.normal) > 0.99:
+                        done.add(g)
+                        stack.append(g)
+        amount = max(todo[f] for f in region)
+        n = Vector((0, 0, 0))
+        for f in region:
+            n += f.normal * f.calc_area()
+        n.normalize()
+        res = bmesh.ops.extrude_face_region(bm, geom=region)
+        for v in [g for g in res["geom"] if isinstance(g, bmesh.types.BMVert)]:
+            v.co += n * amount
+        bmesh.ops.delete(bm, geom=region, context="FACES_ONLY")
+        moved += len(region)
+    return moved
+
+
+def flat_regions(bm):
+    """Face -> region id: connected faces of one material lying in one plane (one board front,
+    one wall panel, one muntin face)."""
+    region = {}
+    rid = 0
+    for f0 in bm.faces:
+        if f0 in region:
+            continue
+        n0 = f0.normal
+        d0 = n0.dot(f0.verts[0].co)
+        stack = [f0]
+        region[f0] = rid
+        while stack:
+            f = stack.pop()
+            for e in f.edges:
+                for g in e.link_faces:
+                    if g in region or g.material_index != f0.material_index:
+                        continue
+                    if g.normal.dot(n0) < 0.9995 or abs(n0.dot(g.verts[0].co) - d0) > 0.001:
+                        continue
+                    region[g] = rid
+                    stack.append(g)
+        rid += 1
+    return region
+
+
+def extrude_region_list(bm, regions, sides=None):
+    """regions: [(faces, distance)] -> each flat region extruded along its normal (side faces
+    made - collected into `sides` - and the old cap removed)."""
+    moved = 0
+    for faces, amount in regions:
+        faces = [f for f in faces if f.is_valid]
+        if not faces:
+            continue
+        n = Vector((0, 0, 0))
+        for f in faces:
+            n += f.normal * f.calc_area()
+        if n.length < 1e-9:
+            continue
+        n.normalize()
+        res = bmesh.ops.extrude_face_region(bm, geom=faces)
+        for v in [g for g in res["geom"] if isinstance(g, bmesh.types.BMVert)]:
+            v.co += n * amount
+        if sides is not None:
+            for g in res["geom"]:
+                if isinstance(g, bmesh.types.BMFace):
+                    g.normal_update()
+                    if abs(g.normal.dot(n)) < 0.5:
+                        sides.add(g)
+        bmesh.ops.delete(bm, geom=faces, context="FACES_ONLY")
+        moved += len(faces)
+    return moved
+
+
+def layer_fix(obj, passes=6):
+    """Lift overlapping flat pieces LAYER_GAP in front of what they overlap: a detail (higher
+    LAYER) in front of the surface it covers; of two layered pieces of one paint (crossing
+    muntins, stacked boards) one is moved in front of the other. Whole flat pieces move (with real
+    side faces), so boards never end up stepped. Exact duplicates are deleted."""
+    mats = [m.name for m in obj.data.materials]
+    total = {"lifted": 0, "dropped": 0, "passes": 0, "left": 0}
+    start = max(1, len(obj.data.polygons))
+    for it in range(passes):
+        if len(obj.data.polygons) > 1.5 * start:
+            total["stopped"] = "growth"            # never let the passes run away
+            break
+        bm = bmesh.new()
+        bm.from_mesh(obj.data)
+        bmesh.ops.triangulate(bm, faces=bm.faces)
+        bm.normal_update()
+        bm.faces.ensure_lookup_table()
+        region = flat_regions(bm)
+        gl = bm.faces.layers.int.get("gen")
+        gen_regions = {r for f, r in region.items() if gl is not None and f[gl]}
+        area = {}
+        for f, r in region.items():
+            area[r] = area.get(r, 0.0) + f.calc_area()
+        need, state, drop, nudge = {}, {}, set(), {}
+        pairs = [(i, j, d, a, False) for i, j, d, a in overlapping_pairs(bm, mats)] +                 [(i, j, d, a, True) for i, j, d, a in overlapping_pairs(bm, mats, same_material=True)]
+        if DEBUG_LAYERS:
+            import collections
+            cc = collections.Counter((mats[bm.faces[i].material_index], mats[bm.faces[j].material_index], round(d, 3)) for i, j, d, a, sm in pairs)
+            print("LAYERDBG pass", it, len(pairs), cc.most_common(8))
+        for i, j, dist, ov, same in pairs:
+            fi, fj = bm.faces[i], bm.faces[j]
+            ri, rj = region[fi], region[fj]
+            if ri == rj:
+                continue
+            if same:
+                # One paint in two layers: the face behind is hidden where they overlap - delete
+                # it when it is (nearly) all covered. Pieces of one paint in exactly one plane
+                # (crossing muntins) shade identically and are left alone; a piece of it within
+                # 1.5 cm in front of another is lifted to LAYER_GAP.
+                back, front = (j, i) if dist < 0 else (i, j)
+                if ov >= 0.9 * bm.faces[back].calc_area():
+                    drop.add(back)
+                    continue
+                # Pieces of one paint in one plane (crossing muntins, a board laid over a frame)
+                # share the depth buffer: the smaller piece is nudged NUDGE in front. Layers of
+                # one paint already more than FIGHT apart are left alone (same shading; lifting
+                # them cascades through stacked casings without end).
+                if abs(dist) >= FIGHT or it > 0:
+                    continue        # (nudged once, in the first pass: repeated nudges cascade)
+                small, big = (ri, rj) if area[ri] <= area[rj] else (rj, ri)
+                if state.get(small) == "fixed":
+                    if state.get(big) == "fixed":
+                        total["left"] += 1
+                        continue
+                    small, big = big, small
+                if small in gen_regions:
+                    continue
+                state[small] = "moving"
+                state.setdefault(big, "fixed")
+                sep = -dist if small == ri else dist
+                nudge.setdefault(small, max(0.0, NUDGE - sep))
+                continue
+            else:
+                mi, mj = mats[fi.material_index], mats[fj.material_index]
+                ki, kj = LAYER.get(mi, 3), LAYER.get(mj, 3)
+                if {mi, mj} == {"KitGlass", "KitDoorPaint"}:
+                    ki, kj = (5, 4) if mi == "KitGlass" else (4, 5)   # door lights sit on the leaf
+                if ki == kj:
+                    ki, kj = (ki + 1, kj) if area[ri] < area[rj] else (ki, kj + 1)
+                mover, other = (ri, rj) if ki > kj else (rj, ri)
+            if mover in gen_regions:
+                # generated boards stay where they were built; a detail piece against one moves
+                # instead, wall cladding is left (the board stands in front of it)
+                if other in gen_regions or mats[bm.faces[i if other == ri else j].material_index] in BODY:
+                    continue
+                mover, other = other, mover
+            sep = -dist if mover == ri else dist        # mover's distance in front of the other
+            if state.get(mover) == "fixed" and same:
+                total["left"] += 1
+                continue
+            state[mover] = "moving"
+            state.setdefault(other, "fixed")
+            if sep < LAYER_GAP - 1e-4:
+                need[mover] = max(need.get(mover, 0.0), LAYER_GAP - sep)
+        for r, a in nudge.items():
+            if r not in need and a > 0:
+                need[r] = a
+        if not need and not drop:
+            bm.free()
+            break
+        faces_of = {}
+        for f, r in region.items():
+            if r in need:
+                faces_of.setdefault(r, []).append(f)
+        dropped = [bm.faces[i] for i in drop]
+        sides = set()
+        total["lifted"] += extrude_region_list(bm, [(faces_of[r], a) for r, a in need.items() if r in faces_of], sides)
+        bmesh.ops.delete(bm, geom=[f for f in dropped if f.is_valid], context="FACES_ONLY")
+        # The new side faces of a lifted piece can land on another surface's plane (a casing's
+        # inner edge on the window reveal): those are covered by that surface - delete them
+        # instead of lifting again (which never converges).
+        if sides:
+            bm.faces.ensure_lookup_table()
+            bm.normal_update()
+            hit = set()
+            for pr in overlapping_pairs(bm, mats) + overlapping_pairs(bm, mats, same_material=True):
+                for k in (pr[0], pr[1]):
+                    if bm.faces[k] in sides:
+                        hit.add(bm.faces[k])
+            bmesh.ops.delete(bm, geom=list(hit), context="FACES_ONLY")
+            total["sides_removed"] = total.get("sides_removed", 0) + len(hit)
+        total["dropped"] += len(drop)
+        total["passes"] = it + 1
+        bm.to_mesh(obj.data)
+        bm.free()
+    return total
+
+
+def ground_fix(obj, lift_mats=("KitDeckBoards",), lift=0.04):
+    """The lawn's top is y = 0: floors lying on it (porch, carport, deck at grade) are raised
+    `lift` with real fascia sides; other upward slivers at the lawn level are removed."""
+    mats = [m.name for m in obj.data.materials]
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.normal_update()
+    raise_faces, kill = {}, []
+    for f in bm.faces:
+        if max(v.co.z for v in f.verts) < 0.003 and mats[f.material_index] not in lift_mats:
+            kill.append(f)          # wholly at or below grade: under the lawn
+            continue
+        if f.normal.z >= 0.95 and mats[f.material_index] not in lift_mats and min(v.co.z for v in f.verts) < 0.016                 and max(v.co.z for v in f.verts) < 0.15:
+            kill.append(f)          # an upward sliver dipping to the lawn level
+            continue
+        if f.normal.z < 0.95 or max(abs(v.co.z) for v in f.verts) > 0.02:
+            continue
+        if mats[f.material_index] in lift_mats:
+            raise_faces[f.index] = lift
+        else:
+            kill.append(f)
+    bmesh.ops.delete(bm, geom=kill, context="FACES_ONLY")
+    bm.faces.ensure_lookup_table()
+    raise_faces = {f.index: lift for f in bm.faces if f.normal.z >= 0.95 and max(abs(v.co.z) for v in f.verts) <= 0.02
+                   and mats[f.material_index] in lift_mats}
+    tops = [[v.co.copy() for v in f.verts] for f in bm.faces if f.index in raise_faces]
+    n = extrude_regions(bm, raise_faces)
+    # walls, posts and trims that started on the old floor level now end on the raised floor
+    lifted = 0
+    if tops:
+        for v in bm.verts:
+            if not (-0.005 < v.co.z < lift - 0.001):
+                continue
+            if all(mats[f.material_index] in lift_mats for f in v.link_faces):
+                continue
+            for t in tops:
+                if any(tri_inside_2d(v.co, t[0], t[k], t[k + 1]) for k in range(1, len(t) - 1)):
+                    v.co.z = lift
+                    lifted += 1
+                    break
+    # slivers of walls / trims left at or under the raised floor are hidden by it
+    buried = []
+    if tops:
+        for f in bm.faces:
+            if mats[f.material_index] in lift_mats or max(v.co.z for v in f.verts) > lift + 0.002:
+                continue
+            c = f.calc_center_median()
+            if any(tri_inside_2d(c, t[0], t[k], t[k + 1]) for t in tops for k in range(1, len(t) - 1)):
+                buried.append(f)
+        bmesh.ops.delete(bm, geom=buried, context="FACES_ONLY")
+    loose = [v for v in bm.verts if not v.link_faces]
+    bmesh.ops.delete(bm, geom=loose, context="VERTS")
+    bm.to_mesh(obj.data)
+    bm.free()
+    return {"raised": n, "removed": len(kill) + len(buried), "lifted_verts": lifted if tops else 0}
+
+
+def tri_inside_2d(p, a, b, c):
+    def side(p1, p2, p3):
+        return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y)
+    d1, d2, d3 = side(p, a, b), side(p, b, c), side(p, c, a)
+    neg = d1 < -1e-9 or d2 < -1e-9 or d3 < -1e-9
+    pos = d1 > 1e-9 or d2 > 1e-9 or d3 > 1e-9
+    return not (neg and pos)
+
+
+def unsink(obj, detail=("KitTrimPaint", "KitDoorPaint", "KitRailBlack", "KitFrameDark", "KitDoorWood")):
+    """Boards / shutters / frames that sit half inside a wall: the vertices behind the wall face
+    (where a wall face is right in front of them) are moved onto that face, so the piece starts
+    at the wall instead of crossing it."""
+    mats = [m.name for m in obj.data.materials]
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.normal_update()
+    wall = bmesh.new()
+    wall.from_mesh(obj.data)
+    kill = [f for f in wall.faces if mats[f.material_index] not in BODY]
+    bmesh.ops.delete(wall, geom=kill, context="FACES_ONLY")
+    wall.faces.ensure_lookup_table()
+    wall.normal_update()
+    if not wall.faces:
+        wall.free(); bm.free()
+        return 0
+    bvh = BVHTree.FromBMesh(wall)
+    moved = 0
+    seen = set()
+    for f0 in bm.faces:
+        if f0.index in seen or mats[f0.material_index] not in detail:
+            continue
+        island, stack = [], [f0]
+        seen.add(f0.index)
+        while stack:
+            f = stack.pop()
+            island.append(f)
+            for e in f.edges:
+                for g in e.link_faces:
+                    if g.index not in seen and mats[g.material_index] in detail:
+                        seen.add(g.index)
+                        stack.append(g)
+        verts = {v for f in island for v in f.verts}
+        plan, lip = {}, {}
+        front = behind = 0
+        for v in verts:
+            hit = bvh.find_nearest(v.co, 0.12)
+            if hit[0] is None:
+                continue
+            p, n = hit[0], wall.faces[hit[2]].normal
+            s = n.dot(v.co - p)
+            on_face = (v.co - p).cross(n).length < 0.002
+            if s > 0.005:
+                front += 1
+                if s < 0.05 and on_face:
+                    lip[v] = p.copy()
+            elif s < -0.005:
+                behind += 1
+                if on_face:
+                    plan[v] = p.copy()
+        if front and plan and front >= behind:
+            for v, p in plan.items():
+                v.co = p
+                moved += 1
+        elif behind > front and lip:
+            for v, p in lip.items():      # mostly inside: the few cm poking through go back
+                v.co = p
+                moved += 1
+    bm.to_mesh(obj.data)
+    bm.free(); wall.free()
+    return moved
+
+
+def auto_corner_boards(obj, depth=0.035, width=0.11, inside=0.045, mat="KitTrimPaint"):
+    """Corner boards over every vertical corner where two perpendicular, axis-aligned walls of
+    lap siding meet: an L of two closed boards at outside corners (the board on one face also
+    covers the end of the other), a square strip at inside corners. Covers the raw ends and the
+    groove notches of the courses."""
+    mats = [m.name for m in obj.data.materials]
+    if mat not in mats:
+        obj.data.materials.append(bpy.data.materials.get(mat) or bpy.data.materials.new(mat))
+        mats.append(mat)
+    mi = mats.index(mat)
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.normal_update()
+    gen = bm.faces.layers.int.get("gen") or bm.faces.layers.int.new("gen")
+    siding = {"KitSidingPaint", "KitLapSiding"}
+    edges = []      # (axis of the wall normal 0=x/1=y, sign, plane offset, other coord, z0, z1, centre)
+    for f in bm.faces:
+        if mats[f.material_index] not in siding:
+            continue
+        n = f.normal
+        ax = 0 if abs(n.x) > 0.995 else (1 if abs(n.y) > 0.995 else -1)
+        if ax < 0:
+            continue
+        c = f.calc_center_median()
+        for e in f.edges:
+            a, b = e.verts[0].co, e.verts[1].co
+            d = b - a
+            if d.length < 0.05 or abs(d.z) / d.length < 0.995:
+                continue
+            other = [g for g in e.link_faces if g is not f]
+            if other and all(mats[g.material_index] in siding and g.normal.dot(n) > 0.99 for g in other):
+                continue        # inner edge of a wall
+            far = max(abs(v.co[1 - ax] - a[1 - ax]) for v in f.verts)    # how far the wall runs on
+            edges.append((ax, 1 if n[ax] > 0 else -1, a[ax], a[1 - ax], min(a.z, b.z), max(a.z, b.z), c, far))
+    # corner lines: an x-facing wall edge and a y-facing wall edge at the same (x, y)
+    lines = {}
+    xs = [e for e in edges if e[0] == 0]
+    ys = [e for e in edges if e[0] == 1]
+    grid = {}
+    for e in ys:
+        grid.setdefault((round(e[3] / 0.05), round(e[2] / 0.05)), []).append(e)
+    for ex in xs:
+        xa, yb = ex[2], ex[3]
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                for ey in grid.get((round(xa / 0.05) + dx, round(yb / 0.05) + dy), []):
+                    if abs(ey[3] - xa) > 0.025 or abs(ey[2] - yb) > 0.025:
+                        continue
+                    z0, z1 = max(ex[4], ey[4]), min(ex[5], ey[5])
+                    if z1 - z0 < 0.005:
+                        continue
+                    # wall A (normal sx along x at x = xa), wall B (normal sy along y at y = yb)
+                    sx, sy = ex[1], ey[1]
+                    cA, cB = ex[6], ey[6]
+                    convex = (cB.x - xa) * sx < 0 and (cA.y - yb) * sy < 0
+                    concave = (cB.x - xa) * sx > 0 and (cA.y - yb) * sy > 0
+                    if not (convex or concave):
+                        continue
+                    key = (round(xa / 0.02), round(yb / 0.02), sx, sy, convex)
+                    line = lines.setdefault(key, [xa, yb, sx, sy, convex, [], 0.0, 0.0])
+                    line[5].append((z0, z1))
+                    line[6], line[7] = max(line[6], ex[7]), max(line[7], ey[7])
+    boards = 0
+    # Courses of one wall that run on a few cm past the other wall's face ("boards poking past
+    # the corner") are cut back to the corner line.
+    pure = [v for v in bm.verts if v.link_faces and all(mats[f.material_index] in siding for f in v.link_faces)]
+    trimmed = 0
+    for key, (xa, yb, sx, sy, convex, spans, far_a, far_b) in lines.items():
+        if not convex or far_a < 0.09 or far_b < 0.09:
+            continue
+        z0 = min(z for z, _ in spans) - 0.01
+        z1 = max(z for _, z in spans) + 0.01
+        for v in pure:
+            if not (z0 <= v.co.z <= z1):
+                continue
+            if abs(v.co.y - yb) < 0.03 and 0 < (v.co.x - xa) * sx < 0.04:
+                v.co.x = xa
+                trimmed += 1
+            elif abs(v.co.x - xa) < 0.03 and 0 < (v.co.y - yb) * sy < 0.04:
+                v.co.y = yb
+                trimmed += 1
+    print("corner trim", trimmed)
+
+    def box(x0, x1, y0, y1, z0, z1):
+        """Closed box, faces wound outward (counter-clockwise seen from outside)."""
+        vs = [bm.verts.new((x, y, z)) for z in (z0, z1) for y in (y0, y1) for x in (x0, x1)]
+        for q in ((0, 2, 3, 1), (4, 5, 7, 6), (0, 1, 5, 4), (2, 6, 7, 3), (0, 4, 6, 2), (1, 3, 7, 5)):
+            f = bm.faces.new([vs[k] for k in q])
+            f.material_index = mi
+            f[gen] = 1
+
+    for key, (xa, yb, sx, sy, convex, spans, far_a, far_b) in lines.items():
+        if far_a < 0.09 or far_b < 0.09:
+            continue        # a reveal / jamb (both walls must run on from the corner)
+        spans.sort()
+        merged = []
+        for z0, z1 in spans:
+            if merged and z0 <= merged[-1][1] + 0.035:
+                merged[-1][1] = max(merged[-1][1], z1)
+            else:
+                merged.append([z0, z1])
+        for z0, z1 in merged:
+            # stop 2.5 cm short of the courses' ends: plinth caps and eave trims sit there
+            z0, z1 = z0 + 0.025, z1 - 0.01
+            if z1 - z0 < 0.12:
+                continue
+            if convex:
+                # board on wall A (x = xa): x from xa out by depth; y from the corner in by width,
+                # out past the corner by depth (covering board B's end)
+                ax0, ax1 = sorted((xa, xa + sx * depth))
+                ay0, ay1 = sorted((yb - sy * width, yb + sy * depth))
+                box(ax0, ax1, ay0, ay1, z0, z1)
+                bx0, bx1 = sorted((xa - sx * width, xa))
+                by0, by1 = sorted((yb, yb + sy * depth))
+                box(bx0, bx1, by0, by1, z0, z1)
+            else:
+                cx0, cx1 = sorted((xa, xa + sx * inside))
+                cy0, cy1 = sorted((yb, yb + sy * inside))
+                box(cx0, cx1, cy0, cy1, z0, z1)
+            boards += 1
+    bm.to_mesh(obj.data)
+    bm.free()
+    return boards
+
+
+SKIN = BODY | {"KitGlass", "KitDoorPaint", "KitDoorWood"}
+
+
+def cross_depth(ta, tb, pierce=0.01):
+    """How far two triangles cross each other (0 if they only touch): the smaller of the depths
+    each one reaches on its less deep side of the other's plane, where they really intersect."""
+    na = (ta[1] - ta[0]).cross(ta[2] - ta[0])
+    nb = (tb[1] - tb[0]).cross(tb[2] - tb[0])
+    if na.length < 1e-12 or nb.length < 1e-12:
+        return 0.0
+    na.normalize(); nb.normalize()
+    da = [nb.dot(p - tb[0]) for p in ta]
+    db = [na.dot(p - ta[0]) for p in tb]
+    for d in (da, db):
+        if max(d) < pierce or min(d) > -pierce:
+            return 0.0
+    line = na.cross(nb)
+    if line.length < 1e-6:
+        return 0.0
+    line.normalize()
+
+    def seg(t, d):
+        ts = []
+        for k in range(3):
+            k2 = (k + 1) % 3
+            if (d[k] > 0) != (d[k2] > 0):
+                s = d[k] / (d[k] - d[k2])
+                ts.append(line.dot(t[k].lerp(t[k2], s)))
+        return (min(ts), max(ts)) if len(ts) >= 2 else (0, -1)
+    sa, sb = seg(ta, da), seg(tb, db)
+    if min(sa[1], sb[1]) - max(sa[0], sb[0]) < 0.02:
+        return 0.0
+    return min(min(max(da), -min(da)), min(max(db), -min(db)))
+
+
+def final_purge(obj, max_island=0.6):
+    """Last resort after the lifting passes: a detail piece (not wall cladding) that still lies
+    within 1.5 cm on another material, or crosses a facade skin face by more than 1 cm, is
+    removed - the whole flat piece if small, else that face."""
+    mats = [m.name for m in obj.data.materials]
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bmesh.ops.triangulate(bm, faces=bm.faces)
+    bm.normal_update()
+    bm.faces.ensure_lookup_table()
+    kill = set()
+    for i, j, dist, ov in overlapping_pairs(bm, mats):
+        mi, mj = mats[bm.faces[i].material_index], mats[bm.faces[j].material_index]
+        if mi in BODY and mj in BODY:
+            continue
+        ki, kj = LAYER.get(mi, 3), LAYER.get(mj, 3)
+        kill.add(bm.faces[i] if (ki, -bm.faces[i].calc_area()) > (kj, -bm.faces[j].calc_area()) else bm.faces[j])
+    # piercing: skin faces against faces of another material
+    cells = {}
+    cs = 0.5
+    for f in bm.faces:
+        vs = [v.co for v in f.verts]
+        lo = [math.floor(min(v[k] for v in vs) / cs) for k in range(3)]
+        hi = [math.floor(max(v[k] for v in vs) / cs) for k in range(3)]
+        for x in range(lo[0], hi[0] + 1):
+            for y in range(lo[1], hi[1] + 1):
+                for z in range(lo[2], hi[2] + 1):
+                    cells.setdefault((x, y, z), []).append(f)
+    seen = set()
+    box = {}
+    for f in bm.faces:
+        vs = [v.co for v in f.verts]
+        box[f] = ([min(v[k] for v in vs) for k in range(3)], [max(v[k] for v in vs) for k in range(3)])
+    for fl in cells.values():
+        skins = [a for a in fl if mats[a.material_index] in SKIN]
+        if not skins:
+            continue
+        others = [b for b in fl if mats[b.material_index] != "KitAsphaltShingles"]
+        for a in skins:
+            ma = mats[a.material_index]
+            la, ha = box[a]
+            for b in others:
+                mb = mats[b.material_index]
+                if mb == ma:
+                    continue
+                lb, hb = box[b]
+                if any(lb[k] > ha[k] or hb[k] < la[k] for k in range(3)):
+                    continue
+                key = (a.index, b.index) if a.index < b.index else (b.index, a.index)
+                if key in seen:
+                    continue
+                seen.add(key)
+                if abs(a.normal.dot(b.normal)) > 0.985:
+                    continue
+                if cross_depth([v.co for v in a.verts], [v.co for v in b.verts]) > 0.01:
+                    if mb in BODY and ma not in BODY:
+                        kill.add(a)
+                    elif ma in BODY and mb not in BODY:
+                        kill.add(b)
+                    else:
+                        kill.add(a if a.calc_area() < b.calc_area() else b)
+    # grow small pieces to their whole island (same material, connected)
+    out = set()
+    for f in kill:
+        if f in out:
+            continue
+        isl, stack = [], [f]
+        seenf = {f}
+        while stack and len(isl) < 400:
+            g = stack.pop()
+            isl.append(g)
+            for e in g.edges:
+                for h in e.link_faces:
+                    if h not in seenf and h.material_index == f.material_index:
+                        seenf.add(h)
+                        stack.append(h)
+        if mats[f.material_index] not in BODY and not stack and sum(g.calc_area() for g in isl) < max_island:
+            out.update(isl)
+        else:
+            out.add(f)
+    gen = bm.faces.layers.int.get("gen")
+    if gen is not None:
+        out = {f for f in out if not f[gen]}
+    bmesh.ops.delete(bm, geom=list(out), context="FACES_ONLY")
+    loose = [v for v in bm.verts if not v.link_faces]
+    bmesh.ops.delete(bm, geom=loose, context="VERTS")
+    bm.to_mesh(obj.data)
+    bm.free()
+    return len(out)
+
+
+def extra_boards(obj, boxes, mat="KitTrimPaint"):
+    """Closed trim boxes (Godot local lo/hi corners), tagged as generated boards."""
+    if not boxes:
+        return 0
+    mats = [m.name for m in obj.data.materials]
+    mi = mats.index(mat)
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    gen = bm.faces.layers.int.get("gen") or bm.faces.layers.int.new("gen")
+    for lo, hi, skip in boxes:
+        before = set(bm.faces)
+        add_box(bm, mi, lo, hi, skip=skip)
+        for f in bm.faces:
+            if f not in before:
+                f[gen] = 1
+    bm.to_mesh(obj.data)
+    bm.free()
+    return len(boxes)
+
+
+def same_paint_push(obj, push=0.007, passes=2):
+    """Last pass for pieces of one paint that still overlap in one plane (< FIGHT): the smaller
+    face is split off and set `push` in front (small faces only), or deleted when the other face
+    covers it. Same colour either way; only the shared depth goes."""
+    mats = [m.name for m in obj.data.materials]
+    total = 0
+    for it in range(passes):
+        bm = bmesh.new()
+        bm.from_mesh(obj.data)
+        bmesh.ops.triangulate(bm, faces=bm.faces)
+        bm.normal_update()
+        bm.faces.ensure_lookup_table()
+        move, kill = {}, set()
+        for i, j, dist, ov in overlapping_pairs(bm, mats, tol=FIGHT, same_material=True):
+            fi, fj = bm.faces[i], bm.faces[j]
+            small = fi if fi.calc_area() <= fj.calc_area() else fj
+            if small in move or small in kill:
+                continue
+            other = fj if small is fi else fi
+            if other in move:
+                continue
+            if ov >= 0.9 * small.calc_area():
+                kill.add(small)
+            elif small.calc_area() < 0.05:
+                sep = -dist if small is fi else dist        # small's height above the other
+                move[small] = max(0.0, push - sep)
+        if not move and not kill:
+            bm.free()
+            break
+        bmesh.ops.delete(bm, geom=list(kill), context="FACES_ONLY")
+        faces = [f for f in move if f.is_valid]
+        for f in faces:
+            res = bmesh.ops.split(bm, geom=[f], use_only_faces=True)
+            for g in [g for g in res["geom"] if isinstance(g, bmesh.types.BMFace)]:
+                n = g.normal.copy()
+                for v in g.verts:
+                    v.co += n * move[f]
+        total += len(kill) + len(faces)
+        bm.to_mesh(obj.data)
+        bm.free()
+    return total
+
+
+def end_boards(obj, mat="KitTrimPaint"):
+    """Trim boards over the raw end grain of modelled siding courses that end without a corner
+    (wall steps, ends under the eaves): thin vertical siding faces whose normal runs along the
+    wall, with nothing of another material in front of them."""
+    mats = [m.name for m in obj.data.materials]
+    if "KitSidingPaint" not in mats:
+        return 0
+    if mat not in mats:
+        obj.data.materials.append(bpy.data.materials.get(mat) or bpy.data.materials.new(mat))
+        mats.append(mat)
+    mi = mats.index(mat)
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.normal_update()
+    gen = bm.faces.layers.int.get("gen") or bm.faces.layers.int.new("gen")
+    bvh = BVHTree.FromBMesh(bm)
+    bm.faces.ensure_lookup_table()
+    groups = {}
+    for f in bm.faces:
+        if mats[f.material_index] != "KitSidingPaint":
+            continue
+        n = f.normal
+        ax = 0 if abs(n.x) > 0.99 else (1 if abs(n.y) > 0.99 else -1)
+        if ax < 0:
+            continue
+        vs = [v.co for v in f.verts]
+        thin = 1 - ax
+        lo_t, hi_t = min(v[thin] for v in vs), max(v[thin] for v in vs)
+        if hi_t - lo_t > 0.05:
+            continue
+        c = f.calc_center_median()
+        covered = True
+        for p in face_samples(f, 8) + [c] + [v.co.lerp(c, 0.1) for v in f.verts]:
+            hit = bvh.ray_cast(p + n * 0.001, n, 0.2)
+            if hit[0] is None or mats[bm.faces[hit[2]].material_index] in BODY:
+                covered = False
+                break
+        if covered:
+            continue
+        # which way the wall faces (its boards' front faces next to this end): the board goes
+        # on that side only, never into the wall
+        side = 0
+        for e in f.edges:
+            for g2 in e.link_faces:
+                if g2 is not f and abs(g2.normal[thin]) > 0.9:
+                    side = 1 if g2.normal[thin] > 0 else -1
+        if side == 0:
+            continue
+        key = (ax, 1 if n[ax] > 0 else -1, round(c[ax] / 0.01), round((lo_t + hi_t) / 2 / 0.03), side)
+        g = groups.setdefault(key, [c[ax], lo_t, hi_t, [], n.copy()])
+        g[1], g[2] = min(g[1], lo_t), max(g[2], hi_t)
+        g[3].append((min(v.z for v in vs), max(v.z for v in vs)))
+    made = 0
+    for (ax, sgn, _, _, side), (plane, lo_t, hi_t, spans, n) in groups.items():
+        spans.sort()
+        merged = []
+        for z0, z1 in spans:
+            if merged and z0 <= merged[-1][1] + 0.04:
+                merged[-1][1] = max(merged[-1][1], z1)
+            else:
+                merged.append([z0, z1])
+        thin = 1 - ax
+        for z0, z1 in merged:
+            z0, z1 = z0 + 0.025, z1 - 0.01          # clear of plinth caps / eave trims
+            if z1 - z0 < 0.03:
+                continue
+            lo = [0, 0, z0]
+            hi = [0, 0, z1]
+            lo[ax], hi[ax] = sorted((plane, plane + sgn * 0.025))
+            lo[thin], hi[thin] = (lo_t - 0.002, hi_t + 0.035) if side > 0 else (lo_t - 0.035, hi_t + 0.002)
+            vs = [bm.verts.new((x, y, z)) for z in (lo[2], hi[2]) for y in (lo[1], hi[1]) for x in (lo[0], hi[0])]
+            for q in ((0, 2, 3, 1), (4, 5, 7, 6), (0, 1, 5, 4), (2, 6, 7, 3), (0, 4, 6, 2), (1, 3, 7, 5)):
+                fn = bm.faces.new([vs[k] for k in q])
+                fn.material_index = mi
+                fn[gen] = 1
+            made += 1
+    bm.to_mesh(obj.data)
+    bm.free()
+    return made
 
 
 def smooth_by_angle(obj, deg=32.0):
@@ -667,7 +1572,19 @@ def prepare(name, cfg):
     if extra:
         extra(obj)
     stats["near_tris"] = decimate(obj, cfg["budget"])
-    stats["coplanar"] = fix_coplanar(obj)
+    # Conflict fixes (tests/house_conflict_test.gd): floors off the lawn, boards out of the walls,
+    # detail layers lifted in front of what they cover, corner boards on the siding corners.
+    stats["ground"] = ground_fix(obj, cfg.get("lift_floor", ()))
+    stats["unsink"] = unsink(obj)
+    stats["layers"] = layer_fix(obj)
+    stats["purged_early"] = final_purge(obj)
+    stats["corner_boards"] = auto_corner_boards(obj)
+    stats["end_boards"] = end_boards(obj) + extra_boards(obj, cfg.get("extra_boards", ()))
+    stats["layers_after_boards"] = layer_fix(obj)
+    stats["ground_final"] = ground_fix(obj, ())
+    stats["purged"] = final_purge(obj)
+    stats["same_paint"] = same_paint_push(obj)
+    stats["near_tris"] = tri_count(obj)
     smooth_by_angle(obj)
     if BAKE:
         bake_ao(obj)
@@ -686,7 +1603,22 @@ def prepare(name, cfg):
     # Far LOD (45-110 m): no small hardware, collapsed to ~1/3, same materials and AO.
     bpy.context.scene.collection.objects.link(far)
     drop_small_islands(far, 0.35)
-    stats["far_tris"] = decimate(far, int(stats["near_tris"] * cfg["far_ratio"]))
+    # Planar simplification only (no collapse): vertices stay where the near LOD has them, so the
+    # lifted layers, corner boards and raised floors keep their separations.
+    bm = bmesh.new()
+    bm.from_mesh(far.data)
+    bmesh.ops.dissolve_limit(bm, angle_limit=math.radians(4.0), use_dissolve_boundaries=False,
+                             verts=bm.verts, edges=bm.edges, delimit={"MATERIAL"})
+    bmesh.ops.triangulate(bm, faces=bm.faces)
+    bm.to_mesh(far.data)
+    bm.free()
+    stats["far_tris"] = tri_count(far)
+    # Fix anything the simplification brought within the tolerances again.
+    stats["far_ground"] = ground_fix(far, cfg.get("lift_floor", ()))
+    stats["far_layers"] = layer_fix(far)
+    stats["far_purged"] = final_purge(far)
+    stats["far_same_paint"] = same_paint_push(far)
+    stats["far_tris"] = tri_count(far)
     far_parts = split_by_material(far)
     export(far_parts, os.path.join(OUT, name + "_far.glb"), extras)
     for p in far_parts:
@@ -734,21 +1666,73 @@ def add_quad(bm, mi, x0, x1, y0, y1, z):
     return f
 
 
+def add_box(bm, mi, lo, hi, skip=(), inward=False):
+    """Axis-aligned box in Godot local coordinates, faces wound outward (inward: a hole's reveals);
+    skip: '+x', '-z', ..."""
+    x0, y0, z0 = lo
+    x1, y1, z1 = hi
+    sides = {"-x": [(x0, y0, z0), (x0, y0, z1), (x0, y1, z1), (x0, y1, z0)], "+x": [(x1, y0, z0), (x1, y1, z0), (x1, y1, z1), (x1, y0, z1)],
+             "-y": [(x0, y0, z0), (x1, y0, z0), (x1, y0, z1), (x0, y0, z1)], "+y": [(x0, y1, z0), (x0, y1, z1), (x1, y1, z1), (x1, y1, z0)],
+             "-z": [(x0, y0, z0), (x0, y1, z0), (x1, y1, z0), (x1, y0, z0)], "+z": [(x0, y0, z1), (x1, y0, z1), (x1, y1, z1), (x0, y1, z1)]}
+    want = {"-x": (-1, 0, 0), "+x": (1, 0, 0), "-y": (0, -1, 0), "+y": (0, 1, 0), "-z": (0, 0, -1), "+z": (0, 0, 1)}
+    for key, pts in sides.items():
+        if key in skip:
+            continue
+        f = bm.faces.new([bm.verts.new(g2b(*q)) for q in pts])
+        f.normal_update()
+        w = g2b(*want[key])
+        if (f.normal.dot(w) < 0) != inward:
+            f.normal_flip()
+        f.material_index = mi
+
+
 def farmhouse_door(obj):
+    """Solid leaf in the cleared storm-door opening: the glazed upper light is a real opening in
+    the leaf (glass 2 cm behind its face, painted reveals), the lower panel stands 2 cm proud."""
     me = obj.data
     names = [m.name for m in me.materials]
     bm = bmesh.new()
     bm.from_mesh(me)
     door, glass = names.index("KitDoorPaint"), names.index("KitGlass")
-    add_quad(bm, door, -1.45, -0.56, 0.52, 2.62, -1.80)            # leaf, 3 cm behind the frame face
-    add_quad(bm, glass, -1.31, -0.70, 1.52, 2.42, -1.786)          # upper glazed light
-    add_quad(bm, door, -1.31, -0.70, 0.70, 1.36, -1.786)           # raised lower panel
+    x0, x1, y0, y1, z = -1.45, -0.56, 0.52, 2.62, -1.80     # leaf, 3 cm behind the frame face
+    gx0, gx1, gy0, gy1 = -1.31, -0.70, 1.52, 2.42
+    for a, b, c, d in ((x0, x1, y0, gy0), (x0, x1, gy1, y1), (x0, gx0, gy0, gy1), (gx1, x1, gy0, gy1)):
+        add_quad(bm, door, a, b, c, d, z)
+    add_box(bm, door, (gx0, gy0, z - 0.02), (gx1, gy1, z), skip=("+z", "-z"), inward=True)
+    add_quad(bm, glass, gx0, gx1, gy0, gy1, z - 0.02)
+    add_box(bm, door, (-1.31, 0.70, z), (-0.70, 1.36, z + 0.02), skip=("-z",))     # raised panel
     bmesh.ops.triangulate(bm, faces=bm.faces)
     bm.to_mesh(me)
     bm.free()
 
 
-EXTRA = {"house_duplex": duplex_steps, "house_farmhouse": farmhouse_door}
+def snap_up(obj, lo, hi, y, keep=("KitDeckBoards",)):
+    """Vertices (of faces not in `keep`) inside the Godot box lo..hi are lifted to height y: walls,
+    door frames and posts standing on a porch deck end on its surface instead of passing it."""
+    mats = [m.name for m in obj.data.materials]
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    n = 0
+    for v in bm.verts:
+        gx, gy, gz = v.co.x, v.co.z, -v.co.y
+        if not (lo[0] <= gx <= hi[0] and lo[1] <= gy <= hi[1] and lo[2] <= gz <= hi[2]):
+            continue
+        if any(mats[f.material_index] in keep for f in v.link_faces):
+            continue
+        v.co.z = y
+        n += 1
+    bm.to_mesh(obj.data)
+    bm.free()
+    return n
+
+
+def farmhouse_extra(obj):
+    farmhouse_door(obj)
+    # Porch deck top at 0.517: the front walls, door frame and posts started 1.2 cm below it.
+    print("snap_up", snap_up(obj, (-1.95, 0.48, -4.45), (5.25, 0.5165, 0.05), 0.518))
+
+
+EXTRA = {"house_duplex": duplex_steps, "house_farmhouse": farmhouse_extra}
 PROBE_X = {"house_farmhouse": (-2.5, 1.5, 0.25, (0.3, 0.8, 1.6, 2.4, 2.8), 0.0), "house_duplex": (-3.0, 1.0, 0.25, (0.3, 0.8, 1.6, 2.4, 2.7), 0.0), "house_suburban": (-5.6, -3.0, 0.1, (0.1, 0.4, 0.7, 1.2, 2.0, 2.2, 2.35, 2.45, 2.6), 0.5)}
 # Godot local metres (x right, y up, z towards the street). door = (x, floor y, z of the door
 # leaf); ramp = [x0, x1, top, z_top, z_bottom]; boxes/hull = [[centre], [size]] collision
@@ -756,7 +1740,7 @@ PROBE_X = {"house_farmhouse": (-2.5, 1.5, 0.25, (0.3, 0.8, 1.6, 2.4, 2.8), 0.0),
 # massing = [eave, rise, ridge axis, width, depth] for the instancer's far wall+roof boxes.
 METADATA = {
     "house_suburban": {
-        "lot": 18.0, "w": 16.43, "d": 14.68, "h": 7.0, "door": [-3.43, 0.0, -3.08], "step_height": 0.0,
+        "lot": 18.0, "w": 16.43, "d": 14.68, "h": 7.0, "door": [-3.43, 0.04, -3.08], "step_height": 0.04,
         "ramp": [], "boxes": [],
         "hull": [[[2.425, 2.75, -4.55], [10.75, 5.5, 8.1]], [[2.0, 2.75, -0.25], [4.5, 5.5, 0.5]],
                  [[-4.475, 2.6, -5.8], [3.05, 5.2, 5.6]], [[-1.0, 2.5, -9.3], [6.0, 5.0, 1.4]]],

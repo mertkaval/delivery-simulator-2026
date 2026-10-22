@@ -12,6 +12,10 @@ const FAR_END := 650.0
 const TH_FLOOR := 3.0
 const TH_PLINTH := 0.45
 const TH_RISE := 3.906 ## tan(38 deg) * 5 m: ridge height above the eaves
+## Balcony slabs sit this far above their floor line, clear of the ground floor's cornice band
+## and with their top 1 cm over the apartment bays' concrete floor band (top 0.2) rather than in
+## its plane (the band's top lay in the slab top: coplanar, if the same concrete).
+const BALCONY_LIFT := 0.10
 
 var batches := {}
 ## Test hook: when true, every placed near-LOD piece is also recorded as [building, asset, mesh, transform].
@@ -97,7 +101,7 @@ func sign_label(text: String, at: Vector3, yaw: float, size: int = 34) -> void:
 
 ## Four facades of a 4 m-bay block. `ground(bay, face)` and `upper(bay, face, floor)` pick modules;
 ## face 0 = street, 1 = left, 2 = back, 3 = right. Returns the roof height.
-func block_facades(base: Transform3D, bays: int, depth: float, floors: int, ground: Callable, upper: Callable) -> float:
+func block_facades(base: Transform3D, bays: int, depth: float, floors: int, ground: Callable, upper: Callable, style: int = -1) -> float:
 	var width := bays * 4.0
 	var depth_bays := int(depth / 4.0)
 	var faces := [
@@ -114,7 +118,30 @@ func block_facades(base: Transform3D, bays: int, depth: float, floors: int, grou
 			module(ground.call(i, f, count), face * pose(Vector3(x, 0, 0)))
 			for fl in range(1, floors):
 				module(upper.call(i, f, fl), face * pose(Vector3(x, GROUND + (fl - 1) * FLOOR, 0)))
-	return GROUND + (floors - 1) * FLOOR
+	var top := GROUND + (floors - 1) * FLOOR
+	if style >= 0: corner_posts(base, width, depth, top, style)
+	return top
+
+## Corner quoins: a 7 cm post up each building corner, 2 cm proud of both facades. The street
+## modules' end faces (piers, fascia, trims) end in the side facade's plane and the side wall
+## steps only 1 cm out past them - coplanar slivers that shimmered at a distance, and a 1 cm slot
+## open down the corner. The post covers both and closes the corner.
+const POST_IN := 0.04 ## post reaches this far inside the street facade's end
+const POST_OUT := 0.025 ## and stands this far proud of both facades (at 2 cm its face lay in the far LOD's fascia / window quads)
+const POST_DEPTH := 0.34 ## back from the street facade's front plane (module depth 0.3)
+func corner_posts(base: Transform3D, width: float, depth: float, top: float, style: int) -> void:
+	var street_out := 0.012 ## module() steps for facades facing +-Z / +-X (local frame of the block)
+	var side_out := 0.01
+	var w := POST_IN + side_out + POST_OUT
+	var d := POST_DEPTH + street_out + POST_OUT
+	for back in [false, true]:
+		for sx in [-1.0, 1.0]:
+			# Post frame: front (local +z of the module) on the street / back facade, x out to the side.
+			var face := base * pose(Vector3(0, 0, -depth if back else 0.0), PI if back else 0.0)
+			var cx: float = sx * (width * 0.5 - POST_IN + w * 0.5)
+			var placement := face * pose(Vector3(cx, 0, street_out + POST_OUT), 0.0, Vector3(w / 4.0, top / FLOOR, d / 0.3))
+			place("plain_wall_%d" % style, placement, NEAR_END)
+			place("plain_wall_%d_far" % style, placement, FAR_END, NEAR_END, false)
 
 func roof(base: Transform3D, bays: int, depth: float, top: float, style: int, variant: int) -> void:
 	var width := bays * 4.0
@@ -138,13 +165,13 @@ func walkup(b: Dictionary) -> void:
 	var entry := 1
 	var top := block_facades(base, b.bays, b.depth, b.floors,
 		func(i: int, face: int, _count: int) -> String: return ("entrance_residential_%d" if face == 0 and i == entry else "ground_residential_%d") % s,
-		func(_i: int, _face: int, _floor: int) -> String: return "bay_apartment_%d" % s)
+		func(_i: int, _face: int, _floor: int) -> String: return "bay_apartment_%d" % s, s)
 	roof(base, b.bays, b.depth, top, s, int(absf(b.front.x + b.front.z)))
 	# Balconies on alternate bays of the street face for the contemporary style.
 	if s == 2:
 		for fl in range(1, b.floors):
 			for i in [0, 2, 3]:
-				module("balcony", base * pose(Vector3(-b.bays * 2.0 + 2.0 + i * 4.0, GROUND + (fl - 1) * FLOOR, 0)))
+				module("balcony", base * pose(Vector3(-b.bays * 2.0 + 2.0 + i * 4.0, GROUND + (fl - 1) * FLOOR + BALCONY_LIFT, 0)))
 	_solid(base, b, top + 0.75)
 	var entry_x: float = -b.bays * 2.0 + 2.0 + entry * 4.0
 	sign_label(b.name, base * Vector3(entry_x, 3.62, 0.2), b.yaw, 30)
@@ -165,15 +192,19 @@ func midrise(b: Dictionary) -> void:
 				if i == lobby: return "entrance_residential_%d" % s
 				return ("entrance_%d" if i == entrance else "storefront_%d") % s
 			return "ground_residential_%d" % s,
-		func(_i: int, _face: int, _floor: int) -> String: return upper_kind % s)
+		func(_i: int, _face: int, _floor: int) -> String: return upper_kind % s, s)
 	clear_glass = false
 	roof(base, b.bays, b.depth, top, s, b.id)
 	for i in range(b.bays - 1):
 		var x: float = -b.bays * 2.0 + 2.0 + i * 4.0
 		if restaurant.is_empty() and (i + b.id) % 2 == 0: module("awning", base * pose(Vector3(x, 3.2, 0.04)))
-		if not restaurant.is_empty() and i != entrance: module("awning", base * pose(Vector3(x, 3.2, 0.04)))
+		if not restaurant.is_empty() and i != entrance:
+			# The first bay's awning starts clear of the restaurant's blade sign (RestaurantInteriors
+			# hangs it at the left edge, x + 0.2 from the facade end).
+			if i == 0: module("awning", base * pose(Vector3(x + 0.225, 3.2, 0.04), 0.0, Vector3(3.45 / 3.9, 1, 1)))
+			else: module("awning", base * pose(Vector3(x, 3.2, 0.04)))
 		if not b.office and s == 2 and i % 2 == 1:
-			for fl in range(1, b.floors): module("balcony", base * pose(Vector3(x, GROUND + (fl - 1) * FLOOR, 0)))
+			for fl in range(1, b.floors): module("balcony", base * pose(Vector3(x, GROUND + (fl - 1) * FLOOR + BALCONY_LIFT, 0)))
 	if restaurant.is_empty():
 		_solid(base, b, top + 0.75)
 		# Shop name on the fascia of the first storefront bay.

@@ -483,8 +483,8 @@
    "triangles": 29,
    "materials": [
     "KitBrickRed",
-    "KitGlass",
-    "KitLimestone"
+    "KitLimestone",
+    "KitGlass"
    ]
   },
   "far": {
@@ -656,8 +656,8 @@
    "triangles": 29,
    "materials": [
     "KitStucco",
-    "KitGlass",
-    "KitLimestone"
+    "KitLimestone",
+    "KitGlass"
    ]
   },
   "far": {

@@ -27,6 +27,9 @@ OUT = os.path.join(ROOT, "modules")
 FLOOR = 3.2
 GROUND = 4.2
 BAY = 4.0
+# Far-LOD windows / doors are flat quads proud of their wall quad: 2 cm, so they never fight with
+# it in the depth buffer (they used to sit 1 cm out and shimmered on distant facades).
+FAR_INSET = 0.02
 
 STYLE = [
     # wall, trim, frame, fascia, office wall
@@ -177,7 +180,7 @@ def bay_apartment(m, s, lod):
     if lod == "far":
         m.quad_z(-2, 2, 0, FLOOR, 0, wall)
         for x0, x1, y0, y1 in apartment_openings(s):
-            m.quad_z(x0, x1, y0, y1, 0.01, "Glass")
+            m.quad_z(x0, x1, y0, y1, FAR_INSET, "Glass")
         return
     ops = apartment_openings(s)
     m.wall(-2, 2, 0, FLOOR, ops, wall, reveal=0.24 if s != 1 else 0.3)
@@ -185,7 +188,9 @@ def bay_apartment(m, s, lod):
         # Two tall sash windows, stone sills, stone lintels and a string course.
         for x0, x1, y0, y1 in ops:
             m.window(x0, x1, y0, y1, -0.12, frame, transoms=[(y0 + y1) / 2], mullions=[(x0 + x1) / 2])
-            m.box(((x0 + x1) / 2, y0 - 0.04, 0.03), (x1 - x0 + 0.24, 0.08, 0.14), trim, skip=("-z",))
+            # Sill from the wall face out (it used to run 4 cm into the reveal, its top in the
+            # plane of the reveal floor).
+            m.box(((x0 + x1) / 2, y0 - 0.04, 0.05), (x1 - x0 + 0.24, 0.08, 0.10), trim, skip=("-z",))
             m.box(((x0 + x1) / 2, y1 + 0.11, 0.02), (x1 - x0 + 0.2, 0.22, 0.04), trim, skip=("-z",))
         m.box((0, 0.06, 0.02), (BAY, 0.12, 0.04), trim, skip=("-z", "-x", "+x"))
     elif s == 1:
@@ -194,7 +199,8 @@ def bay_apartment(m, s, lod):
         m.window(x0, x1, y0, y1, -0.16, frame, mullions=[(x0 + x1) / 2], transoms=[y1 - 0.45])
         for x in (x0 - 0.09, x1 + 0.09):
             m.box((x, (y0 + y1) / 2, 0.025), (0.18, y1 - y0 + 0.36, 0.05), trim, skip=("-z",))
-        m.box(((x0 + x1) / 2, y1 + 0.13, 0.025), (x1 - x0 + 0.36, 0.26, 0.05), trim, skip=("-z",))
+        # Head 2 cm wider each side than the jamb surrounds (their outer faces were coplanar).
+        m.box(((x0 + x1) / 2, y1 + 0.13, 0.025), (x1 - x0 + 0.40, 0.26, 0.05), trim, skip=("-z",))
         m.box(((x0 + x1) / 2, y0 - 0.05, 0.05), (x1 - x0 + 0.4, 0.1, 0.1), trim, skip=("-z",))
         rail_z = 0.12
         m.box(((x0 + x1) / 2, y0 + 0.95, rail_z), (x1 - x0, 0.05, 0.05), "Rail", skip=("-z",))
@@ -227,18 +233,18 @@ def bay_office(m, s, lod):
     wall, trim, frame = st["office"], st["trim"], st["frame"]
     if lod == "far":
         if s == 2:
-            m.quad_z(-2, 2, 0, FLOOR, 0, "Glass")
-            m.quad_z(-2, 2, 0, 0.9, 0.005, "Spandrel")
+            m.quad_z(-2, 2, 0.9, FLOOR, 0, "Glass")
+            m.quad_z(-2, 2, 0, 0.9, 0, "Spandrel")
         else:
             m.quad_z(-2, 2, 0, FLOOR, 0, wall)
-            m.quad_z(-1.6, 1.6, 0.85, 3.0, 0.01, "Glass")
+            m.quad_z(-1.6, 1.6, 0.85, 3.0, FAR_INSET, "Glass")
         return
     if s == 0:
         # Brick piers and a three-light steel ribbon window over a brick spandrel.
         op = (-1.6, 1.6, 0.85, 3.0)
         m.wall(-2, 2, 0, FLOOR, [op], wall, reveal=0.2)
         m.window(*op, -0.1, frame, mullions=[-0.53, 0.53], transoms=[2.35], profile=0.07)
-        m.box((0, 0.8, 0.03), (3.4, 0.1, 0.12), trim, skip=("-z",))
+        m.box((0, 0.8, 0.045), (3.4, 0.1, 0.09), trim, skip=("-z",))  # sill band, from the wall face out
     elif s == 1:
         # Stone fins frame full-height glazing above a stone spandrel.
         op = (-1.75, 1.75, 0.75, 3.05)
@@ -270,7 +276,8 @@ def storefront(m, s, lod, entrance):
     # Piers, fascia (sign band) and a stone cornice.
     for x in (-2 + pier / 2, 2 - pier / 2):
         m.box((x, 1.575, -0.15), (pier, 3.15, 0.3), wall, skip=("-z", "-y"))
-    m.box((0, 3.65, -0.12), (BAY, 1.0, 0.24), fascia, skip=("-z",))
+    # Fascia (sign band) stops under the cornice band: their end faces used to overlap in one plane.
+    m.box((0, 3.605, -0.12), (BAY, 0.91, 0.24), fascia, skip=("-z",))
     m.box((0, 4.13, 0.06), (BAY, 0.14, 0.42), trim, skip=("-z",))
     m.box((0, 3.12, -0.15), (BAY - 2 * pier, 0.06, 0.3), trim, skip=("-z", "-x", "+x"))  # head soffit
     x0, x1 = -2 + pier, 2 - pier
@@ -314,7 +321,8 @@ def parapet(m, lod):
 
 
 def balcony(m, lod):
-    m.box((0, 0.02, 0.62), (3.5, 0.18, 1.3), "Concrete")
+    # Slab set 12 mm into the wall (it used to run 3 cm in).
+    m.box((0, 0.02, 0.629), (3.5, 0.18, 1.282), "Concrete")
     if lod == "far":
         m.quad_z(-1.7, 1.7, 0.1, 1.1, 1.25, "Rail")
         return
@@ -373,7 +381,7 @@ def ground_residential(m, s, lod):
     op = (-1.2, 1.2, 1.2, 3.6)
     if lod == "far":
         m.quad_z(-2, 2, 0, GROUND, 0, wall)
-        m.quad_z(*op, 0.01, "Glass")
+        m.quad_z(*op, FAR_INSET, "Glass")
         return
     m.wall(-2, 2, 0, GROUND, [op], wall, reveal=0.22)
     m.window(*op, -0.12, frame, mullions=[0.0], transoms=[3.0])
@@ -388,7 +396,7 @@ def entrance_residential(m, s, lod):
     door = (-0.9, 0.9, 0.3, 3.05)
     if lod == "far":
         m.quad_z(-2, 2, 0, GROUND, 0, wall)
-        m.quad_z(*door, 0.01, "Door")
+        m.quad_z(*door, FAR_INSET, "Door")
         return
     m.wall(-2, 2, 0, GROUND, [door], wall, reveal=0.3, reveal_mat=trim)
     # Glazed double door with a fanlight, stone surround and two front steps.
@@ -396,7 +404,7 @@ def entrance_residential(m, s, lod):
     m.window(door[0], door[1], 2.55, door[3], -0.24, frame, profile=0.07)
     for x in (door[0] - 0.12, door[1] + 0.12):
         m.box((x, (door[2] + door[3]) / 2 + 0.1, 0.04), (0.24, door[3] - door[2] + 0.2, 0.08), trim, skip=("-z",))
-    m.box((0, door[3] + 0.2, 0.06), (2.3, 0.3, 0.12), trim, skip=("-z",))
+    m.box((0, door[3] + 0.2, 0.06), (2.4, 0.3, 0.12), trim, skip=("-z",))  # head, 5 cm past the jambs
     for i, (h, d) in enumerate(((0.3, 0.75), (0.15, 1.1))):
         m.box((0, h / 2 if i == 0 else 0.075, d / 2 - 0.0), (2.4 + i * 0.3, h if i == 0 else 0.15, d), trim, skip=("-z", "-y"))
     m.box((0, 0.35, 0.04), (BAY, 0.7, 0.08), trim, skip=("-z", "-x", "+x"))
@@ -429,8 +437,8 @@ def th_ground(m, s, lod):
     win = (-0.35, 1.85, TH_PLINTH + 0.6, TH_PLINTH + 2.3) if s != 1 else (-0.2, 1.7, TH_PLINTH + 0.3, TH_PLINTH + 2.3)
     if lod == "far":
         m.quad_z(-2.5, 2.5, 0, TH_FLOOR + TH_PLINTH, 0, wall)
-        m.quad_z(*door, 0.01, st["door"])
-        m.quad_z(*win, 0.01, "Glass")
+        m.quad_z(*door, FAR_INSET, st["door"])
+        m.quad_z(*win, FAR_INSET, "Glass")
         return
     ops = [door] if s == 1 else [door, win]
     m.wall(-2.5, 2.5, 0, TH_FLOOR + TH_PLINTH, ops, wall, reveal=0.22)
@@ -443,8 +451,12 @@ def th_ground(m, s, lod):
     # Stone steps up to the raised ground floor.
     for i in range(3):
         h = TH_PLINTH - i * 0.15
-        m.box(((door[0] + door[1]) / 2, h / 2, 0.3 * (3 - i) / 2), (1.4, h, 0.3 * (3 - i)), trim, skip=("-z", "-y"))
-    m.box((0, TH_PLINTH / 2, 0.02), (TH_W, TH_PLINTH, 0.04), trim, skip=("-z", "-x", "+x", "-y"))  # plinth band
+        # Top step (i = 0) 0.3 m deep, each lower one 0.3 m further out and 4 cm wider, so the
+        # stacked boxes neither hide the treads (the 0.45 m block used to run 0.9 m out) nor share
+        # their end faces.
+        m.box(((door[0] + door[1]) / 2, h / 2, 0.3 * (i + 1) / 2), (1.32 + i * 0.04, h, 0.3 * (i + 1)), trim, skip=("-z", "-y"))
+    # Plinth band, its top 2 cm under the top step's tread (the two used to share a plane).
+    m.box((0, (TH_PLINTH - 0.02) / 2, 0.02), (TH_W, TH_PLINTH - 0.02, 0.04), trim, skip=("-z", "-x", "+x", "-y"))
     if s == 1:
         # Canted bay window projecting 0.7 m, with a lead-capped roof.
         x0, x1, y0, y1 = win
@@ -464,7 +476,7 @@ def th_ground(m, s, lod):
     else:
         x0, x1, y0, y1 = win
         m.window(x0, x1, y0, y1, -0.12, frame, mullions=[(x0 + x1) / 2], transoms=[y1 - 0.5])
-        m.box(((x0 + x1) / 2, y0 - 0.04, 0.04), (x1 - x0 + 0.2, 0.08, 0.14), trim, skip=("-z",))
+        m.box(((x0 + x1) / 2, y0 - 0.04, 0.055), (x1 - x0 + 0.2, 0.08, 0.11), trim, skip=("-z",))  # sill from the wall face out (not into the reveal floor)
         if s == 0:
             m.box(((x0 + x1) / 2, y1 + 0.11, 0.02), (x1 - x0 + 0.2, 0.22, 0.04), trim, skip=("-z",))
             m.box(((door[0] + door[1]) / 2, door[3] + 0.11, 0.02), (1.2, 0.22, 0.04), trim, skip=("-z",))
@@ -482,7 +494,7 @@ def th_upper(m, s, lod):
     if lod == "far":
         m.quad_z(-2.5, 2.5, 0, TH_FLOOR, 0, wall)
         for op in ops:
-            m.quad_z(*op, 0.01, "Glass")
+            m.quad_z(*op, FAR_INSET, "Glass")
         return
     m.wall(-2.5, 2.5, 0, TH_FLOOR, ops, wall, reveal=0.2)
     for x0, x1, y0, y1 in ops:
@@ -495,7 +507,7 @@ def th_upper(m, s, lod):
                 m.box((cx, cy, d / 2), (sx, sy, d), "MetalPanel", skip=("-z",))
         else:
             m.window(x0, x1, y0, y1, -0.12, frame, mullions=[(x0 + x1) / 2], transoms=[(y0 + y1) / 2])
-            m.box(((x0 + x1) / 2, y0 - 0.04, 0.04), (x1 - x0 + 0.2, 0.08, 0.14), trim, skip=("-z",))
+            m.box(((x0 + x1) / 2, y0 - 0.04, 0.055), (x1 - x0 + 0.2, 0.08, 0.11), trim, skip=("-z",))  # sill from the wall face out (not into the reveal floor)
             if s == 0:
                 m.box(((x0 + x1) / 2, y1 + 0.11, 0.02), (x1 - x0 + 0.2, 0.22, 0.04), trim, skip=("-z",))
             else:
@@ -560,8 +572,10 @@ def th_gable(m, s, lod):
     m.face([(-TH_DEPTH / 2, h, 0), (TH_DEPTH / 2, h, 0), (0, h + rise, 0)], st["wall"], (0, 0, 1))
     if lod != "far":
         # Small attic window and a brick chimney breast on the gable.
-        m.box((0, h + rise * 0.4, 0.02), (0.6, 0.6, 0.04), "Glass")
-        m.box((0, h + rise * 0.4, 0.04), (0.74, 0.74, 0.02), st["trim"], skip=("-z",))
+        # Stone surround plate on the wall, the glazed light 2 cm proud of it (the plate used to
+        # cover the glass).
+        m.box((0, h + rise * 0.4, 0.02), (0.74, 0.74, 0.04), st["trim"], skip=("-z",))
+        m.box((0, h + rise * 0.4, 0.04), (0.6, 0.6, 0.04), "Glass")
 
 
 def th_chimney(m, s, lod):

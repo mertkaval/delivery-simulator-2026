@@ -5,17 +5,41 @@
    "figures_removed_faces": 0,
    "after_cleanup_tris": 3297,
    "visibility": {
-    "deleted": 1288,
+    "deleted": 907,
     "flipped": 0,
     "doubled": 12
    },
-   "after_visibility_tris": 2009,
-   "after_dissolve_tris": 1830,
-   "near_tris": 1836,
-   "coplanar": {
-    "dropped": 0,
-    "pushed": 108
+   "after_visibility_tris": 2390,
+   "after_dissolve_tris": 1963,
+   "near_tris": 3259,
+   "ground": {
+    "raised": 0,
+    "removed": 0,
+    "lifted_verts": 0
    },
+   "unsink": 141,
+   "layers": {
+    "lifted": 218,
+    "dropped": 8,
+    "passes": 6,
+    "left": 0
+   },
+   "purged_early": 88,
+   "corner_boards": 5,
+   "end_boards": 0,
+   "layers_after_boards": {
+    "lifted": 140,
+    "dropped": 0,
+    "passes": 1,
+    "left": 6
+   },
+   "ground_final": {
+    "raised": 0,
+    "removed": 19,
+    "lifted_verts": 0
+   },
+   "purged": 0,
+   "same_paint": 102,
    "near_materials": [
     "KitAsphaltShingles",
     "KitDeckBoards",
@@ -24,11 +48,24 @@
     "KitLapSiding",
     "KitTrimPaint"
    ],
-   "far_tris": 733,
+   "far_tris": 2678,
+   "far_ground": {
+    "raised": 0,
+    "removed": 0,
+    "lifted_verts": 0
+   },
+   "far_layers": {
+    "lifted": 0,
+    "dropped": 2,
+    "passes": 1,
+    "left": 0
+   },
+   "far_purged": 0,
+   "far_same_paint": 0,
    "size_m": [
-    10.35,
+    10.36,
     7.92,
-    8.02
+    8.04
    ]
   },
   "meta": {
@@ -104,10 +141,10 @@
    "bounds_min": [
     -5.173,
     -1.115,
-    -7.114
+    -7.126
    ],
    "bounds_max": [
-    5.175,
+    5.192,
     6.804,
     0.911
    ]
@@ -119,17 +156,41 @@
    "figures_removed_faces": 23697,
    "after_cleanup_tris": 115357,
    "visibility": {
-    "deleted": 94922,
+    "deleted": 93262,
     "flipped": 240,
     "doubled": 213
    },
-   "after_visibility_tris": 20433,
-   "after_dissolve_tris": 19534,
-   "near_tris": 19534,
-   "coplanar": {
-    "dropped": 53,
-    "pushed": 60
+   "after_visibility_tris": 22093,
+   "after_dissolve_tris": 20267,
+   "near_tris": 19112,
+   "ground": {
+    "raised": 8,
+    "removed": 3736,
+    "lifted_verts": 1817
    },
+   "unsink": 7,
+   "layers": {
+    "lifted": 369,
+    "dropped": 97,
+    "passes": 3,
+    "left": 0
+   },
+   "purged_early": 3,
+   "corner_boards": 19,
+   "end_boards": 4,
+   "layers_after_boards": {
+    "lifted": 325,
+    "dropped": 114,
+    "passes": 6,
+    "left": 2
+   },
+   "ground_final": {
+    "raised": 0,
+    "removed": 124,
+    "lifted_verts": 0
+   },
+   "purged": 0,
+   "same_paint": 243,
    "near_materials": [
     "KitAsphaltShingles",
     "KitDeckBoards",
@@ -139,7 +200,20 @@
     "KitSidingPaint",
     "KitTrimPaint"
    ],
-   "far_tris": 6446,
+   "far_tris": 12927,
+   "far_ground": {
+    "raised": 0,
+    "removed": 0,
+    "lifted_verts": 0
+   },
+   "far_layers": {
+    "lifted": 0,
+    "dropped": 5,
+    "passes": 1,
+    "left": 0
+   },
+   "far_purged": 16,
+   "far_same_paint": 8,
    "size_m": [
     16.43,
     7.45,
@@ -153,10 +227,10 @@
    "h": 7.0,
    "door": [
     -3.43,
-    0.0,
+    0.04,
     -3.08
    ],
-   "step_height": 0.0,
+   "step_height": 0.04,
    "ramp": [],
    "boxes": [],
    "hull": [
@@ -239,17 +313,41 @@
    "figures_removed_faces": 0,
    "after_cleanup_tris": 3656,
    "visibility": {
-    "deleted": 626,
+    "deleted": 392,
     "flipped": 2,
     "doubled": 1
    },
-   "after_visibility_tris": 3030,
-   "after_dissolve_tris": 2845,
-   "near_tris": 2865,
-   "coplanar": {
-    "dropped": 0,
-    "pushed": 0
+   "after_visibility_tris": 3264,
+   "after_dissolve_tris": 3065,
+   "near_tris": 4437,
+   "ground": {
+    "raised": 0,
+    "removed": 0,
+    "lifted_verts": 0
    },
+   "unsink": 0,
+   "layers": {
+    "lifted": 320,
+    "dropped": 0,
+    "passes": 1,
+    "left": 0
+   },
+   "purged_early": 0,
+   "corner_boards": 4,
+   "end_boards": 0,
+   "layers_after_boards": {
+    "lifted": 0,
+    "dropped": 0,
+    "passes": 0,
+    "left": 0
+   },
+   "ground_final": {
+    "raised": 0,
+    "removed": 0,
+    "lifted_verts": 0
+   },
+   "purged": 0,
+   "same_paint": 0,
    "near_materials": [
     "KitAsphaltShingles",
     "KitBrickRed",
@@ -259,7 +357,20 @@
     "KitLapSiding",
     "KitTrimPaint"
    ],
-   "far_tris": 1146,
+   "far_tris": 3056,
+   "far_ground": {
+    "raised": 0,
+    "removed": 0,
+    "lifted_verts": 0
+   },
+   "far_layers": {
+    "lifted": 0,
+    "dropped": 0,
+    "passes": 0,
+    "left": 0
+   },
+   "far_purged": 0,
+   "far_same_paint": 0,
    "size_m": [
     10.2,
     8.03,

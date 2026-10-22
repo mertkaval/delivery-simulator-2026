@@ -65,10 +65,66 @@ class XMesh(Mesh):
         x, y, z = p
         return (self.ox + c * x + s * z, self.oy + y, self.oz - s * x + c * z)
 
+    clip_z = None   # house-local plane: faces are cut to z >= clip_z (porch roofs stop at the facade)
+
     def face(self, pts, mat, normal):
         c, s = math.cos(self.yaw), math.sin(self.yaw)
         nx, ny, nz = normal
-        return Mesh.face(self, [self._xf(p) for p in pts], mat, (c * nx + s * nz, ny, -s * nx + c * nz))
+        world = [self._xf(p) for p in pts]
+        if self.clip_z is not None:
+            world = clip_poly(world, self.clip_z)
+            if len(world) < 3:
+                return None
+        return Mesh.face(self, world, mat, (c * nx + s * nz, ny, -s * nx + c * nz))
+
+    def wall(self, x0, x1, y0, y1, openings, mat, reveal=0.22, reveal_mat=None, z=0.0, margin=0.25):
+        """Mesh.wall, except an opening standing on the ground (house-local y = 0) gets no sill
+        reveal: that face would lie on the lawn (ground top y = 0) and z-fight with it."""
+        flags = [len(o) < 5 or o[4] for o in openings]
+        openings = [tuple(o[:4]) for o in openings]
+        xs, ys = {x0, x1}, {y0, y1}
+        for ox0, ox1, oy0, oy1 in openings:
+            xs |= {ox0, ox1, max(x0, ox0 - margin), min(x1, ox1 + margin)}
+            ys |= {oy0, oy1, max(y0, oy0 - margin), min(y1, oy1 + margin)}
+        xs, ys = sorted(xs), sorted(ys)
+        for i in range(len(xs) - 1):
+            for j in range(len(ys) - 1):
+                cx, cy = (xs[i] + xs[i + 1]) / 2, (ys[j] + ys[j + 1]) / 2
+                if any(ox0 < cx < ox1 and oy0 < cy < oy1 for ox0, ox1, oy0, oy1 in openings):
+                    continue
+                self.quad_z(xs[i], xs[i + 1], ys[j], ys[j + 1], z, mat)
+        rm = reveal_mat or mat
+        zb = z - reveal
+        for (ox0, ox1, oy0, oy1), flag in zip(openings, flags):
+            if not flag:
+                continue
+            self.face([(ox0, oy0, z), (ox0, oy0, zb), (ox0, oy1, zb), (ox0, oy1, z)], rm, (1, 0, 0))
+            self.face([(ox1, oy0, z), (ox1, oy0, zb), (ox1, oy1, zb), (ox1, oy1, z)], rm, (-1, 0, 0))
+            if self.oy + oy0 > 0.005:
+                self.face([(ox0, oy0, z), (ox1, oy0, z), (ox1, oy0, zb), (ox0, oy0, zb)], rm, (0, 1, 0))
+            self.face([(ox0, oy1, z), (ox1, oy1, z), (ox1, oy1, zb), (ox0, oy1, zb)], rm, (0, -1, 0))
+
+
+def clip_poly(pts, zc):
+    """Sutherland-Hodgman: the part of a convex polygon with z >= zc."""
+    out = []
+    n = len(pts)
+    for k in range(n):
+        a, b = pts[k], pts[(k + 1) % n]
+        ia, ib = a[2] >= zc - 1e-9, b[2] >= zc - 1e-9
+        if ia:
+            out.append(a)
+        if ia != ib:
+            t = (zc - a[2]) / (b[2] - a[2])
+            out.append(tuple(a[i] + (b[i] - a[i]) * t for i in range(3)))
+    # drop duplicates produced by vertices on the plane
+    clean = []
+    for p in out:
+        if not clean or max(abs(p[i] - clean[-1][i]) for i in range(3)) > 1e-7:
+            clean.append(p)
+    if len(clean) > 1 and max(abs(clean[0][i] - clean[-1][i]) for i in range(3)) < 1e-7:
+        clean.pop()
+    return clean
 
 
 LOD = "near"
@@ -122,33 +178,41 @@ def house_window(m, x0, x1, y0, y1, frame="TrimPaint", trim="TrimPaint", grid=No
         return
     mullions = [x0 + (x1 - x0) * i / grid[0] for i in range(1, grid[0])] if grid else []
     split = y0 + (y1 - y0) * 0.62 if grid else None
-    m.window(x0, x1, y0, y1, z - depth + 0.08, frame, mullions=[], transoms=[split] if split else [], profile=0.055, depth=0.08)
+    p = 0.055
+    m.window(x0, x1, y0, y1, z - depth + 0.08, frame, mullions=[], transoms=[split] if split else [], profile=p, depth=0.08)
     if grid and grid[1]:
-        # Craftsman upper-sash muntins.
+        # Craftsman upper-sash muntins on the frame face; the cross bars sit 5 mm behind the
+        # uprights so their front faces never share a plane where they cross.
         for i in range(1, grid[0]):
             x = x0 + (x1 - x0) * i / grid[0]
             m.box((x, (split + y1) / 2, z - depth + 0.09), (0.025, y1 - split, 0.02), frame)
         for j in range(1, grid[1] + 1):
             y = split + (y1 - split) * j / (grid[1] + 1)
-            m.box(((x0 + x1) / 2, y, z - depth + 0.09), (x1 - x0, 0.025, 0.02), frame)
+            m.box(((x0 + x1) / 2, y, z - depth + 0.0895), (x1 - x0 - 2 * p, 0.025, 0.009), frame)
     elif mullions:
+        # Mullions run between the head and sill rails (not through them).
         for x in mullions:
-            m.box((x, (y0 + y1) / 2, z - depth + 0.09), (0.05, y1 - y0, 0.05), frame)
+            m.box((x, (y0 + y1) / 2, z - depth + 0.09), (0.05, y1 - y0 - 2 * p, 0.05), frame, skip=("+y", "-y"))
     if casing:
         opening_trim(m, x0, x1, y0, y1, trim, z)
 
 
 def door(m, x0, x1, y0, y1, finish="DoorWood", lites=True, z=0.0, frame="TrimPaint"):
-    """Panel door with a row of glass lites, set 12 cm back, cased in trim."""
-    m.quad_z(x0, x1, y0, y1, z - 0.12, finish)
+    """Panel door set 12 cm back, cased in trim: the glass lites are real openings in the leaf
+    (glass 3 cm behind its face), raised panels stand 2.5 cm proud, the handle sits on the leaf."""
+    zl = z - 0.12
+    if near() and lites:
+        span = (x1 - x0 - 0.24) / 3
+        ops = [(x0 + 0.12 + i * span + 0.02, x0 + 0.12 + (i + 1) * span - 0.02, y1 - 0.62, y1 - 0.32) for i in range(3)]
+        m.wall(x0, x1, y0, y1, ops, finish, reveal=0.03, reveal_mat=finish, z=zl, margin=0.0)
+        for lx0, lx1, ly0, ly1 in ops:
+            m.quad_z(lx0, lx1, ly0, ly1, zl - 0.03, "Glass")
+    else:
+        m.quad_z(x0, x1, y0, y1, zl, finish)
     if near():
-        if lites:
-            for i in range(3):
-                lx = x0 + 0.12 + i * (x1 - x0 - 0.24) / 3
-                m.quad_z(lx + 0.02, lx + (x1 - x0 - 0.24) / 3 - 0.02, y1 - 0.62, y1 - 0.32, z - 0.115, "Glass")
         for yy in (y0 + 0.25, y0 + 0.85):
-            m.box(((x0 + x1) / 2, yy + 0.25, z - 0.11), (x1 - x0 - 0.3, 0.45, 0.02), finish, skip=("-z",))
-        m.box((x1 - 0.12, y0 + 1.0, z - 0.08), (0.04, 0.16, 0.05), "RailBlack")
+            m.box(((x0 + x1) / 2, yy + 0.25, zl + 0.0125), (x1 - x0 - 0.3, 0.45, 0.025), finish, skip=("-z",))
+        m.box((x1 - 0.12, y0 + 1.0, zl + 0.035), (0.04, 0.16, 0.07), "RailBlack", skip=("-z",))
         opening_trim(m, x0, x1, y0, y1, frame, z, width=0.13, sill=False)
 
 
@@ -167,6 +231,7 @@ def stair_rail(m, x, top, z_front, z_end, mat="RailBlack", balusters=True):
     if not near():
         return
     h = 0.9
+    z_front += 0.05 if z_end > z_front else -0.05   # landing post clear of the wall / deck edge
     prism(m, (x, top + h, z_front), (x, h, z_end), 0.04, 0.05, mat)
     prism(m, (x, top + 0.12, z_front), (x, 0.12, z_end), 0.03, 0.03, mat)
     for zz, yy in ((z_front, top), (z_end, 0.0)):
@@ -190,20 +255,16 @@ def flat_rail(m, x0, x1, y, z, mat="RailBlack", h=0.9, step=0.12, picket=0.018):
         m.box((x0 + i * step, y + 0.1 + (h - 0.1) / 2, z), (picket, h - 0.1, picket), mat, skip=("+y", "-y"))
 
 
-def gutter_run(m, x0, x1, y, z, mat="TrimPaint"):
-    if near():
-        m.box(((x0 + x1) / 2, y - 0.07, z + 0.06), (x1 - x0, 0.12, 0.12), mat)
-
-
 def downpipe(m, x, y_top, z, mat="TrimPaint"):
     if near():
         m.box((x, y_top / 2, z), (0.08, y_top, 0.07), mat)
-        m.box((x, 0.1, z + 0.18), (0.08, 0.06, 0.32), mat)
+        m.box((x, 0.1, z + 0.1875), (0.08, 0.06, 0.305), mat, skip=("-z",))   # shoe from the pipe's face
 
 
 def walls(m, W, D, y0, y1, faces, mat, reveal=0.12):
-    """faces: {'front'|'back'|'left'|'right': [openings (x0,x1,y0,y1) in facade coords]}.
-    Facade coords: x along the face (left to right seen from outside), y height."""
+    """faces: {'front'|'back'|'left'|'right': [openings (x0,x1,y0,y1[, reveal]) in facade coords]}.
+    Facade coords: x along the face (left to right seen from outside), y height. An opening with a
+    fifth element False gets no reveal faces (a recess that has its own side walls)."""
     spec = {"front": (0.0, 0.0, 0.0, W), "back": (0.0, -D, math.pi, W), "left": (-W / 2, -D / 2, -math.pi / 2, D), "right": (W / 2, -D / 2, math.pi / 2, D)}
     for name, (x, z, yaw, width) in spec.items():
         m.push(x, 0, z, yaw)
@@ -217,7 +278,47 @@ def on_face(m, W, D, face):
     m.push(x, 0, z, yaw)
 
 
-def foundation(m, W, D, h, mat="Concrete", windows=()):
+def band(m, W, D, y, h, depth, mat="TrimPaint", gaps=None):
+    """Trim band round the walls (water table, belt course). Front and back boards run past the
+    corners by their depth, the side boards stop at the front/back boards: the four boards butt
+    at the corners instead of overlapping (overlapping boxes share their top/bottom planes).
+    gaps: {"front"|"back": [(x0, x1), ...]} where the board stops (doorways)."""
+    if not near():
+        return
+    gaps = gaps or {}
+    for face in ("front", "back"):
+        on_face(m, W, D, face)
+        cuts = [-W / 2 - depth]
+        for g0, g1 in sorted(gaps.get(face, [])):
+            cuts += [g0, g1]
+        cuts.append(W / 2 + depth)
+        for a, b in zip(cuts[::2], cuts[1::2]):
+            if b - a > 0.01:
+                m.box(((a + b) / 2, y + h / 2, depth / 2), (b - a, h, depth), mat, skip=("-z",))
+        m.pop()
+    for face in ("left", "right"):
+        on_face(m, W, D, face)
+        m.box((0, y + h / 2, depth / 2), (D, h, depth), mat, skip=("-z", "-x", "+x"))
+        m.pop()
+
+
+def corner_boards(m, W, D, y0, y1, depth=0.035, width=0.12, mat="TrimPaint", z_front=0.0, x_off=0.0, back=True):
+    """Outside corner boards over horizontal lap / shingle siding: an L of two boards at each
+    vertical corner, standing `depth` proud, so the courses never end raw at a corner. The board
+    on the front/back face covers the end of the side board (they butt, no shared faces)."""
+    if not near() or y1 - y0 < 0.05:
+        return
+    h, yc = y1 - y0, (y0 + y1) / 2
+    for sx in (-1, 1):
+        xw = x_off + sx * W / 2
+        for zf, sz in ((z_front, 1),) + (((z_front - D, -1),) if back else ()):
+            m.box((xw + sx * (depth - width) / 2, yc, zf + sz * depth / 2), (width + depth, h, depth), mat,
+                  skip=("-z" if sz > 0 else "+z", "-y"))
+            m.box((xw + sx * depth / 2, yc, zf - sz * width / 2), (depth, h, width), mat,
+                  skip=("+z" if sz > 0 else "-z", "-x" if sx > 0 else "+x", "-y"))
+
+
+def foundation(m, W, D, h, mat="Concrete", windows=(), gaps=None):
     """Concrete basement wall, 3 cm proud of the siding, with optional basement windows."""
     m.push(0, 0, 0.03)
     walls(m, W + 0.06, D + 0.06, 0.0, h, {"front": list(windows)}, mat, reveal=0.15)
@@ -226,17 +327,72 @@ def foundation(m, W, D, h, mat="Concrete", windows=()):
         m.push(0, 0, 0.03)
         house_window(m, x0, x1, y0, y1, grid=(2, 0), casing=False)
         m.pop()
-    if near():
-        # Water-table trim board where siding meets the foundation.
-        for face in ("front", "back", "left", "right"):
-            width = W if face in ("front", "back") else D
-            on_face(m, W, D, face)
-            m.box((0, h + 0.06, 0.03), (width + 0.06, 0.12, 0.06), "TrimPaint", skip=("-z",))
-            m.pop()
+    # Water-table trim board where siding meets the foundation (6 cm proud, 3 cm past the plinth).
+    band(m, W, D, h, 0.12, 0.06, gaps=gaps)
 
 
-def gable_roof(m, W, D, y, pitch, over=0.45, rake=0.3, mat="AsphaltShingles", gable="LapSiding", ridge="x", z_front=0.0):
-    """Ridge along x (gables at the sides) or z (gable facing the street)."""
+def extrude_poly(m, poly, w0, w1, to3d, mat, skip_edges=(), caps=(True, True)):
+    """Convex polygon [(u, v), ...] (counter-clockwise) extruded from w0 to w1; to3d(u, v, w) maps
+    to house-local (x, y, z) and must be a right-handed axis permutation. Edges in skip_edges
+    (index k = poly[k] -> poly[k+1]) get no side face (they butt against another piece)."""
+    n = len(poly)
+    o = to3d(0, 0, 0)
+    eu = tuple(a - b for a, b in zip(to3d(1, 0, 0), o))
+    ev = tuple(a - b for a, b in zip(to3d(0, 1, 0), o))
+    ew = tuple(a - b for a, b in zip(to3d(0, 0, 1), o))
+
+    def comb(a, b, c):
+        return tuple(a * eu[i] + b * ev[i] + c * ew[i] for i in range(3))
+    if caps[0]:
+        m.face([to3d(u, v, w0) for u, v in poly], mat, comb(0, 0, -1))
+    if caps[1]:
+        m.face([to3d(u, v, w1) for u, v in poly], mat, comb(0, 0, 1))
+    for k in range(n):
+        if k in skip_edges:
+            continue
+        (ua, va), (ub, vb) = poly[k], poly[(k + 1) % n]
+        nu, nv = vb - va, -(ub - ua)      # outward for a counter-clockwise polygon
+        m.face([to3d(ua, va, w0), to3d(ub, vb, w0), to3d(ub, vb, w1), to3d(ua, va, w1)], mat, comb(nu, nv, 0))
+
+
+def rake_board(m, u_eave0, u_apex, u_eave1, v_eave, v_apex, w0, w1, to3d, up=0.03, down=0.17, mat="TrimPaint"):
+    """Barge board along both rakes of a gable, outside the roof edge (w0..w1), mitred at the apex
+    and cut square at the eaves: one board per slope, butting on the vertical through the apex."""
+    for ue in (u_eave0, u_eave1):
+        quad = [(ue, v_eave - down), (u_apex, v_apex - down), (u_apex, v_apex + up), (ue, v_eave + up)]
+        area = sum(quad[i][0] * quad[(i + 1) % 4][1] - quad[(i + 1) % 4][0] * quad[i][1] for i in range(4))
+        if area < 0:
+            quad = list(reversed(quad))
+        apex_edge = [k for k in range(4) if abs(quad[k][0] - u_apex) < 1e-6 and abs(quad[(k + 1) % 4][0] - u_apex) < 1e-6]
+        extrude_poly(m, quad, w0, w1, to3d, mat, skip_edges=apex_edge)
+
+
+def gable_face(m, half, y, rise, zz, sz, mat, opening=None):
+    """Gable triangle in the plane z = zz (facing sz), optionally with a rectangular window opening
+    (x0, x1, y0, y1) cut out of it, with trim reveals."""
+    if opening is None:
+        m.face([(-half, y, zz), (half, y, zz), (0, y + rise, zz)], mat, (0, 0, sz))
+        return
+    ox0, ox1, oy0, oy1 = opening
+
+    def hw(v):
+        return half * (1 - (v - y) / rise)
+    m.face([(-hw(y), y, zz), (hw(y), y, zz), (hw(oy0), oy0, zz), (-hw(oy0), oy0, zz)], mat, (0, 0, sz))
+    m.face([(-hw(oy0), oy0, zz), (ox0, oy0, zz), (ox0, oy1, zz), (-hw(oy1), oy1, zz)], mat, (0, 0, sz))
+    m.face([(ox1, oy0, zz), (hw(oy0), oy0, zz), (hw(oy1), oy1, zz), (ox1, oy1, zz)], mat, (0, 0, sz))
+    m.face([(-hw(oy1), oy1, zz), (hw(oy1), oy1, zz), (0, y + rise, zz)], mat, (0, 0, sz))
+    zb = zz - sz * 0.12
+    m.face([(ox0, oy0, zz), (ox0, oy0, zb), (ox0, oy1, zb), (ox0, oy1, zz)], "TrimPaint", (1, 0, 0))
+    m.face([(ox1, oy0, zz), (ox1, oy0, zb), (ox1, oy1, zb), (ox1, oy1, zz)], "TrimPaint", (-1, 0, 0))
+    m.face([(ox0, oy0, zz), (ox1, oy0, zz), (ox1, oy0, zb), (ox0, oy0, zb)], "TrimPaint", (0, 1, 0))
+    m.face([(ox0, oy1, zz), (ox1, oy1, zz), (ox1, oy1, zb), (ox0, oy1, zb)], "TrimPaint", (0, -1, 0))
+
+
+def gable_roof(m, W, D, y, pitch, over=0.45, rake=0.3, mat="AsphaltShingles", gable="LapSiding", ridge="x", z_front=0.0, front_opening=None):
+    """Ridge along x (gables at the sides) or z (gable facing the street). The roof is a shingle
+    sheet over a painted soffit; fascia boards and gutters run along the eaves outside the roof
+    edge, barge boards along the rakes outside the gable edge, so no trim shares a plane with the
+    roof or soffit. front_opening: window (x0, x1, y0, y1) in the front gable (ridge "z")."""
     t = math.tan(math.radians(pitch))
     if ridge == "x":
         half = D / 2
@@ -248,16 +404,25 @@ def gable_roof(m, W, D, y, pitch, over=0.45, rake=0.3, mat="AsphaltShingles", ga
             ze = zc + sgn * (half + over)
             pts = [(x0, ye, ze), (x1, ye, ze), (x1, y + rise, zc), (x0, y + rise, zc)]
             m.face(pts, mat, (0, 1, sgn * t))
-            m.face(pts, "TrimPaint", (0, -1, -sgn * t))  # soffit
-            gutter_run(m, x0, x1, ye, ze if sgn > 0 else ze - 0.12, "TrimPaint")
+            # Soffit under the overhangs only (eave strip and the two rake strips): inside the
+            # walls the roof needs no ceiling, and chimneys / vents / dormers then pass no soffit.
+            zw = z_front if sgn > 0 else z_front - D
+            sn = (0, -1, -sgn * t)
+            m.face([(x0, ye, ze), (x1, ye, ze), (x1, y, zw), (x0, y, zw)], "TrimPaint", sn)
+            m.face([(W / 2, y, zw), (x1, y, zw), (x1, y + rise, zc), (W / 2, y + rise, zc)], "TrimPaint", sn)
+            m.face([(x0, y, zw), (-W / 2, y, zw), (-W / 2, y + rise, zc), (x0, y + rise, zc)], "TrimPaint", sn)
             if near():
-                m.box(((x0 + x1) / 2, ye - 0.08, ze), (x1 - x0, 0.18, 0.04), "TrimPaint")  # fascia
+                m.box(((x0 + x1) / 2, ye - 0.08, ze + sgn * 0.015), (x1 - x0, 0.18, 0.03), "TrimPaint")  # fascia
+                m.box(((x0 + x1) / 2, ye - 0.16, ze + sgn * 0.09), (x1 - x0, 0.1, 0.12), "TrimPaint")   # gutter
         for sx in (-1, 1):
             xg = sx * W / 2
             m.face([(xg, y, z_front), (xg, y, z_front - D), (xg, y + rise, zc)], gable, (sx, 0, 0))
             if near():
-                for sgn in (1, -1):
-                    prism(m, (sx * (W / 2 + rake), ye - 0.02, zc + sgn * (half + over)), (sx * (W / 2 + rake), y + rise + 0.02, zc), 0.05, 0.2, "TrimPaint")
+                xr = sx * (W / 2 + rake)
+                lo, hi = (xr, xr + 0.04) if sx > 0 else (xr - 0.04, xr)
+                # (u, v, w) = (-z, y, x) is right-handed
+                rake_board(m, -(zc + half + over), -zc, -(zc - half - over), ye, y + rise, lo, hi,
+                           lambda u, v, w: (w, v, -u))
         if near():
             m.box((0, y + rise + 0.03, zc), (x1 - x0, 0.06, 0.18), mat)
         return y + rise
@@ -270,21 +435,30 @@ def gable_roof(m, W, D, y, pitch, over=0.45, rake=0.3, mat="AsphaltShingles", ga
         xe = sgn * (half + over)
         pts = [(xe, ye, z0), (xe, ye, z1), (0, y + rise, z1), (0, y + rise, z0)]
         m.face(pts, mat, (sgn * t, 1, 0))
-        m.face(pts, "TrimPaint", (-sgn * t, -1, 0))
+        sn = (-sgn * t, -1, 0)
+        xw = sgn * half
+        m.face([(xe, ye, z0), (xe, ye, z1), (xw, y, z1), (xw, y, z0)], "TrimPaint", sn)
+        m.face([(xw, y, z0), (xw, y, z_front), (0, y + rise, z_front), (0, y + rise, z0)], "TrimPaint", sn)
+        m.face([(xw, y, z_front - D), (xw, y, z1), (0, y + rise, z1), (0, y + rise, z_front - D)], "TrimPaint", sn)
         if near():
-            m.box((xe + sgn * 0.06, ye - 0.07, (z0 + z1) / 2), (0.12, 0.12, z0 - z1), "TrimPaint")
-            m.box((xe, ye - 0.08, (z0 + z1) / 2), (0.04, 0.18, z0 - z1), "TrimPaint")
+            m.box((xe + sgn * 0.015, ye - 0.08, (z0 + z1) / 2), (0.03, 0.18, z0 - z1), "TrimPaint")   # fascia
+            m.box((xe + sgn * 0.09, ye - 0.16, (z0 + z1) / 2), (0.12, 0.1, z0 - z1), "TrimPaint")    # gutter
     for zz, sz in ((z_front, 1), (z_front - D, -1)):
-        m.face([(-half, y, zz), (half, y, zz), (0, y + rise, zz)], gable, (0, 0, sz))
+        gable_face(m, half, y, rise, zz, sz, gable, front_opening if sz > 0 else None)
         if near():
-            for sgn in (1, -1):
-                prism(m, (sgn * (half + over), ye - 0.02, zz + sz * rake), (0, y + rise + 0.02, zz + sz * rake), 0.2, 0.05, "TrimPaint", up=(0, 0, 1))
+            zr = zz + sz * rake
+            lo, hi = (zr, zr + 0.04) if sz > 0 else (zr - 0.04, zr)
+            rake_board(m, -(half + over), 0.0, half + over, ye, y + rise, lo, hi, lambda u, v, w: (u, v, w))
     if near():
         m.box((0, y + rise + 0.03, z_front - D / 2), (0.18, 0.06, D + 2 * rake), mat)
     return y + rise
 
 
-def hip_roof(m, W, D, y, pitch, over=0.5, mat="AsphaltShingles", z_front=0.0, x_off=0.0):
+def hip_roof(m, W, D, y, pitch, over=0.5, mat="AsphaltShingles", z_front=0.0, x_off=0.0, soffit="ring"):
+    """Hip roof over a W x D body. soffit "ring": the soffit only fills the overhang between the
+    eaves and the walls (a full ceiling at eave height would cut through the walls, which stand
+    above it up to y); "full" for open porches. Fascia and gutters run outside the eave edge, the
+    front/back boards past the corners and the side boards between them (they butt, no overlap)."""
     t = math.tan(math.radians(pitch))
     x0, x1 = x_off - W / 2 - over, x_off + W / 2 + over
     zf, zb = z_front + over, z_front - D - over
@@ -306,13 +480,21 @@ def hip_roof(m, W, D, y, pitch, over=0.5, mat="AsphaltShingles", z_front=0.0, x_
         m.face([(x1, ye, zb), (x0, ye, zb), r1], mat, (0, 1, -t))
         m.face([(x0, ye, zb), (x0, ye, zf), r0, r1], mat, (-t, 1, 0))
         m.face([(x1, ye, zf), (x1, ye, zb), r1, r0], mat, (t, 1, 0))
-    m.face([(x0, ye, zf), (x1, ye, zf), (x1, ye, zb), (x0, ye, zb)], "TrimPaint", (0, -1, 0))  # soffit
+    if soffit == "full":
+        m.face([(x0, ye, zf), (x1, ye, zf), (x1, ye, zb), (x0, ye, zb)], "TrimPaint", (0, -1, 0))
+    else:
+        wx0, wx1, wzf, wzb = x_off - W / 2, x_off + W / 2, z_front, z_front - D
+        for ring in ([(x0, zf), (x1, zf), (wx1, wzf), (wx0, wzf)], [(x1, zf), (x1, zb), (wx1, wzb), (wx1, wzf)],
+                     [(x1, zb), (x0, zb), (wx0, wzb), (wx1, wzb)], [(x0, zb), (x0, zf), (wx0, wzf), (wx0, wzb)]):
+            m.face([(a, ye, b) for a, b in ring], "TrimPaint", (0, -1, 0))
     if near():
-        for (a, b) in (((x0, zf), (x1, zf)), ((x1, zf), (x1, zb)), ((x1, zb), (x0, zb)), ((x0, zb), (x0, zf))):
-            mx, mz = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
-            sx, sz = abs(b[0] - a[0]) or 0.12, abs(b[1] - a[1]) or 0.12
-            m.box((mx, ye - 0.08, mz), (sx + 0.02, 0.18, sz + 0.02), "TrimPaint")
-            m.box((mx, ye - 0.16, mz), (sx + 0.1, 0.1, sz + 0.1), "TrimPaint")  # gutter
+        fd, gd = 0.03, 0.12
+        for zz, sgn in ((zf, 1), (zb, -1)):
+            m.box((xc, ye - 0.08, zz + sgn * fd / 2), (ww + 2 * fd, 0.18, fd), "TrimPaint")
+            m.box((xc, ye - 0.16, zz + sgn * (fd + gd / 2)), (ww + 2 * (fd + gd), 0.1, gd), "TrimPaint")
+        for xx, sgn in ((x1, 1), (x0, -1)):
+            m.box((xx + sgn * fd / 2, ye - 0.08, zc), (fd, 0.18, dd), "TrimPaint", skip=("+z", "-z"))
+            m.box((xx + sgn * (fd + gd / 2), ye - 0.16, zc), (gd, 0.1, dd + 2 * fd), "TrimPaint", skip=("+z", "-z"))
     return yr
 
 
@@ -325,8 +507,9 @@ def chimney(m, x, z, y0, y1, mat="BrickRed"):
 
 def porch_light(m, x, y, z):
     if near():
-        m.box((x, y, z + 0.08), (0.16, 0.26, 0.16), "RailBlack")
-        m.box((x, y - 0.02, z + 0.08), (0.12, 0.16, 0.17), "LampGlow")
+        # Lantern housing on the wall, glass box standing 2.5 cm proud of it (never flush).
+        m.box((x, y, z + 0.08), (0.16, 0.26, 0.16), "RailBlack", skip=("-z",))
+        m.box((x, y - 0.02, z + 0.1), (0.12, 0.16, 0.17), "LampGlow", skip=("-z",))
 
 
 def column(m, x, z, y0, y1, w0=0.34, w1=0.24, pier=0.55, mat="TrimPaint"):
@@ -348,16 +531,19 @@ def knee_brackets(m, xs, y, z, depth=0.5, mat="TrimPaint"):
     if not near():
         return
     for x in xs:
-        prism(m, (x, y - 0.45, z), (x, y - 0.02, z + depth), 0.08, 0.08, mat)
-        m.box((x, y - 0.06, z + depth / 2), (0.09, 0.1, depth), mat)
+        # Brace and arm start 4 cm off the wall (clear of the siding and the corner boards).
+        prism(m, (x, y - 0.45, z + 0.04), (x, y - 0.02, z + depth), 0.08, 0.08, mat)
+        m.box((x, y - 0.06, z + 0.02 + depth / 2), (0.08, 0.1, depth - 0.04), mat)   # flush with the brace
 
 
 # ------------------------------------------------------------------------------ house types
 
 def house_craftsman(m):
     W, D, F, H = 8.4, 11.0, 1.05, 2.8
-    foundation(m, W, D, F, windows=[(-3.4, -2.2, 0.35, 0.8), (2.4, 3.6, 0.35, 0.8)])
+    foundation(m, W, D, F, windows=[(-3.4, -2.2, 0.35, 0.8), (2.4, 3.6, 0.35, 0.8)],
+               gaps={"front": [(0.02, 1.28)], "back": [(0.87, 2.03)]})
     top = F + H
+    corner_boards(m, W, D, F + 0.12, top)
     front = [(-3.7, -1.0, 1.6, 3.3), (0.15, 1.15, F, 3.15), (2.35, 3.55, 1.6, 3.3)]
     side = [(-3.0, -1.8, 1.7, 3.2), (1.2, 2.3, 1.7, 3.2)]
     walls(m, W, D, F, top, {"front": front, "left": side, "right": side, "back": [(-2.5, -1.0, 1.7, 3.1), (1.0, 1.9, F, 3.1)]}, "LapSiding")
@@ -383,10 +569,11 @@ def house_craftsman(m):
     house_window(m, -1.0, 1.0, dy0 + 0.25, top + 2.55, grid=(2, 1))
     for sx in (-1, 1):
         m.face([(sx * 1.6, dy0 - 0.2, 0), (sx * 1.6, top + 2.9, 0), (sx * 1.6, top + 2.9, -2.6), (sx * 1.6, dy0 - 0.2, -2.6)], "LapSiding", (sx, 0, 0))
+    corner_boards(m, 3.2, 2.6, dy0 - 0.2, top + 2.9, back=False)
     m.pop()
     m.push(0.6, top + 2.9, dz)
     gable_roof(m, 3.2, 3.0, 0.0, 45, over=0.5, rake=0.25, gable="LapSiding", ridge="z", z_front=0.0)
-    knee_brackets(m, (-1.6, 1.6), -0.05, 0.0, 0.45)
+    knee_brackets(m, (-1.6, 1.6), -0.05, 0.0, 0.25)   # to the barge board
     m.pop()
     # Porch: deck at foundation height, two tapered columns, hip roof, stair with black rails.
     px0, px1, pd = -1.15, 2.75, 2.1
@@ -395,7 +582,9 @@ def house_craftsman(m):
     for x in (px0 + 0.25, px1 - 0.25):
         column(m, x, pd - 0.25, F, top - 0.1)
     m.push((px0 + px1) / 2, 0, 0)
-    hip_roof(m, px1 - px0 - 0.2, pd - 0.1, top - 0.05, 25, over=0.35, z_front=pd - 0.1)
+    m.clip_z = 0.0          # the porch roof stops at the facade
+    hip_roof(m, px1 - px0 - 0.2, pd - 0.1, top - 0.03, 25, over=0.35, z_front=pd - 0.1, soffit="full")
+    m.clip_z = None
     m.pop()
     z_end = stairs(m, 0.0, 1.3, F, pd)
     stair_rail(m, -0.02, F, pd, z_end)
@@ -414,9 +603,9 @@ def house_special(m):
     # Recessed split entry: a 1.5 m wide, 1.1 m deep porch void through both storeys' front.
     ex0, ex1, rec = -1.1, 0.5, 1.1
     lower = [(-5.0, -2.0, 0.8, 1.9), (1.4, 4.6, 0.0, 2.25)]
-    walls(m, W, D, 0.0, L, {"front": lower + [(ex0, ex1, 0.0, L)], "left": [(-3.0, -1.8, 0.9, 1.8)], "right": [(1.0, 2.2, 0.9, 1.8)], "back": [(-3, 0, 0.0, 2.2), (2, 4, 0.9, 1.9)]}, "BrickRed", reveal=0.15)
+    walls(m, W, D, 0.0, L, {"front": lower + [(ex0, ex1, 0.0, L, False)], "left": [(-3.0, -1.8, 0.9, 1.8)], "right": [(1.0, 2.2, 0.9, 1.8)], "back": [(-3, 0, 0.0, 2.2), (2, 4, 0.9, 1.9)]}, "BrickRed", reveal=0.15)
     upper = [(-5.3, -1.6, 3.1, 4.9), (1.2, 4.7, 3.3, 4.85)]
-    walls(m, W, D, L, L + U, {"front": upper + [(ex0, ex1, L, L + U - 0.35)], "left": [(-3.5, -2.0, 3.3, 4.6), (2.0, 3.2, 3.3, 4.6)], "right": [(-3.5, -2.3, 3.3, 4.6), (1.5, 2.7, 3.3, 4.6)], "back": [(-4, -1, 3.2, 4.8), (1.5, 4, 3.2, 4.8)]}, "HouseStucco", reveal=0.15)
+    walls(m, W, D, L, L + U, {"front": upper + [(ex0, ex1, L, L + U - 0.35, False)], "left": [(-3.5, -2.0, 3.3, 4.6), (2.0, 3.2, 3.3, 4.6)], "right": [(-3.5, -2.3, 3.3, 4.6), (1.5, 2.7, 3.3, 4.6)], "back": [(-4, -1, 3.2, 4.8), (1.5, 4, 3.2, 4.8)]}, "HouseStucco", reveal=0.15)
     house_window(m, -5.0, -2.0, 0.8, 1.9, frame="FrameBronze", grid=(3, 0), casing=False)
     # Garage door: panelled, painted.
     m.quad_z(1.4, 4.6, 0.0, 2.25, -0.15, "GaragePaint")
@@ -449,7 +638,7 @@ def house_special(m):
     z_end = stairs(m, ex0 + 0.02, ex1 - 0.02, split, 0.0)   # inset: sides would sit on the stucco jambs
     stair_rail(m, ex0 - 0.02, split, 0.0, z_end)
     stair_rail(m, ex1 + 0.02, split, 0.0, z_end)
-    porch_light(m, ex1 - 0.15, split + 2.4, -rec)
+    porch_light(m, (ex0 + ex1) / 2, split + 2.53, -rec)    # above the door casing
     hip_roof(m, W, D, L + U, 22, over=0.6)
     downpipe(m, W / 2 + 0.2, L + U - 0.3, 0.3)
     m.box((W / 2 - 0.4, L + U + 1.4, -D / 2), (0.15, 1.0, 0.15), "RailBlack")
@@ -485,7 +674,14 @@ def house_modern(m):
     UD = D - 1.5
     uf = [(-4.2, -2.2, 3.5, 5.6), (0.4, 4.0, 3.6, 5.6)]
     walls(m, W, UD, G1, G1 + G2, {"front": uf, "back": [(-3, 0, 3.6, 5.5), (1, 3, 3.6, 5.5)], "left": [(-1.5, 0, 3.7, 5.4)], "right": [(-2, -0.5, 3.7, 5.4)]}, "Cedar")
-    m.box((-3.2, G1 + G2 / 2, 0.06), (2.8, G2, 0.12), "MetalPanel", skip=("-z",))
+    # Black metal bay, 12 cm proud, with its window opening (the window sits in the bay's face).
+    bx0, bx1 = -4.6, -1.8
+    m.wall(bx0, bx1, G1, G1 + G2, [uf[0]], "MetalPanel", reveal=0.12, reveal_mat="MetalPanel", z=0.12)
+    for xx, sx in ((bx0, -1), (bx1, 1)):
+        m.face([(xx, G1, 0.0), (xx, G1, 0.12), (xx, G1 + G2, 0.12), (xx, G1 + G2, 0.0)], "MetalPanel", (sx, 0, 0))
+    m.face([(bx0, G1 + G2, 0.0), (bx1, G1 + G2, 0.0), (bx1, G1 + G2, 0.12), (bx0, G1 + G2, 0.12)], "MetalPanel", (0, 1, 0))
+    # Flat roof over the ground floor in front of the set-back upper floor.
+    m.face([(-W / 2, G1, 0.0), (W / 2, G1, 0.0), (W / 2, G1, 1.5), (-W / 2, G1, 1.5)], "MetalPanel", (0, 1, 0))
     for o in uf:
         house_window(m, *o, frame="FrameDark", grid=(2, 0), casing=False, z=0.12 if o[0] < -3 else 0.0)
     for face, specs in (("back", [(-3, 0, 3.6, 5.5), (1, 3, 3.6, 5.5)]), ("left", [(-1.5, 0, 3.7, 5.4)]), ("right", [(-2, -0.5, 3.7, 5.4)])):
@@ -502,7 +698,7 @@ def house_modern(m):
     for sx in (-1, 1):
         m.face([(sx * W / 2, yb, -UD), (sx * W / 2, yb, 0), (sx * W / 2, yb + UD * s, 0)], "Cedar", (sx, 0, 0))
     m.face([(-W / 2, yb, 0), (W / 2, yb, 0), (W / 2, yb + UD * s, 0), (-W / 2, yb + UD * s, 0)], "Cedar", (0, 0, 1))
-    m.box((0, yf + 0.05, 0.6), (W + 0.8, 0.22, 0.08), "FrameDark")
+    m.box((0, yf - 0.05, 0.64), (W + 0.8, 0.22, 0.08), "FrameDark")   # fascia outside the roof edge
     m.pop()
     downpipe(m, W / 2 + 0.15, G1, 0.2, "FrameDark")
 
@@ -513,7 +709,8 @@ def house_foursquare(m):
     f1 = [(-3.6, -2.0, 1.4, 3.2), (-0.7, 0.7, F, 3.0), (2.0, 3.6, 1.4, 3.2)]
     f2 = [(-3.2, -1.2, 4.1, 5.8), (1.2, 3.2, 4.1, 5.8)]
     side = [(-3.0, -1.8, 1.5, 3.1), (1.0, 2.2, 1.5, 3.1), (-3.0, -1.8, 4.2, 5.7), (1.0, 2.2, 4.2, 5.7)]
-    foundation(m, W, D, F)
+    foundation(m, W, D, F, gaps={"front": [(-0.83, 0.83)], "back": [(0.87, 2.03)]})
+    corner_boards(m, W, D, F + 0.12, top)
     walls(m, W, D, F, top, {"front": f1 + f2, "left": side, "right": side, "back": [(-3, -1.5, 1.5, 3.1), (1.0, 1.9, F, 3.0), (-3, -1.5, 4.2, 5.7), (1.5, 3, 4.2, 5.7)]}, "ShingleSiding")
     for o in (f1[0], f1[2]) + tuple(f2):
         house_window(m, *o, grid=(2, 1))
@@ -526,17 +723,13 @@ def house_foursquare(m):
     on_face(m, W, D, "back")
     door(m, 1.0, 1.9, F, 3.0, "DoorPaint")
     m.pop()
-    # Belt course between storeys.
-    for face in ("front", "back", "left", "right"):
-        on_face(m, W, D, face)
-        m.box((0, F + H1, 0.04), ((W if face in ("front", "back") else D) + 0.08, 0.2, 0.08), "TrimPaint", skip=("-z",))
-        m.pop()
-    ridge = gable_roof(m, W, D, top, 42, over=0.55, rake=0.45, gable="ShingleSiding", ridge="z")
-    knee_brackets(m, (-W / 2 - 0.1, W / 2 + 0.1), top + 0.02, 0.0, 0.5)
-    m.push(0, 0, 0)
-    m.wall(-0.9, 0.9, top + 0.6, top + 2.2, [(-0.7, 0.7, top + 0.75, top + 2.0)], "ShingleSiding", z=0.0)
-    house_window(m, -0.7, 0.7, top + 0.75, top + 2.0, grid=(2, 1))
-    m.pop()
+    # Belt course between storeys (the boards butt at the corners).
+    band(m, W, D, F + H1 - 0.1, 0.2, 0.08)
+    # Attic window: a real opening in the front gable (the gable used to cover it).
+    attic = (-0.7, 0.7, top + 0.75, top + 2.0)
+    ridge = gable_roof(m, W, D, top, 42, over=0.55, rake=0.45, gable="ShingleSiding", ridge="z", front_opening=attic)
+    knee_brackets(m, (-W / 2 - 0.1, W / 2 + 0.1), top + 0.02, 0.0, 0.45)   # to the barge board
+    house_window(m, *attic, grid=(2, 1))
     # Full-width porch with balustrade and hip roof on four columns.
     pd = 2.6
     m.box((0, F / 2, pd / 2), (W, F, pd), "Concrete", skip=("-z",))
@@ -545,12 +738,15 @@ def house_foursquare(m):
         column(m, x, pd - 0.3, F, F + H1 - 0.1, w0=0.3, w1=0.22, pier=0.35)
     flat_rail(m, -W / 2 + 0.45, -1.25, F, pd - 0.3, "TrimPaint", h=0.85, step=0.14, picket=0.05)
     flat_rail(m, 1.25, W / 2 - 0.45, F, pd - 0.3, "TrimPaint", h=0.85, step=0.14, picket=0.05)
-    hip_roof(m, W, pd, F + H1 - 0.05, 20, over=0.35, z_front=pd)
+    m.clip_z = 0.0
+    hip_roof(m, W, pd, F + H1 - 0.05, 20, over=0.35, z_front=pd, soffit="full")
+    m.clip_z = None
     z_end = stairs(m, -1.0, 1.0, F, pd, mat="DeckBoards")
     stair_rail(m, -1.05, F, pd, z_end, "TrimPaint", balusters=False)
     stair_rail(m, 1.05, F, pd, z_end, "TrimPaint", balusters=False)
     porch_light(m, 1.0, F + 2.3, 0.0)
-    chimney(m, -W / 2 - 0.35, -D * 0.6, 0.0, ridge + 0.6)
+    # Interior chimney through the left roof slope (an outside stack ran through the eave trim).
+    chimney(m, -W / 2 + 0.9, -D * 0.6, top - 0.3, ridge + 0.6)
     downpipe(m, W / 2 + 0.15, top - 0.3, 0.3)
 
 
@@ -564,7 +760,8 @@ def house_splitlevel(m):
         house_window(m, *o, frame="TrimPaint", grid=(2, 0), casing=False)
         m.box(((o[0] + o[1]) / 2, o[2] - 0.05, 0.06), (o[1] - o[0] + 0.2, 0.1, 0.12), "Concrete", skip=("-z",))
     door(m, *lower[1], "DoorPaint")
-    m.box((1.1, 0.05, 0.6), (1.6, 0.1, 1.2), "Concrete")
+    m.box((1.1, 0.05, 0.6), (1.6, 0.1, 1.2), "Concrete", skip=("-y",))
+    m.box((1.1, 0.05, -0.06), (1.0, 0.1, 0.12), "Concrete", skip=("-y", "-z", "+z", "-x", "+x"))   # threshold
     porch_light(m, 1.95, 2.0, 0.0)
     for face, specs in (("back", [(-5.2, -0.5, 3.1, 4.6), (1.0, 4.0, 3.1, 4.6), (1.5, 4.0, 0.8, 1.9)]), ("left", [(-2, -0.8, 0.9, 1.9), (-1.5, 0.5, 3.2, 4.4)]), ("right", [(-2, -0.8, 0.9, 1.9), (-1.5, 0.5, 3.2, 4.4)])):
         on_face(m, W, D, face)
@@ -575,7 +772,7 @@ def house_splitlevel(m):
     house_window(m, -3.5, -1.5, 0.0, 2.2, frame="FrameBronze", grid=(2, 0), casing=False)  # patio slider
     m.pop()
     ridge = gable_roof(m, W, D, L + U, 24, over=0.5, rake=0.4, gable="HouseStucco", ridge="x")
-    chimney(m, -W / 2 + 1.2, -D - 0.33, 0.0, ridge + 0.7)
+    chimney(m, -W / 2 + 1.2, -D * 0.8, L + U - 0.3, ridge + 0.7)   # through the back slope
     downpipe(m, W / 2 + 0.15, L + U - 0.2, 0.3)
 
 
@@ -604,8 +801,10 @@ def house_laneway(m):
 
 def house_bungalow(m):
     W, D, B, H = 10.4, 9.6, 1.3, 2.7
-    foundation(m, W, D, B, mat="HouseStucco", windows=[(-4.0, -2.6, 0.45, 1.05), (2.6, 4.0, 0.45, 1.05)])
+    foundation(m, W, D, B, mat="HouseStucco", windows=[(-4.0, -2.6, 0.45, 1.05), (2.6, 4.0, 0.45, 1.05)],
+               gaps={"front": [(-0.58, 0.58)], "back": [(-0.13, 1.03)]})
     top = B + H
+    corner_boards(m, W, D, B + 0.12, top)
     front = [(-4.2, -1.6, 2.0, 3.6), (-0.45, 0.45, B, 3.45), (1.6, 3.4, 2.0, 3.6)]
     walls(m, W, D, B, top, {"front": front, "back": [(-3.5, -1.5, 2.1, 3.5), (0.0, 0.9, B, 3.45), (2.0, 3.4, 2.1, 3.5)], "left": [(-2.5, -1.2, 2.1, 3.5), (1.0, 2.0, 2.4, 3.5)], "right": [(-2.0, -0.8, 2.1, 3.5), (1.2, 2.4, 2.1, 3.5)]}, "LapSiding")
     house_window(m, -4.2, -1.6, 2.0, 3.6, grid=(3, 0))
@@ -620,7 +819,7 @@ def house_bungalow(m):
     door(m, 0.0, 0.9, B, 3.45, "DoorPaint")
     m.pop()
     # Front landing and wooden stair with painted rails.
-    m.box((0, B / 2, 0.75), (2.0, B, 1.5), "DeckBoards", skip=("-z",))
+    m.box((0, B / 2, 0.765), (2.0, B, 1.47), "DeckBoards", skip=("-z", "-y"))   # landing, on the plinth face
     z_end = stairs(m, -0.6, 0.6, B, 1.5, mat="DeckBoards")
     stair_rail(m, -0.65, B, 1.5, z_end, "TrimPaint")
     stair_rail(m, 0.65, B, 1.5, z_end, "TrimPaint")
@@ -636,21 +835,26 @@ def house_bungalow(m):
 # ------------------------------------------------------------------------------ yard / lane / forest props
 
 def fence_privacy(m, lattice=False):
-    """2.4 m cedar privacy fence panel (posts at both ends), 1.8 m tall; optional lattice top."""
+    """2.4 m cedar privacy fence panel, 1.8 m tall, with its post at the -x end only (panels are
+    laid end to end, so a post at both ends would double up with the neighbour's; the instancer
+    closes each run with a fence_post); optional lattice top."""
     h = 1.5 if lattice else 1.8
     m.box((0, h / 2 + 0.05, 0), (2.4, h, 0.03), "Cedar")
     if near():
-        for x in (-1.2, 1.2):
-            m.box((x, (h + 0.35) / 2, 0), (0.1, h + 0.35, 0.1), "Cedar")
+        fence_post(m, -1.2, h)
         for y in (0.3, h - 0.15):
             m.box((0, y, -0.04), (2.4, 0.09, 0.04), "Cedar")
-        m.box((0, h + 0.1, 0), (2.4, 0.06, 0.1), "Cedar")
+        m.box((0, h + 0.1, 0), (2.4, 0.06, 0.08), "Cedar")   # cap 1 cm inside the 10 cm posts
         if lattice:
             for i in range(9):
                 x = -1.1 + i * 0.275
                 prism(m, (x - 0.12, h + 0.12, 0), (x + 0.12, h + 0.42, 0), 0.02, 0.02, "Cedar", up=(0, 0, 1))
                 prism(m, (x + 0.12, h + 0.12, 0), (x - 0.12, h + 0.42, 0), 0.02, 0.02, "Cedar", up=(0, 0, 1))
             m.box((0, h + 0.45, 0), (2.4, 0.05, 0.06), "Cedar")
+
+
+def fence_post(m, x=0.0, h=1.8):
+    m.box((x, (h + 0.35) / 2, 0), (0.1, h + 0.35, 0.1), "Cedar", skip=("-y",))
 
 
 def fence_picket(m):
@@ -664,9 +868,10 @@ def fence_picket(m):
 
 def hedge(m):
     """2.4 m clipped hedge, 1.1 m tall, slightly bulged sides."""
-    m.box((0, 0.55, 0), (2.4, 1.1, 0.8), "Hedge")
+    # 2.36 m: neighbouring sections leave a 4 cm gap (double-sided leaves must not share planes).
+    m.box((0, 0.55, 0), (2.36, 1.1, 0.8), "Hedge", skip=("-y",))
     if near():
-        m.box((0, 1.13, 0), (2.3, 0.08, 0.7), "Hedge", skip=("-y",))
+        m.box((0, 1.13, 0), (2.26, 0.08, 0.7), "Hedge", skip=("-y",))
 
 
 def blob(m, cx, cy, cz, rx, ry, rz, mat, seg=7, rings=4, seed=0.0):
@@ -703,9 +908,9 @@ def garden_bed(m):
 def raised_bed(m):
     """Cedar raised vegetable bed, 2.4 x 1.2 x 0.45 m, with plants."""
     for sx in (-1, 1):
-        m.box((sx * 1.2, 0.225, 0), (0.06, 0.45, 1.2), "Cedar")
+        m.box((sx * 1.2, 0.225, 0), (0.06, 0.45, 1.14), "Cedar", skip=("-y", "+z", "-z"))
     for sz in (-1, 1):
-        m.box((0, 0.225, sz * 0.6), (2.4, 0.45, 0.06), "Cedar")
+        m.box((0, 0.225, sz * 0.6), (2.46, 0.45, 0.06), "Cedar", skip=("-y",))
     m.box((0, 0.4, 0), (2.34, 0.04, 1.14), "Soil")
     if near():
         for i in range(6):
@@ -778,9 +983,11 @@ def utility_pole(m, transformer=False):
     m.box((0, 9.3, 0), (2.4, 0.12, 0.14), "PoleWood")
     for x in (-1.05, -0.35, 0.35, 1.05):
         m.box((x, 9.45, 0), (0.08, 0.18, 0.08), "Insulator")
-    prism(m, (-0.7, 9.25, 0.0), (0.0, 8.7, 0.0), 0.05, 0.05, "RailBlack")
-    prism(m, (0.7, 9.25, 0.0), (0.0, 8.7, 0.0), 0.05, 0.05, "RailBlack")
-    m.box((0, 7.4, -0.05), (0.9, 0.08, 0.1), "PoleWood")  # telecom arm
+    # Braces end 1 cm inside the pole, apart from each other (they used to meet in one plane).
+    prism(m, (-0.7, 9.25, 0.0), (-0.13, 8.802, 0.0), 0.05, 0.05, "RailBlack")
+    prism(m, (0.7, 9.25, 0.0), (0.13, 8.802, 0.0), 0.05, 0.05, "RailBlack")
+    # Telecom arm: its street face 1 cm past the pole centre, where the low conductor's end lies.
+    m.box((0, 7.4, -0.04), (0.9, 0.08, 0.1), "PoleWood")
     if transformer:
         m.box((0.32, 8.0, 0), (0.45, 0.9, 0.45), "FrameLight")
         m.box((0.32, 8.47, 0), (0.5, 0.06, 0.5), "FrameLight")
@@ -932,13 +1139,25 @@ HOUSES = {
     "house_bungalow": house_bungalow,
 }
 PROPS = {
-    "fence_privacy": fence_privacy, "fence_lattice": lambda m: fence_privacy(m, True), "fence_picket": fence_picket,
+    "fence_privacy": fence_privacy, "fence_lattice": lambda m: fence_privacy(m, True), "fence_picket": fence_picket, "fence_post": fence_post,
     "hedge": hedge, "garden_bed": garden_bed, "raised_bed": raised_bed, "patio_set": patio_set, "bbq": bbq,
     "bins_trio": bins_trio, "garage_single": garage_single, "shed": shed, "utility_pole": utility_pole,
     "utility_pole_transformer": lambda m: utility_pole(m, True), "tree_fir": fir, "tree_cedar": cedar_tree,
     "street_sign": street_sign, "park_sign": park_sign, "statue_bust": statue_bust, "monument_plinth": monument_plinth, "statue_figure": statue_figure,
 }
 ALL = dict(HOUSES, **PROPS)
+
+
+_PREP = {}
+
+
+def prep_lib():
+    """tools/prepare_new_houses.py as a library (its conflict fixes)."""
+    if not _PREP:
+        path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(KIT))), "tools", "prepare_new_houses.py")
+        _PREP.update({"__name__": "prepare_new_houses_lib", "__file__": path})
+        exec(compile(open(path).read(), path, "exec"), _PREP)
+    return _PREP
 
 
 def build(names=None, bake=True):
@@ -957,6 +1176,10 @@ def build(names=None, bake=True):
             m = XMesh()
             ALL[name](m)
             obj = m.emit(name, col)
+            if lod == "near" and (name in HOUSES or name in ("garage_single", "shed")):
+                # Same conflict pass as the imported houses (tools/prepare_new_houses.py): pieces of
+                # one paint lying in one plane (crossing muntins, trims over trims) get nudged apart.
+                print("HOUSEKIT layers", name, prep_lib()["layer_fix"](obj))
             tris = sum(len(p.vertices) - 2 for p in obj.data.polygons)
             if bake and lod == "near":
                 bake_ao(obj)

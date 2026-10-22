@@ -189,7 +189,9 @@ func fountain(t: Transform3D, park_centre: Vector2) -> void:
 	surface.name = "Water"
 	surface.mesh = disk
 	surface.material_override = water_material()
-	surface.position.y = float(data.get("water_y", 0.17)) - 0.01
+	# Water film 2 cm above the catalogue level: the scanned basin floor undulates up to ~0.24 m
+	# (water_y 0.236), and the film used to cut through it, flickering with the stone.
+	surface.position.y = float(data.get("water_y", 0.17)) + 0.01
 	surface.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	surface.visibility_range_end = 120.0
 	node.add_child(surface)
@@ -198,7 +200,9 @@ func fountain(t: Transform3D, park_centre: Vector2) -> void:
 ## Paved round plaza where the park paths meet (equestrian park): granite setts and a darker
 ## kerb band, flush with the gravel paths.
 func plaza(at: Vector3) -> void:
-	for ring: Array in [[PLAZA_RADIUS + 0.25, 0.028, Color("7d7a74")], [PLAZA_RADIUS, 0.04, Color("b9b5ad")]]:
+	# Kerb band top 0.072, setts 0.09: 1.6 cm over the park's gravel paths (0.054 / 0.056) and over
+	# each other - the setts used to lie 4 mm under the paths and the band 3 mm over the gravel ring.
+	for ring: Array in [[PLAZA_RADIUS + 0.25, 0.062, Color("7d7a74")], [PLAZA_RADIUS, 0.08, Color("b9b5ad")]]:
 		var disk := CylinderMesh.new()
 		disk.top_radius = float(ring[0])
 		disk.bottom_radius = float(ring[0])
@@ -315,9 +319,10 @@ func _process(delta: float) -> void:
 		var on := eye.distance_to(e.at as Vector3) < float(e.near)
 		if on == bool(e.on): continue
 		e.on = on
-		for g: GeometryInstance3D in e.meshes:
+		for g in e.meshes:
+			# Untyped: a typed loop variable raises on meshes already freed at scene teardown.
 			if is_instance_valid(g):
-				g.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if on else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				(g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if on else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 ## Camera views of every placed asset in context: [name, eye, target] (tests/capture_monuments.gd).
 func capture_views() -> Array:

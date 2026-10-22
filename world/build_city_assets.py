@@ -500,7 +500,7 @@ def street_details():
     loft('Mast base',[(0,0,0,.15,.15),(.08,0,0,.15,.15),(.28,0,0,.09,.09)],BLACK,16)
     export('street_lamp')
     clear()
-    tube('Mailbox post',[(0,0,0),(0,1.05,0)],.04,STEEL)
+    tube('Mailbox post',[(0,0,0),(0,.92,0)],.04,STEEL)   # ends flush under the box floor
     verts=[]; faces=[]
     profile=[(-.20,.92),(.20,.92),(.20,1.16)]+[(.20*math.cos(a),1.16+.20*math.sin(a)) for a in [i*math.pi/14 for i in range(1,15)]]
     for z in [-.30,.30]: verts.extend([(x,y,z) for x,y in profile])
@@ -510,7 +510,7 @@ def street_details():
     bevel(mesh('Rolled steel mailbox',verts,faces,mat('MailboxEnamel',(.09,.15,.13),.30,.5)),.01)
     panel('Mailbox door handle',(0,1.10,.322),(.08,.025,.025),CHROME,.008)
     tube('Mailbox flag',[(.218,1.02,0),(.218,1.4,0)],.009,RED,6)
-    panel('Flag blade',(.218,1.36,.055),(.02,.10,.12),RED,.007)
+    panel('Flag blade',(.218,1.36,.069),(.02,.10,.12),RED,.007)   # clear of the flag rod (no coincident faces)
     export('mailbox')
     clear()
     for x in [-.55,.55]: panel('Planter end',(x,.22,0),(.065,.44,1.0),WOOD,.015)

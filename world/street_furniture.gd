@@ -216,7 +216,8 @@ func shopfronts() -> void:
 		put("planter_bamboo_square", at + Vector3(7.2, 0.08, 6.0), 0.0, Vector3(0.9, 1.0, 0.9), RANGE, front)
 		put("cardboard_box_large", at + Vector3(5.6, 0.08, 6.0), 0.3, Vector3(0.5, 0.95, 0.5), RANGE, stack)
 		put("cardboard_box_medium", at + Vector3(5.0, 0.08, 6.2), -0.2, Vector3.ZERO, RANGE, stack)
-		put("cardboard_box_small", at + Vector3(5.3, 0.08, 6.7), 0.6, Vector3.ZERO, RANGE, stack)
+		# (5 cm further out: it stood 2 cm into the medium box)
+		put("cardboard_box_small", at + Vector3(5.34, 0.08, 6.75), 0.6, Vector3.ZERO, RANGE, stack)
 		if k == 0: put("post_box_red", at + Vector3(-6.2, 0.08, 12.0), 0.0, Vector3(0.6, 1.1, 0.45), RANGE, front)
 		k += 1
 	var flowers := ["planter_geranium_red", "planter_geranium_pink", "planter_geranium_orange", "planter_geranium_purple"]

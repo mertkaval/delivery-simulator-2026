@@ -272,6 +272,14 @@ func record(kind: String, at: Vector3, radius: float, source: String = "", flat:
 	if not _cells.has(key): _cells[key] = []
 	(_cells[key] as Array).append(records.size() - 1)
 
+## Withdraw the most recent record (a spot that was taken but then not used), keeping the
+## spatial index in step with `records`.
+func unrecord_last() -> void:
+	if records.is_empty(): return
+	var rec: Dictionary = records.pop_back()
+	var key := Vector2i(floori((rec.at as Vector3).x / REG_CELL), floori((rec.at as Vector3).z / REG_CELL))
+	if _cells.has(key): (_cells[key] as Array).erase(records.size())
+
 ## Validate a spot; on failure slide along `slide` (unit, horizontal) up to `max_slide` metres
 ## in 0.5 m steps, alternating sides (nearest first), then try each of `lateral` offsets
 ## (metres along `across`). Records and returns the spot, or null when none is valid.

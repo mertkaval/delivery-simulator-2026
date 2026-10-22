@@ -131,6 +131,10 @@ func clear_spot(p: Vector2, seg: Dictionary) -> Vector2:
 	return p
 
 static func shelter_offset(half: float) -> float:
+	# Aziz Sancar Avenue (18 m) has its facades 3 m behind the kerb: half + 3.2 stood the shelter
+	# 1 m inside the storefronts. Its shelters stand 1.95 m back from the kerb instead (back panel
+	# 0.45 m off the facades; the 1.9 m placer record stays clear of the carriageway).
+	if half >= 8.5: return half + 1.95
 	return 9.5 if is_equal_approx(half, 6.0) else half + 3.2
 
 func add_stop(line: Dictionary, p: Vector2, seg: Dictionary) -> void:
@@ -166,7 +170,8 @@ func add_stop(line: Dictionary, p: Vector2, seg: Dictionary) -> void:
 		l.outline_size = 0
 		l.modulate = Color.WHITE
 		l.double_sided = false
-		l.transform = pole_t * Transform3D(Basis(Vector3.UP, PI * 0.5 if side > 0 else -PI * 0.5), Vector3(side * 0.045, 2.6, 0))
+		# 5 mm proud of the flag panel's trim face (it was 1 mm).
+		l.transform = pole_t * Transform3D(Basis(Vector3.UP, PI * 0.5 if side > 0 else -PI * 0.5), Vector3(side * 0.05, 2.6, 0))
 		l.visibility_range_end = 50.0
 		add_child(l)
 	# Illuminated advert on the shelter end panel (both faces).
@@ -179,7 +184,8 @@ func add_stop(line: Dictionary, p: Vector2, seg: Dictionary) -> void:
 		ad.outline_size = 0
 		ad.modulate = Color("23313a")
 		ad.double_sided = false
-		ad.transform = shelter_t * Transform3D(Basis(Vector3.UP, -PI * 0.5 if face < 0 else PI * 0.5), Vector3(-1.75 + face * 0.07, 1.4, -0.05))
+		# 9 mm outside the lit advert box (x -1.826 .. -1.674): at 0.07 the text sat inside it.
+		ad.transform = shelter_t * Transform3D(Basis(Vector3.UP, -PI * 0.5 if face < 0 else PI * 0.5), Vector3(-1.75 + face * 0.085, 1.4, -0.05))
 		ad.visibility_range_end = 30.0
 		add_child(ad)
 	var name_label := Label3D.new()

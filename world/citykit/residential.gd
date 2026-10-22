@@ -16,19 +16,23 @@ const TYPES := {
 	"house_craftsman": {"lot": 11.5, "w": 8.4, "d": 11.0, "h": 6.6, "door": Vector3(0.65, 1.05, 0.0),
 		"ramp": [0.0, 1.3, 1.05, 2.1, 3.78], "boxes": [[Vector3(0.8, 0.52, 1.05), Vector3(3.9, 1.05, 2.1)]]},
 	"house_special": {"lot": 14.0, "w": 12.0, "d": 11.0, "h": 6.8, "door": Vector3(-0.3, 1.35, -1.1),
-		"ramp": [-1.1, 0.5, 1.35, 0.0, 2.24], "boxes": [[Vector3(-0.3, 0.67, -0.55), Vector3(1.6, 1.35, 1.1)]], "recess": [-1.1, 0.5, 1.1]},
-	"house_modern": {"lot": 12.5, "w": 10.0, "d": 11.0, "h": 7.0, "door": Vector3(0.0, 0.0, 0.0), "ramp": [], "boxes": []},
+		"ramp": [-1.1, 0.5, 1.35, 0.0, 2.24], "boxes": [[Vector3(-0.3, 0.67, -0.55), Vector3(1.6, 1.35, 1.1)]], "recess": [-1.1, 0.5, 1.1],
+		"number": Vector3(0.95, 1.75, 0.04)},
+	"house_modern": {"lot": 12.5, "w": 10.0, "d": 11.0, "h": 7.0, "door": Vector3(0.0, 0.0, 0.0), "ramp": [], "boxes": [],
+		"number": Vector3(0.95, 1.6, 0.04)},
 	"house_foursquare": {"lot": 11.5, "w": 9.0, "d": 10.0, "h": 9.5, "door": Vector3(0.0, 0.8, 0.0),
-		"ramp": [-1.0, 1.0, 0.8, 2.6, 3.72], "boxes": [[Vector3(0.0, 0.4, 1.3), Vector3(9.0, 0.8, 2.6)]]},
+		"ramp": [-1.0, 1.0, 0.8, 2.6, 3.72], "boxes": [[Vector3(0.0, 0.4, 1.3), Vector3(9.0, 0.8, 2.6)]],
+		"number": Vector3(1.15, 2.4, 0.04)},
 	"house_splitlevel": {"lot": 14.0, "w": 12.0, "d": 9.0, "h": 6.6, "door": Vector3(1.1, 0.1, 0.0), "ramp": [], "boxes": []},
 	"house_laneway": {"lot": 9.0, "w": 6.4, "d": 8.5, "h": 8.8, "door": Vector3(-1.1, 0.36, 0.0),
-		"ramp": [-1.4, -0.2, 0.36, 1.8, 2.36], "boxes": [[Vector3(-0.6, 0.18, 0.9), Vector3(4.2, 0.36, 1.8)]]},
+		"ramp": [-1.4, -0.2, 0.36, 1.8, 2.36], "boxes": [[Vector3(-0.6, 0.18, 0.9), Vector3(4.2, 0.36, 1.8)]],
+		"number": Vector3(0.7, 1.75, 0.04)},
 	"house_bungalow": {"lot": 12.5, "w": 10.4, "d": 9.6, "h": 7.0, "door": Vector3(0.0, 1.3, 0.0),
 		"ramp": [-0.6, 0.6, 1.3, 1.5, 3.46], "boxes": [[Vector3(0.0, 0.65, 0.75), Vector3(2.0, 1.3, 1.5)]]},
 	# Imported models (tools/prepare_new_houses.py -> assets/houses/, values from its houses.json):
 	# "hull" replaces the single body collision box, "number" is the beside-door house number,
 	# "door2" the upper flat's balcony door of the up/down duplex.
-	"house_suburban": {"lot": 18.0, "w": 16.43, "d": 14.68, "h": 7.0, "door": Vector3(-3.43, 0.0, -3.08), "ramp": [], "boxes": [],
+	"house_suburban": {"lot": 18.0, "w": 16.43, "d": 14.68, "h": 7.0, "door": Vector3(-3.43, 0.04, -3.08), "ramp": [], "boxes": [],
 		"hull": [[Vector3(2.425, 2.75, -4.55), Vector3(10.75, 5.5, 8.1)], [Vector3(2.0, 2.75, -0.25), Vector3(4.5, 5.5, 0.5)],
 			[Vector3(-4.475, 2.6, -5.8), Vector3(3.05, 5.2, 5.6)], [Vector3(-1.0, 2.5, -9.3), Vector3(6.0, 5.0, 1.4)]],
 		"number": Vector3(-5.05, 1.6, -2.95)},
@@ -287,7 +291,14 @@ static func forest() -> Array[Transform3D]:
 					if absf(p.x - lane.x) < 4.5 and p.z > lane.z0 - 3 and p.z < lane.z1 + 3: clear = false
 				if clear and not CityCatalog.near_estate_road(p, 9.0):
 					var s := rng.randf_range(0.75, 1.35)
-					_forest.append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * s), p))
+					var yaw := rng.randf() * TAU
+					# The lowest branch tier spreads ~3.4 m (x scale): keep the whole crown off
+					# the kit buildings beside the strips, not just the 3 m trunk square.
+					var crown := Rect2(p.x - 3.5 * s, p.z - 3.5 * s, 7.0 * s, 7.0 * s)
+					for b in CityLayout.buildings():
+						if CityLayout.footprint(b).intersects(crown): clear = false
+					if clear:
+						_forest.append(Transform3D(Basis(Vector3.UP, yaw).scaled(Vector3.ONE * s), p))
 				x += 5.5
 			z += 5.5
 	return _forest

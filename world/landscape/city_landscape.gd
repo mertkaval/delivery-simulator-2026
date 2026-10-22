@@ -169,9 +169,60 @@ func tint() -> Color:
 	return Color(0.5 + v + rng.randf_range(-0.02, 0.02), 0.5 + v + rng.randf_range(-0.03, 0.03), 0.5 + v, 0.0)
 
 ## One tree with its three LODs and a trunk collider. Returns false when the species is missing.
+## Building footprints (x, z) that tree crowns must keep out of: kit buildings (terraces, walk-ups,
+## corridor blocks), the residential houses' bodies, the avenue restaurants, the shops / WC and the
+## Cedar House. Crowns used to grow through terrace walls and roofs from the side-road sidewalks.
+static var _buildings: Array[Rect2] = []
+static func building_rects() -> Array[Rect2]:
+	if not _buildings.is_empty(): return _buildings
+	# Kit facades: bays, sills, gables and the corner posts stand up to ~0.3 m out of the footprint.
+	for b in CityLayout.buildings(): _buildings.append(CityLayout.footprint(b).grow(0.35))
+	for lot in ResidentialLayout.lots():
+		var spec: Dictionary = ResidentialLayout.TYPES[lot.type]
+		var t := ResidentialLayout.transform(lot)
+		var w: float = spec.w
+		var d: float = spec.d
+		var rect := Rect2()
+		for k in range(4):
+			var c: Vector3 = t * Vector3((-0.5 if k % 2 == 0 else 0.5) * w, 0, 0.0 if k < 2 else -d)
+			rect = Rect2(Vector2(c.x, c.z), Vector2.ZERO) if k == 0 else rect.expand(Vector2(c.x, c.z))
+		_buildings.append(rect.grow(0.8))   # eaves, bays and porch roofs reach past the walls
+	for i in range(3):
+		var p: Vector3 = CityCatalog.PICKUPS[i] - Vector3.UP
+		_buildings.append(Rect2(p.x - 10.2, p.z - 8.0, 12.4, 11.0))
+	for id: String in ShopCatalog.LOCATIONS:
+		var at: Vector3 = ShopCatalog.LOCATIONS[id]
+		_buildings.append(Rect2(at.x - 7.2, at.z - 5.2, 14.4, 10.6))
+	_buildings.append(Rect2(-47.2, 26.8, 14.4, 10.6))   # public WC (-40, 32)
+	var home: Vector3 = CedarNeighborhood.CEDAR_HOME_ORIGIN
+	_buildings.append(Rect2(home.x - 6.5, home.z - 7.5, 13.0, 13.0))
+	return _buildings
+
+## True when a crown of `radius` at `at` stays clear of every building footprint.
+static func crown_clear(at: Vector3, radius: float) -> bool:
+	var p := Vector2(at.x, at.z)
+	for rect in building_rects():
+		var q := Vector2(clampf(p.x, rect.position.x, rect.end.x), clampf(p.y, rect.position.y, rect.end.y))
+		if q.distance_to(p) < radius: return false
+	return true
+
 func add_tree(sid: String, at: Vector3, yaw: float, scale: float, collide: bool = true, near_end: float = -1.0) -> bool:
 	var sp := species(sid)
 	if sp.is_empty(): return false
+	# Crown reach: the larger of the catalogue crown radius and the LOD0 foliage's own extent.
+	var box: AABB = (sp.lod0 as Mesh).get_aabb()
+	var reach := maxf(float(sp.crown), maxf(maxf(-box.position.x, box.end.x), maxf(-box.position.z, box.end.z)))
+	# ... and of the distant impostor card, which is drawn at the same spot at sp.far scale.
+	if _impostor != null:
+		var ibox: AABB = _impostor.get_aabb()
+		reach = maxf(reach, maxf(maxf(-ibox.position.x, ibox.end.x), maxf(-ibox.position.z, ibox.end.z)) * float(sp.far))
+	# A crown that would reach into a building is grown smaller (down to 20 %) before the tree is
+	# given up: a smaller tree by the facade instead of none.
+	var fitted := scale
+	while not crown_clear(at, reach * fitted * 0.95):
+		fitted *= 0.88
+		if fitted < scale * 0.2: return false
+	scale = fitted
 	var h: float = sp.height * scale
 	var basis := Basis(Vector3.UP, yaw).scaled(Vector3.ONE * scale)
 	var xf := Transform3D(basis, at)
@@ -289,11 +340,11 @@ func street_row(from: Vector3, to: Vector3, across: Vector3, step: float, pool: 
 		if spot != null:
 			var p: Vector3 = spot
 			if light_near(p, 4.0):
-				placer.records.pop_back()
+				placer.unrecord_last()
 			else:
 				var sid: String = pool[(n + int(absf(p.x) * 0.1)) % pool.size()]
-				add_tree(sid, p, rng.randf() * TAU, rng.randf_range(0.82, 0.98))
-				n += 1
+				if add_tree(sid, p, rng.randf() * TAU, rng.randf_range(0.82, 0.98)): n += 1
+				else: placer.unrecord_last()   # its crown would grow into a building
 		s += step
 
 ## Side roads south of Refet Bele Street (10 m): trees at the back of both sidewalks.
@@ -353,16 +404,22 @@ func plant_lot(lot: Dictionary) -> void:
 		if local_clear(rects, Vector2(local.x, local.z), 0.6):
 			var at := t * local
 			if placer.place("tree", at, 0.4, {"walk": 1.0, "source": "garden_tree"}) != null:
-				add_tree(GARDEN_TREES[seed_i % GARDEN_TREES.size()], at, rng.randf() * TAU, rng.randf_range(0.72, 0.86))
+				if not add_tree(GARDEN_TREES[seed_i % GARDEN_TREES.size()], at, rng.randf() * TAU, rng.randf_range(0.72, 0.86)): placer.unrecord_last()
 	# Shrubs at the facade corners and a flower bed beside the porch.
 	for sx in [-1.0, 1.0]:
-		var local := Vector3(sx * (w / 2 - 0.7), 0, 0.85)
+		var ids := prop_ids("shrub")
+		var sid: String = ids[(seed_i + int(sx)) % ids.size()]
+		var shrub_scale := rng.randf_range(0.7, 0.95)
+		# Out from the facade by the shrub's own spread plus the 0.25 m the houses' skirts, sills and
+		# bays stand proud of the wall line (it used to grow into the wall / the craftsman's skirt).
+		var sbox: AABB = (prop(sid).mesh as Mesh).get_aabb()
+		var spread := maxf(maxf(-sbox.position.x, sbox.end.x), maxf(-sbox.position.z, sbox.end.z)) * shrub_scale
+		var local := Vector3(sx * (w / 2 - maxf(0.7, spread + 0.05)), 0, maxf(1.1, spread + 0.35))
 		if (seed_i + int(sx)) % 5 == 0 or not local_clear(rects, Vector2(local.x, local.z), 0.45): continue
 		var at := t * local
 		if placer.problem("shrub", at, 0.5, {"walk": 0.6}) != "": continue
 		placer.record("shrub", at, 0.5, "front_shrub")
-		var ids := prop_ids("shrub")
-		add_prop(ids[(seed_i + int(sx)) % ids.size()], Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * rng.randf_range(0.7, 0.95)), at), 55.0, true)
+		add_prop(sid, Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * shrub_scale), at), 55.0, true)
 	if seed_i % 5 < 3:
 		var right := door.x + 1.25 + 1.3
 		if right + 1.3 < w / 2 - 1.2:
@@ -393,8 +450,9 @@ func plant_lot(lot: Dictionary) -> void:
 		var local := Vector3(-lot_w / 2 + 3.3, 0, back + 2.9)
 		var at := t * local
 		if placer.place("tree", at, 0.4, {"walk": 0.5, "soft_ok": false, "source": "backyard_tree"}) != null:
-			add_tree(SHADE_TREES[seed_i % SHADE_TREES.size()], at, rng.randf() * TAU, rng.randf_range(0.7, 0.85))
-			if seed_i % 2 == 0:
+			var planted := add_tree(SHADE_TREES[seed_i % SHADE_TREES.size()], at, rng.randf() * TAU, rng.randf_range(0.7, 0.85))
+			if not planted: placer.unrecord_last()
+			if planted and seed_i % 2 == 0:
 				add_prop("grass_b", Transform3D(Basis(Vector3.UP, rng.randf() * TAU), at + t.basis * Vector3(0.7, 0, 0.5)), 40.0, false)
 
 # ----------------------------------------------------------------------------- parks
@@ -420,10 +478,10 @@ func plant_park(park: Vector3) -> void:
 	for p in spots:
 		if trees >= (6 if round_park else 7): break
 		if placer.problem("tree", p, 0.4, {"spacing": 5.5, "gap": 1.0}) != "": continue
-		placer.record("tree", p, 0.4, "park_tree")
 		var sid: String = pool[(trees + int(absf(park.z))) % pool.size()]
 		if trees == 2 and not round_park: sid = "cherry"
-		add_tree(sid, p, rng.randf() * TAU, rng.randf_range(0.7, 0.85) if not round_park else rng.randf_range(0.75, 0.9))
+		if not add_tree(sid, p, rng.randf() * TAU, rng.randf_range(0.7, 0.85) if not round_park else rng.randf_range(0.75, 0.9)): continue
+		placer.record("tree", p, 0.4, "park_tree")
 		trees += 1
 	# Shrub groups, a rock group and grass tufts.
 	var shrubs := prop_ids("shrub")
@@ -483,7 +541,25 @@ func forest_understory() -> void:
 		if not PropPlacer.surface_at(Vector2(p.x, p.z), 1.5).is_empty(): continue
 		var basis := Basis(Vector3.UP, rng.randf() * TAU)
 		match i % 4:
-			0: add_prop(rocks[rng.randi() % rocks.size()], Transform3D(basis.scaled(Vector3.ONE * rng.randf_range(1.0, 2.2)), p), 110.0, false, 64.0)
+			0:
+				var rid: String = rocks[rng.randi() % rocks.size()]
+				var rscale := rng.randf_range(1.0, 2.2)
+				# Clear of the forest's trunks (rocks used to sit through them).
+				var rbox: AABB = (prop(rid).mesh as Mesh).get_aabb()
+				var rr := maxf(rbox.size.x, rbox.size.z) * 0.5 * rscale + 0.45
+				var hits_trunk := false
+				for g in ResidentialLayout.forest():
+					if Vector2(g.origin.x - p.x, g.origin.z - p.z).length() < rr: hits_trunk = true
+				# ... and of the rear lanes' power poles (HouseInstancer.build_lane: lane edge + 0.3 m,
+				# every 30 m from 6 m in): a rock sat through one.
+				for lane in ResidentialLayout.lanes():
+					var px: float = float(lane.x) + (1.0 if float(lane.x) > 0 else -1.0) * (float(lane.width) / 2 + 0.3)
+					if absf(px - p.x) > rr + 0.2: continue
+					var z: float = float(lane.z0) + 6.0
+					while z < float(lane.z1) - 3.0:
+						if Vector2(px - p.x, z - p.z).length() < rr + 0.2: hits_trunk = true
+						z += 30.0
+				if not hits_trunk: add_prop(rid, Transform3D(basis.scaled(Vector3.ONE * rscale), p), 110.0, false, 64.0)
 			1: add_prop(smalls[rng.randi() % smalls.size()], Transform3D(basis.scaled(Vector3.ONE * rng.randf_range(0.6, 1.0)), p), 90.0, false, 64.0)
 			_: add_prop("grass_a" if i % 2 == 0 else "grass_b", Transform3D(basis.scaled(Vector3.ONE * rng.randf_range(1.0, 1.5)), p), 50.0, false, 64.0)
 

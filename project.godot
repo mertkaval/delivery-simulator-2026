@@ -43,3 +43,7 @@ rain_intensity={
 "type": "float",
 "value": 0.0
 }
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/city_preview_sync/plugin.cfg")

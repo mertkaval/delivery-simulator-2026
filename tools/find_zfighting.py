@@ -9,16 +9,25 @@ import numpy as np
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 FIX = "--fix" in ARGS          # nudge the smaller surface of each fighting pair outward and re-export
 ARGS = [a for a in ARGS if a != "--fix"]
+# --opposite: coincident faces turned against each other (the bottom of a cushion on its frame,
+# two sides of a thin panel) in different parts / materials. They fight wherever the material is
+# double-sided (glTF doubleSided, the default for imported props); the smaller part is pushed
+# along its own normal (into / behind the other) by the nudge.
+OPPOSITE = "--opposite" in ARGS
+ARGS = [a for a in ARGS if a != "--opposite"]
 NUDGE = 0.005
 if "--tol" in ARGS:
     i = ARGS.index("--tol"); PLANE_TOL = float(ARGS[i + 1]); ARGS = ARGS[:i] + ARGS[i + 2:]
 if "--nudge" in ARGS:
     i = ARGS.index("--nudge"); NUDGE = float(ARGS[i + 1]); ARGS = ARGS[:i] + ARGS[i + 2:]
+COS = None
+if "--cos" in ARGS:   # cos of the largest angle between faces still counted as parallel
+    i = ARGS.index("--cos"); COS = float(ARGS[i + 1]); ARGS = ARGS[:i] + ARGS[i + 2:]
 OUT = None
 if "--json" in ARGS:
     i = ARGS.index("--json"); OUT = ARGS[i + 1]; ARGS = ARGS[:i] + ARGS[i + 2:]
 PLANE_TOL = globals().get("PLANE_TOL", 0.004)     # faces closer than this to the same plane fight in the depth buffer
-NORMAL_TOL = 0.995    # cos of the angle for "parallel"
+NORMAL_TOL = COS if COS is not None else 0.995    # cos of the angle for "parallel"
 MIN_AREA = 0.0005     # ignore slivers
 
 
@@ -74,7 +83,7 @@ def analyse(path):
     area = np.linalg.norm(n, axis=1) / 2
     keep = area > MIN_AREA
     n0 = n / np.maximum(np.linalg.norm(n, axis=1), 1e-12)[:, None]
-    keep &= n0[:, 2] > -0.7          # downward faces (undersides on floors/ground) are never seen
+    if not OPPOSITE: keep &= n0[:, 2] > -0.7          # downward faces (undersides on floors/ground) are never seen
     tri_ids = np.nonzero(keep)[0]
     t, owner, n, area = t[keep], owner[keep], n[keep], area[keep]
     n = n / np.linalg.norm(n, axis=1)[:, None]
@@ -89,18 +98,30 @@ def analyse(path):
         buckets.setdefault((qn[i, 0], qn[i, 1], qn[i, 2], qd[i]), []).append(i)
     centroid = t.mean(1)
     # Sample points inside each triangle (centroid + points toward each corner).
-    samples = np.concatenate([centroid[:, None], (0.6 * centroid[:, None] + 0.4 * t)], axis=1)  # (N,4,3)
+    # Centroid, points toward each corner (40 % and 85 % of the way) and toward each edge midpoint:
+    # large triangles that overlap only partly (a slab corner under a path) are caught too.
+    mids = (t + np.roll(t, -1, axis=1)) * 0.5
+    samples = np.concatenate([centroid[:, None], (0.6 * centroid[:, None] + 0.4 * t), (0.15 * centroid[:, None] + 0.85 * t),
+                              (0.2 * centroid[:, None] + 0.8 * mids)], axis=1)  # (N,10,3)
     pairs = {}
     for key, members in buckets.items():
         cand = []
-        for dq in (-1, 0, 1):
-            cand += buckets.get((key[0], key[1], key[2], key[3] + dq), [])
-        if len(cand) < 2:
+        if OPPOSITE:
+            # Plane (-n, -d): the opposite-facing bucket.
+            for dq in (-2, -1, 0, 1):
+                cand += buckets.get((-key[0], -key[1], -key[2], -key[3] + dq), [])
+        else:
+            for dq in (-1, 0, 1):
+                cand += buckets.get((key[0], key[1], key[2], key[3] + dq), [])
+        if len(cand) < (1 if OPPOSITE else 2):
             continue
         cand = np.array(cand)
         for i in members:
             others = cand[(cand != i)]
-            others = others[(np.abs(d[others] - d[i]) < PLANE_TOL) & ((n[others] @ n[i]) > NORMAL_TOL)]
+            if OPPOSITE:
+                others = others[(np.abs(d[others] + d[i]) < PLANE_TOL) & ((n[others] @ n[i]) < -NORMAL_TOL) & (owner[others] != owner[i])]
+            else:
+                others = others[(np.abs(d[others] - d[i]) < PLANE_TOL) & ((n[others] @ n[i]) > NORMAL_TOL)]
             if len(others) == 0:
                 continue
             # Any other triangle in the same plane whose interior overlaps (a clean mesh tiles a plane
@@ -109,7 +130,7 @@ def analyse(path):
                 continue
             a, b, c = t[others, 0], t[others, 1], t[others, 2]
             hit = np.zeros(len(others), dtype=bool)
-            for s in range(4):
+            for s in range(samples.shape[1]):
                 hit |= point_in_tri(samples[i, s][None, :], a, b, c)
             for j in others[hit]:
                 k = (min(owner[i], owner[j]), max(owner[i], owner[j]))
@@ -130,7 +151,11 @@ def analyse(path):
                 if (o.name, v) in done: continue
                 done[(o.name, v)] = True
                 o.data.vertices[v].co += local
-        bpy.ops.export_scene.gltf(filepath=path, export_format='GLB', export_extras=True, export_yup=True)
+        # Keep the baked vertex colours (AO) the kit / restaurant GLBs carry.
+        try:
+            bpy.ops.export_scene.gltf(filepath=path, export_format='GLB', export_extras=True, export_yup=True, export_vertex_color='ACTIVE')
+        except TypeError:
+            bpy.ops.export_scene.gltf(filepath=path, export_format='GLB', export_extras=True, export_yup=True)
         print("FIXED", os.path.basename(path), "moved", len(moves), "triangles", flush=True)
     return {"asset": os.path.basename(path), "tris": int(len(t)), "pairs": out}
 

@@ -765,8 +765,17 @@ def rs_aframe(m):
     for z, nz in ((0.18, 1), (-0.18, -1)):
         prism(m, (0, 0.0, z), (0, 1.0, 0.0), 0.6, 0.03, "Oak", up=(0, 0, nz))
     if near():
-        for z, nz in ((0.105, 1), (-0.105, -1)):
-            m.face([(-0.25, 0.2, z * 1.55), (0.25, 0.2, z * 1.55), (0.25, 0.85, z * 0.25), (-0.25, 0.85, z * 0.25)], "Chalkboard", (0, 0.2, nz))
+        # Boards 5 mm off the leg's outer face, parallel to it (the quad used to tilt across it:
+        # 2 cm proud at the foot, inside the oak at the top).
+        ln = math.hypot(1.0, 0.18)
+        ny, nz_ = 0.18 / ln, 1.0 / ln          # outward normal of the front leg (y, z)
+        off = 0.015 + 0.005
+        for nz in (1, -1):
+            pts = []
+            for x, y in ((-0.25, 0.2), (0.25, 0.2), (0.25, 0.85), (-0.25, 0.85)):
+                zc = 0.18 * (1.0 - y)
+                pts.append((x, y + ny * off, nz * (zc + nz_ * off)))
+            m.face(pts, "Chalkboard", (0, 0.2, nz))
 
 
 def rs_planter(m):

@@ -47,7 +47,9 @@ static func build(restaurant_id: String, size: Vector2, accent: Color, title_ove
 	var pad := size.x * 0.06
 	var inner := size.x - pad * 2.0
 	root.add_child(text(title.to_upper(), Vector3(0, size.y * 0.5 - unit * 1.3, 0.002), fit(title, unit * 1.5, inner), accent.lightened(0.45), HORIZONTAL_ALIGNMENT_CENTER, inner))
-	root.add_child(text(subtitle.to_upper(), Vector3(0, size.y * 0.5 - unit * 2.35, 0.002), fit(subtitle, unit * 0.6, inner), Color("cfc6b2"), HORIZONTAL_ALIGNMENT_CENTER, inner))
+	# Neighbouring lines' label quads overlap: they alternate 2 / 3.5 mm off the board (they lay in
+	# one plane and flickered where the quads cross).
+	root.add_child(text(subtitle.to_upper(), Vector3(0, size.y * 0.5 - unit * 2.35, 0.0035), fit(subtitle, unit * 0.6, inner), Color("cfc6b2"), HORIZONTAL_ALIGNMENT_CENTER, inner))
 	var dishes := OrderDetails.menu(restaurant_id)
 	var row := unit * (6.0 / maxf(1.0, float(dishes.size())))
 	var y0 := size.y * 0.5 - unit * 3.3
@@ -59,10 +61,11 @@ static func build(restaurant_id: String, size: Vector2, accent: Color, title_ove
 	for i in range(dishes.size()):
 		var y := y0 - row * (i + 0.5)
 		var d: Array = dishes[i]
+		var lift := 0.002 if i % 2 == 0 else 0.0035
 		# Label3D anchors left-aligned text at its left edge and right-aligned at its right edge.
-		root.add_child(text(str(d[0]), Vector3(-size.x * 0.5 + pad, y, 0.002), dish_h, Color("f4efe2"), HORIZONTAL_ALIGNMENT_LEFT, name_w))
-		root.add_child(text(DeliverySession.money(int(d[1])), Vector3(size.x * 0.5 - pad, y, 0.002), dish_h, accent.lightened(0.55), HORIZONTAL_ALIGNMENT_RIGHT, price_w))
-	root.add_child(text("ORDER AT THE COUNTER · COURIER PICKUP INSIDE", Vector3(0, -size.y * 0.5 + unit * 0.55, 0.002), fit("ORDER AT THE COUNTER · COURIER PICKUP INSIDE", unit * 0.34, inner), Color("9a917f"), HORIZONTAL_ALIGNMENT_CENTER, inner))
+		root.add_child(text(str(d[0]), Vector3(-size.x * 0.5 + pad, y, lift), dish_h, Color("f4efe2"), HORIZONTAL_ALIGNMENT_LEFT, name_w))
+		root.add_child(text(DeliverySession.money(int(d[1])), Vector3(size.x * 0.5 - pad, y, lift + 0.0015), dish_h, accent.lightened(0.55), HORIZONTAL_ALIGNMENT_RIGHT, price_w))
+	root.add_child(text("ORDER AT THE COUNTER · COURIER PICKUP INSIDE", Vector3(0, -size.y * 0.5 + unit * 0.55, 0.0065), fit("ORDER AT THE COUNTER · COURIER PICKUP INSIDE", unit * 0.34, inner), Color("9a917f"), HORIZONTAL_ALIGNMENT_CENTER, inner))
 	return root
 
 ## Text size (em, metres) for `s` to fit `width` metres: about 0.6 em per character.

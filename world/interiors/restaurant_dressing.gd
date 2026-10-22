@@ -10,7 +10,7 @@ extends RefCounted
 ## (xe - 1.0, TableService) and the menu boards clear.
 
 const RANGE := 30.0
-const COUNTER_TOP := 1.04      ## rs_counter stone top (restaurant frame)
+const COUNTER_TOP := 1.045     ## rs_counter stone top 1.04 (restaurant frame) + 5 mm: tray floors 1.6 cm over it
 const COUNTER_Z := -7.34       ## along the counter, a little to the staff side
 ## Counter slots, x relative to the entrance bay centre xe: -0.42 (between the pass spot and the
 ## register), 0.95 (left of the ayran machine), 2.27 (right end, before the pickup shelf).
@@ -55,7 +55,7 @@ static func terrace(parent: RestaurantInteriors, t: Transform3D, b: Dictionary, 
 		if i == e: continue
 		var x := RestaurantCatalog.bay_x(b, i)
 		var id: String = TERRACE_TROUGHS[(i + int(b.id)) % TERRACE_TROUGHS.size()]
-		var at := Vector3(x, 0.06, 0.3)
+		var at := Vector3(x, RestaurantInteriors.SIDEWALK_Y, 0.3)
 		spawn(parent, id, t * Transform3D(Basis.IDENTITY, at), 90.0, 1)
 		parent.local_box(t, at + Vector3(0, 0.3, 0), Vector3(1.0, 0.6, 0.5))
 
