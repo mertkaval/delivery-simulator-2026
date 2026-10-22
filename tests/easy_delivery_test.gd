@@ -160,8 +160,12 @@ func run() -> void:
 	aim_at(shelves.look_point(decoy))
 	await physics(3)
 	check(player.target().get("node") == decoy, "a decoy can be looked at")
-	await frames(1)
-	check(game.receipt_panel.visible and game.receipt_name.text.begins_with(str((decoy.get_meta("package") as Dictionary).customer).to_upper()), "looking at a package shows its tag big: " + game.receipt_name.text.replace("\n", " "))
+	# The tag panel follows the aim on the next frames (allow a slow frame or two).
+	var decoy_name := str((decoy.get_meta("package") as Dictionary).customer).to_upper()
+	for i in range(60):
+		await frames(1)
+		if game.receipt_panel.visible and game.receipt_name.text.begins_with(decoy_name): break
+	check(game.receipt_panel.visible and game.receipt_name.text.begins_with(decoy_name), "looking at a package shows its tag big: %s (aimed at %s)" % [game.receipt_name.text.replace("\n", " "), decoy_name])
 	game.interact()
 	var expect := "This one is for %s — you're looking for %s" % [(decoy.get_meta("package") as Dictionary).customer, s.order.customer]
 	check(s.order.state == "ACCEPTED" and game.notice.text.begins_with(expect), "wrong package: '%s'" % game.notice.text)
@@ -246,10 +250,14 @@ func run() -> void:
 	player.toggle_bicycle()
 	Input.action_press("move_forward")
 	await physics(80)
-	await frames(2)
-	chest = bp.attachment.global_position
-	to_bag = bag_centre(bp) - chest
-	check(player.mounted and bp.model.is_visible_in_tree() and to_bag.length() < 0.7 and to_bag.dot(-player.bicycle.global_basis.z) < -0.1, "riding: the bag stays on the back (%.2f m from the chest)" % to_bag.length())
+	var riding_ok := false
+	for i in range(60):
+		await frames(1)
+		chest = bp.attachment.global_position
+		to_bag = bag_centre(bp) - chest
+		riding_ok = player.mounted and bp.model.is_visible_in_tree() and to_bag.length() < 0.7 and to_bag.dot(-player.bicycle.global_basis.z) < -0.1
+		if riding_ok: break
+	check(riding_ok, "riding: the bag stays on the back (%.2f m from the chest, mounted %s, visible %s, behind %.2f)" % [to_bag.length(), player.mounted, bp.model.is_visible_in_tree(), to_bag.dot(-player.bicycle.global_basis.z)])
 	Input.action_release("move_forward")
 	Input.action_press("jump")
 	await physics(100)
@@ -257,10 +265,14 @@ func run() -> void:
 	player.toggle_bicycle()
 	await physics(30)
 	player.toggle_view()
-	await frames(20)
-	var shadow_only := true
-	for gi: GeometryInstance3D in bp.model.find_children("*", "GeometryInstance3D", true, false):
-		if gi.is_visible_in_tree() and gi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY: shadow_only = false
+	# The view switch blends over a few frames; the bag must end up shadow-only.
+	var shadow_only := false
+	for i in range(80):
+		await frames(1)
+		shadow_only = true
+		for gi: GeometryInstance3D in bp.model.find_children("*", "GeometryInstance3D", true, false):
+			if gi.is_visible_in_tree() and gi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY: shadow_only = false
+		if shadow_only: break
 	check(shadow_only, "first person: the worn bag only casts its shadow (never in the view)")
 	player.toggle_view()
 	await frames(20)

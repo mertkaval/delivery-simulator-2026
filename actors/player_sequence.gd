@@ -105,6 +105,12 @@ var _events_done := -1.0
 var _pkg: Node3D
 var _pkg_mode := ""
 var _on_event: Callable
+var _flap_prev := -1.0
+var _set_down_heard := false   ## PlaceDown's release frame already played the set-down sound
+
+## A sound for the courier's own action (2D, UI bus), at a level relative to game.sound().
+func cue(sound: String, volume_db := -6.0) -> void:
+	if game.audio != null and CityAudio.has_sound(sound): (game.audio as CityAudio).play_ui(sound, volume_db)
 
 ## Third person with the contract's bag scenes and the courier's bag clips.
 func clip_mode() -> bool:
@@ -139,6 +145,7 @@ func play_clip(step_role: String, pkg: Node3D = null, on_event := Callable(), ho
 	step_started.emit(step_role)
 	_clip = a.contract_clip(a.action_clip_name)
 	_events_done = -1.0
+	_flap_prev = -1.0
 	if pkg != null: _pkg = pkg
 	_on_event = on_event
 	_clip_on = true
@@ -157,7 +164,12 @@ func apply_clip(frame: float) -> void:
 	if bag and _clip.get("bag_track", null) is Array: bag.transform = track_xf(_clip.bag_track, frame)
 	if bag and _clip.get("flap_deg", null) is Array:
 		var flap := bp.held_node("Flap")
-		if flap: flap.rotation.x = deg_to_rad(track_value(_clip.flap_deg, frame))
+		var deg := track_value(_clip.flap_deg, frame)
+		if flap: flap.rotation.x = deg_to_rad(deg)
+		# The flap passing upright: velcro tearing open, or pressed shut.
+		if _flap_prev >= 0.0 and _flap_prev < 90.0 and deg >= 90.0: cue("bag_velcro_open")
+		elif _flap_prev >= 90.0 and deg < 90.0: cue("bag_flap_close")
+		_flap_prev = deg
 	if _clip.get("events", null) is Array:
 		for e: Dictionary in _clip.events:
 			var f := float(e.get("frame", 0.0))
@@ -170,8 +182,11 @@ func clip_event(e: Dictionary) -> void:
 	var bp := avatar().backpack
 	match str(e.get("do", "")):
 		"bag_socket":
-			bp.socket_back(str(e.get("to", "")) == "back")
+			var to_back := str(e.get("to", "")) == "back"
+			if to_back != bp.on_back: cue("bag_on_shoulder" if to_back else "bag_off_shoulder")
+			bp.socket_back(to_back)
 		"body_strap_l", "body_strap_r":
+			if role == "bag_strap_right" and bool(e.get("visible", true)): cue("bag_on_shoulder", -14.0)
 			for n in bp.straps:
 				if str(n.name).ends_with("L" if str(e.do).ends_with("_l") else "R"): n.visible = bool(e.get("visible", true))
 		"bag_strap_l", "bag_strap_r":
@@ -180,6 +195,10 @@ func clip_event(e: Dictionary) -> void:
 		"package":
 			if not is_instance_valid(_pkg): return
 			var to := str(e.get("to", ""))
+			if to == "track" and role == "bag_take": cue("package_out_of_bag")
+			if to == "released" and role == "place_down":
+				cue("package_drop")
+				_set_down_heard = true
 			if to == "track":
 				if _pkg.get_parent() != avatar().body:
 					if _pkg.get_parent(): _pkg.reparent(avatar().body, false)
@@ -267,7 +286,8 @@ func leave_clips(pkg: Node3D, from_bag: bool, spot: Transform3D, zone_check: Cal
 	if from_bag and holding_flow():
 		await take_out_clips(pkg)
 		await place_down_clip(pkg, spot, zone_check)
-		game.sound("package_drop")
+		if not _set_down_heard: game.sound("package_drop")
+		_set_down_heard = false
 		_pkg_mode = ""
 		role = "photo"
 		step_started.emit("photo")
@@ -289,7 +309,8 @@ func leave_clips(pkg: Node3D, from_bag: bool, spot: Transform3D, zone_check: Cal
 			var tw := create_tween()
 			tw.tween_property(pkg, "global_transform", spot, 0.25)
 			await wait(0.27)
-	game.sound("package_drop")
+	if not _set_down_heard: game.sound("package_drop")
+	_set_down_heard = false
 	_pkg_mode = ""
 	role = "photo"
 	step_started.emit("photo")
@@ -314,7 +335,7 @@ func meet_clips(pkg: Node3D, from_bag: bool, customer: Node3D, toward: Vector3, 
 		var to := Transform3D(Basis(Vector3.UP, atan2(player().global_position.x - toward.x, player().global_position.z - toward.z)), toward + Vector3(0, 0.98, 0) + (player().global_position - toward).normalized() * 0.28)
 		to.origin.y = toward.y + 0.98
 		await hop_to(pkg, to, 0.5)
-		game.sound("package_place")
+		game.sound("item_pickup")
 		on_handed.call(pkg)
 		await play_clip("bag_put_on")
 	else:
@@ -328,7 +349,7 @@ func handover_clip(pkg: Node3D, on_handed: Callable) -> void:
 	await play_clip("handover", pkg, func(what: String) -> void:
 		if what == "released" and not handed[0]:
 			handed[0] = true
-			game.sound("package_place")
+			game.sound("item_pickup")
 			on_handed.call(_pkg))
 	if not handed[0]: on_handed.call(pkg)
 

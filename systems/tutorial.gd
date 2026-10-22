@@ -116,7 +116,7 @@ func _process(delta: float) -> void:
 		_check_delay = 1.2
 		card.complete()
 		var audio := get_tree().get_first_node_in_group("city_audio") as CityAudio
-		if audio: audio.play_ui("step_complete" if ResourceLoader.exists(CityAudio.SFX % "step_complete") else "ui_accept", -6.0)
+		if audio: audio.play_ui("step_complete" if CityAudio.has_sound("step_complete") else "ui_accept", -6.0)
 		return
 	refresh()
 
@@ -182,7 +182,7 @@ func finish() -> void:
 	CityNavigation.target = {}
 	card.show_finished(DeliverySession.money(DeliverySession.TUTORIAL_BONUS))
 	var audio := get_tree().get_first_node_in_group("city_audio") as CityAudio
-	if audio and ResourceLoader.exists(CityAudio.SFX % "mission_complete"): audio.play_ui("mission_complete", -4.0)
+	if audio and CityAudio.has_sound("mission_complete"): audio.play_ui("mission_complete", -4.0)
 	game.notify("Training complete! %s bonus added.\nRequests now arrive automatically while you're online." % DeliverySession.money(DeliverySession.TUTORIAL_BONUS))
 	game.save_session()
 

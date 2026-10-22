@@ -43,6 +43,21 @@ func run() -> void:
 		var s := CityAudio.stream(n)
 		looped = looped and s.loop_mode == AudioStreamWAV.LOOP_FORWARD and s.loop_end > 0
 	check(looped, "CityAudio.stream() returns forward-looping streams for every loop")
+	# ElevenLabs sounds (SoundBank): every take loads, bank loops loop, trims stay sane.
+	var bank_bad: Array[String] = []
+	for n: String in SoundBank.BANK:
+		var entry: Dictionary = SoundBank.BANK[n]
+		for path: String in entry.files:
+			var s := load(path) as AudioStreamWAV
+			if s == null or s.get_length() <= 0.05: bank_bad.append(path.get_file())
+		var t := CityAudio.trim(n)
+		if t > 6.0 or t < -20.0: bank_bad.append("%s trim %.1f" % [n, t])
+		if bool(entry.loop):
+			var st := CityAudio.stream(n)
+			if st == null or st.loop_mode != AudioStreamWAV.LOOP_FORWARD or st.loop_end <= 0: bank_bad.append(n + " not looping")
+	check(bank_bad.is_empty() and SoundBank.BANK.size() >= 60, "%d ElevenLabs sounds load, loop and are level-trimmed %s" % [SoundBank.BANK.size(), bank_bad])
+	check(CityAudio.has_sound("bag_off_shoulder") and CityAudio.has_sound("jump_land") and CityAudio.has_sound("owl_hoot")
+		and not CityAudio.has_sound("no_such_sound"), "has_sound covers ElevenLabs names and the sfx_forge fallbacks")
 
 	# 2. Game with CityAudio.
 	root.size = Vector2i(1280, 720)
@@ -151,7 +166,7 @@ func run() -> void:
 	var steps: Array[String] = [audio.footstep_for(Vector3(-8, 0.2, 23)), audio.footstep_for(Vector3(-64, 0.0, -145)),
 		audio.footstep_for(CedarNeighborhood.CEDAR_HOME_ORIGIN + Vector3(0, 0.3, 0)), audio.footstep_for(ShopCatalog.LOCATIONS["bikes"] + Vector3(0, 0.1, 0))]
 	print("footsteps: ", steps)
-	check(steps.all(func(s: String) -> bool: return s.begins_with("footstep_") and FileAccess.file_exists(CityAudio.SFX % s))
+	check(steps.all(func(s: String) -> bool: return s.begins_with("footstep_") and CityAudio.has_sound(s))
 		and steps[2] == "footstep_wood" and steps[3] == "footstep_interior", "footsteps pick a surface sound (home wood, shop tiles)")
 	for n: String in CityAudio.GAMEPLAY: audio.play_ui(n)
 	check(audio.ui_players.size() == CityAudio.MAX_UI, "play_ui() for every gameplay cue stays within %d UI voices" % CityAudio.MAX_UI)

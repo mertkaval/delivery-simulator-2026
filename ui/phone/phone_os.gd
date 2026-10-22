@@ -516,4 +516,4 @@ static func weather_icon(desc: String) -> String:
 
 func sound(name: String) -> void:
 	var audio := get_tree().get_first_node_in_group("city_audio") as CityAudio
-	if audio and ResourceLoader.exists(CityAudio.SFX % name): audio.play_ui(name, -10.0)
+	if audio and CityAudio.has_sound(name): audio.play_ui(name, -10.0)

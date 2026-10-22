@@ -1,7 +1,9 @@
 class_name CityAudio
 extends Node
-## Game audio. Sounds come from tools/sfx_forge (procedural, free, offline) in assets/audio/sfx;
-## every file is loudness-levelled there (tools/sfx_forge/inspect_sfx.py checks it).
+## Game audio. Sounds are asked for by name. Names in SoundBank play the ElevenLabs sounds in
+## assets/audio/elevenlabs (tools/elevenlabs_sfx: a random take per play where there are several,
+## plus a trim that matches the mix); every other name plays the procedural sfx_forge sound in
+## assets/audio/sfx (tools/sfx_forge, loudness-levelled by tools/sfx_forge/inspect_sfx.py).
 ## - Phone/UI cues follow the order state machine (auto_order_cues), plus play_ui() for callers.
 ## - Bicycle: tyre roll and chain/freewheel loops driven by speed and pedalling, brake squeal,
 ##   bell; the player's car gets an engine loop.
@@ -30,7 +32,7 @@ const PARKS := [Vector3(-44, 0, -330), Vector3(44, 0, -330), Vector3(-44, 0, -47
 const BUS_TRIM := {"UI": -2.0, "Ambience": -3.0, "SFX": -1.0}
 ## Ambience layers and their gain (dB) at full weight.
 const LAYERS := {"city_ambience": -10.0, "night_city_hum": -6.0, "park_ambience": -7.0, "restaurant_ambience": -8.0,
-	"rain": -6.0, "rain_heavy": -6.0, "wind_soft": -8.0, "wind": -9.0, "crickets": -7.0}
+	"rain": -6.0, "rain_heavy": -6.0, "wind_soft": -8.0, "wind": -9.0, "crickets": -7.0, "house_tone": -4.0}
 const MAX_UI := 4
 const MAX_ONESHOTS := 16
 const MAX_ENGINES := 8
@@ -82,16 +84,38 @@ var clock := 0.0
 var honk_cooldown := 0.0
 var jam_honk_cooldown := 30.0
 var shop_inside := {}
+var was_on_floor := true
+var was_mounted := false
+var thunder_timer := 20.0
+var thunder_player: AudioStreamPlayer
 
+## The stream for a sound name: a random take of its SoundBank sound, else the sfx_forge file.
 static func stream(sound: String) -> AudioStreamWAV:
 	if not streams.has(sound):
-		var s: AudioStreamWAV = load(SFX % sound)
-		if s != null and sound in LOOPS and (s.loop_mode == AudioStreamWAV.LOOP_DISABLED or s.loop_end <= s.loop_begin):
-			s.loop_mode = AudioStreamWAV.LOOP_FORWARD
-			s.loop_begin = 0
-			s.loop_end = int(s.get_length() * s.mix_rate)
-		streams[sound] = s
-	return streams[sound]
+		var takes: Array[AudioStreamWAV] = []
+		var looped := sound in LOOPS
+		if SoundBank.BANK.has(sound):
+			var entry: Dictionary = SoundBank.BANK[sound]
+			looped = looped or bool(entry.loop)
+			for path: String in entry.files: takes.append(load(path) as AudioStreamWAV)
+		else:
+			takes.append(load(SFX % sound) as AudioStreamWAV)
+		for s in takes:
+			if s != null and looped and (s.loop_mode == AudioStreamWAV.LOOP_DISABLED or s.loop_end <= s.loop_begin):
+				s.loop_mode = AudioStreamWAV.LOOP_FORWARD
+				s.loop_begin = 0
+				s.loop_end = int(s.get_length() * s.mix_rate)
+		streams[sound] = takes
+	var list: Array[AudioStreamWAV] = streams[sound]
+	return list[0] if list.size() == 1 else list[randi() % list.size()]
+
+## Level trim (dB) for a sound name, so a SoundBank sound sits where the mix expects it.
+static func trim(sound: String) -> float:
+	return float((SoundBank.BANK[sound] as Dictionary).trim) if SoundBank.BANK.has(sound) else 0.0
+
+## Is there a sound for this name (SoundBank or sfx_forge)?
+static func has_sound(sound: String) -> bool:
+	return SoundBank.BANK.has(sound) or ResourceLoader.exists(SFX % sound)
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -110,6 +134,9 @@ func _ready() -> void:
 		add_child(p)
 		p.play(randf() * p.stream.get_length())
 		ambience[layer] = p
+	thunder_player = AudioStreamPlayer.new()
+	thunder_player.bus = "Ambience"
+	add_child(thunder_player)
 
 ## UI / Ambience / SFX buses with mix trims, and a limiter on Master so stacked cues never clip.
 static func setup_buses() -> void:
@@ -147,7 +174,7 @@ func setup(owner_game: Node) -> void:
 		signal_players.append(pooled_player(3.0, SIGNAL_RANGE + 6.0))
 		signal_slot.append({})
 	var player: Node3D = game.player
-	for loop: String in ["tyre_roll", "bike_chain", "bike_freewheel", "car_engine"]:
+	for loop: String in ["tyre_roll", "bike_chain", "bike_freewheel", "car_engine", "bike_wind"]:
 		var p := AudioStreamPlayer3D.new()
 		p.stream = stream(loop)
 		p.bus = "SFX"
@@ -191,7 +218,7 @@ func play_ui(sound: String, volume_db: float = -4.0, pitch: float = 1.0) -> void
 		u = ui_players[ui_next % ui_players.size()]
 		ui_next += 1
 	u.stream = s
-	u.volume_db = volume_db
+	u.volume_db = volume_db + trim(sound)
 	u.pitch_scale = pitch
 	u.play()
 
@@ -200,6 +227,7 @@ func loop_at(sound: String, at: Vector3, unit_size: float, max_distance: float, 
 	var p := AudioStreamPlayer3D.new()
 	p.stream = stream(sound)
 	p.bus = "SFX"
+	p.volume_db = trim(sound)
 	p.unit_size = unit_size
 	p.max_distance = max_distance
 	p.position = at
@@ -237,7 +265,7 @@ func one_shot_at(sound: String, at: Vector3, volume_db: float = 0.0, unit_size: 
 	p.stream = stream(sound)
 	p.unit_size = unit_size
 	p.max_distance = max_distance
-	p.volume_db = volume_db
+	p.volume_db = volume_db + trim(sound)
 	p.pitch_scale = pitch
 	p.global_position = at
 	p.play()
@@ -336,11 +364,16 @@ func ride_sounds(player: CourierPlayer, delta: float) -> void:
 	var speed := absf(player.riding_speed) if player.mounted else 0.0
 	var car := ShopCatalog.is_car(game.session.active_vehicle)
 	var pedalling := player.mounted and Input.get_axis("move_back", "move_forward") > 0.1
-	var roll_db := -80.0 if speed < 0.3 else lerpf(-26.0, -8.0, clampf(speed / 9.0, 0.0, 1.0))
+	if player.mounted != was_mounted:
+		was_mounted = player.mounted
+		if not car: one_shot_at("bike_mount" if player.mounted else "bike_dismount", player.global_position + Vector3(0, 0.6, 0), -6.0, 3.0)
+	var roll_db := -80.0 if speed < 0.3 else lerpf(-26.0, -8.0, clampf(speed / 9.0, 0.0, 1.0)) + trim("tyre_roll")
 	bike.tyre_roll.volume_db = move_toward(bike.tyre_roll.volume_db, roll_db, 120.0 * delta)
 	bike.tyre_roll.pitch_scale = clampf(0.75 + speed * 0.05, 0.75, 1.4)
-	var chain_db := -14.0 if pedalling and speed > 0.5 and not car else -80.0
-	var free_db := -12.0 if not pedalling and speed > 0.8 and not car else -80.0
+	var wind_db := -80.0 if speed < 4.0 or car else lerpf(-24.0, -10.0, clampf((speed - 4.0) / 8.0, 0.0, 1.0)) + trim("bike_wind")
+	bike.bike_wind.volume_db = move_toward(bike.bike_wind.volume_db, wind_db, 60.0 * delta)
+	var chain_db := -14.0 + trim("bike_chain") if pedalling and speed > 0.5 and not car else -80.0
+	var free_db := -12.0 + trim("bike_freewheel") if not pedalling and speed > 0.8 and not car else -80.0
 	bike.bike_chain.volume_db = move_toward(bike.bike_chain.volume_db, chain_db, 200.0 * delta)
 	bike.bike_chain.pitch_scale = clampf(0.7 + speed * 0.06, 0.7, 1.5)
 	bike.bike_freewheel.volume_db = move_toward(bike.bike_freewheel.volume_db, free_db, 200.0 * delta)
@@ -356,13 +389,19 @@ func ride_sounds(player: CourierPlayer, delta: float) -> void:
 		one_shot_at("bike_bell", player.global_position + Vector3(0, 1.0, 0) - player.global_basis.z * 0.6, -6.0)
 
 func walk_sounds(player: CourierPlayer, delta: float) -> void:
+	var speed := Vector2(player.velocity.x, player.velocity.z).length()
+	# Landing after a jump or a drop: harder falls land louder.
+	var on_floor := player.is_on_floor()
+	if on_floor and not was_on_floor and not player.mounted and player.last_fall_speed > 3.0:
+		var hard := clampf((player.last_fall_speed - 3.0) / 6.0, 0.0, 1.0)
+		one_shot_at("jump_land", player.global_position, lerpf(-18.0, -9.0, hard), 2.0, randf_range(0.92, 1.05), 25.0)
+	was_on_floor = on_floor
 	# With a visible body the steps land on its foot contacts (PlayerAvatar).
 	if player.avatar != null and player.avatar.ready_ok:
 		for at in player.take_footsteps():
-			one_shot_at(footstep_for(at), at, randf_range(-20.0, -17.0), 2.0, randf_range(0.9, 1.1), 25.0)
+			one_shot_at(step_sound(at, speed), at, randf_range(-20.0, -17.0), 2.0, randf_range(0.9, 1.1), 25.0)
 		return
-	if player.mounted or not player.is_on_floor(): return
-	var speed := Vector2(player.velocity.x, player.velocity.z).length()
+	if player.mounted or not on_floor: return
 	if speed < 0.6:
 		step_timer = 0.0
 		return
@@ -370,7 +409,12 @@ func walk_sounds(player: CourierPlayer, delta: float) -> void:
 	if step_timer <= 0.0:
 		step_timer = 1.6 / maxf(speed, 1.0)
 		var at := player.global_position
-		one_shot_at(footstep_for(at), at, randf_range(-20.0, -17.0), 2.0, randf_range(0.9, 1.1), 25.0)
+		one_shot_at(step_sound(at, speed), at, randf_range(-20.0, -17.0), 2.0, randf_range(0.9, 1.1), 25.0)
+
+## Footstep for the surface, with the running takes on pavement at running speed.
+func step_sound(at: Vector3, speed: float) -> String:
+	var surface := footstep_for(at)
+	return "footstep_run" if surface == "footstep_concrete" and speed > CourierPlayer.RUN_SPEED + 0.8 else surface
 
 ## Footstep sound for the surface at `at`.
 func footstep_for(at: Vector3) -> String:
@@ -420,12 +464,22 @@ func mix_ambience(at: Vector3, hour: float, delta: float) -> void:
 		"wind_soft": (0.35 + 0.4 * overcast) * outdoors,
 		"wind": clampf((overcast - 0.4) * 1.2 + rain_amount * 0.3, 0.0, 1.0) * outdoors,
 		"rain": rain_amount * (1.0 - inside * 0.6),
-		"rain_heavy": clampf((rain_amount - 0.5) * 2.0, 0.0, 1.0) * (1.0 - inside * 0.6)}
+		"rain_heavy": clampf((rain_amount - 0.5) * 2.0, 0.0, 1.0) * (1.0 - inside * 0.6),
+		"house_tone": 1.0 if in_home(at) else 0.0}
 	for layer: String in targets:
 		var linear: float = targets[layer]
-		var db := -80.0 if linear < 0.01 else linear_to_db(linear) + float(LAYERS[layer])
+		var db := -80.0 if linear < 0.01 else linear_to_db(linear) + float(LAYERS[layer]) + trim(layer)
 		var p: AudioStreamPlayer = ambience[layer]
 		p.volume_db = move_toward(p.volume_db, db, 40.0 * delta)
+	# Thunder now and then in heavy weather, muffled indoors.
+	thunder_timer -= delta
+	if thunder_timer <= 0.0:
+		thunder_timer = randf_range(25.0, 70.0)
+		if rain_amount > 0.6 and overcast > 0.5 and not thunder_player.playing:
+			thunder_player.stream = stream("thunder")
+			thunder_player.volume_db = randf_range(-12.0, -4.0) + trim("thunder") - inside * 8.0
+			thunder_player.pitch_scale = randf_range(0.85, 1.05)
+			thunder_player.play()
 
 func ambient_birds(at: Vector3, hour: float, delta: float) -> void:
 	# Songbirds in the trees by day (a dawn chorus, quieter dusk), owls at night in the suburbs.
@@ -632,7 +686,7 @@ func vehicle_events(car: Dictionary, body: Node3D, d: float, dt: float) -> void:
 		st.honk = 9.0
 		honk_cooldown = 3.0
 	elif float(st.stopped) > 12.0 and jam_honk_cooldown <= 0.0 and d < 45.0 and randf() < 0.01:
-		one_shot_at("horn_honk", at, -9.0, 7.0, horn_pitch, 70.0)
+		one_shot_at("horn_long", at, -9.0, 7.0, horn_pitch, 70.0)
 		st.honk = 20.0
 		jam_honk_cooldown = randf_range(35.0, 70.0)
 
@@ -674,11 +728,12 @@ func scan_signals() -> void:
 		var s := signal_slot[i]
 		if s.is_empty(): continue
 		var p := signal_players[i]
-		var want := stream("ped_signal_walk" if bool(s.walk) else "ped_signal_wait")
+		var sound := "ped_signal_walk" if bool(s.walk) else "ped_signal_wait"
+		var want := stream(sound)
 		p.global_position = (s.node as Node3D).global_position
 		if p.stream != want or not p.playing:
 			p.stream = want
-			p.volume_db = -6.0 if bool(s.walk) else -9.0
+			p.volume_db = (-6.0 if bool(s.walk) else -9.0) + trim(sound)
 			p.play()
 
 func cull_fixed_loops() -> void:

@@ -866,7 +866,7 @@ func delivered(method: String, show_receipt_now := true) -> void:
 	else: notify("Delivered to %s!" % session.order.get("customer", "the customer"))
 
 func sound(name: String) -> void:
-	if audio and ResourceLoader.exists(CityAudio.SFX % name): audio.play_ui(name, -6.0)
+	if audio and CityAudio.has_sound(name): audio.play_ui(name, -6.0)
 
 ## Title screen (new game, continue, settings, exit) or the Esc pause menu (ui/main_menu.gd).
 func open_main_menu(title: bool) -> void:

@@ -325,7 +325,7 @@ func purchase() -> void:
 		show_receipt(result)
 	else:
 		message.text = result
-		click("app_locked")
+		click("not_enough_money")
 
 ## Thank-you screen after a purchase.
 func show_receipt(result: String) -> void:
@@ -394,4 +394,4 @@ func flat_button(text: String, bg: Color, fg: Color) -> Button:
 
 func click(sound: String) -> void:
 	var audio := get_tree().get_first_node_in_group("city_audio") as CityAudio
-	if audio and ResourceLoader.exists(CityAudio.SFX % sound): audio.play_ui(sound, -8.0)
+	if audio and CityAudio.has_sound(sound): audio.play_ui(sound, -8.0)

@@ -224,9 +224,11 @@ func start_new() -> void:
 	else: emit("new_game")
 
 func emit(action: String) -> void:
-	var audio := get_tree().get_first_node_in_group("city_audio") as CityAudio
-	if audio: audio.play_ui("ui_accept", -10.0)
 	chosen.emit(action)
+
+func menu_sound(sound: String, volume_db: float) -> void:
+	var audio := get_tree().get_first_node_in_group("city_audio") as CityAudio
+	if audio: audio.play_ui(sound, volume_db)
 
 ## A transparent menu button: text only; hover/focus lights a soft bar with a mint edge.
 func menu_button(label: String, callback: Callable, hint := "") -> Button:
@@ -261,7 +263,12 @@ func menu_button(label: String, callback: Callable, hint := "") -> Button:
 	b.add_theme_stylebox_override("focus", lit)
 	b.add_theme_stylebox_override("pressed", down)
 	b.add_theme_stylebox_override("hover_pressed", down)
-	b.mouse_entered.connect(func(): if not b.disabled: b.grab_focus())
+	b.mouse_entered.connect(func():
+		if not b.disabled:
+			b.grab_focus()
+			menu_sound("ui_hover", -14.0))
+	if label == "Back": b.pressed.connect(func(): menu_sound("ui_back", -8.0))
+	elif label != "": b.pressed.connect(func(): menu_sound("ui_click", -8.0))
 	b.pressed.connect(callback)
 	if hint != "":
 		var h := text_label(hint, 13, WARM if label == "Continue" else Color(1, 1, 1, 0.5), 400, 1)
