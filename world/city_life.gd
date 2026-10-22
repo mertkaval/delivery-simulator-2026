@@ -254,9 +254,10 @@ func _physics_process(delta: float) -> void:
 		rider.speed = move_toward(rider.speed, 0.0 if stop else 3.4, delta * 3)
 		body.rotation.y = 0 if rider.direction < 0 else PI
 		if body.move_and_collide(direction * rider.speed * delta): rider.speed = 0
-		if body.position.z < -682 or body.position.z > 42:
-			rider.direction *= -1
-			body.position.x *= -1
+		if body.position.z < -682 or body.position.z > 42: rider.direction *= -1
+		# Stay in the centre of the marked bike lane: bumping a pedestrian or a car can shove the
+		# body sideways, and the shove used to carry it onto the sidewalk.
+		body.position.x = -float(rider.direction) * float(StreetGrid.AVENUE.bike)
 		if camera != null and body.position.distance_squared_to(camera.global_position) > 100 * 100: continue
 		rider.phase += delta * rider.speed * 2
 		for wheel in rider.wheels: wheel.rotate_x(-rider.speed * delta / 0.35)

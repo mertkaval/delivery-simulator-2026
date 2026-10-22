@@ -128,9 +128,9 @@ func _physics_process(delta: float) -> void:
 		rider.speed=move_toward(rider.speed,0 if stop else 3.4,delta*3)
 		body.rotation.y=0 if rider.direction<0 else PI
 		body.move_and_collide(direction*rider.speed*delta)
-		if body.position.z<-664 or body.position.z>-272:
-			rider.direction*=-1
-			body.position.x=473.1 if rider.direction<0 else 475.1
+		if body.position.z<-664 or body.position.z>-272: rider.direction*=-1
+		# Held in the bike lane (a bump must not push the rider onto the pavement).
+		body.position.x=473.1 if rider.direction<0 else 475.1
 		rider.phase+=delta*rider.speed*2
 		for wheel in rider.wheels: wheel.rotate_x(-rider.speed*delta/.35)
 		if rider.joints.is_empty():
