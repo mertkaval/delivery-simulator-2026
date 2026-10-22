@@ -16,3 +16,7 @@
 
 # Raw source packs the user drops in (converted copies live under assets/)
 /source_assets/
+
+# Local secrets (ElevenLabs API key etc.)
+/.env
+/.env.*
