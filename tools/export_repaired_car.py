@@ -37,7 +37,7 @@ mix=mat.node_tree.nodes.new('ShaderNodeMixRGB');mix.blend_type='MULTIPLY';mix.in
 mix.inputs[2].default_value=(.72,.76,.80,1)
 mat.node_tree.links.new(source,mix.inputs[1]);mat.node_tree.links.new(mix.outputs[0],bs.inputs['Base Color'])
 # Weld disconnected UV seam positions without discarding UV layers. Recompute outward normals.
-report={'source':'res://car_model.glb','source_triangles':404598,'wheel_radius_m':.34,'wheelbase_m':2.62,'lods':[],'textures':[]}
+report={'source':'sketchup_assets/car_model.glb','source_triangles':404598,'wheel_radius_m':.34,'wheelbase_m':2.62,'lods':[],'textures':[]}
 for ob in objects:
     if ob.type!='MESH':continue
     bm=bmesh.new();bm.from_mesh(ob.data)

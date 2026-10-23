@@ -5,8 +5,8 @@
 
 ids: ambulance citybus fire_truck garbage_truck police_sedan postvan rdservtruck school_bus taxi
 towtruck ace11 (none = all). Sources are the user's GLBs at the project root (left untouched):
-  generic_civil_service_vehicles_pack.glb -> assets/vehicles/civil/<name>.glb
-  ace_11_-_low_poly_model.glb             -> assets/vehicles/ace11/ace11.glb
+  sketchup_assets/generic_civil_service_vehicles_pack.glb -> assets/vehicles/civil/<name>.glb
+  sketchup_assets/ace_11_-_low_poly_model.glb -> assets/vehicles/ace11/ace11.glb
 
 Vehicle contract (same as tools/prepare_sketchup_assets.py / VehicleCatalog):
   root empty on the ground (z = 0), centred on the footprint, front at Blender +Y (Godot -Z),
@@ -25,8 +25,8 @@ import numpy as np
 from mathutils import Vector, Matrix
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PACK = os.path.join(ROOT, "generic_civil_service_vehicles_pack.glb")
-ACE = os.path.join(ROOT, "ace_11_-_low_poly_model.glb")
+PACK = os.path.join(ROOT, "sketchup_assets", "generic_civil_service_vehicles_pack.glb")
+ACE = os.path.join(ROOT, "sketchup_assets", "ace_11_-_low_poly_model.glb")
 OUT_CIVIL = os.path.join(ROOT, "assets", "vehicles", "civil")
 OUT_ACE = os.path.join(ROOT, "assets", "vehicles", "ace11")
 QA = os.path.join(ROOT, "world", "vehicles", "production", "renders", "civil")

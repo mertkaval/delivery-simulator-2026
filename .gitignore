@@ -14,8 +14,22 @@
 /world/editor_preview/city_preview.scn
 /world/editor_preview/signature.txt
 
-# Raw source packs the user drops in (converted copies live under assets/)
-/source_assets/
+# Raw source packs the user drops in (converted copies live under assets/; their sources are in
+# ASSET_LICENSES.md) stay local. Backed up in Git LFS: the work that cannot be rebuilt or
+# downloaded again -- character masters, the courier's textures and animation work, NPC decals.
+# NPC textures, renders and exports are rebuilt by tools/npc/build_all.sh / export_all.sh.
+/source_assets/*
+!/source_assets/.gdignore
+!/source_assets/character_mpfb/
+/source_assets/character_mpfb/*
+!/source_assets/character_mpfb/*.blend
+!/source_assets/character_mpfb/textures/
+!/source_assets/character_mpfb/anims_wip/
+!/source_assets/npc/
+/source_assets/npc/*/*
+!/source_assets/npc/*/*_master.blend
+!/source_assets/npc/_decals/*
+!/source_assets/npc/faces_v9.png
 
 # Local secrets (ElevenLabs API key etc.)
 /.env
