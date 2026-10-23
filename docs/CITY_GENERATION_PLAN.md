@@ -86,3 +86,22 @@ German *-straße*, French *Rue*, Spanish/Portuguese *Calle / Rua*.
   the asset budgets (`tests/asset_budget_test.gd`, `tests/perf_budget_test.gd`) from day one.
 - **Cultural care**: work from references for each culture, avoid caricature; fictional names.
 - **Consistency**: no district ships without the shared material library and a QA sheet review.
+
+## 4. Terrain first (added 2026-10-23)
+
+The city is planned on real ground: hills, lowlands, lakes and rivers, not a flat plate. Order of
+work: **terrain → water → road plan → sidewalks, traffic lights, bus stops → public building
+markers (police, hospital, city hall...) → neighbourhoods and parks**.
+
+Terrain tools compared:
+| Tool | Result | Verdict |
+|---|---|---|
+| A.N.T. Landscape (official Blender extension, GPL-2) | 20 noise types + an erosion simulator (rain, rivers, avalanches); 130k-tri terrain in 0.4 s, erosion 7 s | Generic noise; no lakes, river networks or "where can a city go" |
+| Erosion terrain generator (Blender 5.2 extension, GPL-3) | Droplet erosion on noise | Same limits |
+| SRTM Terrain Importer / BlenderGIS / PTerrain | Real-world elevation (NASA SRTM, public domain) | Option: real topography as a base, fictional names on top |
+| Gaea | Best-in-class | Free edition is non-commercial only; commercial needs a paid tier |
+| Terrain3D (Godot, MIT) | Runtime terrain with LOD, painting, collision | The Godot side: imports our 16-bit heightmap |
+| **`tools/terrain/city_terrain.py`** (ours) | From a JSON (hills, basins, lakes, sea edge): relief, thermal erosion, lakes filled to their spill level, rivers that follow real drainage (priority-flood + D8 flow) carved into the ground and running to the sea | **Chosen.** 2 km × 2 km at 4 m in ~5 s; outputs a 16-bit heightmap, water / slope / buildable masks, river lines, lake levels and a planning map |
+
+Next: the road planner reads `meta.json` and the masks: no lots on water or steep ground, roads
+along the contours on hills (the tensor field turns with the slope), bridges where roads cross rivers.
