@@ -71,7 +71,10 @@ def card_density(k, C, dens):
 
 def scalp(k, F):
     C, eye_z = k.head_frame(F)
-    dens = k.scalp_density(C, HAIRLINE)
+    hairline = k.scalp_density(C, HAIRLINE)
+    ear = k.ear_mask(F)
+    def dens(P):                                        # the scalp, never the ears (paint, cards, cap)
+        return hairline(P) * (1 - ear(P))
     def shade(P):                                       # dense on top, faded (skin shows) low on the sides
         az, el = k.scalp_angles(P, C)
         return dens(P) * (0.82 + 0.16 * smooth(0, 25, el))
@@ -84,6 +87,7 @@ def scalp(k, F):
 def beard(k):
     F = k.face_marks()
     hy, sn, mo = F["head"].y, F["sn"], F["mouth"]
+    ear = k.ear_mask(F)
     neck_z = F["menton"] - 0.022
 
     def density(P):
@@ -92,7 +96,7 @@ def beard(k):
         top = np.interp(x, [0.0, 0.022, 0.032, 0.048, 0.062, 0.08], [sn - 0.001, sn - 0.003, mo + 0.004, sn - 0.006, sn + 0.012, sn + 0.045])
         # lower edge: a clean neckline just above the Adam's apple, rising back to the ear lobe
         low = np.interp(y, [hy - 0.12, hy - 0.04, hy + 0.01], [neck_z, neck_z + 0.012, sn - 0.03])
-        d = smooth(top + 0.002, top - 0.004, z) * smooth(low - 0.004, low + 0.006, z) * smooth(hy + 0.012, hy - 0.004, y)
+        d = smooth(top + 0.002, top - 0.004, z) * smooth(low - 0.008, low + 0.012, z) * smooth(hy + 0.012, hy - 0.004, y)
         # lips stay clear
         lip = ((x / 0.026) ** 2 + ((z - mo) / np.where(z > mo, 0.0042, 0.0095)) ** 2) < 1.0   # moustache covers the upper lip
         d = np.where(lip, 0.0, d)
@@ -100,8 +104,8 @@ def beard(k):
         dense = smooth(0.045, 0.028, x)
         dense = np.maximum(dense, (z > mo) * smooth(0.034, 0.026, x) * 1.15)     # full moustache to the corners
         # five-o'clock shadow a little way up the cheek above the beard line
-        shadow = 0.10 * smooth(top + 0.018, top, z) * smooth(low - 0.004, low + 0.006, z) * smooth(hy + 0.012, hy - 0.004, y) * (~lip)
-        return np.maximum(d * (0.42 + 0.48 * dense), shadow)
+        shadow = 0.05 * smooth(top + 0.018, top, z) * smooth(low - 0.008, low + 0.012, z) * smooth(hy + 0.012, hy - 0.004, y) * (~lip)
+        return np.maximum(d * (0.28 + 0.40 * dense), shadow) * (1 - ear(P))
 
     def region(co):
         return (co[:, 2] > neck_z - 0.03) & (co[:, 2] < sn + 0.08) & (co[:, 1] < hy + 0.03) & (np.abs(co[:, 0]) < 0.1)

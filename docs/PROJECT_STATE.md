@@ -449,3 +449,30 @@ Verified with Godot 4.7.2 / Jolt: 11 new integration checks passed, existing sce
 - **Probes:**
   - `Godot --path . --script res://tests/perf_probe.gd -- [seconds] [speed] [attrib]`: BOOT, SPIKE and PERF lines, or ATTRIB per-subsystem frame cost.
   - `Godot --path . --script res://tests/boot_profile.gd -- [depth]`: BOOTCOST per subsystem.
+
+## The MPFB v3 courier is the player character (2026-10-22)
+
+- **Body:** `assets/player/courier.glb` is the MPFB v3 courier: 1.82 m, 51k tris, 53-bone MPFB game_engine rig, 87 clips (`tools/prepare_courier_v3.py`, from `source_assets/character_mpfb/`). The Mixamo Ch42 courier is archived in `assets/player/archive/v1_mixamo/` (git-tracked, Godot-ignored).
+- **Pipeline (unchanged steps, `tools/setup_player.gd`):**
+  1. Copy the Blender manifest to `assets/player/clips_blender.json`.
+  2. Run `--import`.
+  3. Run `setup_player.gd -- configure`. This writes `assets/player/courier_bone_map.tres` from the manifest's `bone_map_profile_to_mpfb` and finds the skeleton path (`Courier/Skeleton3D`). If a reimport does not pick it up, delete `.godot/imported/courier.glb-*`.
+  4. Run `--import` again.
+  5. Run `setup_player.gd -- build`. Speeds are measured on the retargeted skeleton (Walk 1.24, Jog 2.63, Run 3.70, Sprint 5.57 m/s). The backpack attaches to UpperChest; its check against `Bag_TakeOff`'s bag_track is 0.8 mm.
+- **Gaits (`PlayerAvatar.COURIER_CLIPS`):** Ctrl walks with Walk, W runs with Run (3.8 m/s clip for the 3.5 m/s run), Shift sprints with Sprint (5.7 for 5.8). Walk_Back, turns, jumps, carry, the bag and delivery clips (with the bag variants) keep their roles.
+- **New in play:**
+  - Land_Hard on real falls (over 7.5 m/s, standing or walking).
+  - Bike_Mount and Bike_Dismount, played in place on the bicycle at 1.6× (1.5 s / 1.4 s). Pedalling and walking wait for them (`PlayerAvatar.mount_locked`). They are not used for the scooter or cars.
+  - Gestures through `PlayerAvatar.play_gesture(role, yaw, hold, item)`, on the action layer. A gesture ends by itself, or as soon as the courier moves, and never overrides a CourierSequence clip:
+    - Knock_Door / Press_Doorbell at the customer's door. Odd-numbered houses have a doorbell, and the sound is timed to the knuckles or the finger.
+    - Wave when the customer opens the door.
+    - Eat_Drink on keys 1 / 2, with a procedural water bottle or energy bar on a BoneAttachment3D in the right hand.
+    - Idle fidgets after 9 s standing still: Idle_Look, Idle_Shift, Idle_FoldArms.
+- **In the library but not wired:**
+  - Phone_Raise / Use / Lower: the phone pauses the game and the view is at the eyes.
+  - Car_Drive: the driver is hidden in cars.
+  - Bike_Pedal / Coast / Brake / Stand_Pedal / Bell / Look_Back: riding is IK on the Bike_Seated pose.
+  - Crouch, Sit, Push, Throw, Roll, Slide, ClimbUp_1m, Hit_Knockback, Open_Box, Phone_Call, Nod_Yes / Shake_No: no matching game actions yet.
+- **Tests and captures:**
+  - `tests/courier_actions_test.gd` (23 checks).
+  - `tests/capture_courier_actions.gd -- <dir> [door,supplies,fidget,fall,bike]`.

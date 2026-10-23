@@ -41,15 +41,16 @@ var clips := {
 	"bike": {"name": "Driving"},
 	"carry": {"name": "Idle_Carry"},
 }
-## The courier's own clips (assets/player/courier.glb, measured on that rig): a 3 m/s Mixamo jog
-## for running, the fast UAL jog for sprinting, a real walk backwards and a seated bike pose.
-## Speeds come from clips.json (by clip name); foot contact phases are measured at load.
+## The courier's own clips (assets/player/courier.glb: the MPFB v3 courier, tools/prepare_courier_v3.py,
+## measured on that rig): natural procedural gaits - Walk 1.25 m/s for Ctrl, Run 3.8 m/s for the
+## 3.5 m/s run (the "jog" role), Sprint 5.7 m/s for Shift - a real walk backwards and a seated bike
+## pose. Speeds come from clips.json (by clip name); foot contact phases are measured at load.
 const COURIER_CLIPS := {
 	"idle": {"name": "Idle"},
 	"walk": {"name": "Walk"},
 	"walk_back": {"name": "Walk_Back"},
-	"jog": {"name": "Jog"},
-	"sprint": {"name": "Run"},
+	"jog": {"name": "Run"},
+	"sprint": {"name": "Sprint"},
 	"jump_start": {"name": "Jump_Start", "offset": 0.42},
 	"jump_air": {"name": "Jump"},
 	"jump_land": {"name": "Jump_Land", "offset": 0.03},
@@ -70,7 +71,26 @@ const COURIER_CLIPS := {
 	"bag_strap_right": {"name": "Bag_StrapRight"},
 	"handover": {"name": "Handover"},
 	"place_down": {"name": "PlaceDown"},
+	# A real fall lands deep (Land_Hard); getting on / off the bicycle are authored in bike space
+	# (root = bike origin), played in place at MOUNT_RATE.
+	"land_hard": {"name": "Land_Hard", "offset": 0.03},
+	"bike_mount": {"name": "Bike_Mount"},
+	"bike_dismount": {"name": "Bike_Dismount"},
+	# Gestures (play_gesture): at the door, eating / drinking, greeting, idle fidgets.
+	"knock_door": {"name": "Knock_Door"},
+	"doorbell": {"name": "Press_Doorbell"},
+	"eat_drink": {"name": "Eat_Drink"},
+	"wave": {"name": "Wave"},
+	"nod": {"name": "Nod_Yes"},
+	"idle_look": {"name": "Idle_Look"},
+	"idle_shift": {"name": "Idle_Shift"},
+	"idle_fold": {"name": "Idle_FoldArms"},
 }
+## Getting on / off the bicycle: the clips play this much faster than authored (2.4 s / 2.2 s).
+const MOUNT_RATE := 1.6
+## Standing idle this long (s) starts a fidget (look round, shift weight, fold arms).
+const FIDGET_AFTER := 9.0
+const FIDGETS := [["idle_look", 7.5], ["idle_shift", 7.5], ["idle_fold", 5.0]]
 ## Action roles CourierSequence can play as one-shots.
 const ACTION_ROLES := ["pick_up", "bag_take_off", "bag_hold", "bag_pack", "bag_take", "bag_put_on", "handover", "place_down"]
 ## Body facing correction (the retargeted bodies face +Z; the game faces -Z) and scale.
@@ -391,7 +411,12 @@ func build_tree() -> void:
 	land.add_node("land", anim_node("jump_land"))
 	land.add_node("speed", AnimationNodeTimeScale.new())
 	land.add_node("amount", AnimationNodeBlend2.new())
-	land.connect_node("speed", 0, "land")
+	# A real fall: the deep-knee Land_Hard instead of the hop landing.
+	land.add_node("hard", anim_node("land_hard" if has_clip("land_hard") else "jump_land"))
+	land.add_node("which", AnimationNodeBlend2.new())
+	land.connect_node("which", 0, "land")
+	land.connect_node("which", 1, "hard")
+	land.connect_node("speed", 0, "which")
 	land.connect_node("amount", 0, "idle")
 	land.connect_node("amount", 1, "speed")
 	land.connect_node("output", 0, "amount")
@@ -410,6 +435,15 @@ func build_tree() -> void:
 		if has_clip(turn):
 			library.get_animation(clip(turn)).loop_mode = Animation.LOOP_NONE
 			sm.add_node("Turn_" + turn, anim_node(turn), Vector2(0, 200))
+	for pair: Array in [["BikeMount", "bike_mount"], ["BikeDismount", "bike_dismount"]]:
+		if not has_clip(pair[1]): continue
+		library.get_animation(clip(pair[1])).loop_mode = Animation.LOOP_NONE
+		var bt := AnimationNodeBlendTree.new()
+		bt.add_node("clip", anim_node(pair[1]))
+		bt.add_node("speed", AnimationNodeTimeScale.new())
+		bt.connect_node("speed", 0, "clip")
+		bt.connect_node("output", 0, "speed")
+		sm.add_node(pair[0], bt, Vector2(200, 400))
 	var start := AnimationNodeStateMachineTransition.new()
 	start.advance_mode = AnimationNodeStateMachineTransition.ADVANCE_MODE_AUTO
 	sm.add_transition("Start", "Move", start)
@@ -421,6 +455,14 @@ func build_tree() -> void:
 			for pair: Array in [["Move", 0.18], ["JumpStart", 0.08], ["Air", 0.2], ["Bike", 0.3]]:
 				fades["Turn_%s>%s" % [turn, pair[0]]] = pair[1]
 			fades["Move>Turn_" + turn] = 0.18
+	if has_clip("bike_mount"):
+		for key: String in ["Move>BikeMount", "Land>BikeMount", "BikeMount>Move", "BikeDismount>BikeMount"]: fades[key] = 0.2
+		for t: String in ["turn_left", "turn_right"]:
+			if has_clip(t): fades["Turn_%s>BikeMount" % t] = 0.2
+		fades["BikeMount>Bike"] = 0.25
+	if has_clip("bike_dismount"):
+		for key: String in ["Bike>BikeDismount", "BikeDismount>Bike", "BikeMount>BikeDismount"]: fades[key] = 0.2
+		fades["BikeDismount>Move"] = 0.3
 	for key: String in fades:
 		var t := AnimationNodeStateMachineTransition.new()
 		t.xfade_time = float(fades[key])
@@ -435,6 +477,8 @@ func build_tree() -> void:
 	tree.set("parameters/Move/back_rate/scale", 1.0)
 	tree.set("parameters/Land/speed/scale", 1.5)
 	tree.set("parameters/JumpStart/speed/scale", 1.15)
+	for st in ["BikeMount", "BikeDismount"]:
+		if sm.has_node(st): tree.set("parameters/%s/speed/scale" % st, MOUNT_RATE)
 	tree.advance(0.0)
 
 ## Ground speed and foot contact phases of a locomotion clip, measured on this skeleton: the
@@ -501,10 +545,146 @@ func go(to: String) -> void:
 func jumped() -> void:
 	_jump_queued = true
 
-## Mounting: blend from where the body stands to the saddle.
+## Mounting: the Bike_Mount clip in place on the bike (from where the body stands into its first
+## frame over 0.25 s), else a blend from where the body stands to the saddle.
 func begin_mount() -> void:
+	end_gesture()
 	mount_from = global_transform
 	mount_t = 0.0
+	dismount_clip_left = 0.0
+	mount_clip_left = clip_seconds("bike_mount") if uses_mount_clips() else 0.0
+
+## Getting on / off with the clips: game seconds left of each; the dismount plays where the bike
+## stood when it began.
+var mount_clip_left := 0.0
+var dismount_clip_left := 0.0
+var dismount_at := Transform3D.IDENTITY
+var hard_landing := false
+
+func clip_seconds(role: String) -> float:
+	return library.get_animation(clip(role)).length / MOUNT_RATE if has_clip(role) else 0.0
+
+## The mount / dismount clips are authored on the gray bicycle's saddle and bars: not for the
+## scooter's floorboard or a car.
+func uses_mount_clips() -> bool:
+	return has_clip("bike_mount") and player.session != null and not ShopCatalog.is_car(player.session.active_vehicle) \
+		and not player.bike_markers.is_empty() and not player.bike_markers.get("footboard", false)
+
+## True while getting on or off: the courier waits (no pedalling, no walking away).
+func mount_locked() -> bool:
+	return mount_clip_left > 0.0 or dismount_clip_left > 0.0
+
+func ik_off() -> void:
+	ik.seat_weight = 0.0
+	ik.look_weight = 0.0
+	for side in range(2):
+		ik.arm_weight[side] = 0.0
+		ik.leg_weight[side] = 0.0
+
+# --- Gestures: short clips outside CourierSequence (door, supplies, greeting, idle fidgets) ----
+
+var gesture := ""
+var _gesture_left := 0.0
+var _gesture_faces := false
+var _idle_for := 0.0
+var _fidget_next := 0
+
+## One clip on the action layer, turning to `yaw` first (NAN = keep facing); `hold` > 0 plays a
+## looping clip that long. Ends at its end, or as soon as the courier moves, jumps, gets on the
+## bike or a CourierSequence clip takes the layer. Returns the clip length (-1 when not played).
+func play_gesture(role: String, yaw := NAN, hold := -1.0, item := "") -> float:
+	if not ready_ok or player.busy or player.mounted or mount_locked() or not has_clip(role): return -1.0
+	if action_role != "" and action_role != gesture: return -1.0
+	var length := play_action(role)
+	if length <= 0.0: return -1.0
+	gesture = role
+	_gesture_left = hold if hold > 0.0 else length
+	_gesture_faces = not is_nan(yaw)
+	if _gesture_faces: face_goal = yaw
+	show_item(item)
+	return length
+
+func end_gesture() -> void:
+	if gesture == "": return
+	if action_role == gesture: stop_action()
+	if _gesture_faces: face_goal = NAN
+	gesture = ""
+	_gesture_faces = false
+	show_item("")
+
+## A small item in the right hand for Eat_Drink: "water_bottle" or "energy_bar" ("" hides it).
+var _hand_item: BoneAttachment3D
+func show_item(kind: String) -> void:
+	if _hand_item == null:
+		if kind == "": return
+		_hand_item = BoneAttachment3D.new()
+		_hand_item.name = "HeldItem"
+		_hand_item.bone_name = str(bone_map.get("RightHand", "RightHand"))
+		skeleton.add_child(_hand_item)
+		_hand_item.add_child(item_mesh("water_bottle"))
+		_hand_item.add_child(item_mesh("energy_bar"))
+	for c: Node3D in _hand_item.get_children(): c.visible = c.name == kind
+	_hand_item.visible = kind != ""
+
+## Hand-bone space (+Y along the hand to the fingers, palm towards -X on the right hand): the
+## item sits across the palm, gripped by the fingers.
+static func item_mesh(kind: String) -> Node3D:
+	var root := Node3D.new()
+	root.name = kind
+	var body := MeshInstance3D.new()
+	var mat := StandardMaterial3D.new()
+	if kind == "water_bottle":
+		var c := CylinderMesh.new()
+		c.top_radius = 0.032
+		c.bottom_radius = 0.034
+		c.height = 0.2
+		body.mesh = c
+		mat.albedo_color = Color(0.55, 0.78, 0.95, 0.75)
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_DEPTH_PRE_PASS
+		mat.roughness = 0.15
+		var cap := MeshInstance3D.new()
+		var cm := CylinderMesh.new()
+		cm.top_radius = 0.016
+		cm.bottom_radius = 0.018
+		cm.height = 0.025
+		cap.mesh = cm
+		var capm := StandardMaterial3D.new()
+		capm.albedo_color = Color(0.92, 0.94, 0.96)
+		cap.material_override = capm
+		cap.position = Vector3(0, 0.11, 0)
+		body.add_child(cap)
+	else:
+		var b := BoxMesh.new()
+		b.size = Vector3(0.035, 0.12, 0.016)
+		body.mesh = b
+		mat.albedo_color = Color(0.95, 0.55, 0.12)
+		mat.roughness = 0.45
+		mat.metallic = 0.3
+	body.material_override = mat
+	root.add_child(body)
+	# Gripped across the palm: the item's long axis along the thumb (hand +Z), half way down the
+	# fingers, just off the palm.
+	root.transform = Transform3D(Basis(Vector3.RIGHT, PI / 2), Vector3(0.0, 0.075, 0.0))
+	return root
+
+func tick_gesture(delta: float, speed: float, grounded: bool, third: bool) -> void:
+	if gesture != "":
+		_idle_for = 0.0
+		if action_role != gesture:
+			gesture = ""                       # a CourierSequence clip took over (it owns face_goal now)
+			_gesture_faces = false
+			return
+		_gesture_left -= delta
+		if _gesture_left <= 0.0 or speed > 0.6 or player.busy or not grounded or state != "Move": end_gesture()
+		return
+	var idle := speed < 0.1 and grounded and state == "Move" and third and not player.busy and action_role == "" \
+		and player.held_package() == null
+	_idle_for = _idle_for + delta if idle else 0.0
+	if _idle_for > FIDGET_AFTER:
+		var f: Array = FIDGETS[_fidget_next % FIDGETS.size()]
+		_fidget_next += 1
+		_idle_for = -randf_range(4.0, 10.0)          # the next one a while after this one
+		play_gesture(str(f[0]), NAN, float(f[1]))
 
 ## Play a courier action clip (ACTION_ROLES) once over the body. Returns its length (s), or
 ## -1.0 when the body has no such clip (the caller poses it procedurally instead).
@@ -613,11 +793,15 @@ func refresh_visibility() -> void:
 	_visible_mode = -1
 	if mode >= 0 and body != null: set_mode(mode)
 
-## Dismounting: blend from the saddle to standing beside the bike.
+## Dismounting: the Bike_Dismount clip in place on the bike, then a blend from where it ends to
+## where the courier stands; else a blend from the saddle to standing beside the bike.
 func begin_dismount() -> void:
 	mount_from = global_transform
 	mount_t = 0.0
-	facing = player.global_rotation.y
+	mount_clip_left = 0.0
+	dismount_clip_left = clip_seconds("bike_dismount") if uses_mount_clips() else 0.0
+	dismount_at = global_transform
+	facing = player.global_rotation.y if dismount_clip_left <= 0.0 else global_rotation.y
 	yaw_rate = 0.0
 
 # --- Per tick -------------------------------------------------------------------------------
@@ -669,12 +853,25 @@ func set_mode(mode: int) -> void:
 
 func walk(delta: float) -> void:
 	var p := player
+	if dismount_clip_left > 0.0:
+		# Getting off: the clip in place where the bike stands, then the usual blend to the courier.
+		dismount_clip_left -= delta
+		if state != "BikeDismount": go("BikeDismount")
+		global_transform = dismount_at
+		yaw_rate = 0.0
+		ik_off()
+		if dismount_clip_left <= 0.0:
+			mount_from = global_transform
+			mount_t = 0.0
+			go("Move")
+		return
 	var hv := Vector2(p.velocity.x, p.velocity.z)
 	var real := p.get_real_velocity()
 	var speed := Vector2(real.x, real.z).length() if p.is_on_floor() else hv.length()
 	var grounded := p.is_on_floor() or p.coyote_time > 0.0
 	var aim_yaw := p.global_rotation.y
 	var third := p.view == null or p.view.blend > 0.5
+	tick_gesture(delta, speed, grounded, third)
 	# Facing: towards the direction of travel; standing still it keeps its heading (third person)
 	# or follows the view (first person); backing up in first person keeps facing the view.
 	var target_yaw := facing
@@ -759,11 +956,14 @@ func walk(delta: float) -> void:
 			# Impact-scaled landing: a hop dips lightly, a real fall crouches deep.
 			land_amount = clampf(remap(p.last_fall_speed, 3.0, 9.0, 0.35, 1.0), 0.3, 1.0)
 			if speed > 2.0: land_amount *= 0.5
+			# A real fall (not a hop) standing or walking: the deep-knee hard landing.
+			hard_landing = p.last_fall_speed > 7.5 and speed < 2.0 and has_clip("land_hard")
+			tree.set("parameters/Land/which/blend_amount", 1.0 if hard_landing else 0.0)
 			tree.set("parameters/Land/amount/blend_amount", land_amount)
 			go("Land")
 			step(0)
 		elif state == "JumpStart" and state_time > 0.2: go("Move")
-		elif state == "Land" and (state_time > 0.42 or (speed > 1.0 and state_time > 0.16)): go("Move")
+		elif state == "Land" and (state_time > (0.75 if hard_landing else 0.42) or (speed > 1.0 and state_time > 0.16)): go("Move")
 		air_time = 0.0
 	# Locomotion blend: gait by speed, playback at ground speed / blended stride.
 	var turning_step := turning and speed < 0.25
@@ -1000,6 +1200,21 @@ func ride(delta: float) -> void:
 	var p := player
 	var bike := p.bicycle
 	var m := p.bike_markers
+	if mount_clip_left > 0.0:
+		# Getting on: the clip in place on the bike (authored in bike space), the body easing from
+		# where it stood into the clip's first frame; then the seated pose and the IK take over.
+		mount_clip_left -= delta
+		if state != "BikeMount": go("BikeMount")
+		var into := smoothstep(0.0, 1.0, minf(1.0, (clip_seconds("bike_mount") - mount_clip_left) / 0.25))
+		global_transform = mount_from.interpolate_with(bike.global_transform, into)
+		facing = bike.global_rotation.y
+		yaw_rate = 0.0
+		sole_lift = 0.0
+		ik_off()
+		if mount_clip_left <= 0.0:
+			mount_from = bike.global_transform
+			mount_t = 0.0
+		return
 	if state != "Bike": go("Bike")
 	var bike_xf := bike.global_transform
 	var mount_blend := smoothstep(0.0, 1.0, mount_t)

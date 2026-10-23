@@ -359,7 +359,8 @@ func _physics_process(delta: float) -> void:
 	if is_instance_valid(headlight):
 		headlight.light_energy = 3.0 if (session.owns("lights") or session.active_vehicle=="scooter" or ShopCatalog.is_car(session.active_vehicle)) and (session.hour() < 7 or session.hour() > 18) and not bicycle.get_meta("has_vehicle_lights",false) else 0.0
 	if mounted:
-		var pedal := Input.get_axis("move_back", "move_forward")
+		# Still swinging a leg over (PlayerAvatar.mount_locked): no pedalling yet.
+		var pedal := Input.get_axis("move_back", "move_forward") if not (avatar != null and avatar.mount_locked()) else 0.0
 		var brake := Input.is_action_pressed("jump")
 		var powered := session.active_vehicle=="scooter" or ShopCatalog.is_car(session.active_vehicle)
 		var acceleration := 3.2 if powered else (1.2 if session.energy < 20 else 2.5)
@@ -395,7 +396,9 @@ func _physics_process(delta: float) -> void:
 ## kept for JUMP_BUFFER s; hard landings cost a moment of speed.
 func walk(delta: float) -> void:
 	_mouse_still += delta
-	var movement := Input.get_vector("move_left", "move_right", "move_forward", "move_back") if not busy else Vector2.ZERO
+	# Still stepping off the bicycle (PlayerAvatar.mount_locked): wait for the feet.
+	var locked := busy or (avatar != null and avatar.mount_locked())
+	var movement := Input.get_vector("move_left", "move_right", "move_forward", "move_back") if not locked else Vector2.ZERO
 	var direction := transform.basis * Vector3(movement.x, 0, movement.y)
 	var sprinting := Input.is_action_pressed("sprint") and session.energy > 0.0 and movement.length() > 0.0
 	var walking := InputMap.has_action("walk") and Input.is_action_pressed("walk")
@@ -416,7 +419,7 @@ func walk(delta: float) -> void:
 	velocity.x = h.x
 	velocity.z = h.y
 	coyote_time = COYOTE if on_floor else maxf(0.0, coyote_time - delta)
-	jump_buffer = JUMP_BUFFER if Input.is_action_just_pressed("jump") and not busy else maxf(0.0, jump_buffer - delta)
+	jump_buffer = JUMP_BUFFER if Input.is_action_just_pressed("jump") and not locked else maxf(0.0, jump_buffer - delta)
 	if not on_floor:
 		velocity.y -= GRAVITY * delta
 	if jump_buffer > 0.0 and coyote_time > 0.0 and velocity.y <= 0.5:

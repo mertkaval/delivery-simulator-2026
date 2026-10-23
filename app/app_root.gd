@@ -217,7 +217,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		return
 	if mode == "" and (event.is_action_pressed("use_water") or event.is_action_pressed("use_snack")):
-		notify(session.use_supply("water_bottle" if event.is_action_pressed("use_water") else "energy_bar"))
+		var item := "water_bottle" if event.is_action_pressed("use_water") else "energy_bar"
+		var had := int(session.supplies.get(item, 0))
+		notify(session.use_supply(item))
+		# On foot the courier drinks / takes a bite (Eat_Drink).
+		if int(session.supplies.get(item, 0)) < had and player.avatar != null: player.avatar.play_gesture("eat_drink", NAN, -1.0, item)
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("pause_game"):
@@ -934,14 +938,24 @@ func at_door() -> String:
 			return ""
 		return "Leave it in the yellow marked area in front of the door (%s there)." % use_hint()
 	if drop_zone and drop_zone.customer == null:
-		sound("door_knock")
+		# Every other house has a doorbell: ring it (Press_Doorbell, pressed at 0.47 s), else knock
+		# (Knock_Door, knuckles on the door from 0.53 s). The courier turns to the door first and
+		# waves when the customer opens it.
+		var bell := drop_zone.address % 2 == 1
+		var to_door := drop_zone.door_point - player.global_position
+		var yaw := atan2(-to_door.x, -to_door.z)
+		var played := player.avatar.play_gesture("doorbell" if bell else "knock_door", yaw) if player.avatar != null else -1.0
+		var lead := (0.47 if bell else 0.5) if played > 0.0 else 0.0
 		var tw := create_tween()
-		tw.tween_interval(1.1)
+		tw.tween_interval(lead)
+		tw.tween_callback(sound.bind("doorbell" if bell else "door_knock"))
+		tw.tween_interval(1.1 - lead)                  # the door opens 1.1 s after the press, as before
 		tw.tween_callback(func() -> void:
 			if drop_zone:
 				drop_zone.call_customer(session.order)
-				sound("door_open"))
-		return "You knock on the door…"
+				sound("door_open")
+				if player.avatar != null: player.avatar.play_gesture("wave", yaw))
+		return "You ring the doorbell…" if bell else "You knock on the door…"
 	return "%s is at the door. Hand the order over with %s." % [session.order.get("customer", "The customer"), use_hint()]
 
 ## Standing at (or in) the marked delivery area.

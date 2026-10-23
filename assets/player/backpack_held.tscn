@@ -484,7 +484,7 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_h4vla")
 
-[node name="BackpackHeld" type="Node3D" unique_id=1669077738]
+[node name="BackpackHeld" type="Node3D" unique_id=97556208]
 
 [node name="Bag" parent="." unique_id=311721828 instance=ExtResource("1_dj3oy")]
 

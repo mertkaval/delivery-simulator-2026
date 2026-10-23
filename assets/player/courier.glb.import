@@ -41,8 +41,8 @@ materials/extract_format=0
 materials/extract_path=""
 _subresources={
 "nodes": {
-"PATH:Armature/Skeleton3D": {
-"retarget/bone_map": Resource("res://assets/sketchup/people/humanoid_bone_map.tres"),
+"PATH:Courier/Skeleton3D": {
+"retarget/bone_map": Resource("res://assets/player/courier_bone_map.tres"),
 "retarget/bone_renamer/rename_bones": true,
 "retarget/bone_renamer/unique_node/make_unique": true,
 "retarget/bone_renamer/unique_node/skeleton_name": "GeneralSkeleton",

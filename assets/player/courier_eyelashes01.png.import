@@ -2,24 +2,23 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://barivl1d6edfe"
-path.s3tc="res://.godot/imported/courier_Courier_metal_rough.jpg-6df762b61b931c80c7a6428ac8f54167.s3tc.ctex"
+uid="uid://3yomtshw2edr"
+path="res://.godot/imported/courier_eyelashes01.png-ae013e2f4594100dede717fee96ed1b3.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
-"md5": "c1e9085425b9f7edbdc392a5258e80da"
+"md5": "050add4f6a49b84709d4e478963163c9"
 }
 
 [deps]
 
-source_file="res://assets/player/courier_Courier_metal_rough.jpg"
-dest_files=["res://.godot/imported/courier_Courier_metal_rough.jpg-6df762b61b931c80c7a6428ac8f54167.s3tc.ctex"]
+source_file="res://assets/player/courier_eyelashes01.png"
+dest_files=["res://.godot/imported/courier_eyelashes01.png-ae013e2f4594100dede717fee96ed1b3.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -41,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

@@ -199,7 +199,12 @@ func run() -> void:
 	var msg: String = player.toggle_bicycle()
 	check(player.mounted, "mounts the bicycle: " + msg)
 	await ticks(10)
-	check(player.avatar.mount_t < 1.0 or player.avatar.seat_blend < 1.0, "mounting blends onto the saddle (no teleport)")
+	check(player.avatar.mount_locked() or player.avatar.mount_t < 1.0 or player.avatar.seat_blend < 1.0, "mounting plays Bike_Mount / blends onto the saddle (no teleport)")
+	# Bike_Mount swings the leg over first (pedalling waits for it).
+	var waited := 0
+	while player.avatar.mount_locked() and waited < 300:
+		await physics_frame
+		waited += 1
 	Input.action_press("move_forward")
 	await ticks(90)
 	var m := player.bike_markers
@@ -233,6 +238,10 @@ func run() -> void:
 	await ticks(5)
 	msg = player.toggle_bicycle()
 	check(not player.mounted, "dismounts: " + msg)
+	waited = 0
+	while player.avatar.mount_locked() and waited < 300:      # Bike_Dismount steps off first
+		await physics_frame
+		waited += 1
 	await ticks(60)
 	var gap := player.avatar.global_position.y - player.global_position.y
 	check(player.avatar.state == "Move" and player.avatar.ik.seat_weight < 0.01 and absf(gap) < 0.08, "back on its feet beside the bike (%s, seat %.2f, %.3f m)" % [player.avatar.state, player.avatar.ik.seat_weight, gap])

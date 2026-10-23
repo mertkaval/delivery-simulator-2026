@@ -35,9 +35,17 @@ class Kit:
         self.tex = os.path.join(self.dir, "textures")
         os.makedirs(self.tex, exist_ok=True)
         os.makedirs(os.path.join(self.dir, "renders"), exist_ok=True)
-        scn = bpy.data.scenes.get(name) or bpy.data.scenes.new(name)
+        if bpy.context.window is not None:
+            scn = bpy.data.scenes.get(name) or bpy.data.scenes.new(name)
+            bpy.context.window.scene = scn
+        else:
+            # headless (blender --background): no window to switch, so build in the startup scene,
+            # cleared of its default objects
+            scn = bpy.context.scene
+            for o in list(scn.objects):
+                bpy.data.objects.remove(o, do_unlink=True)
+            scn.name = name
         scn.unit_settings.system = "METRIC"
-        bpy.context.window.scene = scn
         self.scn = scn
         self.col = {}
         for c in ("Body", "Clothes", "Rig", "Stage"):
@@ -49,6 +57,8 @@ class Kit:
         self.body = None
         self.rig = None
         self.garments = []
+        self.body_gender = 0.5
+        self.parts = {}
 
     # ------------------------------------------------------------------ human
     def activate(self, which):
@@ -68,6 +78,7 @@ class Kit:
         b = bpy.context.active_object
         b.name = self.name + "_Body"
         self.body = b
+        self.body_gender = float(macros.get("gender", 0.5))
         for k, v in macros.items():
             HumanObjectProperties.set_value(k, v, entity_reference=b)
         TargetService.reapply_macro_details(b)
@@ -534,13 +545,15 @@ class Kit:
             e.seam = len(fs) == 2 and lab[fs[0].index] != lab[fs[1].index]
         bm.to_mesh(me)
         bm.free()
-        area = next(a for a in bpy.context.window.screen.areas if a.type == "VIEW_3D")
-        region = next(r for r in area.regions if r.type == "WINDOW")
+        ctx = {}
+        if bpy.context.window is not None:
+            area = next(a for a in bpy.context.window.screen.areas if a.type == "VIEW_3D")
+            ctx = dict(area=area, region=next(r for r in area.regions if r.type == "WINDOW"))
         for o in bpy.context.view_layer.objects:
             o.select_set(False)
         bpy.context.view_layer.objects.active = ob
         ob.select_set(True)
-        with bpy.context.temp_override(area=area, region=region, active_object=ob, object=ob, selected_objects=[ob]):
+        with bpy.context.temp_override(active_object=ob, object=ob, selected_objects=[ob], **ctx):
             bpy.ops.object.mode_set(mode="EDIT")
             bpy.ops.mesh.select_all(action="SELECT")
             bpy.ops.uv.select_all(action="SELECT")
@@ -773,6 +786,17 @@ class Kit:
             pass
         return ao is not None
 
+    def ear_mask(self, F, side_x=0.068):
+        """0..1 weight of the ears (they stand out beyond the side of the head, around eye height,
+        just behind the head joint): beards, sideburns and scalp paint stay off them."""
+        hy = F["head"].y
+        eye_z = float((F["eye_l"][2] + F["eye_r"][2]) / 2)
+        def mask(P):
+            ax, y, z = np.abs(P[..., 0]), P[..., 1], P[..., 2]
+            return (smooth(side_x - 0.002, side_x + 0.004, ax) * smooth(hy - 0.04, hy - 0.03, y) * smooth(hy + 0.05, hy + 0.04, y)
+                    * smooth(eye_z - 0.072, eye_z - 0.062, z) * smooth(eye_z + 0.036, eye_z + 0.026, z))
+        return mask
+
     def paint_skin(self, density_fn, hair_rgb, region, seed=7, grain=1):
         """Paint body hair (beard, stubble, arm hair) into the skin texture: density_fn(P) gives 0..1
         coverage per texel from its rest-pose world position; region(co) -> bool picks the
@@ -794,8 +818,8 @@ class Kit:
         hair = np.array(hair_rgb, np.float32) / 255
         # skin under hair is shadowed and loses its warmth before the hairs go on top
         lum = src[..., :3] @ np.array([0.3, 0.55, 0.15], np.float32)
-        shade = a[..., None] * 0.6
-        under = src[..., :3] * (1 - shade) + (lum[..., None] * 0.7) * shade
+        shade = a[..., None] * 0.4
+        under = src[..., :3] * (1 - shade) + (lum[..., None] * np.array([0.78, 0.72, 0.68], np.float32)) * shade   # warm, not grey
         out[..., :3] = under * (1 - cover) + hair * cover
         self.set_skin(mat, self.save_image(self.name + "_skin", out))
         return int((a > 0.05).sum())
@@ -855,7 +879,7 @@ class Kit:
         return self.save_image(name, rgba)
 
     def hair_cards(self, F, density, length_fn, flow_fn, n_cards=1400, width=(0.009, 0.016), segs=4,
-                   dark=(7, 6, 6), light=(52, 44, 40), seed=9, rough=0.74, short_width=0.4):
+                   dark=(7, 6, 6), light=(52, 44, 40), seed=9, rough=0.74, short_width=0.4, gather=None):
         """Game hair: textured cards rooted on the scalp. density(P) picks the scalp; length_fn(az, el)
         -> metres; flow_fn(az, el) -> (direction in world, lift fraction) combs each card. Cards hug
         the skull (never closer than their root radius) and carry radial normals so they shade as
@@ -879,18 +903,24 @@ class Kit:
             root = tri[0] + (tri[1] - tri[0]) * a_ + (tri[2] - tri[0]) * b_
             n = f.normal.copy()
             az, el = self.scalp_angles(np.array(tuple(root), np.float32), Cn)
-            L = float(length_fn(az, el)) * rng.uniform(0.75, 1.15)
+            if gather is not None:
+                # tied back: every card runs over the skull to the gather point (bun / ponytail)
+                target = gather - root
+                L = min(target.length * 0.97, 0.26)
+                lift = 0.012
+            else:
+                L = float(length_fn(az, el)) * rng.uniform(0.75, 1.15)
+                target, lift = flow_fn(az, el)
+                target = Vector(target)
+                if root.x < 0:
+                    target.x = -target.x
             if L < 0.004:
                 continue
-            target, lift = flow_fn(az, el)
-            target = Vector(target)
-            if root.x < 0:
-                target.x = -target.x
             d = (target - n * target.dot(n))
             if d.length < 1e-5:
                 continue
             d.normalize()
-            d.rotate(Matrix.Rotation(rng.uniform(-0.3, 0.3), 3, n))
+            d.rotate(Matrix.Rotation(rng.uniform(-0.3, 0.3) * (0.25 if gather is not None else 1.0), 3, n))
             r0 = (root - C).length
             w0 = rng.uniform(*width) * (short_width if L < 0.02 else 1.0)   # short fade hairs: thin cards
             u0 = int(rng.integers(cols)) / cols
@@ -1003,6 +1033,78 @@ class Kit:
         me.materials.append(self.plain("M_" + name, tuple(int(c * 1.3) for c in dark), rough=0.7))
         next(n for n in me.materials[0].node_tree.nodes if n.type == "BSDF_PRINCIPLED").inputs["Specular IOR Level"].default_value = 0.1
         self.parts["HairCap"] = ob
+        self.rig_garment(ob)
+        return ob
+
+    def hair_tie(self, G, kind, dark, light):
+        """The gathered hair of a tied style: a bun (wrapped strands round a ball) or a ponytail (a
+        tapering tail hanging from the gather point), textured with the cards' strand atlas made
+        opaque over the dark base."""
+        import bmesh
+        bm = bmesh.new()
+        if kind.startswith("bun"):
+            r = 0.034 if kind == "bun_high" else 0.03
+            bmesh.ops.create_uvsphere(bm, u_segments=20, v_segments=12, radius=r)
+            for v in bm.verts:
+                v.co.y *= 0.8
+                v.co += G
+            uv = bm.loops.layers.uv.new("UVMap")
+            for f in bm.faces:
+                for l in f.loops:
+                    p = l.vert.co - G
+                    l[uv].uv = ((math.atan2(p.x, p.z) / (2 * math.pi)) % 1.0, 0.5 + p.y / (2 * r))
+        else:
+            rings, seg, length = 12, 12, 0.24
+            direction = Vector((0, 0.35, -1.0)).normalized()
+            rows = []
+            for i in range(rings + 1):
+                t = i / rings
+                c = G + direction * (length * t) + Vector((0, 0.03 * math.sin(t * math.pi), 0))
+                rad = 0.024 * (1 - t) + 0.006 * t + (0.006 * math.sin(t * math.pi))
+                row = []
+                for j in range(seg):
+                    a = 2 * math.pi * j / seg
+                    row.append(bm.verts.new(c + Vector((math.cos(a) * rad, math.sin(a) * rad * 0.8, 0))))
+                rows.append(row)
+            uv = bm.loops.layers.uv.new("UVMap")
+            for i in range(rings):
+                for j in range(seg):
+                    f = bm.faces.new((rows[i][j], rows[i][(j + 1) % seg], rows[i + 1][(j + 1) % seg], rows[i + 1][j]))
+                    for l, (u, v) in zip(f.loops, ((j, i), (j + 1, i), (j + 1, i + 1), (j, i + 1))):
+                        l[uv].uv = (u / seg, v / rings)
+            bm.normal_update()
+        name = self.name + "_HairTie"
+        old = bpy.data.objects.get(name)
+        if old:
+            bpy.data.objects.remove(old, do_unlink=True)
+        me = bpy.data.meshes.new(name)
+        bm.to_mesh(me)
+        bm.free()
+        for poly in me.polygons:
+            poly.use_smooth = True
+        ob = bpy.data.objects.new(name, me)
+        self.col["Body"].objects.link(ob)
+        atlas = bpy.data.images.get(self.name + "_Hair_strands")
+        if atlas is not None:
+            src = self.read_image(atlas)
+            base = np.array(dark, np.float32) / 255 * 1.2
+            out = src.copy()
+            out[..., :3] = src[..., :3] * src[..., 3:4] + base * (1 - src[..., 3:4])
+            out[..., 3] = 1.0
+            img = self.save_image(name + "_tex", out)
+            m = bpy.data.materials.get("M_" + name) or bpy.data.materials.new("M_" + name)
+            nt = m.node_tree
+            nt.nodes.clear()
+            o = nt.nodes.new("ShaderNodeOutputMaterial")
+            p = nt.nodes.new("ShaderNodeBsdfPrincipled")
+            t = nt.nodes.new("ShaderNodeTexImage")
+            t.image = img
+            nt.links.new(t.outputs["Color"], p.inputs["Base Color"])
+            nt.links.new(p.outputs[0], o.inputs[0])
+            p.inputs["Roughness"].default_value = 0.7
+            p.inputs["Specular IOR Level"].default_value = 0.06
+            me.materials.append(m)
+        self.parts["HairTie"] = ob
         self.rig_garment(ob)
         return ob
 

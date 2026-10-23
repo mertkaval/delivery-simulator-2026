@@ -120,18 +120,18 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_unppb")
 
-[node name="BackpackPlainWorn" type="Node3D" unique_id=1802937823]
+[node name="BackpackPlainWorn" type="Node3D" unique_id=653460441]
 
-[node name="Bag" parent="." unique_id=47540055 instance=ExtResource("1_1bmpk")]
-transform = Transform3D(-0.9732568, 0.015134139, -0.22922124, 0.064020015, 0.9761649, -0.20737392, 0.22061923, -0.21650279, -0.95102787, -0.056314982, -0.3646757, -0.21151546)
+[node name="Bag" parent="." unique_id=382048428 instance=ExtResource("1_1bmpk")]
+transform = Transform3D(-0.9999994, 0.00091566565, -0.0004055997, 0.0009905269, 0.964044, -0.26574096, 0.0001476861, -0.2657412, -0.9640443, -0.0025206106, -0.11725855, -0.16001202)
 
-[node name="PolishedAlloy_001" parent="Bag/PlainBackpack" parent_id_path=PackedInt32Array(47540055, 703589831) index="0" unique_id=720225384]
+[node name="PolishedAlloy_001" parent="Bag/PlainBackpack" parent_id_path=PackedInt32Array(382048428, 1195885814) index="0" unique_id=212945633]
 mesh = SubResource("ArrayMesh_axk0a")
 
-[node name="Rubber_001" parent="Bag/PlainBackpack" parent_id_path=PackedInt32Array(47540055, 703589831) index="1" unique_id=220342582]
+[node name="Rubber_001" parent="Bag/PlainBackpack" parent_id_path=PackedInt32Array(382048428, 1195885814) index="1" unique_id=357488490]
 mesh = SubResource("ArrayMesh_ejwie")
 
-[node name="WovenEquipment_001" parent="Bag/PlainBackpack" parent_id_path=PackedInt32Array(47540055, 703589831) index="2" unique_id=1116971901]
+[node name="WovenEquipment_001" parent="Bag/PlainBackpack" parent_id_path=PackedInt32Array(382048428, 1195885814) index="2" unique_id=1758726248]
 mesh = SubResource("ArrayMesh_yqxnk")
 
 [editable path="Bag"]

@@ -48,7 +48,7 @@ func _initialize() -> void:
 	var args := OS.get_cmdline_user_args()
 	var stage: String = args[0] if args.size() > 0 else "build"
 	if stage == "configure":
-		configure(GLB, "Armature/Skeleton3D")
+		configure(GLB, courier_skeleton_path(), courier_bone_map())
 		if FileAccess.file_exists(CUSTOMER + ".import"): configure(CUSTOMER, "Armature/Skeleton3D")
 		if FileAccess.file_exists(CLOTHED + ".import"): configure(CLOTHED, "Armature/Skeleton3D")
 		quit()
@@ -66,15 +66,41 @@ func _process(_delta: float) -> bool:
 		return true
 	return false
 
-func configure(scene: String, skeleton_path: String) -> void:
+## The courier's own BoneMap when its Blender manifest names the rig's bones (the MPFB v3 courier:
+## "bone_map_profile_to_mpfb"), saved next to the model; else the townspeople's map.
+const COURIER_MAP := "res://assets/player/courier_bone_map.tres"
+func courier_bone_map() -> String:
+	if not FileAccess.file_exists(BLENDER_JSON): return PEOPLE_MAP
+	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(BLENDER_JSON))
+	if not (meta is Dictionary and (meta as Dictionary).get("bone_map_profile_to_mpfb", null) is Dictionary): return PEOPLE_MAP
+	var names: Dictionary = (meta as Dictionary)["bone_map_profile_to_mpfb"]
+	var bm := BoneMap.new()
+	bm.profile = SkeletonProfileHumanoid.new()
+	for profile_bone: String in names: bm.set_skeleton_bone_name(StringName(profile_bone), StringName(str(names[profile_bone])))
+	print("bone map ", COURIER_MAP, " ", ResourceSaver.save(bm, COURIER_MAP), " (", names.size(), " bones)")
+	return COURIER_MAP
+
+## Path of the courier's Skeleton3D inside the imported scene (run after a plain --import).
+func courier_skeleton_path() -> String:
+	if not ResourceLoader.exists(GLB): return "Armature/Skeleton3D"
+	var scene: Node = (load(GLB) as PackedScene).instantiate()
+	var skel := scene.find_children("*", "Skeleton3D", true, false)
+	var path := str(scene.get_path_to(skel[0])) if not skel.is_empty() else "Armature/Skeleton3D"
+	scene.free()
+	return path
+
+func configure(scene: String, skeleton_path: String, bone_map: String = PEOPLE_MAP) -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load(scene + ".import") != OK:
 		push_error("missing " + scene + ".import (run --import first)")
 		return
 	var sub: Dictionary = cfg.get_value("params", "_subresources", {})
-	var nodes: Dictionary = sub.get("nodes", {})
+	var nodes: Dictionary = {}                     # only this skeleton (a previous model's path is stale)
+	for key: String in (sub.get("nodes", {}) as Dictionary):
+		if not key.ends_with("Skeleton3D"): nodes[key] = (sub["nodes"] as Dictionary)[key]
+	print(scene, " skeleton ", skeleton_path, " map ", bone_map)
 	nodes["PATH:" + skeleton_path] = {
-		"retarget/bone_map": load(PEOPLE_MAP),
+		"retarget/bone_map": load(bone_map),
 		"retarget/bone_renamer/rename_bones": true,
 		"retarget/bone_renamer/unique_node/make_unique": true,
 		"retarget/bone_renamer/unique_node/skeleton_name": "GeneralSkeleton",
@@ -102,7 +128,8 @@ func build() -> void:
 		if str(clip_name) in HIDE: continue
 		lib.add_animation(clip_name, clips.get_animation(clip_name).duplicate(true) as Animation)
 	for alias: String in ALIASES:
-		lib.add_animation(alias, clips.get_animation(ALIASES[alias]).duplicate(true) as Animation)
+		if clips.has_animation(ALIASES[alias]):          # the Mixamo courier only; v3 has its own Jog
+			lib.add_animation(alias, clips.get_animation(ALIASES[alias]).duplicate(true) as Animation)
 	var track := lib.get_animation("Idle").track_get_path(0)
 	print("first track path: ", track)
 	source.free()
@@ -148,7 +175,7 @@ func measure() -> void:
 	var out_clips: Dictionary = {}
 	for clip_name: StringName in animator.get_animation_list():
 		var clip := animator.get_animation(clip_name)
-		var src_name: String = ALIASES.get(str(clip_name), str(clip_name))
+		var src_name: String = str(clip_name) if bclips.has(str(clip_name)) else ALIASES.get(str(clip_name), str(clip_name))
 		var meta: Dictionary = (bclips.get(src_name, {}) as Dictionary).duplicate()
 		var entry: Dictionary = {"length": snappedf(clip.length, 0.0001), "loop": clip.loop_mode != Animation.LOOP_NONE,
 			"kind": meta.get("kind", ""), "source": src_name}
@@ -294,6 +321,8 @@ func bone_in_root(animator: AnimationPlayer, skeleton: Skeleton3D, scene: Node3D
 ## The worn scenes (child of a BoneAttachment3D on UpperChest), the held scene, and the contract.
 func build_backpack(scene: Node3D, animator: AnimationPlayer, skeleton: Skeleton3D, bp: Dictionary, clips: Dictionary) -> Dictionary:
 	var bone := str(bp.get("bone", "UpperChest"))
+	if bone.contains("("): bone = bone.get_slice("(", 1).get_slice(")", 0)   # "spine_03 (UpperChest)" -> the retargeted name
+	bp["bone"] = bone
 	var at := bone_in_root(animator, skeleton, scene, "Idle", 0, bone)
 	var local := at.affine_inverse() * track_xf(bp["worn_idle_frame0_courier_root"])
 	var local_plain := at.affine_inverse() * track_xf(bp["worn_plain_idle_frame0_courier_root"])

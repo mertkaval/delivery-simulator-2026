@@ -372,10 +372,10 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_w7a74")
 
-[node name="BackpackWorn" type="Node3D" unique_id=296823836]
+[node name="BackpackWorn" type="Node3D" unique_id=1111084911]
 
 [node name="Bag" parent="." unique_id=1556694122 instance=ExtResource("1_phxk6")]
-transform = Transform3D(-0.9732568, 0.015134139, -0.22922124, 0.064020015, 0.9761649, -0.20737392, 0.22061923, -0.21650279, -0.95102787, -0.070048094, -0.37715536, -0.2684774)
+transform = Transform3D(-0.9999994, 0.00091566565, -0.0004055997, 0.0009905269, 0.964044, -0.26574096, 0.0001476861, -0.2657412, -0.9640443, -0.0025449977, -0.13326597, -0.2177795)
 
 [node name="DeliveryBag" parent="Bag" index="0" unique_id=351165780]
 metadata/extras = {
