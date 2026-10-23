@@ -82,7 +82,8 @@ func run() -> void:
 	check(game.session.calendar_minutes>before,"Existing home rest still advances to morning")
 	var report := "\n".join(lines)+"\n"
 	print(report)
-	var file := FileAccess.open("C:/Users/mert3/Documents/Codex/2026-09-13/b/outputs/Cedar_House/integration_validation.txt",FileAccess.WRITE)
-	file.store_string(report)
+	# The report goes to the user data folder (a machine-specific path broke the test on CI).
+	var file := FileAccess.open("user://cedar_house_integration_validation.txt",FileAccess.WRITE)
+	if file: file.store_string(report)
 	quit(0 if failures==0 else 1)
 
