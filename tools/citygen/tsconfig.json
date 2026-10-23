@@ -1,0 +1,2 @@
+{"compilerOptions": {"target": "es2017", "module": "commonjs", "esModuleInterop": false, "allowSyntheticDefaultImports": true, "outDir": "../out", "rootDir": "..", "skipLibCheck": true, "noImplicitAny": false, "strict": false},
+ "files": ["generate.ts"]}
