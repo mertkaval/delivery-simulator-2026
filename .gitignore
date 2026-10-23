@@ -20,3 +20,5 @@
 # Local secrets (ElevenLabs API key etc.)
 /.env
 /.env.*
+__pycache__/
+*.pyc
