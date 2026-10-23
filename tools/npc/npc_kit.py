@@ -630,7 +630,7 @@ class Kit:
         if scn.world is None:
             scn.world = bpy.data.worlds.get("NPC_World") or bpy.data.worlds.new("NPC_World")
         scn.world.light_settings.distance = distance
-        keep = {self.body, self.parts.get("Eyes"), self.parts.get("Hair")}
+        keep = {self.body, self.parts.get("Eyes"), self.parts.get("Hair"), self.parts.get("HairCap")}
         hidden = {o: o.hide_render for o in scn.objects}
         for o in scn.objects:
             o.hide_render = o not in keep
@@ -660,8 +660,10 @@ class Kit:
                 scn.world.light_settings.distance = prev[1]
         return ao
 
-    def skin_detail(self, F, age=0.3, ao_strength=0.6, lips_mul=(0.9, 0.82, 0.82), lips_desat=0.3, beard_zone=None, seed=31):
-        """Face realism for the game skin: baked AO multiplied into the colour, muted lips, and a
+    def skin_detail(self, F, age=0.3, ao_strength=0.6, lips_mul=(0.9, 0.82, 0.82), lips_desat=0.3, beard_zone=None, seed=31,
+                    undereye=0.0):
+        """Face realism for the game skin: baked AO multiplied into the colour, muted lips, darker and
+        cooler skin under the eyes (`undereye` 0..1, with a tear-trough crease), and a
         normal + roughness map pair (pore grain everywhere; nasolabial folds, forehead lines,
         under-eye creases and lip lines scaled by `age`; shinier T-zone and lips, matte beard)."""
         mat = self.body.material_slots[0].material
@@ -691,6 +693,11 @@ class Kit:
         if ao is not None:                                     # the parting between the lips stays dark
             gap = self.blur((lip & (ao < 0.6)).astype(np.float32), 1)
             out[..., :3] *= (1 - 0.5 * gap)[..., None]
+        if undereye > 0:                                       # periorbital shadow: darker, slightly cool crescent
+            for s in (1, -1):
+                r = np.hypot((x * s - eye_x) / 1.5, (z - (eye_z - 0.013)) / 0.75)
+                w = smooth(0.016, 0.005, r) * face * smooth(eye_z - 0.002, eye_z - 0.008, z)
+                out[..., :3] *= 1 - undereye * w[..., None] * (1 - np.array([0.80, 0.76, 0.82], np.float32))
         self.set_skin(mat, self.save_image(self.name + "_skin", out))
         # height: pores + creases (metres)
         rng = np.random.default_rng(seed)
@@ -709,6 +716,12 @@ class Kit:
             r = np.hypot((xs - eye_x) / 1.25, z - eye_z)
             fade = smooth(eye_x - 0.024, eye_x - 0.012, xs) * smooth(eye_z + 0.002, eye_z - 0.006, z)
             h += np.where(face, groove(np.abs(r - 0.019), 0.0004 * age, 0.0018) * fade, 0)
+            if undereye > 0:                                   # tear trough: inner corner down-out along the rim
+                a0, a1 = (eye_x - 0.012, eye_z - 0.011), (eye_x + 0.006, eye_z - 0.024)
+                dx, dz = a1[0] - a0[0], a1[1] - a0[1]
+                t = np.clip(((xs - a0[0]) * dx + (z - a0[1]) * dz) / (dx * dx + dz * dz), 0, 1)
+                dd = np.hypot(xs - (a0[0] + t * dx), z - (a0[1] + t * dz))
+                h += np.where(face, groove(dd, 0.0006 * undereye, 0.0025) * smooth(0.0, 0.25, t) * smooth(1.0, 0.7, t), 0)
             for i in range(3):
                 ang = -0.35 + i * 0.35
                 cx, cz = eye_x + 0.028, eye_z
@@ -786,6 +799,247 @@ class Kit:
         out[..., :3] = under * (1 - cover) + hair * cover
         self.set_skin(mat, self.save_image(self.name + "_skin", out))
         return int((a > 0.05).sum())
+
+    # ------------------------------------------------------------------ hair cards
+    def head_frame(self, F):
+        """Skull centre C (on the midline, at eye height) from the rest body without MPFB helpers."""
+        bm, _ = self.body_bmesh()
+        co = np.array([tuple(v.co) for v in bm.verts], np.float32)
+        bm.free()
+        eye_z = float((F["eye_l"][2] + F["eye_r"][2]) / 2)
+        top = co[(co[:, 2] > eye_z + 0.02) & (np.abs(co[:, 0]) < 0.07)]
+        cy = float((top[:, 1].min() + top[:, 1].max()) / 2)
+        return Vector((0.0, cy, eye_z)), eye_z
+
+    @staticmethod
+    def scalp_angles(P, C):
+        """azimuth (deg, 0 = front .. 180 = back, mirrored) and elevation (deg) around the skull centre"""
+        v = P - np.array(C, np.float32)
+        az = np.degrees(np.arctan2(np.abs(v[..., 0]), -v[..., 1]))
+        el = np.degrees(np.arctan2(v[..., 2], np.hypot(v[..., 0], v[..., 1])))
+        return az, el
+
+    def scalp_density(self, C, hairline, fade=3.0):
+        """0..1 hair coverage: elevation above the hairline profile hairline=(azimuths, min elevations)."""
+        az_k, el_k = hairline
+        def dens(P):
+            az, el = self.scalp_angles(P, C)
+            lim = np.interp(az, az_k, el_k)
+            return smooth(lim - fade, lim + fade, el)
+        return dens
+
+    def strand_atlas(self, name, dark, light, columns=4, size=512, strands=56, seed=5):
+        """RGBA strand-clump texture for hair cards: `columns` variants side by side, v = root..tip."""
+        rng = np.random.default_rng(seed)
+        h, w = size, size
+        alpha = np.zeros((h, w), np.float32)
+        tone = np.zeros((h, w), np.float32)
+        vv = (np.arange(h, dtype=np.float32) + 0.5)[:, None] / h
+        xx = np.arange(w, dtype=np.float32)[None, :]
+        cw = w / columns
+        for c in range(columns):
+            for _ in range(strands):
+                x0 = c * cw + rng.uniform(0.12, 0.88) * cw
+                length = rng.uniform(0.6, 1.0)
+                amp, freq, ph = rng.uniform(0.5, 3.0), rng.uniform(4, 11), rng.uniform(0, 6.3)
+                xs = x0 + amp * np.sin(vv * freq + ph) + rng.uniform(-6, 6) * vv
+                width = rng.uniform(0.9, 1.8)
+                taper = np.clip((length - vv) / 0.18, 0, 1) * np.clip(vv / 0.04, 0.35, 1)
+                a = np.exp(-((xx - xs) / width) ** 2) * taper
+                alpha = np.maximum(alpha, a)
+                tone = np.maximum(tone, a * rng.uniform(0.0, 1.0))
+        d = np.array(dark, np.float32) / 255
+        l = np.array(light, np.float32) / 255
+        rgb = d + (l - d) * (tone ** 2 * 0.6 + vv[..., None][..., 0] * 0.25)[..., None]
+        rgba = np.concatenate([rgb, np.clip(alpha * 1.8, 0, 1)[..., None]], -1)
+        return self.save_image(name, rgba)
+
+    def hair_cards(self, F, density, length_fn, flow_fn, n_cards=1400, width=(0.009, 0.016), segs=4,
+                   dark=(7, 6, 6), light=(52, 44, 40), seed=9, rough=0.74, short_width=0.4):
+        """Game hair: textured cards rooted on the scalp. density(P) picks the scalp; length_fn(az, el)
+        -> metres; flow_fn(az, el) -> (direction in world, lift fraction) combs each card. Cards hug
+        the skull (never closer than their root radius) and carry radial normals so they shade as
+        one volume. Replaces parts["Hair"]."""
+        C, eye_z = self.head_frame(F)
+        rng = np.random.default_rng(seed)
+        bm, _ = self.body_bmesh()
+        faces = [f for f in bm.faces if f.calc_center_median().z > eye_z - 0.08]
+        cen = np.array([tuple(f.calc_center_median()) for f in faces], np.float32)
+        wts = density(cen) * np.array([f.calc_area() for f in faces], np.float32)
+        pick = rng.choice(len(faces), size=n_cards, p=wts / wts.sum())
+        verts, quads, uvs, nrms = [], [], [], []
+        Cn = np.array(C, np.float32)
+        cols = 4
+        for fi in pick:
+            f = faces[fi]
+            tri = [v.co for v in f.verts[:3]]
+            a_, b_ = rng.random(2)
+            if a_ + b_ > 1:
+                a_, b_ = 1 - a_, 1 - b_
+            root = tri[0] + (tri[1] - tri[0]) * a_ + (tri[2] - tri[0]) * b_
+            n = f.normal.copy()
+            az, el = self.scalp_angles(np.array(tuple(root), np.float32), Cn)
+            L = float(length_fn(az, el)) * rng.uniform(0.75, 1.15)
+            if L < 0.004:
+                continue
+            target, lift = flow_fn(az, el)
+            target = Vector(target)
+            if root.x < 0:
+                target.x = -target.x
+            d = (target - n * target.dot(n))
+            if d.length < 1e-5:
+                continue
+            d.normalize()
+            d.rotate(Matrix.Rotation(rng.uniform(-0.3, 0.3), 3, n))
+            r0 = (root - C).length
+            w0 = rng.uniform(*width) * (short_width if L < 0.02 else 1.0)   # short fade hairs: thin cards
+            u0 = int(rng.integers(cols)) / cols
+            base = len(verts)
+            prev = root
+            for i in range(segs + 1):
+                t = i / segs
+                pos = root + d * (L * t) + n * (L * lift * math.sin(min(t * 1.4, 1.0) * math.pi / 2) * (1 - 0.45 * t))
+                rmin = r0 + 0.0015 + 0.003 * t
+                rad = pos - C
+                if rad.length < rmin:
+                    pos = C + rad.normalized() * rmin
+                nn = (pos - C).normalized()
+                seg_dir = (pos - prev) if i > 0 else d
+                b = nn.cross(seg_dir.normalized() if seg_dir.length > 1e-6 else d)
+                if b.length < 1e-6:
+                    b = nn.cross(d)
+                b.normalize()
+                w = w0 * (1 - 0.45 * t)
+                for side in (-0.5, 0.5):
+                    verts.append(tuple(pos + b * (w * side) - nn * 0.0008))
+                    nrms.append(tuple(nn))
+                    uvs.append((u0 + (side + 0.5) / cols, t))
+                prev = pos
+            for i in range(segs):
+                q = base + 2 * i
+                quads.append((q, q + 1, q + 3, q + 2))
+        bm.free()
+        name = self.name + "_Hair"
+        old = bpy.data.objects.get(name)
+        if old:
+            bpy.data.objects.remove(old, do_unlink=True)
+        for o in [o for o in self.col["Body"].objects if o.name.startswith(self.name + "_Hair")]:
+            bpy.data.objects.remove(o, do_unlink=True)
+        me = bpy.data.meshes.new(name)
+        me.from_pydata(verts, [], quads)
+        uvl = me.uv_layers.new(name="UVMap")
+        for poly in me.polygons:
+            poly.use_smooth = True
+            for li in poly.loop_indices:
+                uvl.data[li].uv = uvs[me.loops[li].vertex_index]
+        me.normals_split_custom_set_from_vertices(nrms)
+        ob = bpy.data.objects.new(name, me)
+        self.col["Body"].objects.link(ob)
+        img = self.strand_atlas(name + "_strands", dark, light, columns=cols, seed=seed)
+        m = bpy.data.materials.get("M_" + name) or bpy.data.materials.new("M_" + name)
+        nt = m.node_tree
+        nt.nodes.clear()
+        out = nt.nodes.new("ShaderNodeOutputMaterial")
+        p = nt.nodes.new("ShaderNodeBsdfPrincipled")
+        t = nt.nodes.new("ShaderNodeTexImage")
+        t.image = img
+        nt.links.new(t.outputs["Color"], p.inputs["Base Color"])
+        clip = nt.nodes.new("ShaderNodeMath")                 # hard cutoff, as the game's alpha scissor
+        clip.operation = "ROUND"
+        nt.links.new(t.outputs["Alpha"], clip.inputs[0])
+        nt.links.new(clip.outputs[0], p.inputs["Alpha"])
+        nt.links.new(p.outputs[0], out.inputs[0])
+        p.inputs["Roughness"].default_value = rough
+        p.inputs["Specular IOR Level"].default_value = 0.04        # flat cards glint as grey sheets otherwise
+        try:
+            m.surface_render_method = "DITHERED"
+        except (AttributeError, TypeError):
+            pass
+        m.use_backface_culling = False
+        me.materials.append(m)
+        self.parts["Hair"] = ob
+        self.rig_garment(ob)
+        cap = self.hair_cap(C, density, np.array(verts, np.float32), dark)
+        return ob, len(quads)
+
+    def hair_cap(self, C, density, card_verts, dark, fill=0.62, smooth_iter=6):
+        """Opaque dark volume under the hair cards (the usual game-hair base mesh): scalp faces pushed
+        out radially to `fill` of the card height above them, so looking along the strands never
+        shows through to the background."""
+        bm, _ = self.body_bmesh()
+        cen = np.array([tuple(f.calc_center_median()) for f in bm.faces], np.float32)
+        keep = density(cen) > 0.12                      # reaches below the cards to hide their lower ends
+        bmesh.ops.delete(bm, geom=[f for f, k_ in zip(bm.faces, keep) if not k_], context="FACES")
+        bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+        kd = KDTree(len(card_verts))
+        for i, p in enumerate(card_verts):
+            kd.insert(p, i)
+        kd.balance()
+        Cn = np.array(C, np.float32)
+        height = {}
+        for v in bm.verts:
+            r0 = (v.co - C).length
+            near = kd.find_range(v.co, 0.025)
+            hs = [float(np.linalg.norm(card_verts[i] - Cn)) - r0 for _, i, _ in near]
+            height[v] = max(0.0015, fill * max(hs)) if hs else 0.0015
+        for _ in range(smooth_iter):
+            height = {v: 0.5 * h + 0.5 * float(np.mean([height[e.other_vert(v)] for e in v.link_edges])) if v.link_edges else h
+                      for v, h in height.items()}
+        for v in bm.verts:
+            if v.is_boundary:
+                height[v] = 0.0012                      # meets the scalp at the hair edge
+            v.co = v.co + (v.co - C).normalized() * height[v]
+        name = self.name + "_HairCap"
+        old = bpy.data.objects.get(name)
+        if old:
+            bpy.data.objects.remove(old, do_unlink=True)
+        me = bpy.data.meshes.new(name)
+        bm.to_mesh(me)
+        bm.free()
+        for poly in me.polygons:
+            poly.use_smooth = True
+        ob = bpy.data.objects.new(name, me)
+        self.col["Body"].objects.link(ob)
+        me.materials.append(self.plain("M_" + name, tuple(int(c * 1.3) for c in dark), rough=0.7))
+        next(n for n in me.materials[0].node_tree.nodes if n.type == "BSDF_PRINCIPLED").inputs["Specular IOR Level"].default_value = 0.1
+        self.parts["HairCap"] = ob
+        self.rig_garment(ob)
+        return ob
+
+    def paint_brows(self, hair_rgb, density=0.85, widen=1.3, seed=17):
+        """Thicken thin MPFB brow cards with brow hair painted into the skin underneath, following the
+        brow mesh's own centreline and thickness (binned along x)."""
+        brow = self.parts["Eyebrows"]
+        ev = brow.evaluated_get(bpy.context.evaluated_depsgraph_get())
+        me = ev.to_mesh()
+        bc = np.array([tuple(brow.matrix_world @ v.co) for v in me.vertices], np.float32)
+        ev.to_mesh_clear()
+        lines = []
+        for s in (1, -1):
+            side = bc[bc[:, 0] * s > 0]
+            xs = np.abs(side[:, 0])
+            edges = np.linspace(xs.min(), xs.max(), 9)
+            pts = []
+            for a, b in zip(edges, edges[1:]):
+                m = (xs >= a) & (xs <= b)
+                if m.any():
+                    pts.append((float(np.abs(side[m, 0]).mean()), float(np.median(side[m, 2])), float(side[m, 2].std() * 2.2 + 0.0015)))
+            lines.append(pts)
+        ymax = float(bc[:, 1].max()) + 0.01
+        def dens(P):
+            x, y, z = np.abs(P[:, 0]), P[:, 1], P[:, 2]
+            out = np.zeros(len(P), np.float32)
+            for pts in lines:
+                for (x0, z0, t0), (x1, z1, t1) in zip(pts, pts[1:]):
+                    dx, dz = x1 - x0, z1 - z0
+                    t = np.clip(((x - x0) * dx + (z - z0) * dz) / max(dx * dx + dz * dz, 1e-9), 0, 1)
+                    d = np.hypot(x - (x0 + t * dx), z - (z0 + t * dz))
+                    half = (t0 + (t1 - t0) * t) * widen
+                    out = np.maximum(out, smooth(half, half * 0.55, d) * (y < ymax))
+            return out * density
+        def region(co):
+            return (co[:, 2] > bc[:, 2].min() - 0.02) & (co[:, 2] < bc[:, 2].max() + 0.02) & (co[:, 1] < ymax + 0.02)
+        return self.paint_skin(dens, hair_rgb, region, seed=seed)
 
     def add_asset(self, rel, asset_type="Clothes"):
         """Fit an MPFB clothing asset (mhclo under the user data dir) to the body and its rig."""

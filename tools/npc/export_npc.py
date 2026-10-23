@@ -74,6 +74,7 @@ def game_material(m, kind):
     p = nt.nodes.new("ShaderNodeBsdfPrincipled")
     nt.links.new(p.outputs[0], out.inputs[0])
     p.inputs["Roughness"].default_value = rough
+    p.inputs["Base Color"].default_value = p0.inputs["Base Color"].default_value   # untextured parts (hair cap)
     p.inputs["Specular IOR Level"].default_value = 0.35 if kind == "skin" else 0.2
     if img:
         t = nt.nodes.new("ShaderNodeTexImage")
@@ -160,7 +161,7 @@ for o in made:
     for slot in o.material_slots:
         m = slot.material
         if m and not m.name.startswith("M_"):
-            kind = "skin" if o.name == "EXP_Body" else ("clip" if any(p in o.name for p in ("Hair", "Eyebrows", "Eyelashes", "Eyes")) else "opaque")
+            kind = "skin" if o.name == "EXP_Body" else ("clip" if any(p in o.name for p in ("Hair", "Eyebrows", "Eyelashes", "Eyes")) and "HairCap" not in o.name else "opaque")
             slot.material = game_material(m, kind)
     tris = sum(len(p.vertices) - 2 for p in o.data.polygons)
     print("built", o.name, len(o.data.vertices), "verts", tris, "tris, unweighted fixed", len(bad))

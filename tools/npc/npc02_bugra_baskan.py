@@ -18,12 +18,67 @@ def build_body(k):
     k.human(
         macros={"gender": 1.0, "age": 0.52, "muscle": 0.58, "weight": 0.48, "proportions": 0.6, "height": 0.6,
                 "caucasian": 0.82, "african": 0.03, "asian": 0.15},
-        targets={"nose/nose-hump-incr": 0.35, "nose/nose-scale-vert-incr": 0.2, "eyebrows/eyebrows-trans-down": 0.25,
-                 "chin/chin-width-incr": 0.2, "head/head-oval": 0.2, "stomach/stomach-pregnant-decr": 0.3},
-        skin="young_caucasian_male", eyes="darkbrown", brows="eyebrow009", hair=HAIR, height_m=1.78)
-    k.tint_body_texture((0.93, 0.83, 0.72), gamma=1.12)          # warm olive Mediterranean tone
-    k.color_hair((8, 7, 7), (34, 28, 25), gamma=1.5, rough=0.55)
+        targets={
+            # long oval face, full lower jaw, defined chin
+            "head/head-oval": 0.45, "head/head-scale-vert-incr": 0.18, "chin/chin-width-incr": 0.3,
+            "chin/chin-height-incr": 0.2, "chin/chin-prominent-incr": 0.15, "chin/chin-jaw-drop-incr": 0.15,
+            # young, slightly full cheeks over clear cheekbones
+            "cheek/l-cheek-bones-incr": 0.25, "cheek/r-cheek-bones-incr": 0.25,
+            # long straight nose, gentle hump, rounded tip, narrow bridge
+            "nose/nose-scale-vert-incr": 0.4, "nose/nose-hump-incr": 0.2, "nose/nose-point-width-incr": 0.25,
+            "nose/nose-width1-decr": 0.2, "nose/nose-scale-depth-incr": 0.15, "nose/nose-nostrils-width-incr": 0.1,
+            # thick low brows over slightly hooded eyes with soft bags beneath
+            "eyebrows/eyebrows-trans-down": 0.45, "eyebrows/eyebrows-trans-forward": 0.25,
+            "eyes/l-eye-eyefold-down": 0.35, "eyes/r-eye-eyefold-down": 0.35,
+            "eyes/l-eye-bag-incr": 0.35, "eyes/r-eye-bag-incr": 0.35,
+            "eyes/l-eye-scale-incr": 0.35, "eyes/r-eye-scale-incr": 0.35,
+            "eyes/l-eye-height2-incr": 0.15, "eyes/r-eye-height2-incr": 0.15,
+            "eyes/l-eye-bag-height-incr": 0.2, "eyes/r-eye-bag-height-incr": 0.2,
+            # thin upper lip, fuller lower lip
+            "mouth/mouth-upperlip-volume-decr": 0.3, "mouth/mouth-lowerlip-volume-incr": 0.15,
+            "stomach/stomach-pregnant-decr": 0.3},
+        skin="young_caucasian_male", eyes="darkbrown", brows="eyebrow009", hair=None, height_m=1.78)
+    k.tint_body_texture((0.95, 0.87, 0.79), gamma=1.08)          # light warm beige, not orange
     k.color_hair((7, 6, 5), (30, 24, 21), gamma=1.3, rough=0.7, part="Eyebrows", alpha_gamma=0.55)
+
+
+# hair: hairline as minimum elevation (deg) over azimuth (deg, 0 front .. 180 back) around the skull
+HAIRLINE = ([0, 25, 45, 62, 72, 80, 88, 104, 116, 140, 180], [40, 37, 30, 18, -20, -14, 19, 19, -8, -26, -36])
+
+
+def hair_length(az, el):
+    """faded short back and sides, 6-7 cm swept-up top, a bit shorter towards the crown"""
+    L = np.interp(el, [-40, 0, 10, 18, 28, 40, 60], [0.006, 0.008, 0.011, 0.02, 0.042, 0.062, 0.066])
+    return L * (1 - 0.3 * smooth(70, 170, az)) * (1 - 0.15 * smooth(35, 5, az))
+
+
+def hair_flow(az, el):
+    """top: back and up with lift at the front (quiff); sides: down and back, flat"""
+    k_top = float(smooth(14, 30, el))
+    front = float(smooth(70, 20, az))
+    target = Vector((0.0, 1.0, 0.08)) * k_top + Vector((0.2, 0.45, -1.0)) * (1 - k_top)
+    lift = 0.03 + k_top * (0.06 + 0.12 * front)
+    return target, lift
+
+
+def card_density(k, C, dens):
+    """cards concentrate on the long top; the faded sides are mostly the painted scalp"""
+    def f(P):
+        az, el = k.scalp_angles(P, C)
+        return dens(P) * smooth(7, 22, el)
+    return f
+
+
+def scalp(k, F):
+    C, eye_z = k.head_frame(F)
+    dens = k.scalp_density(C, HAIRLINE)
+    def shade(P):                                       # dense on top, faded (skin shows) low on the sides
+        az, el = k.scalp_angles(P, C)
+        return dens(P) * (0.82 + 0.16 * smooth(0, 25, el))
+    def region(co):
+        return co[:, 2] > eye_z - 0.09
+    k.paint_skin(shade, (9, 8, 8), region, seed=13)
+    return C, dens
 
 
 def beard(k):
@@ -39,10 +94,11 @@ def beard(k):
         low = np.interp(y, [hy - 0.12, hy - 0.04, hy + 0.01], [neck_z, neck_z + 0.012, sn - 0.03])
         d = smooth(top + 0.002, top - 0.004, z) * smooth(low - 0.004, low + 0.006, z) * smooth(hy + 0.012, hy - 0.004, y)
         # lips stay clear
-        lip = ((x / 0.026) ** 2 + ((z - mo) / np.where(z > mo, 0.0085, 0.0095)) ** 2) < 1.0
+        lip = ((x / 0.026) ** 2 + ((z - mo) / np.where(z > mo, 0.0042, 0.0095)) ** 2) < 1.0   # moustache covers the upper lip
         d = np.where(lip, 0.0, d)
         # moustache and chin goatee denser, cheeks shorter
         dense = smooth(0.045, 0.028, x)
+        dense = np.maximum(dense, (z > mo) * smooth(0.034, 0.026, x) * 1.15)     # full moustache to the corners
         # five-o'clock shadow a little way up the cheek above the beard line
         shadow = 0.10 * smooth(top + 0.018, top, z) * smooth(low - 0.004, low + 0.006, z) * smooth(hy + 0.012, hy - 0.004, y) * (~lip)
         return np.maximum(d * (0.42 + 0.48 * dense), shadow)
@@ -283,7 +339,11 @@ def run(stage="all"):
     k.pose("rest")
     texels, F, beard_density = beard(k)
     arm_hair(k)
-    k.skin_detail(F, age=0.25, lips_mul=(0.86, 0.76, 0.74), lips_desat=0.35,
+    C, dens = scalp(k, F)
+    k.paint_brows((8, 7, 6), density=0.7, widen=0.5)
+    if stage != "no_hair":
+        k.hair_cards(F, card_density(k, C, dens), hair_length, hair_flow, n_cards=1700, width=(0.011, 0.019))
+    k.skin_detail(F, age=0.25, lips_mul=(0.86, 0.76, 0.74), lips_desat=0.35, undereye=0.7,
                   beard_zone=lambda P: beard_density(P.reshape(-1, 3)).reshape(P.shape[:-1]) > 0.25)
     g = build_clothes(k)
     materials(k, g)
