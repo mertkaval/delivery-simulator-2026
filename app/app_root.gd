@@ -78,6 +78,15 @@ var bag_keys: HBoxContainer
 var _bag_key_shown := "~"
 var nav_pill: PanelContainer
 var _supplies_shown := "~"
+## Shown while the city builds: the Neighborhood child readies (~10-15 s) before this node's _ready.
+var loading_screen: LoadingScreen
+
+func _enter_tree() -> void:
+	if loading_screen != null: return
+	loading_screen = LoadingScreen.new()
+	loading_screen.name = "LoadingScreen"
+	add_child(loading_screen)
+	loading_screen.begin(self)
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -166,6 +175,7 @@ func _ready() -> void:
 	hud.add_child(_flash)
 	show_menu("start")
 	update_hud()
+	loading_screen.finish()
 	if "--smoke-test" in OS.get_cmdline_user_args():
 		call_deferred("smoke_test")
 

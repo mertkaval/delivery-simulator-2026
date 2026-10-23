@@ -28,6 +28,14 @@ var building := 0 ## index of the building currently being assembled
 static var enabled := true
 ## World-space tops of terrace chimney stacks (for CityVFX smoke), rebuilt on every load.
 static var chimney_tops: Array[Vector3] = []
+## Welding the ~16k kit pieces with SurfaceTool took ~13 s of every launch, so the merged
+## geometry is cached in user://. A batch's file name hashes everything that shapes it (pieces,
+## transforms, glass swap, LOD range) plus the kit GLBs' modification times; bump CACHE_VERSION
+## when flush() changes how it builds meshes.
+const CACHE_VERSION := 1
+const CACHE_DIR := "user://cache/kit_buildings"
+static var use_cache := true
+var assets_used := {}
 
 func _ready() -> void:
 	if not enabled: return
@@ -50,9 +58,11 @@ static func pose(at: Vector3, yaw: float = 0.0, scale_factor: Vector3 = Vector3.
 func place(asset: String, placement: Transform3D, end: float, start: float = 0.0, shadows: bool = true) -> void:
 	var key := "%d_%d_%d_%d" % [building, int(start), int(end), int(shadows)]
 	if not batches.has(key):
-		batches[key] = {"start": start, "end": end, "shadows": shadows, "origin": placement.origin, "surfaces": {}}
+		batches[key] = {"start": start, "end": end, "shadows": shadows, "origin": placement.origin, "surfaces": {}, "sig": 0}
 	var group: Dictionary = batches[key]
 	var swap := clear_glass and (asset.begins_with("storefront_") or (asset.begins_with("entrance_") and not asset.begins_with("entrance_residential")))
+	group.sig = hash([group.sig, asset, swap, placement])
+	assets_used[asset] = true
 	for piece in UrbanKit.get_parts(asset):
 		var material: Material = piece.material
 		if swap and material == UrbanKit.material("UrbanWindow"): material = CityKit.material("KitClearGlass")
@@ -260,20 +270,53 @@ func _solid(base: Transform3D, b: Dictionary, height: float) -> void:
 	collider(base * Vector3(0, height * 0.5, -b.depth * 0.5), Vector3(width, height, b.depth), b.yaw)
 	occluder(base * Vector3(0, height * 0.5, -b.depth * 0.5), Vector3(width - 0.6, height - 0.6, b.depth - 0.6), b.yaw)
 
+## Changes whenever a kit GLB the batches use is re-exported.
+func source_stamp() -> int:
+	var names := assets_used.keys()
+	names.sort()
+	var stamp := CACHE_VERSION
+	for asset: String in names:
+		for path in [CityKit.MODULES % asset, "res://world/downtown/assets/%s.glb" % asset]:
+			if FileAccess.file_exists(path): stamp = hash([stamp, asset, FileAccess.get_modified_time(path)])
+	return stamp
+
+## One mesh per building and LOD range, one surface per material, local to the building (no
+## materials: they are set after loading/saving so the cache holds geometry only).
+static func merge(data: Dictionary) -> ArrayMesh:
+	var origin: Vector3 = data.origin
+	var merged := ArrayMesh.new()
+	for surface: Dictionary in data.surfaces.values():
+		var tool := SurfaceTool.new()
+		for part in surface.parts:
+			var mesh: Mesh = part[0]
+			var t: Transform3D = part[1]
+			t.origin -= origin
+			for s in range(mesh.get_surface_count()): tool.append_from(mesh, s, t)
+		tool.commit(merged)
+	return merged
+
 func flush() -> void:
+	var stamp := source_stamp()
+	# headless runs (tests) use a dummy renderer: never write or trust their meshes
+	var cache := use_cache and DisplayServer.get_name() != "headless" and DirAccess.make_dir_recursive_absolute(CACHE_DIR) == OK
+	var used := {}
+	var missed := 0
 	for data: Dictionary in batches.values():
-		# One mesh per building and LOD range, one surface per material, local to the building.
 		var origin: Vector3 = data.origin
-		var merged := ArrayMesh.new()
+		var file := "%s/%08x.res" % [CACHE_DIR, hash([stamp, data.sig, data.start, data.end, data.shadows, origin])]
+		used[file.get_file()] = true
+		var merged: ArrayMesh = null
+		if cache and FileAccess.file_exists(file):
+			merged = ResourceLoader.load(file, "ArrayMesh", ResourceLoader.CACHE_MODE_IGNORE) as ArrayMesh
+			if merged != null and (merged.get_surface_count() != data.surfaces.size() or merged.surface_get_array_len(0) == 0): merged = null
+		if merged == null:
+			missed += 1
+			merged = merge(data)
+			if cache: ResourceSaver.save(merged, file)
+		var surface_index := 0
 		for surface: Dictionary in data.surfaces.values():
-			var tool := SurfaceTool.new()
-			for part in surface.parts:
-				var mesh: Mesh = part[0]
-				var t: Transform3D = part[1]
-				t.origin -= origin
-				for s in range(mesh.get_surface_count()): tool.append_from(mesh, s, t)
-			tool.commit(merged)
-			merged.surface_set_material(merged.get_surface_count() - 1, surface.material)
+			merged.surface_set_material(surface_index, surface.material)
+			surface_index += 1
 		var node := MeshInstance3D.new()
 		node.mesh = merged
 		node.position = origin
@@ -284,3 +327,7 @@ func flush() -> void:
 		if not data.shadows: node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(node)
 	batches.clear()
+	if cache and missed > 0:
+		# drop meshes no current batch uses (old layouts / re-exported modules)
+		for name in DirAccess.get_files_at(CACHE_DIR):
+			if not used.has(name): DirAccess.remove_absolute(CACHE_DIR.path_join(name))
