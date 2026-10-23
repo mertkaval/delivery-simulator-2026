@@ -162,16 +162,24 @@ class Kit:
         img.pixels.foreach_get(a)
         return a.reshape(h, w, 4)
 
+    @staticmethod
+    def skin_tex(mat):
+        """the body's colour texture node (MPFB's diffuse; not the kit's normal/roughness nodes)"""
+        return next(n for n in mat.node_tree.nodes if n.type == "TEX_IMAGE" and not n.name.startswith("NPC_"))
+
+    @staticmethod
+    def set_skin(mat, img):
+        """point MPFB's diffuse and alpha texture nodes at img"""
+        for n in mat.node_tree.nodes:
+            if n.type == "TEX_IMAGE" and not n.name.startswith("NPC_"):
+                n.image = img
+
     def tint_body_texture(self, mul, gamma=1.0):
         mat = self.body.material_slots[0].material
-        tex = next(n for n in mat.node_tree.nodes if n.type == "TEX_IMAGE")
-        src = self.read_image(tex.image)
+        src = self.read_image(self.skin_tex(mat).image)
         out = src.copy()
         out[..., :3] = np.clip(np.clip(src[..., :3], 0, 1) ** gamma * np.array(mul, np.float32), 0, 1)
-        img = self.save_image(self.name + "_skin", out)
-        for n in mat.node_tree.nodes:
-            if n.type == "TEX_IMAGE":
-                n.image = img
+        self.set_skin(mat, self.save_image(self.name + "_skin", out))
 
     # iris colour ramps (dark, light) applied over the MPFB eye texture's luminance
     IRIS = {"brown": ((24, 13, 7), (96, 58, 30)), "darkbrown": ((14, 8, 5), (62, 38, 22)),
@@ -213,7 +221,7 @@ class Kit:
         p.inputs["Roughness"].default_value = 0.12
         p.inputs["Specular IOR Level"].default_value = 0.2
 
-    def color_hair(self, dark, light, gamma=1.4, rough=0.6, part="Hair"):
+    def color_hair(self, dark, light, gamma=1.4, rough=0.6, part="Hair", alpha_gamma=1.0):
         o = self.parts[part]
         m = o.material_slots[0].material
         tex = next(n for n in m.node_tree.nodes if n.type == "TEX_IMAGE")
@@ -225,7 +233,8 @@ class Kit:
         d = np.array(dark, np.float32) / 255
         l = np.array(light, np.float32) / 255
         rgb = d + (l - d) * (t ** gamma)[..., None]
-        img = self.save_image("%s_%s" % (self.name, part.lower()), np.concatenate([rgb, src[..., 3:4]], -1))
+        alpha = np.clip(src[..., 3:4], 0, 1) ** alpha_gamma          # < 1 thickens strands (brows)
+        img = self.save_image("%s_%s" % (self.name, part.lower()), np.concatenate([rgb, alpha], -1))
         tex.image = img
         p = next(n for n in m.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
         p.inputs["Roughness"].default_value = rough
@@ -590,13 +599,173 @@ class Kit:
         N /= np.maximum(np.linalg.norm(N, axis=-1, keepdims=True), 1e-6)
         return P, N, M
 
+    # ------------------------------------------------------------------ face / skin detail
+    def face_marks(self):
+        """Face landmarks in rest pose. Nose tip = most forward point of the midline profile; nose
+        base, mouth and chin sit at fixed offsets below it on MPFB heads (-15, -28, -79 mm); eye
+        centres come from the fitted eye mesh."""
+        co = self.body_rest()
+        head = self.rig.matrix_world @ self.rig.data.bones["head"].head_local
+        mid = co[(np.abs(co[:, 0]) < 0.006) & (co[:, 1] < head.y) & (co[:, 2] > head.z - 0.06) & (co[:, 2] < head.z + 0.06)]
+        tip = mid[np.argmin(mid[:, 1])]
+        eyes = self.parts["Eyes"]
+        ev = eyes.evaluated_get(bpy.context.evaluated_depsgraph_get())
+        me = ev.to_mesh()
+        ec = np.array([tuple(eyes.matrix_world @ v.co) for v in me.vertices], np.float32)
+        ev.to_mesh_clear()
+        eye = [ec[ec[:, 0] * s > 0].mean(0) for s in (1, -1)]
+        return dict(head=head, tip=float(tip[2]), tip_y=float(tip[1]), sn=float(tip[2]) - 0.015,
+                    mouth=float(tip[2]) - 0.028, menton=float(tip[2]) - 0.079, eye_l=eye[0], eye_r=eye[1])
+
+    def bake_ao(self, size=2048, samples=32, distance=0.06):
+        """Cycles ambient-occlusion bake of the body (eyes and hair occlude; clothes and brows don't)
+        into its own UV layout. Returns the AO as a float array (1 = open, 0 = occluded)."""
+        scn = self.scn
+        prev = (scn.render.engine, scn.world.light_settings.distance if scn.world else None)
+        try:
+            scn.render.engine = "CYCLES"
+        except TypeError:
+            return None
+        scn.cycles.samples = samples
+        if scn.world is None:
+            scn.world = bpy.data.worlds.get("NPC_World") or bpy.data.worlds.new("NPC_World")
+        scn.world.light_settings.distance = distance
+        keep = {self.body, self.parts.get("Eyes"), self.parts.get("Hair")}
+        hidden = {o: o.hide_render for o in scn.objects}
+        for o in scn.objects:
+            o.hide_render = o not in keep
+        img = bpy.data.images.get(self.name + "_ao")
+        if img is None or tuple(img.size) != (size, size):
+            if img:
+                bpy.data.images.remove(img)
+            img = bpy.data.images.new(self.name + "_ao", size, size, alpha=False)
+        img.colorspace_settings.name = "Non-Color"
+        mat = self.body.material_slots[0].material
+        node = mat.node_tree.nodes.new("ShaderNodeTexImage")
+        node.image = img
+        mat.node_tree.nodes.active = node
+        for o in bpy.context.view_layer.objects:
+            o.select_set(False)
+        self.body.select_set(True)
+        bpy.context.view_layer.objects.active = self.body
+        try:
+            bpy.ops.object.bake(type="AO", margin=8, use_clear=True)
+            ao = self.read_image(img)[..., 0].copy()
+        finally:
+            mat.node_tree.nodes.remove(node)
+            for o, h in hidden.items():
+                o.hide_render = h
+            scn.render.engine = prev[0]
+            if prev[1] is not None:
+                scn.world.light_settings.distance = prev[1]
+        return ao
+
+    def skin_detail(self, F, age=0.3, ao_strength=0.6, lips_mul=(0.9, 0.82, 0.82), lips_desat=0.3, beard_zone=None, seed=31):
+        """Face realism for the game skin: baked AO multiplied into the colour, muted lips, and a
+        normal + roughness map pair (pore grain everywhere; nasolabial folds, forehead lines,
+        under-eye creases and lip lines scaled by `age`; shinier T-zone and lips, matte beard)."""
+        mat = self.body.material_slots[0].material
+        tex = self.skin_tex(mat)
+        src = self.read_image(tex.image)
+        size = src.shape[0]
+        ao = self.bake_ao(size)
+        co = self.body_rest()
+        P, N, M = self.surface_maps(self.body, size, uv_name=self.body.data.uv_layers[0].name, vco=co)
+        x, y, z = P[..., 0], P[..., 1], P[..., 2]
+        ax = np.abs(x)
+        hy, tip, sn, mo = F["head"].y, F["tip"], F["sn"], F["mouth"]
+        eye_z = float((F["eye_l"][2] + F["eye_r"][2]) / 2)
+        eye_x = float(abs(F["eye_l"][0]))
+        face = M & (y < hy - 0.035) & (z > F["menton"] - 0.01) & (z < tip + 0.12)
+        out = src.copy()
+        if ao is not None:
+            aof = np.clip(ao, 0, 1) ** 1.2
+            k_ = np.where(face, ao_strength, ao_strength * 0.75)
+            out[..., :3] *= (1 - k_ + k_ * aof)[..., None]
+        lip = face & (((ax / 0.025) ** 2 + ((z - mo) / np.where(z > mo, 0.0085, 0.0095)) ** 2) < 1.0)
+        lw = self.blur(lip.astype(np.float32), 2)
+        lum = out[..., :3] @ np.array([0.3, 0.55, 0.15], np.float32)
+        lipc = out[..., :3] * (1 - lips_desat) + lum[..., None] * lips_desat
+        lipc = lipc * np.array(lips_mul, np.float32)
+        out[..., :3] = out[..., :3] * (1 - lw[..., None]) + lipc * lw[..., None]
+        if ao is not None:                                     # the parting between the lips stays dark
+            gap = self.blur((lip & (ao < 0.6)).astype(np.float32), 1)
+            out[..., :3] *= (1 - 0.5 * gap)[..., None]
+        self.set_skin(mat, self.save_image(self.name + "_skin", out))
+        # height: pores + creases (metres)
+        rng = np.random.default_rng(seed)
+        grain = rng.standard_normal((size, size)).astype(np.float32)   # finest grain the texel size allows
+        h = 0.00003 * grain * M
+        h += np.where(face, 0.00005 * grain, 0)                # pores read on the face
+        def groove(d, depth, width):
+            return -depth * np.exp(-(d / width) ** 2)
+        for s in (1, -1):
+            xs = x * s
+            # nasolabial fold: nose wing to beside the mouth corner
+            d = np.abs((xs - 0.019) * (mo - 0.014 - sn) - (z - sn) * (0.034 - 0.019)) / np.hypot(mo - 0.014 - sn, 0.034 - 0.019)
+            seg = smooth(sn + 0.008, sn, z) * smooth(mo - 0.022, mo - 0.008, z) * smooth(0.01, 0.016, xs)
+            h += np.where(face, groove(d, 0.0009 * (0.4 + age), 0.003) * seg, 0)
+            # under-eye crease and crow's feet
+            r = np.hypot((xs - eye_x) / 1.25, z - eye_z)
+            fade = smooth(eye_x - 0.024, eye_x - 0.012, xs) * smooth(eye_z + 0.002, eye_z - 0.006, z)
+            h += np.where(face, groove(np.abs(r - 0.019), 0.0004 * age, 0.0018) * fade, 0)
+            for i in range(3):
+                ang = -0.35 + i * 0.35
+                cx, cz = eye_x + 0.028, eye_z
+                dd = np.abs(np.sin(ang) * (xs - cx) - np.cos(ang) * (z - cz))
+                near = smooth(cx - 0.002, cx + 0.004, xs) * smooth(cx + 0.018, cx + 0.010, xs) * smooth(0.013, 0.007, np.abs(z - cz))
+                h += np.where(face, groove(dd, 0.00028 * age, 0.001) * near, 0)
+        for i in range(3):                                     # forehead lines
+            fz = eye_z + 0.042 + i * 0.009
+            h += np.where(face & (ax < 0.05), groove(np.abs(z - fz - 0.004 * (ax / 0.05) ** 2), 0.0003 * age, 0.0012) * smooth(0.05, 0.03, ax), 0)
+        h += np.where(lip, -0.00014 * np.abs(np.sin(2 * np.pi * x / 0.0022)), 0)   # lip lines
+        both = face[:, 1:] & face[:, :-1]
+        texel = float(np.median(np.linalg.norm(P[:, 1:][both] - P[:, :-1][both], axis=-1))) if both.any() else 0.0008
+        gx = (np.roll(h, -1, 1) - np.roll(h, 1, 1)) / (2 * texel)
+        gy = (np.roll(h, -1, 0) - np.roll(h, 1, 0)) / (2 * texel)
+        edge = ~(M & np.roll(M, 1, 1) & np.roll(M, -1, 1) & np.roll(M, 1, 0) & np.roll(M, -1, 0))
+        gx[edge] = 0                                           # no ridges along UV island borders
+        gy[edge] = 0
+        nrm = np.stack([-gx, -gy, np.ones_like(gx)], -1)
+        nrm /= np.linalg.norm(nrm, axis=-1, keepdims=True)
+        one = np.ones((size, size, 1), np.float32)
+        nimg = self.save_image(self.name + "_skin_normal", np.concatenate([self.dilate(nrm * 0.5 + 0.5, M, 4), one], -1), "Non-Color")
+        # roughness: T-zone and lips shinier, beard matte
+        rough = np.full((size, size), 0.58, np.float32) + 0.03 * grain
+        tzone = face & (((ax < 0.022) & (z > sn) & (z < eye_z + 0.07)) | ((z > eye_z + 0.025) & (ax < 0.05)))
+        rough = np.where(tzone, rough - 0.12, rough)
+        rough = np.where(lip, 0.5, rough)
+        if beard_zone is not None:
+            rough = np.where(M & beard_zone(P), 0.72, rough)
+        rough = self.blur(rough, 2)
+        rimg = self.save_image(self.name + "_skin_roughness", np.concatenate([np.repeat(np.clip(rough, 0, 1)[..., None], 3, -1), one], -1), "Non-Color")
+        nt = mat.node_tree
+        p = next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED")
+        for n in [n for n in nt.nodes if n.name in ("NPC_SkinNormal", "NPC_SkinNormalMap", "NPC_SkinRough", "NPC_SkinRoughSep")]:
+            nt.nodes.remove(n)
+        tn = nt.nodes.new("ShaderNodeTexImage"); tn.name = "NPC_SkinNormal"; tn.image = nimg
+        nm = nt.nodes.new("ShaderNodeNormalMap"); nm.name = "NPC_SkinNormalMap"
+        nm.uv_map = self.body.data.uv_layers[0].name
+        nt.links.new(tn.outputs["Color"], nm.inputs["Color"])
+        nt.links.new(nm.outputs["Normal"], p.inputs["Normal"])
+        tr = nt.nodes.new("ShaderNodeTexImage"); tr.name = "NPC_SkinRough"; tr.image = rimg
+        sep = nt.nodes.new("ShaderNodeSeparateColor"); sep.name = "NPC_SkinRoughSep"
+        nt.links.new(tr.outputs["Color"], sep.inputs[0])
+        nt.links.new(sep.outputs[1], p.inputs["Roughness"])
+        try:
+            p.inputs["Subsurface Weight"].default_value = 0.12
+            p.inputs["Subsurface Radius"].default_value = (0.9, 0.4, 0.25)
+            p.inputs["Subsurface Scale"].default_value = 0.004
+        except KeyError:
+            pass
+        return ao is not None
+
     def paint_skin(self, density_fn, hair_rgb, region, seed=7, grain=1):
         """Paint body hair (beard, stubble, arm hair) into the skin texture: density_fn(P) gives 0..1
         coverage per texel from its rest-pose world position; region(co) -> bool picks the
         vertices worth rasterising. Stubble grain comes from per-texel noise."""
         mat = self.body.material_slots[0].material
-        tex = next(n for n in mat.node_tree.nodes if n.type == "TEX_IMAGE")
-        src = self.read_image(tex.image)
+        src = self.read_image(self.skin_tex(mat).image)
         size = src.shape[0]
         co = self.body_rest()
         P, N, M = self.surface_maps(self.body, size, uv_name=self.body.data.uv_layers[0].name, vco=co,
@@ -610,11 +779,12 @@ class Kit:
         cover = np.clip(a * (0.80 + 0.35 * grains), 0, 0.94)[..., None]   # dense, fine grain; skin shows faintly
         out = src.copy()
         hair = np.array(hair_rgb, np.float32) / 255
-        out[..., :3] = src[..., :3] * (1 - cover) + hair * cover
-        img = self.save_image(self.name + "_skin", out)
-        for n in mat.node_tree.nodes:
-            if n.type == "TEX_IMAGE":
-                n.image = img
+        # skin under hair is shadowed and loses its warmth before the hairs go on top
+        lum = src[..., :3] @ np.array([0.3, 0.55, 0.15], np.float32)
+        shade = a[..., None] * 0.6
+        under = src[..., :3] * (1 - shade) + (lum[..., None] * 0.7) * shade
+        out[..., :3] = under * (1 - cover) + hair * cover
+        self.set_skin(mat, self.save_image(self.name + "_skin", out))
         return int((a > 0.05).sum())
 
     def add_asset(self, rel, asset_type="Clothes"):

@@ -84,6 +84,20 @@ def game_material(m, kind):
             r.operation = "ROUND"                    # glTF alphaMode MASK, cutoff 0.5
             nt.links.new(t.outputs["Alpha"], r.inputs[0])
             nt.links.new(r.outputs[0], p.inputs["Alpha"])
+    # the kit's skin detail maps (npc_kit.skin_detail): normal + roughness (green channel)
+    src = {n.name: n for n in m.node_tree.nodes}
+    if "NPC_SkinNormal" in src and src["NPC_SkinNormal"].image:
+        tn = nt.nodes.new("ShaderNodeTexImage")
+        tn.image = src["NPC_SkinNormal"].image
+        nm = nt.nodes.new("ShaderNodeNormalMap")
+        nt.links.new(tn.outputs["Color"], nm.inputs["Color"])
+        nt.links.new(nm.outputs["Normal"], p.inputs["Normal"])
+    if "NPC_SkinRough" in src and src["NPC_SkinRough"].image:
+        tr = nt.nodes.new("ShaderNodeTexImage")
+        tr.image = src["NPC_SkinRough"].image
+        sep = nt.nodes.new("ShaderNodeSeparateColor")
+        nt.links.new(tr.outputs["Color"], sep.inputs[0])
+        nt.links.new(sep.outputs[1], p.inputs["Roughness"])
     return g
 
 

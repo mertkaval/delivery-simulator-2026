@@ -23,21 +23,11 @@ def build_body(k):
         skin="young_caucasian_male", eyes="darkbrown", brows="eyebrow009", hair=HAIR, height_m=1.78)
     k.tint_body_texture((0.93, 0.83, 0.72), gamma=1.12)          # warm olive Mediterranean tone
     k.color_hair((8, 7, 7), (34, 28, 25), gamma=1.5, rough=0.55)
-    k.color_hair((10, 8, 7), (40, 32, 28), gamma=1.3, rough=0.7, part="Eyebrows")
-
-
-def face_marks(k):
-    """Nose tip from the rest-pose midline profile (its most forward point); nose base, mouth and
-    chin sit at fixed offsets below it on MPFB heads (read off the profile: -15, -28, -79 mm)."""
-    co = k.body_rest()
-    head = k.rig.matrix_world @ k.rig.data.bones["head"].head_local
-    mid = co[(np.abs(co[:, 0]) < 0.006) & (co[:, 1] < head.y) & (co[:, 2] > head.z - 0.06) & (co[:, 2] < head.z + 0.06)]
-    tip = float(mid[np.argmin(mid[:, 1]), 2])
-    return dict(head=head, tip=tip, sn=tip - 0.015, mouth=tip - 0.028, menton=tip - 0.079)
+    k.color_hair((7, 6, 5), (30, 24, 21), gamma=1.3, rough=0.7, part="Eyebrows", alpha_gamma=0.55)
 
 
 def beard(k):
-    F = face_marks(k)
+    F = k.face_marks()
     hy, sn, mo = F["head"].y, F["sn"], F["mouth"]
     neck_z = F["menton"] - 0.022
 
@@ -53,11 +43,13 @@ def beard(k):
         d = np.where(lip, 0.0, d)
         # moustache and chin goatee denser, cheeks shorter
         dense = smooth(0.045, 0.028, x)
-        return d * (0.42 + 0.48 * dense)
+        # five-o'clock shadow a little way up the cheek above the beard line
+        shadow = 0.10 * smooth(top + 0.018, top, z) * smooth(low - 0.004, low + 0.006, z) * smooth(hy + 0.012, hy - 0.004, y) * (~lip)
+        return np.maximum(d * (0.42 + 0.48 * dense), shadow)
 
     def region(co):
         return (co[:, 2] > neck_z - 0.03) & (co[:, 2] < sn + 0.08) & (co[:, 1] < hy + 0.03) & (np.abs(co[:, 0]) < 0.1)
-    return k.paint_skin(density, (16, 12, 11), region, seed=11), F
+    return k.paint_skin(density, (16, 12, 11), region, seed=11), F, density
 
 
 def arm_hair(k):
@@ -289,8 +281,10 @@ def run(stage="all"):
     k = Kit(NAME)
     build_body(k)
     k.pose("rest")
-    texels, F = beard(k)
+    texels, F, beard_density = beard(k)
     arm_hair(k)
+    k.skin_detail(F, age=0.25, lips_mul=(0.86, 0.76, 0.74), lips_desat=0.35,
+                  beard_zone=lambda P: beard_density(P.reshape(-1, 3)).reshape(P.shape[:-1]) > 0.25)
     g = build_clothes(k)
     materials(k, g)
     n = rig_and_mask(k, g)

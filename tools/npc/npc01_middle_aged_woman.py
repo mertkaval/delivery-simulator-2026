@@ -234,6 +234,7 @@ def run(stage="all"):
     k = Kit(NAME)
     build_body(k)
     k.pose("rest")
+    k.skin_detail(k.face_marks(), age=0.65, ao_strength=0.5, lips_mul=(0.9, 0.8, 0.8), lips_desat=0.25)
     g = build_clothes(k)
     materials(k, g)
     n = rig_and_mask(k, g)
