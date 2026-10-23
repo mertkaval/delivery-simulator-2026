@@ -1,0 +1,74 @@
+# Headless test suites (tests/run_tests.ps1 -HeadlessOnly) on every code change to main.
+# The rendered audits (city conflict, frame budget) need a GPU and run on the dev machine.
+#
+# Git LFS bandwidth is limited, so LFS objects are cached between runs (only new objects are
+# downloaded) and asset-only pushes do not trigger a run. Start a run by hand from the Actions tab.
+name: Tests
+
+on:
+  push:
+    branches: [main]
+    paths: ["**.gd", "**.tscn", "**.tres", "project.godot", "tests/**", ".github/workflows/tests.yml"]
+  workflow_dispatch:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.7.2-stable
+  GODOT_DIR: C:\godot
+
+jobs:
+  headless:
+    runs-on: windows-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: List LFS objects
+        shell: pwsh
+        run: git lfs ls-files --long | ForEach-Object { $_.Split(' ')[0] } | Sort-Object | Out-File -Encoding utf8 .lfs-assets-id
+
+      - name: Restore LFS cache
+        uses: actions/cache@v4
+        with:
+          path: .git/lfs
+          key: lfs-${{ hashFiles('.lfs-assets-id') }}
+          restore-keys: lfs-
+
+      - name: Fetch LFS objects
+        run: git lfs pull
+
+      - name: Restore Godot
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.GODOT_DIR }}
+          key: godot-${{ env.GODOT_VERSION }}-win64
+
+      - name: Download Godot
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $zip = "Godot_v${env:GODOT_VERSION}_win64.exe.zip"
+          Invoke-WebRequest "https://github.com/godotengine/godot-builds/releases/download/$env:GODOT_VERSION/$zip" -OutFile $zip
+          Expand-Archive $zip -DestinationPath $env:GODOT_DIR
+
+      - name: Import assets
+        shell: pwsh
+        run: |
+          $godot = Get-ChildItem $env:GODOT_DIR -Recurse -Filter "*_console.exe" | Select-Object -First 1 -ExpandProperty FullName
+          "GODOT=$godot" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+          # Two passes: the first creates import settings for files the scene imports extract.
+          & $godot --headless --path . --import
+          & $godot --headless --path . --import
+          $bad = Get-ChildItem -Recurse -Filter *.import | Select-String -SimpleMatch "valid=false" -List
+          if ($bad) { $bad | ForEach-Object { $_.Path }; throw "assets failed to import" }
+          exit 0
+
+      - name: Headless test suites
+        shell: pwsh
+        run: ./tests/run_tests.ps1 -Godot $env:GODOT -HeadlessOnly
