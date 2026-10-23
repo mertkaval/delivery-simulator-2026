@@ -261,3 +261,25 @@ static func order_chip() -> PanelContainer:
 	info.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	col.add_child(info)
 	return chip
+
+## A rounded card (14 px corners, roomy padding): the modal shell and menu buttons.
+static func card(color: Color) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = color
+	style.set_corner_radius_all(14)
+	style.content_margin_left = 24
+	style.content_margin_right = 24
+	style.content_margin_top = 18
+	style.content_margin_bottom = 18
+	return style
+
+## A plain label with a soft drop shadow (menu pages).
+static func shadow_label(text: String, size: int = 20, color: Color = Color("e6efeb")) -> Label:
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_color_override("font_color", color)
+	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.5))
+	l.add_theme_constant_override("shadow_offset_x", 0)
+	l.add_theme_constant_override("shadow_offset_y", 1)
+	return l

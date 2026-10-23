@@ -62,17 +62,18 @@ func run() -> void:
 	var routed := 0
 	var homes := {}
 	for b: CitizenBrain in brains:
-		if not b.loop.is_empty(): continue
-		if not b.places.is_empty() and not (b.places.home as Dictionary).is_empty(): routed += 1
-		if b.places.has("home"): homes[(b.places.home as Dictionary).get("node", -1)] = true
-		if b.ROUTINES.has(b.routine_name):
-			var night := b.slot_for(2.0)
-			if night != "home": check(false, "%s sleeps at home (slot %s)" % [b.routine_name, night])
+		if not b.loop.is_empty() or b.routine == null: continue
+		var r := b.routine
+		if not r.places.is_empty() and not (r.places.home as Dictionary).is_empty(): routed += 1
+		if r.places.has("home"): homes[(r.places.home as Dictionary).get("node", -1)] = true
+		var night := r.slot_for(2.0)
+		if night != "home": check(false, "%s sleeps at home (slot %s)" % [r.routine_name, night])
 	check(routed > brains.size() * 0.8, "walkers have their own places (%d / %d)" % [routed, brains.size()])
 	check(homes.size() > 20, "homes are spread over the city (%d distinct)" % homes.size())
 	if not LivingAssets.load_people().is_empty():
 		var roles := {}
-		for b: CitizenBrain in brains: roles[b.role] = true
+		for b: CitizenBrain in brains:
+			if b.routine != null: roles[b.routine.role] = true
 		check(roles.size() >= 10, "many roles walk the streets (%d)" % roles.size())
 		check(role_poses.size() >= 2, "people do their jobs at their stops (%s)" % str(role_poses.keys()))
 	check(life.seats.size() > 40, "free bench seats registered (%d)" % life.seats.size())
