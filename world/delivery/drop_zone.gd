@@ -173,8 +173,8 @@ func _process(delta: float) -> void:
 ## Meet at door: the customer opens the door and waits on the doorstep.
 func call_customer(order: Dictionary) -> void:
 	if customer != null or method != "meet": return
-	# The realistic talking avatar (assets/player/customer_avaturn.glb); a townsperson if missing.
-	var who: Node3D = LivingAssets.door_customer()
+	# A resident of the customer's gender (designed townspeople); else the talking Avaturn avatar.
+	var who: Node3D = LivingAssets.resident_for(str(order.get("customer", ""))) if not LivingAssets.load_people().is_empty() else LivingAssets.door_customer()
 	if who == null: who = LivingAssets.humanoid(absi(hash(str(order.get("customer", "")))) % 6)
 	customer = who
 	who.name = "Customer"

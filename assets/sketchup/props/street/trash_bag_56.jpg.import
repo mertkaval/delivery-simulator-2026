@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cisu6a5ram15t"
-path="res://.godot/imported/trash_bag_56.jpg-cef2142adb13e1d9e99ca2d0cbbf5d95.ctex"
+path.s3tc="res://.godot/imported/trash_bag_56.jpg-cef2142adb13e1d9e99ca2d0cbbf5d95.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "744e0de06502cbaaa2e5ba64e43a4a22"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/sketchup/props/street/trash_bag_56.jpg"
-dest_files=["res://.godot/imported/trash_bag_56.jpg-cef2142adb13e1d9e99ca2d0cbbf5d95.ctex"]
+dest_files=["res://.godot/imported/trash_bag_56.jpg-cef2142adb13e1d9e99ca2d0cbbf5d95.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

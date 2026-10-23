@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://4m4ja4wjfjjr"
-path="res://.godot/imported/courier_Jersey_roughness.png-634b411e98c02b7bb68a5b38b7a818d5.ctex"
+path.s3tc="res://.godot/imported/courier_Jersey_roughness.png-634b411e98c02b7bb68a5b38b7a818d5.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "526d8a27391f8f65fa54812b5d6fc34d"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/player/courier_Jersey_roughness.png"
-dest_files=["res://.godot/imported/courier_Jersey_roughness.png-634b411e98c02b7bb68a5b38b7a818d5.ctex"]
+dest_files=["res://.godot/imported/courier_Jersey_roughness.png-634b411e98c02b7bb68a5b38b7a818d5.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dotcch0vtpicu"
-path="res://.godot/imported/jetta_lod2_YVA69T_d.png-17e97b7f54793a6fb37906829770f523.ctex"
+path.s3tc="res://.godot/imported/jetta_lod2_YVA69T_d.png-17e97b7f54793a6fb37906829770f523.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "e3da4f80dc8f7dc713b7cfa6e1345aad"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/vehicles/jetta_gli_2025/jetta_lod2_YVA69T_d.png"
-dest_files=["res://.godot/imported/jetta_lod2_YVA69T_d.png-17e97b7f54793a6fb37906829770f523.ctex"]
+dest_files=["res://.godot/imported/jetta_lod2_YVA69T_d.png-17e97b7f54793a6fb37906829770f523.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

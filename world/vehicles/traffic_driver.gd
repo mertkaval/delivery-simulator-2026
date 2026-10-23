@@ -10,12 +10,13 @@ extends RefCounted
 ## that follow the route round bends: the player, people, buses, cars from other routes),
 ## traffic signals (SignalPlan.limit) and a short reaction time when pulling away. Distant
 ## vehicles update every step within CLOSE of the camera, every second step up to NEAR and
-## beyond NEAR at a quarter of the rate without swept moves or
+## beyond NEAR at an eighth of the rate (swept moves only within SWEEP) without
 ## wheel animation and stop casting shadows beyond SHADOW.
 
 const NEAR := 120.0
 const CLOSE := 50.0
 const SHADOW := 60.0
+const SWEEP := 70.0
 const ACCEL := 1.7
 const BRAKE := 4.5
 const EMERGENCY := 8.0
@@ -84,7 +85,8 @@ static func drive(car: Dictionary, delta: float, limit: float, physics := true) 
 		# Never drive through the player or another vehicle. A pedestrian (layer 4 only) who
 		# stays against the car for a long time (stranded on a zebra next to its wing) is
 		# edged past, as people step aside for a creeping car.
-		var hit := physics and body.test_move(body.global_transform, motion, _touch)
+		# The swept test only near the camera (rays keep the lane ahead clear further out).
+		var hit := physics and float(car.get("dist", 0.0)) < SWEEP and body.test_move(body.global_transform, motion, _touch)
 		if hit and float(car.get("go_t", 0.0)) > 1.5:
 			var c := _touch.get_collider() as CollisionObject3D
 			# Two cars wedged side by side where lanes merge: the one in front drives on (the
@@ -124,9 +126,9 @@ static func due(car: Dictionary, delta: float, camera: Node3D) -> float:
 	if dist < CLOSE:
 		car.skip = 0.0
 		return delta
-	# Mid range: every second step (still with swept moves and rays); far: every fourth.
+	# Mid range: every second step (still with swept moves and rays); far: every eighth.
 	car.skip = float(car.skip) + delta
-	car.tick = (int(car.tick) + 1) % (2 if near else 4)
+	car.tick = (int(car.tick) + 1) % (2 if near else 8)
 	if int(car.tick) != 0: return -1.0
 	var dt := float(car.skip)
 	car.skip = 0.0

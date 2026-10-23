@@ -1,0 +1,375 @@
+{
+  "people": [
+    {
+      "id": "baker",
+      "name": "NPC09_Baker",
+      "scene": "res://assets/people/baker.glb",
+      "skeleton": "NPC09_Baker/GeneralSkeleton",
+      "role": "baker",
+      "gender": "m",
+      "height": 1.75,
+      "age": 64
+    },
+    {
+      "id": "barista",
+      "name": "NPC10_Barista",
+      "scene": "res://assets/people/barista.glb",
+      "skeleton": "NPC10_Barista/GeneralSkeleton",
+      "role": "barista",
+      "gender": "f",
+      "height": 1.64,
+      "age": 33
+    },
+    {
+      "id": "bugra",
+      "name": "NPC02_BugraBaskan",
+      "scene": "res://assets/people/bugra.glb",
+      "skeleton": "NPC02_BugraBaskan/GeneralSkeleton",
+      "role": "pedestrian",
+      "gender": "m",
+      "height": 1.78,
+      "age": 28
+    },
+    {
+      "id": "bus_driver",
+      "name": "NPC31_BusDriver",
+      "scene": "res://assets/people/bus_driver.glb",
+      "skeleton": "NPC31_BusDriver/GeneralSkeleton",
+      "role": "bus_driver",
+      "gender": "m",
+      "height": 1.74,
+      "age": 64
+    },
+    {
+      "id": "cashier",
+      "name": "NPC28_GroceryCashier",
+      "scene": "res://assets/people/cashier.glb",
+      "skeleton": "NPC28_GroceryCashier/GeneralSkeleton",
+      "role": "cashier",
+      "gender": "f",
+      "height": 1.6,
+      "age": 38
+    },
+    {
+      "id": "chef",
+      "name": "NPC05_Chef",
+      "scene": "res://assets/people/chef.glb",
+      "skeleton": "NPC05_Chef/GeneralSkeleton",
+      "role": "chef",
+      "gender": "f",
+      "height": 1.68,
+      "age": 38
+    },
+    {
+      "id": "concierge",
+      "name": "NPC03_Concierge",
+      "scene": "res://assets/people/concierge.glb",
+      "skeleton": "NPC03_Concierge/GeneralSkeleton",
+      "role": "concierge",
+      "gender": "f",
+      "height": 1.62,
+      "age": 41
+    },
+    {
+      "id": "construction_worker",
+      "name": "NPC04_ConstructionWorker",
+      "scene": "res://assets/people/construction_worker.glb",
+      "skeleton": "NPC04_ConstructionWorker/GeneralSkeleton",
+      "role": "construction",
+      "gender": "m",
+      "height": 1.8,
+      "age": 38
+    },
+    {
+      "id": "courier_woman",
+      "name": "NPC07_BikeCourier",
+      "scene": "res://assets/people/courier_woman.glb",
+      "skeleton": "NPC07_BikeCourier/GeneralSkeleton",
+      "role": "bike_courier",
+      "gender": "f",
+      "height": 1.7,
+      "age": 28
+    },
+    {
+      "id": "delivery_driver",
+      "name": "NPC17_DeliveryDriver",
+      "scene": "res://assets/people/delivery_driver.glb",
+      "skeleton": "NPC17_DeliveryDriver/GeneralSkeleton",
+      "role": "delivery_driver",
+      "gender": "f",
+      "height": 1.68,
+      "age": 51
+    },
+    {
+      "id": "dog_walker",
+      "name": "NPC12_DogWalker",
+      "scene": "res://assets/people/dog_walker.glb",
+      "skeleton": "NPC12_DogWalker/GeneralSkeleton",
+      "role": "dog_walker",
+      "gender": "f",
+      "height": 1.66,
+      "age": 51
+    },
+    {
+      "id": "doner_worker",
+      "name": "NPC13_DonerWorker",
+      "scene": "res://assets/people/doner_worker.glb",
+      "skeleton": "NPC13_DonerWorker/GeneralSkeleton",
+      "role": "doner",
+      "gender": "m",
+      "height": 1.77,
+      "age": 35
+    },
+    {
+      "id": "elderly_man",
+      "name": "NPC15_ElderlyMan",
+      "scene": "res://assets/people/elderly_man.glb",
+      "skeleton": "NPC15_ElderlyMan/GeneralSkeleton",
+      "role": "retiree",
+      "gender": "m",
+      "height": 1.72,
+      "age": 74
+    },
+    {
+      "id": "elderly_woman",
+      "name": "NPC16_ElderlyWoman",
+      "scene": "res://assets/people/elderly_woman.glb",
+      "skeleton": "NPC16_ElderlyWoman/GeneralSkeleton",
+      "role": "retiree",
+      "gender": "f",
+      "height": 1.56,
+      "age": 77
+    },
+    {
+      "id": "jogger_man",
+      "name": "NPC06_VancouverJogger",
+      "scene": "res://assets/people/jogger_man.glb",
+      "skeleton": "NPC06_VancouverJogger/GeneralSkeleton",
+      "role": "jogger",
+      "gender": "m",
+      "height": 1.78,
+      "age": 25
+    },
+    {
+      "id": "jogger_woman",
+      "name": "NPC08_AuburnJogger",
+      "scene": "res://assets/people/jogger_woman.glb",
+      "skeleton": "NPC08_AuburnJogger/GeneralSkeleton",
+      "role": "jogger",
+      "gender": "f",
+      "height": 1.66,
+      "age": 30
+    },
+    {
+      "id": "middle_aged_man",
+      "name": "NPC25_MiddleAgedMan",
+      "scene": "res://assets/people/middle_aged_man.glb",
+      "skeleton": "NPC25_MiddleAgedMan/GeneralSkeleton",
+      "role": "commuter",
+      "gender": "m",
+      "height": 1.78,
+      "age": 56
+    },
+    {
+      "id": "middle_aged_woman",
+      "name": "NPC01_MiddleAgedWoman",
+      "scene": "res://assets/people/middle_aged_woman.glb",
+      "skeleton": "NPC01_MiddleAgedWoman/GeneralSkeleton",
+      "role": "resident",
+      "gender": "f",
+      "height": 1.64,
+      "age": 50
+    },
+    {
+      "id": "moto_courier",
+      "name": "NPC20_MotoCourier",
+      "scene": "res://assets/people/moto_courier.glb",
+      "skeleton": "NPC20_MotoCourier/GeneralSkeleton",
+      "role": "moto_courier",
+      "gender": "m",
+      "height": 1.76,
+      "age": 33
+    },
+    {
+      "id": "office_man",
+      "name": "NPC19_OfficeWorkerMan",
+      "scene": "res://assets/people/office_man.glb",
+      "skeleton": "NPC19_OfficeWorkerMan/GeneralSkeleton",
+      "role": "office",
+      "gender": "m",
+      "height": 1.8,
+      "age": 35
+    },
+    {
+      "id": "office_woman",
+      "name": "NPC24_OfficeWorkerWoman",
+      "scene": "res://assets/people/office_woman.glb",
+      "skeleton": "NPC24_OfficeWorkerWoman/GeneralSkeleton",
+      "role": "office",
+      "gender": "f",
+      "height": 1.66,
+      "age": 35
+    },
+    {
+      "id": "paramedic",
+      "name": "NPC22_Paramedic",
+      "scene": "res://assets/people/paramedic.glb",
+      "skeleton": "NPC22_Paramedic/GeneralSkeleton",
+      "role": "paramedic",
+      "gender": "m",
+      "height": 1.8,
+      "age": 38
+    },
+    {
+      "id": "parent",
+      "name": "NPC32_Parent",
+      "scene": "res://assets/people/parent.glb",
+      "skeleton": "NPC32_Parent/GeneralSkeleton",
+      "role": "parent",
+      "gender": "m",
+      "height": 1.8,
+      "age": 43
+    },
+    {
+      "id": "pizza_worker",
+      "name": "NPC33_PizzaWorker",
+      "scene": "res://assets/people/pizza_worker.glb",
+      "skeleton": "NPC33_PizzaWorker/GeneralSkeleton",
+      "role": "pizza",
+      "gender": "f",
+      "height": 1.64,
+      "age": 28
+    },
+    {
+      "id": "police_woman",
+      "name": "NPC21_PoliceOfficer",
+      "scene": "res://assets/people/police_woman.glb",
+      "skeleton": "NPC21_PoliceOfficer/GeneralSkeleton",
+      "role": "police",
+      "gender": "f",
+      "height": 1.7,
+      "age": 38
+    },
+    {
+      "id": "road_cyclist",
+      "name": "NPC18_DeliveryCyclist",
+      "scene": "res://assets/people/road_cyclist.glb",
+      "skeleton": "NPC18_DeliveryCyclist/GeneralSkeleton",
+      "role": "bike_courier",
+      "gender": "m",
+      "height": 1.78,
+      "age": 28
+    },
+    {
+      "id": "security_guard",
+      "name": "NPC27_SecurityGuard",
+      "scene": "res://assets/people/security_guard.glb",
+      "skeleton": "NPC27_SecurityGuard/GeneralSkeleton",
+      "role": "security",
+      "gender": "m",
+      "height": 1.74,
+      "age": 64
+    },
+    {
+      "id": "server",
+      "name": "NPC30_RestaurantServer",
+      "scene": "res://assets/people/server.glb",
+      "skeleton": "NPC30_RestaurantServer/GeneralSkeleton",
+      "role": "server",
+      "gender": "m",
+      "height": 1.75,
+      "age": 25
+    },
+    {
+      "id": "street_cleaner",
+      "name": "NPC34_StreetCleaner",
+      "scene": "res://assets/people/street_cleaner.glb",
+      "skeleton": "NPC34_StreetCleaner/GeneralSkeleton",
+      "role": "street_cleaner",
+      "gender": "f",
+      "height": 1.66,
+      "age": 51
+    },
+    {
+      "id": "student_man",
+      "name": "NPC14_EastAsianStudent",
+      "scene": "res://assets/people/student_man.glb",
+      "skeleton": "NPC14_EastAsianStudent/GeneralSkeleton",
+      "role": "student",
+      "gender": "m",
+      "height": 1.74,
+      "age": 23
+    },
+    {
+      "id": "student_woman",
+      "name": "NPC11_CollegeStudent",
+      "scene": "res://assets/people/student_woman.glb",
+      "skeleton": "NPC11_CollegeStudent/GeneralSkeleton",
+      "role": "student",
+      "gender": "f",
+      "height": 1.62,
+      "age": 23
+    },
+    {
+      "id": "taxi_driver",
+      "name": "NPC23_TaxiDriver",
+      "scene": "res://assets/people/taxi_driver.glb",
+      "skeleton": "NPC23_TaxiDriver/GeneralSkeleton",
+      "role": "taxi_driver",
+      "gender": "m",
+      "height": 1.72,
+      "age": 64
+    },
+    {
+      "id": "tourist",
+      "name": "NPC29_Tourist",
+      "scene": "res://assets/people/tourist.glb",
+      "skeleton": "NPC29_Tourist/GeneralSkeleton",
+      "role": "tourist",
+      "gender": "f",
+      "height": 1.6,
+      "age": 46
+    },
+    {
+      "id": "urban_cyclist",
+      "name": "NPC26_UrbanCyclist",
+      "scene": "res://assets/people/urban_cyclist.glb",
+      "skeleton": "NPC26_UrbanCyclist/GeneralSkeleton",
+      "role": "cyclist",
+      "gender": "m",
+      "height": 1.76,
+      "age": 28
+    },
+    {
+      "id": "warehouse_worker",
+      "name": "NPC35_WarehouseWorker",
+      "scene": "res://assets/people/warehouse_worker.glb",
+      "skeleton": "NPC35_WarehouseWorker/GeneralSkeleton",
+      "role": "warehouse",
+      "gender": "m",
+      "height": 1.8,
+      "age": 30
+    },
+    {
+      "id": "young_man",
+      "name": "NPC36_YoungMan",
+      "scene": "res://assets/people/young_man.glb",
+      "skeleton": "NPC36_YoungMan/GeneralSkeleton",
+      "role": "pedestrian",
+      "gender": "m",
+      "height": 1.76,
+      "age": 24
+    },
+    {
+      "id": "young_woman",
+      "name": "NPC37_YoungWoman",
+      "scene": "res://assets/people/young_woman.glb",
+      "skeleton": "NPC37_YoungWoman/GeneralSkeleton",
+      "role": "pedestrian",
+      "gender": "f",
+      "height": 1.68,
+      "age": 25
+    }
+  ],
+  "clips": "res://assets/people/npc_role_clips.glb"
+}

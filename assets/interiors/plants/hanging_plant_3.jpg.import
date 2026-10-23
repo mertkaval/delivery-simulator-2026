@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cgx5emdwwrwne"
-path="res://.godot/imported/hanging_plant_3.jpg-86f5808acc118a7b515d1f897f79bb35.ctex"
+path.s3tc="res://.godot/imported/hanging_plant_3.jpg-86f5808acc118a7b515d1f897f79bb35.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "15e1f6b35322ad02ef53d56d4f77334d"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/interiors/plants/hanging_plant_3.jpg"
-dest_files=["res://.godot/imported/hanging_plant_3.jpg-86f5808acc118a7b515d1f897f79bb35.ctex"]
+dest_files=["res://.godot/imported/hanging_plant_3.jpg-86f5808acc118a7b515d1f897f79bb35.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

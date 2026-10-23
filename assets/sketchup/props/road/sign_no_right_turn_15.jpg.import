@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ddam2prq0xocu"
-path="res://.godot/imported/sign_no_right_turn_15.jpg-a6d8bbd3dc29f5b7680c7ca82bae7e7e.ctex"
+path.s3tc="res://.godot/imported/sign_no_right_turn_15.jpg-a6d8bbd3dc29f5b7680c7ca82bae7e7e.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "36d86ff03e58a86bb3381d760dce6d67"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/sketchup/props/road/sign_no_right_turn_15.jpg"
-dest_files=["res://.godot/imported/sign_no_right_turn_15.jpg-a6d8bbd3dc29f5b7680c7ca82bae7e7e.ctex"]
+dest_files=["res://.godot/imported/sign_no_right_turn_15.jpg-a6d8bbd3dc29f5b7680c7ca82bae7e7e.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

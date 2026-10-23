@@ -62,7 +62,7 @@ func start_waiter(index: int, spot: Vector3, yaw: float, plate_spot: Vector3) ->
 	pass_spot = spot
 	pass_yaw = yaw
 	counter_spot = plate_spot
-	waiter = LivingAssets.humanoid(index)
+	waiter = LivingAssets.person("server", index)
 	waiter.max_distance = max_distance
 	waiter.locomotion = "WalkCarry"
 	add_child(waiter)

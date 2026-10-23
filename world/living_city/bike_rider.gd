@@ -17,7 +17,7 @@ static func available() -> bool:
 
 ## Seat a humanoid townsperson on `bike` (a CityAssets "bicycle"). Returns the rider node.
 static func mount(bike: Node3D, index: int) -> Node3D:
-	var rider: LivingCitizen = LivingAssets.humanoid(index)
+	var rider: LivingCitizen = LivingAssets.person("cyclist", index)
 	bike.add_child(rider)
 	rider.transform = Transform3D.IDENTITY    # the clip is authored with the rider root at the bike root
 	rider.set_process(false)                  # its walking logic would replace the riding clip

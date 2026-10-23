@@ -9,6 +9,9 @@ var elapsed := 0.0
 const CITIZEN_SADDLE_Z := 0.44
 
 func person(index: int) -> Node3D:
+	# The designed townspeople (assets/people): every role that lives on the street, each with
+	# its own daily routine (CitizenBrain.ROUTINES).
+	if not LivingAssets.load_people().is_empty(): return LivingAssets.person("street", index)
 	var model := CityAssets.create("citizen", 75)
 	CityAssets.tint(model, "Clothing", Color(["315769", "965a40", "556b46", "a38f65", "473d55", "b5b7ac"][index % 6]))
 	CityAssets.tint(model, "Skin", Color(["ad795c", "6b4631", "c89574", "8e6046"][index % 4]))
@@ -77,7 +80,8 @@ func _ready() -> void:
 		park_index += 1
 	# Atatürk Avenue restaurants (CityAssets restaurant_0..2): counter staff, seated diners and a waiter.
 	for i in range(3):
-		var worker := person(i + 3)
+		# counter staff working the counter (stirring, kneading, serving) on a routine
+		var worker: Node3D = LivingAssets.standing_person(i * 3 + 1, "chef") if not LivingAssets.load_people().is_empty() else person(i + 3)
 		worker.position = CityCatalog.PICKUPS[i] + Vector3(-2.8, -1, -1.5)
 		worker.position.y=.05
 		worker.rotation.y = PI

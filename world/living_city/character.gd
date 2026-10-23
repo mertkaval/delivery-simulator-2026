@@ -40,6 +40,7 @@ var skeleton: Skeleton3D
 var phone: Node3D
 var tray: Node3D
 var tray_load: Node3D
+var broom: Node3D
 var shadows := true
 ## Waiters: the tray stays in the hands through PickUp (lifting from / setting on a surface).
 var tray_active := false
@@ -51,7 +52,7 @@ var routine_step := 0
 static var camera_frame := -1
 static var camera_position := Vector3.ZERO
 static var camera_known := false
-const PHONE_CLIPS := ["Phone", "SitPhone"]
+const PHONE_CLIPS := ["Phone", "SitPhone", "Photo", "PhoneCall"]
 const TRAY_CLIPS := ["Carry", "WalkCarry"]
 
 func attach_helmet() -> void:
@@ -109,7 +110,7 @@ func play_once(clip: String, backwards := false) -> float:
 ## Seated placement for a seat whose top is `seat_top` above this node's parent origin:
 ## (origin height, distance of the origin ahead of the back's rearmost point). See CitySeating.
 func seat_fit(seat_top: float) -> Vector2:
-	var m: Vector3=LivingAssets.SEATED.get(body_id,Vector3(0.45,-0.44,0.0))
+	var m: Vector3=LivingAssets.seated(body_id) if body_id!="" else Vector3(0.45,-0.44,0.0)
 	return Vector2(seat_top-m.x*body_scale, -m.y*body_scale)
 
 ## Script-time counters read by tests/capture_npc_life.gd (frame-time reports).
@@ -153,6 +154,8 @@ func _process_body(delta: float) -> void:
 	var interval := 0.0 if distance<10 else (1.0/20.0 if distance<24 else (1.0/10.0 if distance<45 else 0.2))
 	var on_screen := notifier==null or notifier.is_on_screen()
 	if not on_screen: interval=maxf(interval,0.5)
+	# Standing or seated in place (diners, counter staff, guards): half the rate beyond 10 m.
+	elif distance>=10 and ground_speed==0.0 and oneshot=="": interval=maxf(interval*2.0,1.0/15.0)
 	if timer<interval: return
 	var measured := global_position.distance_to(last_position)/maxf(timer,0.001)
 	last_position=global_position
@@ -191,8 +194,8 @@ func _process_body(delta: float) -> void:
 		if clip!=last_clip:
 			animator.play(clip,.3)
 			last_clip=clip
-		if clip in LivingAssets.LOCOMOTION:
-			var reference := stride_speed*(LivingAssets.FORMAL_STRIDE if clip=="WalkFormal" else 1.0)
+		if clip in LivingAssets.LOCOMOTION or LivingAssets.STRIDE_FACTOR.has(clip):
+			var reference := stride_speed*float(LivingAssets.STRIDE_FACTOR.get(clip,1.0))
 			animator.speed_scale=clampf(speed/maxf(reference,0.1),.55,1.7) if humanoid else clampf(speed/1.25,.65,1.5)
 		else:
 			animator.speed_scale=idle_rate if humanoid else .75
@@ -227,6 +230,63 @@ func update_props(distance: float) -> void:
 			var centre := (gl.origin+gr.origin)*0.5+fingers*0.05*body_scale+Vector3.UP*0.035
 			var forward := -global_basis.z
 			tray.global_transform=Transform3D(Basis.looking_at(forward,Vector3.UP),centre)
+
+	# Push broom while sweeping: the handle runs through both hands (high left, low right) down
+	# to the ground ahead, the brush head flat on the pavement across the stroke.
+	var want_broom := clip=="Sweep" and distance<45
+	if want_broom and broom==null: broom=make_broom()
+	if broom!=null:
+		broom.visible=want_broom
+		if want_broom:
+			var gl := skeleton.global_transform*skeleton.get_bone_global_pose(skeleton.find_bone("LeftHand"))
+			var gr := skeleton.global_transform*skeleton.get_bone_global_pose(skeleton.find_bone("RightHand"))
+			# grip centres: a little along the fingers from the hand bones
+			var high := gl.origin+gl.basis.y.normalized()*0.06*body_scale
+			var low := gr.origin+gr.basis.y.normalized()*0.06*body_scale
+			var down := (low-high).normalized()
+			if down.y>-0.2: down=(down+Vector3.DOWN*0.6).normalized()
+			var ground := global_position.y+0.03
+			var reach := (high.y-ground)/maxf(-down.y,0.2)
+			var foot := high+down*reach
+			var forward := Vector3(down.x,0,down.z).normalized() if Vector2(down.x,down.z).length()>0.05 else -global_basis.z
+			var handle := broom.get_child(0) as Node3D
+			var head := broom.get_child(1) as Node3D
+			var top := high-down*0.12
+			var length := top.distance_to(foot)
+			handle.global_transform=Transform3D(Basis.looking_at(down,forward if absf(down.dot(Vector3.UP))>0.95 else Vector3.UP)*Basis(Vector3.RIGHT,-PI*0.5),(top+foot)*0.5)
+			handle.scale=Vector3(1,length,1)
+			head.global_transform=Transform3D(Basis.looking_at(forward,Vector3.UP),foot)
+
+func make_broom() -> Node3D:
+	var root := Node3D.new()
+	root.name="Broom"
+	root.top_level=true
+	add_child(root)
+	var wood := StandardMaterial3D.new()
+	wood.albedo_color=Color(0.55,0.4,0.24)
+	wood.roughness=0.7
+	var handle := MeshInstance3D.new()
+	var stick := CylinderMesh.new()
+	stick.top_radius=0.014
+	stick.bottom_radius=0.014
+	stick.height=1.0
+	stick.radial_segments=6
+	stick.rings=1
+	stick.material=wood
+	handle.mesh=stick
+	root.add_child(handle)
+	var head := MeshInstance3D.new()
+	var block := BoxMesh.new()
+	block.size=Vector3(0.46,0.05,0.07)
+	var bristle := StandardMaterial3D.new()
+	bristle.albedo_color=Color(0.12,0.11,0.1)
+	bristle.roughness=0.9
+	block.material=bristle
+	head.mesh=block
+	root.add_child(head)
+	for mesh: GeometryInstance3D in [handle,head]:
+		mesh.visibility_range_end=50.0
+	return root
 
 ## Gives this person a tray to carry (shown while a carrying clip plays); `load` sits on it.
 func carry(item: Node3D) -> void:

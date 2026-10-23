@@ -62,6 +62,7 @@ func set_time(hour: float) -> void:
 	atmosphere.ambient_light_color = Color("7185b4").lerp(Color("c3d1d6"), amount)
 	for lamp in lamps:
 		lamp.light_energy = (1.0 - amount) * 3.0
+		lamp.visible = amount < 0.98      # a dark lamp still costs light culling: off in daylight
 	HiggsfieldHousing.set_daylight(amount)
 	if downtown!=null: downtown.set_time(hour,amount)
 	CityKit.set_night(1.0 - amount)
@@ -674,7 +675,7 @@ func build_store(id: String, at: Vector3) -> void:
 			if id!="equipment": display_solid(model, id=="cars")
 		# Converted Sketchfab people: a clerk at the counter and a guard at the door.
 		var shop_index: int = ShopCatalog.LOCATIONS.keys().find(id)
-		var clerk: Node3D = LivingAssets.standing_person(1 + shop_index)
+		var clerk: Node3D = LivingAssets.standing_person(1 + shop_index, "cashier")
 		clerk.position=at+Vector3(4,.1,-.2)
 		clerk.rotation.y=PI
 		add_child(clerk)
@@ -731,6 +732,11 @@ func build_cedar_home() -> void:
 		lamp.light_energy = 0.65
 		lamp.omni_range = 3.6
 		lamp.shadow_enabled = true
+		# Indoor lamps with cube shadows: only drawn (and their shadows rendered) near the house.
+		lamp.distance_fade_enabled = true
+		lamp.distance_fade_begin = 30.0
+		lamp.distance_fade_shadow = 18.0
+		lamp.distance_fade_length = 8.0
 		add_child(lamp)
 	lamp_at(CEDAR_HOME_ORIGIN + Vector3(1.1, 2.65, 6.3))
 

@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c7hx2jcj2fr0c"
-path="res://.godot/imported/civil_rdservtruck_Image_27.png-970552ffda3d28a58d8dbafc57039854.ctex"
+path.s3tc="res://.godot/imported/civil_rdservtruck_Image_27.png-970552ffda3d28a58d8dbafc57039854.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "c60b801a4de53fb21a468e00c917fbcc"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/sketchup/vehicles/civil_rdservtruck_Image_27.png"
-dest_files=["res://.godot/imported/civil_rdservtruck_Image_27.png-970552ffda3d28a58d8dbafc57039854.ctex"]
+dest_files=["res://.godot/imported/civil_rdservtruck_Image_27.png-970552ffda3d28a58d8dbafc57039854.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

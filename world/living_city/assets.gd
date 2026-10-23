@@ -55,12 +55,19 @@ static func sketchup_person(id: String) -> LivingCitizen:
 	return model
 
 ## A standing person for a fixed spot (guard at a door, staff at a counter).
-static func standing_person(index: int) -> LivingCitizen:
-	# Guards keep their uniform model; clerks and other standing staff are realistic humanoids.
-	var person: LivingCitizen = sketchup_person(STANDING[0]) if index%STANDING.size()==0 else humanoid(index)
-	person.max_distance=70.0
-	if person.humanoid: person.routine=PackedStringArray(["Idle","Idle","Talk","Interact","Look","Phone"])
-	return person
+static func standing_person(index: int, role: String = "cashier") -> LivingCitizen:
+	# Index 0 (every STANDING.size()-th) is a guard; the rest are counter staff of `role`.
+	var guard := index%STANDING.size()==0
+	var who: LivingCitizen
+	if not load_people().is_empty():
+		who = person("security" if guard else role, index)
+	else:
+		who = sketchup_person(STANDING[0]) if guard else humanoid(index)
+	who.max_distance=70.0
+	if who.humanoid:
+		who.routine=PackedStringArray(["Duty","Duty","FoldArms","Look","Idle"]) if guard and not people.is_empty() \
+			else PackedStringArray(["Idle","Counter","Counter","Talk","Interact","Look"] if not people.is_empty() else ["Idle","Idle","Talk","Interact","Look","Phone"])
+	return who
 
 ## Realistic townspeople (tools/prepare_characters.py) animated with the CC0 Quaternius
 ## Universal Animation Library through Godot humanoid retargeting (tools/setup_retarget.gd):
@@ -149,8 +156,187 @@ static func outfit_material(id: String, surface: int, source: StandardMaterial3D
 	outfit_materials[key] = m
 	return m
 
+## Designed townspeople (tools/npc/: MPFB bodies on the v3 courier's rig -> assets/people/*.glb and
+## people.json). When present they replace the converted HUMANOIDS: a spawn site asks for a group
+## (a waiter gets the restaurant server, a guard the security guard, a door customer a resident
+## of the customer's gender) and they move with the courier's natural clips (courier_anims.res)
+## plus the role clips (npc_role_clips.glb: sweeping, counter work, duty stance, photos, walking
+## a dog, pushing a stroller).
+const PEOPLE_MANIFEST := "res://assets/people/people.json"
+const COURIER_CLIPS := "res://assets/player/courier_anims.res"
+## The courier's Walk covers 1.254 m/s at 1.824 m; sitting on a 0.471 m seat (clips.json).
+const V3_WALK := 1.254
+const V3_HEIGHT := 1.824
+const V3_SEAT := 0.471
+## Game clip -> courier clip (natural gaits and idles authored for the v3 courier).
+const PEOPLE_CLIPS := {"Idle": "Idle", "Walk": "Walk", "Brisk": "Walk", "WalkFormal": "Walk", "Run": "Jog",
+	"Wait": "Idle_Shift", "Talk": "Idle_Talk", "Look": "Idle_Look", "FoldArms": "Idle_FoldArms",
+	"Sit": "Sit_Idle", "SitTalk": "Sit_Talk", "Cycle": "Sit_Idle", "SitDown": "Sit_Enter", "StandUp": "Sit_Exit",
+	"Interact": "Interact", "PickUp": "PickUp_Table", "Push": "Push", "Carry": "Carry_Idle", "WalkCarry": "Carry_Walk",
+	"Phone": "Phone_Use", "PhoneCall": "Phone_Call", "Wave": "Wave", "Nod": "Nod_Yes", "Drive": "Car_Drive"}
+## Game clip -> role clip (npc_role_clips.glb; Godot drops the _Loop suffix on import).
+const ROLE_CLIPS := {"Sweep": "Sweep", "Counter": "Counter_Work", "Duty": "Duty_Stand", "Photo": "Photo_Take",
+	"WalkLeash": "Walk_Leash", "WalkPush": "Walk_Push"}
+## Game clip -> UAL clip for what the courier set does not have.
+const PEOPLE_UAL := {"SitPhone": "Sitting_Phone", "SitEat": "Sitting_Eat", "Kneel": "Fixing_Kneeling"}
+## Walking clips besides LOCOMOTION, and stride relative to Walk for every walking clip.
+const STRIDE_FACTOR := {"WalkFormal": 0.98, "Run": 2.14, "WalkLeash": 1.0, "WalkPush": 0.96, "WalkCarry": 1.0}
+## Spawn group -> roles that may fill it (picked by index; first role first).
+const GROUPS := {
+	"walker": ["pedestrian", "resident", "commuter", "office", "student", "retiree", "tourist", "parent", "jogger"],
+	"resident": ["resident", "pedestrian", "commuter", "office", "retiree", "parent", "student"],
+	"diner": ["pedestrian", "resident", "commuter", "office", "student", "tourist", "retiree", "parent"],
+	"passenger": ["commuter", "office", "student", "pedestrian", "resident", "retiree", "tourist"],
+	"shopper": ["pedestrian", "resident", "student", "tourist", "retiree", "parent", "office"],
+	"cyclist": ["cyclist", "bike_courier"],
+	# everyone who walks the pavements on a routine (staff at their posts and riders excluded)
+	"street": ["pedestrian", "resident", "commuter", "office", "student", "retiree", "tourist", "parent", "jogger",
+		"dog_walker", "police", "street_cleaner", "construction", "paramedic", "delivery_driver", "moto_courier",
+		"security", "warehouse", "taxi_driver", "bus_driver", "cashier"],
+	# roles with one designed body share their spawn sites with related roles, so a city of
+	# restaurants / shops / dog walkers is not one face repeated
+	"server": ["server", "pizza", "doner", "barista"], "security": ["security"],
+	"dog_walker": ["dog_walker", "retiree", "resident", "pedestrian", "parent"],
+	"cashier": ["cashier", "barista", "baker", "warehouse", "concierge"],
+	"barista": ["barista"], "baker": ["baker"], "chef": ["chef", "doner", "pizza", "baker"], "doner": ["doner"], "pizza": ["pizza"],
+	"concierge": ["concierge"], "police": ["police"], "paramedic": ["paramedic"], "construction": ["construction"],
+	"street_cleaner": ["street_cleaner"], "warehouse": ["warehouse"], "jogger": ["jogger"], "tourist": ["tourist"],
+	"bus_driver": ["bus_driver"], "taxi_driver": ["taxi_driver"], "delivery_driver": ["delivery_driver"],
+	"moto_courier": ["moto_courier"], "student": ["student"], "office": ["office"], "retiree": ["retiree"], "parent": ["parent"]}
+const FEMALE_NAMES := ["Ayşe", "Elif", "Zeynep", "Selin", "Ece", "Defne", "Olivia", "Emma", "Sofia", "Priya", "Mei", "Yuna",
+	"Leila", "Chloé", "Ingrid", "Valentina"]
+static var people: Array = []
+static var people_by_id := {}
+static var people_loaded := false
+static var people_library: AnimationLibrary
+
+## people.json entries whose model exists (empty: the converted HUMANOIDS are used).
+static func load_people() -> Array:
+	if people_loaded: return people
+	people_loaded = true
+	if not FileAccess.file_exists(PEOPLE_MANIFEST) or not ResourceLoader.exists(COURIER_CLIPS): return people
+	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(PEOPLE_MANIFEST))
+	if not data is Dictionary: return people
+	for e: Dictionary in (data as Dictionary).get("people", []):
+		if ResourceLoader.exists(str(e.scene)):
+			people.append(e)
+			people_by_id[str(e.id)] = e
+	return people
+
+## Body ids for generic townspeople (walkers, diners, seated people): the designed people of the
+## "walker" group, else the converted HUMANOIDS.
+static func body_ids() -> Array:
+	if load_people().is_empty(): return HUMANOIDS
+	var ids: Array = []
+	for e: Dictionary in people:
+		if str(e.role) in GROUPS.walker: ids.append(str(e.id))
+	return ids if not ids.is_empty() else HUMANOIDS
+
+## Seated pose of a body at scale 1: (buttocks above the soles' plane origin, back offset, sole).
+static func seated(id: String) -> Vector3:
+	if SEATED.has(id): return SEATED[id]
+	var h := float((people_by_id.get(id, {}) as Dictionary).get("height", V3_HEIGHT)) / V3_HEIGHT
+	return Vector3(V3_SEAT * h, -0.445 * h, 0.0)
+
+## A designed person for a role group (index picks among the matches; gender "f" / "m" filters).
+static func person_entry(group: String, index: int, gender: String = "") -> Dictionary:
+	if load_people().is_empty(): return {}
+	var roles: Array = GROUPS.get(group, [group])
+	var pool: Array = []
+	for e: Dictionary in people:
+		if str(e.role) in roles and (gender == "" or str(e.gender) == gender): pool.append(e)
+	if pool.is_empty() and gender != "":
+		return person_entry(group, index)
+	if pool.is_empty(): return {}
+	return pool[posmod(index, pool.size())]
+
+## The game's clip library for the designed people.
+static func people_clips() -> AnimationLibrary:
+	if people_library != null: return people_library
+	people_library = AnimationLibrary.new()
+	var courier: AnimationLibrary = load(COURIER_CLIPS)
+	for game_name: String in PEOPLE_CLIPS:
+		if courier.has_animation(PEOPLE_CLIPS[game_name]):
+			people_library.add_animation(game_name, courier.get_animation(PEOPLE_CLIPS[game_name]))
+	var role_path := "res://assets/people/npc_role_clips.glb"
+	if ResourceLoader.exists(role_path):
+		var source: Node = (load(role_path) as PackedScene).instantiate()
+		var ap := source.find_child("AnimationPlayer", true, false) as AnimationPlayer
+		if ap != null:
+			var lib := ap.get_animation_library("")
+			for game_name: String in ROLE_CLIPS:
+				for clip_name: String in [ROLE_CLIPS[game_name], ROLE_CLIPS[game_name] + "_Loop"]:
+					if lib.has_animation(clip_name):
+						var a := lib.get_animation(clip_name)
+						a.loop_mode = Animation.LOOP_LINEAR
+						people_library.add_animation(game_name, a)
+						break
+		source.free()
+	for path in [UAL, UAL_NPC]:
+		if not ResourceLoader.exists(path): continue
+		var source: Node = load(path).instantiate()
+		var full: AnimationLibrary = (source.find_child("AnimationPlayer", true, false) as AnimationPlayer).get_animation_library("")
+		for game_name: String in PEOPLE_UAL:
+			if not people_library.has_animation(game_name) and full.has_animation(PEOPLE_UAL[game_name]):
+				people_library.add_animation(game_name, full.get_animation(PEOPLE_UAL[game_name]))
+		source.free()
+	for game_name in ["Idle", "Walk", "Brisk", "WalkFormal", "Run", "Wait", "Talk", "Look", "FoldArms", "Sit", "SitTalk", "Cycle",
+			"Carry", "WalkCarry", "Phone", "PhoneCall", "Drive", "Sweep", "Counter", "Duty", "Photo", "WalkLeash", "WalkPush", "Kneel"]:
+		if people_library.has_animation(game_name): people_library.get_animation(game_name).loop_mode = Animation.LOOP_LINEAR
+	return people_library
+
+## A designed person of `group` (see GROUPS); falls back to the converted bodies.
+static func person(group: String, index: int, gender: String = "", size: float = -1.0) -> LivingCitizen:
+	var e := person_entry(group, index, gender)
+	if e.is_empty(): return humanoid(index, size)
+	return people_body(e, index, size)
+
+static func people_body(e: Dictionary, index: int, size: float = -1.0) -> LivingCitizen:
+	var id := str(e.id)
+	if not people_scenes.has(id): people_scenes[id] = load(str(e.scene))
+	var model := LivingCitizen.new()
+	model.name = "HumanoidCitizen"
+	model.humanoid = true
+	model.body_id = id
+	model.set_meta("role", str(e.role))
+	model.set_meta("person", id)
+	var body: Node3D = people_scenes[id].instantiate()
+	body.rotation.y = PI          # retarget convention faces +Z; the game's people face -Z
+	var s := size if size > 0.0 else 1.0     # designed people have their own heights
+	body.scale = Vector3.ONE * s
+	model.body_scale = s
+	model.stride_speed = V3_WALK * float(e.get("height", V3_HEIGHT)) / V3_HEIGHT * s
+	model.add_child(body)
+	model.variants.append(body)
+	for mesh: MeshInstance3D in body.find_children("*", "MeshInstance3D", true, false):
+		var keep := Node.new()   # keeps scene-wide static batching away from skinned people
+		keep.name = "Skinned"
+		mesh.add_child(keep)
+	var animator := AnimationPlayer.new()
+	animator.name = "AnimationPlayer"
+	body.add_child(animator)
+	animator.root_node = NodePath("..")
+	animator.add_animation_library("", people_clips())
+	animator.play("Idle")
+	animator.seek(fposmod(index * 1.37, 2.0), true)
+	model.players.append(animator)
+	model.idle_rate = 0.9 + 0.2 * noise(index, 12)
+	for joint in ["HipL", "HipR", "KneeL", "KneeR", "ShoulderL", "ShoulderR", "ElbowL", "ElbowR"]:
+		var proxy := Node3D.new()
+		proxy.name = joint
+		model.add_child(proxy)
+	return model
+
+## A resident for a customer's name (gender from the first name).
+static func resident_for(customer: String) -> LivingCitizen:
+	var first := customer.get_slice(" ", 0)
+	return person("resident", absi(hash(customer)), "f" if first in FEMALE_NAMES else "m")
+
 ## `size` overrides the natural height variation (seated people are sized to their seat).
 static func humanoid(index: int, size: float = -1.0) -> LivingCitizen:
+	var ids := body_ids()
+	if ids != HUMANOIDS:
+		return people_body(people_by_id[ids[posmod(index, ids.size())]], index, size)
 	var id: String = HUMANOIDS[index%HUMANOIDS.size()]
 	if not people_scenes.has(id): people_scenes[id]=load(SKETCHUP_PEOPLE%id)
 	var model := LivingCitizen.new()
@@ -246,7 +432,7 @@ static func citizen(index: int=-1) -> Node3D:
 	if index<0:
 		index=citizen_index
 		citizen_index+=1
-	if ResourceLoader.exists(SKETCHUP_PEOPLE%HUMANOIDS[0]): return humanoid(index)
+	if not load_people().is_empty() or ResourceLoader.exists(SKETCHUP_PEOPLE%HUMANOIDS[0]): return humanoid(index)
 	return classic_citizen(index)
 
 ## The earlier procedural citizens (kept for cyclists: they carry a pedalling clip).

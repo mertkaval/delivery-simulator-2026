@@ -191,6 +191,7 @@ func finish() -> void:
 	game.save_session()
 
 ## After training (new careers): an optional goal card, saving up for the first bicycle.
+var _goal_wallet := -1
 func bike_goal() -> void:
 	var s := session()
 	if card.finished: return
@@ -202,8 +203,12 @@ func bike_goal() -> void:
 		s.tutorial["bike_goal"] = true
 		card.show_finished("", "GOAL REACHED", "Your first bicycle!", "Press %s next to it to ride. Deliveries are faster now: more orders, more tips." % game.binding("interact"))
 		return
-	card.set_goal("GOAL", "Save up for a bicycle", "Cedar Cycles sells a gray city bike for %s. Keep delivering on foot: %s to go." % [DeliverySession.money(price), DeliverySession.money(maxi(0, price - s.wallet))], float(s.wallet) / float(price))
-	card.visible = game.mode == "" or game.mode == "bag"
+	# The card is rebuilt only when the savings change (rebuilding relays out the whole HUD column).
+	if s.wallet != _goal_wallet or not card.bar.visible:
+		_goal_wallet = s.wallet
+		card.set_goal("GOAL", "Save up for a bicycle", "Cedar Cycles sells a gray city bike for %s. Keep delivering on foot: %s to go." % [DeliverySession.money(price), DeliverySession.money(maxi(0, price - s.wallet))], float(s.wallet) / float(price))
+	var show: bool = game.mode == "" or game.mode == "bag"
+	if card.visible != show: card.visible = show
 
 ## Current task text with keys and order details filled in.
 func refresh() -> void:

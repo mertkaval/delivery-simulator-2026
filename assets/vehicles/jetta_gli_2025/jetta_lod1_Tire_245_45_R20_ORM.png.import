@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dlqgj0a1hqlko"
-path="res://.godot/imported/jetta_lod1_Tire_245_45_R20_ORM.png-0d438537ba864377a1eca6adbee8b88f.ctex"
+path.s3tc="res://.godot/imported/jetta_lod1_Tire_245_45_R20_ORM.png-0d438537ba864377a1eca6adbee8b88f.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "f990c2a89f5b1cab34aa59d2cb142191"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/vehicles/jetta_gli_2025/jetta_lod1_Tire_245_45_R20_ORM.png"
-dest_files=["res://.godot/imported/jetta_lod1_Tire_245_45_R20_ORM.png-0d438537ba864377a1eca6adbee8b88f.ctex"]
+dest_files=["res://.godot/imported/jetta_lod1_Tire_245_45_R20_ORM.png-0d438537ba864377a1eca6adbee8b88f.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

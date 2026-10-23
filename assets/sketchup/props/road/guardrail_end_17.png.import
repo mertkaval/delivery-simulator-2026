@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cpr3m1j1351mr"
-path="res://.godot/imported/guardrail_end_17.png-a3ff946fe42dd69dc866db098a2bc5fc.ctex"
+path.s3tc="res://.godot/imported/guardrail_end_17.png-a3ff946fe42dd69dc866db098a2bc5fc.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0fefae2b4a484a8991e703d8f00c7689"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/sketchup/props/road/guardrail_end_17.png"
-dest_files=["res://.godot/imported/guardrail_end_17.png-a3ff946fe42dd69dc866db098a2bc5fc.ctex"]
+dest_files=["res://.godot/imported/guardrail_end_17.png-a3ff946fe42dd69dc866db098a2bc5fc.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

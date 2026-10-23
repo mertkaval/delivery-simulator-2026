@@ -113,8 +113,9 @@ func gait(a: Dictionary, speed: float, delta: float) -> void:
 	a.body.position.y = absf(sin(float(a.phase))) * 0.015 * clampf(speed, 0.0, 1.0)
 
 func add_dog_walker(i: int, route: Array) -> void:
-	var owner := LivingAssets.citizen(60 + i)
+	var owner := LivingAssets.person("dog_walker", 60 + i)
 	owner.max_distance = 80.0
+	owner.locomotion = "WalkLeash"   # lead in the left hand, right arm swinging
 	add_child(owner)
 	var coat := Color(DOG_COATS[i % DOG_COATS.size()]).srgb_to_linear()
 	var dog := quadruped("dog", coat, coat.lerp(Color(0.95, 0.93, 0.9), 0.5))
@@ -250,10 +251,11 @@ func update_dog(d: Dictionary, delta: float, me: Vector3) -> void:
 	if float(d.speed) > 0.01:
 		owner.global_position += to_goal.normalized() * float(d.speed) * delta
 		face(owner, to_goal, delta, 5.0)
-	# The dog trots a step ahead on the owner's right, sniffing the verge when they stop.
+	if owner is LivingCitizen: (owner as LivingCitizen).ground_speed = float(d.speed)
+	# The dog trots a step ahead on the owner's left (the lead hand), sniffing the verge when they stop.
 	var forward := -owner.global_basis.z
 	var right := forward.cross(Vector3.UP).normalized()
-	var spot: Vector3 = owner.global_position + forward * 0.9 + right * 0.75
+	var spot: Vector3 = owner.global_position + forward * 0.9 - right * 0.75
 	var root: Node3D = dog.root
 	var gap := spot - root.global_position
 	gap.y = 0
@@ -269,7 +271,11 @@ func update_dog(d: Dictionary, delta: float, me: Vector3) -> void:
 		d.bark = 18.0
 		sound("dog_bark", root.global_position + Vector3(0, 0.5, 0), -4.0, randf_range(0.9, 1.1))
 	# Lead from the owner's hand to the collar, with a little sag.
-	var hand: Vector3 = owner.global_position + Vector3(0, 0.95, 0) + right * 0.28
+	var hand: Vector3 = owner.global_position + Vector3(0, 0.95, 0) - right * 0.28
+	var skeleton: Skeleton3D = (owner as LivingCitizen).skeleton if owner is LivingCitizen else null
+	if skeleton != null and skeleton.find_bone("LeftHand") >= 0:
+		var grip := skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone("LeftHand"))
+		hand = grip.origin + grip.basis.y.normalized() * 0.06
 	var collar: Vector3 = root.global_transform * Vector3(0, 0.53, -0.31)
 	var mid := (hand + collar) * 0.5 - Vector3(0, 0.08, 0)
 	var leash: MeshInstance3D = d.leash

@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://chwlahcgftwly"
-path="res://.godot/imported/window_flower_box_22.jpg-f6b945b7c569de36a3f6f37a5a316cdd.ctex"
+path.s3tc="res://.godot/imported/window_flower_box_22.jpg-f6b945b7c569de36a3f6f37a5a316cdd.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "7d7dd842edcb6ddd2430383940f3b002"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/sketchup/props/plants/window_flower_box_22.jpg"
-dest_files=["res://.godot/imported/window_flower_box_22.jpg-f6b945b7c569de36a3f6f37a5a316cdd.ctex"]
+dest_files=["res://.godot/imported/window_flower_box_22.jpg-f6b945b7c569de36a3f6f37a5a316cdd.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

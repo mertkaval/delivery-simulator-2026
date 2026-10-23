@@ -445,7 +445,7 @@ func dwell(bus: Dictionary, stop: Dictionary, _delta: float) -> void:
 func passenger(index: int) -> Node3D:
 	var p: Node3D = pool.pop_back() if not pool.is_empty() else null
 	if p == null:
-		p = LivingAssets.citizen(index + 40)
+		p = LivingAssets.person("passenger", index + 40)
 		p.max_distance = 70.0
 		add_child(p)
 	p.visible = true

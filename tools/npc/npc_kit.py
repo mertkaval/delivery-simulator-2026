@@ -887,6 +887,7 @@ class Kit:
         C, eye_z = self.head_frame(F)
         rng = np.random.default_rng(seed)
         bm, _ = self.body_bmesh()
+        scalp_bvh = BVHTree.FromBMesh(bm) if gather is not None else None
         faces = [f for f in bm.faces if f.calc_center_median().z > eye_z - 0.08]
         cen = np.array([tuple(f.calc_center_median()) for f in faces], np.float32)
         wts = density(cen) * np.array([f.calc_area() for f in faces], np.float32)
@@ -931,7 +932,12 @@ class Kit:
                 pos = root + d * (L * t) + n * (L * lift * math.sin(min(t * 1.4, 1.0) * math.pi / 2) * (1 - 0.45 * t))
                 rmin = r0 + 0.0015 + 0.003 * t
                 rad = pos - C
-                if rad.length < rmin:
+                if gather is not None:
+                    # tied back: each point lies on the scalp itself (just above it), all the way round
+                    loc, nrm_s, _, _ = scalp_bvh.find_nearest(pos)
+                    if loc is not None:
+                        pos = loc + nrm_s * (0.0025 + 0.0025 * t)
+                elif rad.length < rmin:
                     pos = C + rad.normalized() * rmin
                 nn = (pos - C).normalized()
                 seg_dir = (pos - prev) if i > 0 else d
@@ -1223,8 +1229,14 @@ class Kit:
         r = np.full((size, size), rough, np.float32) + 0.04 * n
         if color_fn is not None:
             rgb, r = color_fn(P, N, M, rgb, r)
-        gx = (np.roll(h, -1, 1) - np.roll(h, 1, 1)) / (2 * texel)
-        gy = (np.roll(h, -1, 0) - np.roll(h, 1, 0)) / (2 * texel)
+        # slopes per metre with the local texel size: stretched UV areas would otherwise get
+        # exaggerated relief (crinkled knees)
+        tx = np.linalg.norm(np.roll(P, -1, 1) - np.roll(P, 1, 1), axis=-1) * 0.5
+        ty = np.linalg.norm(np.roll(P, -1, 0) - np.roll(P, 1, 0), axis=-1) * 0.5
+        tx = np.clip(np.where(np.isfinite(tx) & (tx > 0), tx, texel), texel * 0.5, texel * 4)
+        ty = np.clip(np.where(np.isfinite(ty) & (ty > 0), ty, texel), texel * 0.5, texel * 4)
+        gx = (np.roll(h, -1, 1) - np.roll(h, 1, 1)) / (2 * tx)
+        gy = (np.roll(h, -1, 0) - np.roll(h, 1, 0)) / (2 * ty)
         edge = ~(M & np.roll(M, 1, 1) & np.roll(M, -1, 1) & np.roll(M, 1, 0) & np.roll(M, -1, 0))
         gx[edge] = 0
         gy[edge] = 0
@@ -1261,6 +1273,7 @@ class Kit:
         nt.links.new(nm.outputs["Normal"], p.inputs["Normal"])
         p.inputs["Sheen Weight"].default_value = sheen
         p.inputs["Sheen Roughness"].default_value = 0.6
+        p.inputs["Specular IOR Level"].default_value = 0.25       # cloth: dark fabrics must not shine
         p.inputs["Sheen Tint"].default_value = srgb(tuple(min(255, v * 1.6) for v in base_rgb))   # white sheen washes dark dyes pink
         nt.links.new(p.outputs[0], out.inputs[0])
         ob.data.materials.clear()

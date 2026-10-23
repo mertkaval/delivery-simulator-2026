@@ -64,34 +64,36 @@ static func sit(person: LivingCitizen, s: Dictionary, clip: String = "Sit") -> v
 static func fit_body(seat_height: float, seed: int) -> Vector2i:
 	var best := -1
 	var best_err := INF
-	for k in range(LivingAssets.HUMANOIDS.size()):
-		var id: String = LivingAssets.HUMANOIDS[(k + seed) % LivingAssets.HUMANOIDS.size()]
-		var m: Vector3 = LivingAssets.SEATED[id]
+	var ids := LivingAssets.body_ids()
+	for k in range(ids.size()):
+		var id: String = ids[(k + seed) % ids.size()]
+		var m: Vector3 = LivingAssets.seated(id)
 		var want := m.x - m.z
 		var scale := clampf(seat_height / want, 0.93, 1.07)
 		var err := absf(seat_height - want * scale) + 0.004 * k
 		if err < best_err:
 			best_err = err
-			best = (k + seed) % LivingAssets.HUMANOIDS.size()
+			best = (k + seed) % ids.size()
 	return Vector2i(best, 0)
 
 static func fit_scale(seat_height: float, id: String) -> float:
-	var m: Vector3 = LivingAssets.SEATED[id]
+	var m: Vector3 = LivingAssets.seated(id)
 	return clampf(seat_height / (m.x - m.z), 0.93, 1.07)
 
-## A seated person sized for this seat: picks the body (index chosen so its HUMANOIDS slot fits)
-## and scale; outfit colours still come from `index`.
+## A seated person sized for this seat: picks the body (index chosen so its body_ids() slot fits)
+## and scale.
 static func seated_person(s: Dictionary, index: int, clip: String = "Sit") -> LivingCitizen:
 	var height: float = float(s.top) - float(s.floor)
-	var n := LivingAssets.HUMANOIDS.size()
+	var ids := LivingAssets.body_ids()
+	var n := ids.size()
 	var body := posmod(index, n)
-	var id: String = LivingAssets.HUMANOIDS[body]
-	var m: Vector3 = LivingAssets.SEATED[id]
+	var id: String = ids[body]
+	var m: Vector3 = LivingAssets.seated(id)
 	# Keep the person's own body when a natural scale fits the seat within 3.5 cm; otherwise
 	# take the body that fits best (so feet stay on the floor).
 	if absf(height - (m.x - m.z) * fit_scale(height, id)) > 0.035:
 		body = fit_body(height, index).x
-		id = LivingAssets.HUMANOIDS[body]
-	# humanoid() picks HUMANOIDS[index % 5]: shift the index onto the chosen body.
+		id = ids[body]
+	# humanoid() picks body_ids()[index % n]: shift the index onto the chosen body.
 	var person_index := index - posmod(index, n) + body
 	return LivingAssets.humanoid(person_index, fit_scale(height, id))

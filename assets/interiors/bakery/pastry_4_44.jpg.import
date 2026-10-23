@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cgib2eoj0dtrs"
-path="res://.godot/imported/pastry_4_44.jpg-28e7fb35cef0b7f6531f8c1d0c387ec8.ctex"
+path.s3tc="res://.godot/imported/pastry_4_44.jpg-28e7fb35cef0b7f6531f8c1d0c387ec8.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "1a5f34b6d8a76678a2f196f898079fc0"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/interiors/bakery/pastry_4_44.jpg"
-dest_files=["res://.godot/imported/pastry_4_44.jpg-28e7fb35cef0b7f6531f8c1d0c387ec8.ctex"]
+dest_files=["res://.godot/imported/pastry_4_44.jpg-28e7fb35cef0b7f6531f8c1d0c387ec8.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

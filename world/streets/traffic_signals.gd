@@ -340,7 +340,12 @@ static func code_of(def: Dictionary, t: float) -> int:
 	var blink := int(floorf(t * 2.0)) % 2
 	return ns + 3 * ew + 9 * pn + 27 * pe + 81 * blink
 
-func _process(_delta: float) -> void:
+var _signal_tick := 0.0
+func _process(delta: float) -> void:
+	# Aspects change at most every 0.5 s (the flashing hand): look ten times a second.
+	_signal_tick -= delta
+	if _signal_tick > 0.0: return
+	_signal_tick = 0.1
 	for rt in runtime:
 		var def: Dictionary = rt.def
 		var t := clock(def)

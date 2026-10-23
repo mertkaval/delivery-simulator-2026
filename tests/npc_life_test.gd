@@ -36,6 +36,7 @@ func run() -> void:
 	var bad_height := 0
 	var stale_crossing := 0
 	var seated_seen := 0
+	var role_poses := {}
 	for step in range(180):
 		for i in range(15): await physics_frame
 		for b: CitizenBrain in brains:
@@ -43,6 +44,7 @@ func run() -> void:
 			var p := b.body.position
 			if b.state == "WAIT_CROSS" and b.body.get_meta("in_crossing", false): stale_crossing += 1
 			if b.state == "SEATED": seated_seen += 1
+			if b.state == "VISIT" and b.model != null and b.model.purpose_pose in ["Duty", "Sweep", "Photo", "Kneel", "Interact"]: role_poses[b.model.purpose_pose] = true
 			if b.state == "WALK" and absf(p.y - CitizenRoutes.ground_y(p)) > 0.03: bad_height += 1
 			if b.state == "WALK" and b.loop.is_empty() and not b.body.get_meta("in_crossing", false) and p.x < 120 and absf(p.x) < 5.5 and absf(p.z + 93) > 4 and absf(p.z + 177) > 4:
 				off_road += 1
@@ -56,6 +58,23 @@ func run() -> void:
 	for b: CitizenBrain in brains:
 		if b.body.position.distance_to(start[b]) > 3.0 or b.state in ["INSIDE", "SEATED"]: moved += 1
 	check(moved > brains.size() * 0.85, "people get somewhere (%d / %d moved)" % [moved, brains.size()])
+	# Daily routines: every walker has its own places, and its slot follows the clock.
+	var routed := 0
+	var homes := {}
+	for b: CitizenBrain in brains:
+		if not b.loop.is_empty(): continue
+		if not b.places.is_empty() and not (b.places.home as Dictionary).is_empty(): routed += 1
+		if b.places.has("home"): homes[(b.places.home as Dictionary).get("node", -1)] = true
+		if b.ROUTINES.has(b.routine_name):
+			var night := b.slot_for(2.0)
+			if night != "home": check(false, "%s sleeps at home (slot %s)" % [b.routine_name, night])
+	check(routed > brains.size() * 0.8, "walkers have their own places (%d / %d)" % [routed, brains.size()])
+	check(homes.size() > 20, "homes are spread over the city (%d distinct)" % homes.size())
+	if not LivingAssets.load_people().is_empty():
+		var roles := {}
+		for b: CitizenBrain in brains: roles[b.role] = true
+		check(roles.size() >= 10, "many roles walk the streets (%d)" % roles.size())
+		check(role_poses.size() >= 2, "people do their jobs at their stops (%s)" % str(role_poses.keys()))
 	check(life.seats.size() > 40, "free bench seats registered (%d)" % life.seats.size())
 	check(life.sitters.size() >= 6, "park bench sitters (%d)" % life.sitters.size())
 	var services: Array = world.restaurants.services
@@ -67,7 +86,7 @@ func run() -> void:
 	# Seated people: buttocks on the seat (body origin height = seat top - measured contact).
 	var seated_ok := true
 	for p: LivingCitizen in life.sitters:
-		var m: Vector3 = LivingAssets.SEATED[p.body_id]
+		var m: Vector3 = LivingAssets.seated(p.body_id)
 		if p.purpose_pose.begins_with("Sit") == false: seated_ok = false
 		if absf(p.body_scale - clampf(p.body_scale, 0.93, 1.07)) > 0.001: seated_ok = false
 		if m.x <= 0: seated_ok = false

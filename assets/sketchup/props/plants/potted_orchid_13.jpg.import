@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://csyvxf2s0e00i"
-path="res://.godot/imported/potted_orchid_13.jpg-72f5e502369edc9d989304c6fb978897.ctex"
+path.s3tc="res://.godot/imported/potted_orchid_13.jpg-72f5e502369edc9d989304c6fb978897.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "9b3bbd1ba5f3f083de97059b5933409a"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/sketchup/props/plants/potted_orchid_13.jpg"
-dest_files=["res://.godot/imported/potted_orchid_13.jpg-72f5e502369edc9d989304c6fb978897.ctex"]
+dest_files=["res://.godot/imported/potted_orchid_13.jpg-72f5e502369edc9d989304c6fb978897.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

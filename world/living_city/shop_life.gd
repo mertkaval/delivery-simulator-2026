@@ -25,7 +25,7 @@ func _ready() -> void:
 	for id in ShopCatalog.LOCATIONS:
 		if not SPOTS.has(id): continue
 		var at: Vector3 = ShopCatalog.LOCATIONS[id]
-		var person := LivingAssets.humanoid(500 + n * 3)
+		var person := LivingAssets.person("shopper", 500 + n * 3)
 		person.max_distance = 45.0
 		add_child(person)
 		var c := {"person": person, "origin": at, "spots": SPOTS[id], "state": "LOOK", "timer": 3.0 + n * 4.0,

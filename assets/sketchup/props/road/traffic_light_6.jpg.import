@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://vevyf6wq3gm6"
-path="res://.godot/imported/traffic_light_6.jpg-36bc158528ab2587a99fcbeb358bc5d1.ctex"
+path.s3tc="res://.godot/imported/traffic_light_6.jpg-36bc158528ab2587a99fcbeb358bc5d1.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "cecc64a31ca13f99001739eaa8f893ae"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/sketchup/props/road/traffic_light_6.jpg"
-dest_files=["res://.godot/imported/traffic_light_6.jpg-36bc158528ab2587a99fcbeb358bc5d1.ctex"]
+dest_files=["res://.godot/imported/traffic_light_6.jpg-36bc158528ab2587a99fcbeb358bc5d1.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

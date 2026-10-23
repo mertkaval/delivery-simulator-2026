@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bdv55djfbs1vi"
-path="res://.godot/imported/wheelie_bin_green_12.jpg-6f52b0195d20debb32a26995a68f0d2c.ctex"
+path.s3tc="res://.godot/imported/wheelie_bin_green_12.jpg-6f52b0195d20debb32a26995a68f0d2c.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "e79bf008136f01efd421393022264fdc"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/sketchup/props/street/wheelie_bin_green_12.jpg"
-dest_files=["res://.godot/imported/wheelie_bin_green_12.jpg-6f52b0195d20debb32a26995a68f0d2c.ctex"]
+dest_files=["res://.godot/imported/wheelie_bin_green_12.jpg-6f52b0195d20debb32a26995a68f0d2c.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

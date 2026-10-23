@@ -196,8 +196,8 @@ func fit_out(b: Dictionary, r: Array) -> void:
 	# People: a server at the register, a cook on the line, diners seated on the real chairs and
 	# a waiter serving them from the counter (TableService), and a few people at the sidewalk tables.
 	var seed := restaurants.size()
-	person(t, Vector3(xe + 0.6, 0.06, -7.95), 0.0, "Talk", seed * 3)
-	person(t, Vector3(xe + 0.2, 0.06, -14.25), PI, "Idle", seed * 3 + 1)
+	person(t, Vector3(xe + 0.6, 0.06, -7.95), 0.0, "Talk", seed * 3, "server")
+	person(t, Vector3(xe + 0.2, 0.06, -14.25), PI, "Counter", seed * 3 + 1, "chef")
 	dining(t, b, r, xe, e, bays, seed)
 	restaurants.append({"id": r[0], "name": r[1], "frame": t, "pickup": t * RestaurantCatalog.pickup_local(b),
 		"door": RestaurantCatalog.door_outside(b), "door_inside": t * Vector3(xe, 0, -2.0)})
@@ -280,8 +280,8 @@ func exterior(t: Transform3D, b: Dictionary, r: Array, xe: float, e: int, bays: 
 var people: Array[Node3D] = []
 var services: Array[TableService] = []
 
-func person(t: Transform3D, at: Vector3, yaw: float, pose: String, index: int) -> void:
-	var model := LivingAssets.citizen(index)
+func person(t: Transform3D, at: Vector3, yaw: float, pose: String, index: int, group: String = "diner") -> void:
+	var model := LivingAssets.person(group, index)
 	# Citizen rigs face -z: turn them so `yaw` is the direction they look.
 	model.transform = t * Transform3D(Basis(Vector3.UP, yaw + PI), at)
 	model.purpose_pose = pose

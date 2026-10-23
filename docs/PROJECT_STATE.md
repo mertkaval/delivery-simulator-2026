@@ -476,3 +476,65 @@ Verified with Godot 4.7.2 / Jolt: 11 new integration checks passed, existing sce
 - **Tests and captures:**
   - `tests/courier_actions_test.gd` (23 checks).
   - `tests/capture_courier_actions.gd -- <dir> [door,supplies,fidget,fall,bike]`.
+
+## Townspeople: 37 MPFB characters with daily routines (2026-10-23)
+- **Characters.** 35 reference characters (`tools/npc/people.py`, NPC03–NPC37) plus NPC01 (middle-aged
+  woman) and NPC02 (Buğra) are built headless from MPFB 2 with the courier's 53-bone `game_engine`
+  rig: `tools/npc/build_all.sh [ids]` → `source_assets/npc/<Name>/` (master .blend + QA renders),
+  garments from `tools/npc/garments.py` (shell-grown tops/trousers, grid-panel aprons, hi-vis vests,
+  shoes from the foot hull, planar decals from `tools/npc/decals.py`), card hair, painted brows/beards,
+  AO-baked skin detail. QA sheets against the references: `python tools/npc/qa_all.py <out.png> [ids]`.
+- **Export.** `tools/npc/export_all.sh [ids]` → `assets/people/<id>.glb` (skin 1024, other maps 512,
+  JPEG) and `assets/people/people.json` (`tools/npc/manifest.py`: id, rig name, role, gender,
+  height, age). Godot: `--import`, `--script res://tools/setup_people.gd` (humanoid retarget with the
+  courier bone map, LODs), `--import` again.
+- **Animation.** All people share the courier's clip set (`courier_anims.res`) through
+  `LivingAssets.PEOPLE_CLIPS`, plus role clips authored on the courier rig
+  (`tools/npc/role_clips.py` → `assets/people/npc_role_clips.glb`): Sweep, Counter_Work, Duty_Stand,
+  Photo_Take, Walk_Leash, Walk_Push. Props follow the hand bones: a push broom through both hands
+  while sweeping, the phone for photos, the dog lead from the left hand (dog on the left).
+- **Spawning.** `LivingAssets.person(group, index)` picks a designed person by role group
+  (`GROUPS`: street, walker, resident, diner, passenger, shopper, cyclist, server, chef, cashier,
+  security, dog_walker …). Avenue/downtown walkers (`street`), restaurant staff, waiters, shop
+  customers, bus passengers, cyclists, dog walkers, door customers (`resident_for`) and shop clerks /
+  guards (`standing_person`) all use them; the converted Sketchfab/procedural people stay as fallback.
+- **Daily routines (no random wandering).** `CitizenBrain.ROUTINES` gives each role a timetable
+  (office, commuter, student, retiree, resident, tourist, jogger, police, security, street_cleaner,
+  construction, courier, worker), shifted ±0.5 h per person. `persona()` fixes each person's own
+  home, workplace (by role), lunch café near work, errand shop near home, and circuits: police beat,
+  sweeping round, jogging loop, tourist sights, delivery rounds, stroll. At a stop the role works
+  (Duty, Sweep, Photo, Interact, Kneel); through a door they stay inside until the timetable moves on.
+- Test: `tests/npc_life_test.gd` also checks every walker has its own places, sleeps at home and
+  that several role activities happen.
+- **Crowd export.** Townspeople GLBs (texture budget ≤ 512) are exported as ONE skinned mesh with
+  three surfaces: skin, a clothing atlas (every garment, shoe and hair-cap material packed into a
+  grid of 512 px tiles: base colour, normal, roughness, hi-vis emission) and a cut-out atlas (hair
+  cards, brows, lashes, eyes). ~12 mesh instances / materials per person → 1 / 3.
+
+## Whole-game optimisation pass (2026-10-23)
+Measured with `tests/perf_probe.gd` (ride: `-- 60 9`; per-subsystem: `attrib`; node/body census:
+`census`; paired toggles: `exp [per_script|per_process|<toggle names>]`; it also prints GPU vs CPU
+render time and the townspeople's own script cost). Start of pass → end:
+| | before | after |
+|---|---|---|
+| ride median / p95 frame | 30.4 / 39.3 ms | ~22 / 32 ms |
+| boot `ready` / first frame | 27.8 s / 8.7 s | ~18 s / ~1.9 s |
+| VRAM | 7.7 GB | ~5.5 GB |
+The game is CPU-bound (GPU ~6.5 ms). Fixes:
+- **Textures imported lossless.** Textures a scene import extracts default to Lossless with
+  "detect 3D" (only the editor ever switches them to VRAM): 891 people textures and ~550 vehicle,
+  prop, interior and player textures were uncompressed (slow to load, 4–8× VRAM). All 3D textures
+  are VRAM compressed with mipmaps now (normal maps RGTC); `tools/setup_people.gd` does this for
+  every texture the people GLBs extract. Legacy 4K people/vehicle textures capped at 2048. A
+  person now loads in ~29 ms instead of ~210 ms.
+- **Minimap** redrew every frame, walking every door and house and planning the whole delivery
+  route each frame (9 ms): it now redraws only when the view changes (or at 4 Hz), culls in world
+  space and re-plans the route after 2 m of movement.
+- **Tutorial bike-goal card** rebuilt itself every frame (theme overrides, freed children → HUD
+  relayout); now only when the savings change. **Traffic signals** evaluate at 10 Hz.
+- **Vehicles**: beyond 120 m at 7.5 Hz (was 15 Hz); swept test_move only within 70 m (rays still
+  keep the lane clear). **Townspeople** standing or seated in place animate at half rate beyond 10 m.
+- **Lights**: street lamps are hidden (not just zero energy) in daylight; the five shadowed lamps in
+  the courier's home fade out beyond 30 m (shadows beyond 18 m).
+- People exporter keeps its `_export.blend` beside the master (a .blend under `assets/` made
+  Godot's headless import fail).

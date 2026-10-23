@@ -31,7 +31,9 @@ func kerbside(base: Transform3D,local: Vector3,kind: String,radius: float,yaw: f
 func set_time(_hour: float,daylight: float) -> void:
 	if UrbanKit.window_material!=null: UrbanKit.window_material.set_shader_parameter("night",1.0-daylight)
 	if UrbanKit.materials.has("UrbanImpostor"): UrbanKit.materials.UrbanImpostor.set_shader_parameter("night",1.0-daylight)
-	for light in lights: light.light_energy=(1.0-daylight)*2.2
+	for light in lights:
+		light.light_energy=(1.0-daylight)*2.2
+		light.visible=daylight<0.98
 	if population!=null: population.hour=_hour
 func pose(at: Vector3, yaw: float=0, scale_factor: Vector3=Vector3.ONE) -> Transform3D:
 	return Transform3D(Basis(Vector3.UP,yaw).scaled_local(scale_factor),at)

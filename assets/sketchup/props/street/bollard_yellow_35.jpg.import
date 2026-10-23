@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://wwjscth4rykc"
-path="res://.godot/imported/bollard_yellow_35.jpg-d2a620e50d144b8baac135dcc58b7dfa.ctex"
+path.s3tc="res://.godot/imported/bollard_yellow_35.jpg-d2a620e50d144b8baac135dcc58b7dfa.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d4bc8204c4b9cae84e8a73c91255beeb"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/sketchup/props/street/bollard_yellow_35.jpg"
-dest_files=["res://.godot/imported/bollard_yellow_35.jpg-d2a620e50d144b8baac135dcc58b7dfa.ctex"]
+dest_files=["res://.godot/imported/bollard_yellow_35.jpg-d2a620e50d144b8baac135dcc58b7dfa.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0
