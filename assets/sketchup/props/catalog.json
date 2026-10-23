@@ -180,6 +180,48 @@
    "collision": true
   },
   {
+   "id": "litter_bin_slat_green",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/litter_bin_slat_green.glb",
+   "source": "modelled (tools/prepare_litter_bins.py)",
+   "size": [
+    0.63,
+    0.98,
+    0.63
+   ],
+   "tris": 2334,
+   "suggested_use": "sidewalk litter bin (slatted steel, bin bag, rain bonnet)",
+   "collision": true
+  },
+  {
+   "id": "litter_bin_slat_black",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/litter_bin_slat_black.glb",
+   "source": "modelled (tools/prepare_litter_bins.py)",
+   "size": [
+    0.63,
+    0.98,
+    0.63
+   ],
+   "tris": 2334,
+   "suggested_use": "sidewalk litter bin (slatted steel, bin bag, rain bonnet)",
+   "collision": true
+  },
+  {
+   "id": "litter_bin_slat_red",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/litter_bin_slat_red.glb",
+   "source": "modelled (tools/prepare_litter_bins.py)",
+   "size": [
+    0.63,
+    0.98,
+    0.63
+   ],
+   "tris": 2334,
+   "suggested_use": "sidewalk litter bin (slatted steel, bin bag, rain bonnet)",
+   "collision": true
+  },
+  {
    "id": "path_lamp",
    "category": "street",
    "path": "res://assets/sketchup/props/street/path_lamp.glb",
@@ -247,6 +289,20 @@
    ],
    "tris": 970,
    "suggested_use": "kerb-side wheelie bin",
+   "collision": true
+  },
+  {
+   "id": "cart_trio",
+   "category": "street",
+   "path": "res://assets/sketchup/props/street/cart_trio.glb",
+   "source": "modelled (tools/prepare_yard_bins.py)",
+   "size": [
+    2.1,
+    1.075,
+    0.77
+   ],
+   "tris": 2748,
+   "suggested_use": "residential lane carts: garbage (black), recycling (blue), organics (green)",
    "collision": true
   },
   {

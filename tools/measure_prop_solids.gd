@@ -54,7 +54,7 @@ func node_parts(node: Node) -> Array:
 
 func run() -> void:
 	var house := HouseInstancer.new()
-	for a in ["fence_picket", "hedge", "fence_privacy", "fence_post", "patio_set", "bbq", "raised_bed", "shed", "bins_trio", "garden_bed", "garage_single",
+	for a in ["fence_picket", "hedge", "fence_privacy", "fence_post", "patio_set", "bbq", "raised_bed", "shed", "cart_trio", "garage_single",
 		"bus_shelter",
 		"rs_aframe", "rs_planter", "rs_plant", "rs_sidewalk_set", "rs_table4", "rs_table2", "rs_booth", "rs_barrel"]:
 		report("house:" + a, house.get_parts(a, "near"))
@@ -71,7 +71,7 @@ func run() -> void:
 		var n := CityAssets.create(a, 100)
 		report("city:" + a, node_parts(n))
 		n.free()
-	for id in ["rock_0", "rock_1", "rock_2", "rock_3", "rock_4", "rock_5", "rock_6", "rock_7", "rock_8", "potted_lily", "potted_snake", "shrub_a", "shrub_b", "shrub_c"]:
+	for id in ["rock_0", "rock_1", "rock_2", "rock_3", "rock_4", "rock_5", "rock_6", "rock_7", "rock_8", "potted_lily", "potted_snake", "pot_geranium_red", "boxwood_ball", "shrub_a", "shrub_b", "shrub_c"]:
 		var p := CityLandscape.prop(id)
 		if p.is_empty(): report("land:" + id, [])
 		else: report("land:" + id, [{"mesh": p.mesh, "transform": Transform3D.IDENTITY}])

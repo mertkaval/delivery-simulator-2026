@@ -28,7 +28,8 @@ const SOLIDS := {
 	"bbq": [[Vector3(0, 0.595, 0), Vector3(1.0, 1.19, 0.55), false]],
 	"raised_bed": [[Vector3(0, 0.23, 0), Vector3(2.46, 0.46, 1.26), false]],
 	"shed": [[Vector3(0, 1.36, -0.95), Vector3(2.5, 2.72, 2.0), true]],
-	"bins_trio": [[Vector3(0, 0.53, -0.04), Vector3(2.14, 1.06, 0.84), false]],
+	# Lane cart trio (cart_trio: black / blue / green carts 0.72 m apart, HouseInstancer).
+	"bins_trio": [[Vector3(0, 0.54, -0.06), Vector3(2.1, 1.08, 0.74), false]],
 	"mailbox": [[Vector3(0.014, 0.705, 0.017), Vector3(0.36, 1.41, 0.5), false]],
 	"address_post": [[Vector3(0, 0.625, 0), Vector3(0.16, 1.25, 0.16), false]],
 	# Restaurant frontage and interior (RestaurantInteriors kit pieces).
@@ -50,7 +51,8 @@ const SOLIDS := {
 	"parking_meter": [[Vector3(0, 0.785, 0), Vector3(0.2, 1.57, 0.2), false]],
 	"mailboxes": [[Vector3(0, 0.7, 0.024), Vector3(1.35, 1.4, 0.3), false]],
 	"hydrant": [[Vector3(0, 0.46, 0), Vector3(0.42, 0.92, 0.42), false]],
-	"trash_bin": [[Vector3(0, 0.46, 0), Vector3(0.6, 0.92, 0.6), false]],
+	# Slatted litter bin (litter_bin_slat_*, tools/prepare_litter_bins.py): 0.55 m body, 0.63 m bonnet.
+	"trash_bin": [[Vector3(0, 0.49, 0), Vector3(0.58, 0.98, 0.58), false]],
 	"recycle_bin": [[Vector3(0, 0.56, 0), Vector3(0.57, 1.12, 0.69), false]],
 	"newspaper_box": [[Vector3(0, 0.61, 0.016), Vector3(0.5, 1.22, 0.47), false]],
 	"bike_rack": [[Vector3(0, 0.467, 0), Vector3(1.08, 0.93, 0.18), false]],
@@ -73,6 +75,12 @@ const SOLIDS := {
 	# Landscape kit (CityLandscape): pots by shop doors and rocks (rocks only when >= MIN_ROCK tall).
 	"potted_lily": [[Vector3(0, 0.5, 0), Vector3(0.4, 1.0, 0.4), false]],
 	"potted_snake": [[Vector3(0, 0.42, 0), Vector3(0.29, 0.83, 0.28), false]],
+	# Front-yard door pots (yard.glb, CityLandscape.front_planting): 0.41 m rim, geranium to 0.8 m.
+	# Flower beds and boxwood balls stay walk-through like the other low planting.
+	"pot_geranium_red": [[Vector3(0, 0.4, 0), Vector3(0.42, 0.8, 0.42), false]],
+	"pot_geranium_pink": [[Vector3(0, 0.4, 0), Vector3(0.42, 0.8, 0.42), false]],
+	"pot_geranium_lilac": [[Vector3(0, 0.4, 0), Vector3(0.42, 0.8, 0.42), false]],
+	"pot_geranium_orange": [[Vector3(0, 0.4, 0), Vector3(0.42, 0.8, 0.42), false]],
 	"rock_0": [[Vector3(0.07, 0.45, 0.17), Vector3(1.55, 0.9, 1.35), false]],
 	"rock_1": [[Vector3(-0.53, 0.36, 0.4), Vector3(1.25, 0.72, 1.0), false]],
 	"rock_2": [[Vector3(-0.05, 0.17, 0.33), Vector3(0.6, 0.34, 0.7), false]],

@@ -251,36 +251,6 @@
    ]
   }
  },
- "hedge": {
-  "near": {
-   "triangles": 20,
-   "materials": [
-    "KitHedge"
-   ]
-  },
-  "far": {
-   "triangles": 10,
-   "materials": [
-    "KitHedge"
-   ]
-  }
- },
- "garden_bed": {
-  "near": {
-   "triangles": 208,
-   "materials": [
-    "KitSoil",
-    "KitFoliage"
-   ]
-  },
-  "far": {
-   "triangles": 136,
-   "materials": [
-    "KitSoil",
-    "KitFoliage"
-   ]
-  }
- },
  "raised_bed": {
   "near": {
    "triangles": 440,
@@ -329,25 +299,6 @@
    "materials": [
     "KitRailBlack",
     "KitFrameLight"
-   ]
-  }
- },
- "bins_trio": {
-  "near": {
-   "triangles": 144,
-   "materials": [
-    "KitBinBlack",
-    "KitRailBlack",
-    "KitBinBlue",
-    "KitBinGreen"
-   ]
-  },
-  "far": {
-   "triangles": 72,
-   "materials": [
-    "KitBinBlack",
-    "KitBinBlue",
-    "KitBinGreen"
    ]
   }
  },

@@ -56,8 +56,24 @@ func _ready() -> void:
 		trunk(t.origin, t.basis.get_scale().x)
 	flush()
 
+## Yard pieces from the landscape kits (CityLandscape: foliage wind shader, per-instance tint in the
+## MultiMesh custom data) and converted props (PropKit): piece id -> source.
+const LANDSCAPE_PIECES := {"hedge": "hedge_section"}
+## Garbage / recycling / organics carts at the lane: one asset (tools/prepare_yard_bins.py).
+const YARD_BINS: Array[String] = ["cart_trio"]
+
 func get_parts(asset: String, lod: String) -> Array:
 	var key := asset + lod
+	if not parts.has(key) and LANDSCAPE_PIECES.has(asset):
+		var p := CityLandscape.prop(String(LANDSCAPE_PIECES[asset]))
+		parts[key] = [{"mesh": p.mesh, "transform": Transform3D.IDENTITY, "material": null, "name": "", "custom": true}]
+	elif not parts.has(key) and asset in YARD_BINS:
+		var list: Array = []
+		for p: Dictionary in PropKit.get_parts(asset):
+			var piece := p.duplicate()
+			piece["name"] = ""
+			list.append(piece)
+		parts[key] = list
 	if not parts.has(key):
 		var dir := RESTAURANT_DIR if asset.begins_with("rs_") else (TRANSIT_DIR if asset.begins_with("bus_") else DIR)
 		for prefix in ["dog_", "cat_", "pigeon_", "crow_", "gull_", "bird_"]:
@@ -224,12 +240,12 @@ func build_lot(lot: Dictionary) -> void:
 	if not spec.ramp.is_empty():
 		var r: Array = spec.ramp
 		ramp(t, r[0], r[1], r[2], r[3], r[4])
-	# Front walk from the sidewalk to the steps, with a garden bed beside it.
+	# Front walk from the sidewalk to the steps. (The flower beds, door pots and boxwood along the
+	# facade are planted by CityLandscape.front_planting.)
 	var door: Vector3 = spec.door
 	var walk_len := ResidentialLayout.SETBACK + 0.4
 	# 3 cm tall and 4 cm narrower than the steps, so no face lines up with the house concrete.
 	add_slab(t * Vector3(door.x, 0.0, ResidentialLayout.SETBACK + 0.2 - walk_len / 2 + 0.6), Vector3(1.26, 0.03, walk_len - 1.2), t.basis, "c1bbaa", lot.delivery >= 0)
-	add("garden_bed", t * Transform3D(Basis.IDENTITY, Vector3(-w / 2 + 1.4, 0, 1.4)), colours)
 	if lot.fence != "":
 		# Front fence/hedge along the property line, open at the walk. Whole 2.4 m sections centred
 		# in the lot: none reaches past the lot edge into the neighbour's fence on the same line.
@@ -291,8 +307,10 @@ func build_lot(lot: Dictionary) -> void:
 		elif grill_free:
 			add("bbq", t * Transform3D(Basis.IDENTITY, Vector3(1.6, 0, -d - 1.2)), colours)
 			solids().solid("bbq", t * Transform3D(Basis.IDENTITY, Vector3(1.6, 0, -d - 1.2)))
-	add("bins_trio", t * Transform3D(Basis(Vector3.UP, PI), Vector3(-lot.width / 2 + 1.4, 0, back - 0.6)), colours)
-	solids().solid("bins_trio", t * Transform3D(Basis(Vector3.UP, PI), Vector3(-lot.width / 2 + 1.4, 0, back - 0.6)))
+	# Garbage (black), recycling (blue) and organics (green) carts at the lane, lid grips to the lane.
+	var carts := t * Transform3D(Basis(Vector3.UP, PI), Vector3(-lot.width / 2 + 1.4, 0, back - 0.6))
+	add(YARD_BINS[0], carts, colours)
+	solids().solid("bins_trio", carts)
 	# Delivery houses: door interaction, number plate, mailbox, porch light.
 	if lot.delivery >= 0:
 		var index: int = lot.delivery
@@ -474,6 +492,9 @@ func flush() -> void:
 		var multi := MultiMesh.new()
 		multi.transform_format = MultiMesh.TRANSFORM_3D
 		multi.use_colors = true
+		# Landscape-kit pieces (hedges): foliage shader tint in the custom data (0.5 = neutral).
+		var custom: bool = data.piece.get("custom", false)
+		multi.use_custom_data = custom
 		multi.mesh = data.piece.mesh
 		multi.instance_count = items.size()
 		var origin: Vector3 = items[0][0].origin
@@ -482,6 +503,9 @@ func flush() -> void:
 			tr.origin -= origin
 			multi.set_instance_transform(i, tr)
 			multi.set_instance_color(i, items[i][1])
+			if custom:
+				var h := fposmod(sin(tr.origin.x * 12.9898 + tr.origin.z * 78.233) * 43758.5453, 1.0)
+				multi.set_instance_custom_data(i, Color(0.48 + h * 0.05, 0.49 + h * 0.04, 0.48, 0.0))
 		var node := MultiMeshInstance3D.new()
 		node.name = "G%d" % index
 		index += 1

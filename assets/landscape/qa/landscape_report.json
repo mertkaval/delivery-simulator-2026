@@ -121,5 +121,116 @@
     ]
    ]
   }
+ },
+ "yard": {
+  "flower_bed_a": {
+   "height": 0.677646279335022,
+   "kind": "flower_bed",
+   "length": 2.4,
+   "depth": 0.8,
+   "tris": 7516,
+   "size": [
+    2.406,
+    1.051,
+    0.698
+   ]
+  },
+  "flower_bed_b": {
+   "height": 0.6464816331863403,
+   "kind": "flower_bed",
+   "length": 2.4,
+   "depth": 0.8,
+   "tris": 7516,
+   "size": [
+    2.405,
+    1.09,
+    0.666
+   ]
+  },
+  "flower_bed_c": {
+   "height": 0.6573165059089661,
+   "kind": "flower_bed",
+   "length": 2.4,
+   "depth": 0.8,
+   "tris": 7516,
+   "size": [
+    2.466,
+    1.052,
+    0.677
+   ]
+  },
+  "flower_bed_d": {
+   "height": 0.6701917052268982,
+   "kind": "flower_bed",
+   "length": 1.6,
+   "depth": 0.8,
+   "tris": 7252,
+   "size": [
+    1.603,
+    1.139,
+    0.69
+   ]
+  },
+  "pot_geranium_red": {
+   "height": 0.800000011920929,
+   "kind": "door_pot",
+   "tris": 1302,
+   "size": [
+    0.579,
+    0.51,
+    0.8
+   ]
+  },
+  "pot_geranium_pink": {
+   "height": 0.800000011920929,
+   "kind": "door_pot",
+   "tris": 1302,
+   "size": [
+    0.571,
+    0.508,
+    0.8
+   ]
+  },
+  "pot_geranium_lilac": {
+   "height": 0.800000011920929,
+   "kind": "door_pot",
+   "tris": 1302,
+   "size": [
+    0.581,
+    0.533,
+    0.8
+   ]
+  },
+  "pot_geranium_orange": {
+   "height": 0.800000011920929,
+   "kind": "door_pot",
+   "tris": 1302,
+   "size": [
+    0.526,
+    0.563,
+    0.8
+   ]
+  },
+  "boxwood_ball": {
+   "height": 0.3960206210613251,
+   "kind": "boxwood",
+   "tris": 302,
+   "size": [
+    0.752,
+    0.711,
+    0.572
+   ]
+  },
+  "hedge_section": {
+   "height": 1.1,
+   "kind": "hedge",
+   "length": 2.36,
+   "tris": 670,
+   "size": [
+    2.44,
+    1.148,
+    1.354
+   ]
+  }
  }
 }

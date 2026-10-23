@@ -36,7 +36,7 @@ func set_time(_hour: float,daylight: float) -> void:
 func pose(at: Vector3, yaw: float=0, scale_factor: Vector3=Vector3.ONE) -> Transform3D:
 	return Transform3D(Basis(Vector3.UP,yaw).scaled_local(scale_factor),at)
 ## Kit props replaced by the converted realistic props (PropKit) where one exists.
-const PROP_SWAP := {"dumpster":"dumpster_large","bollard":"bollard_metal","barrier":"water_barrier_white","trash_bin":"litter_bin_green",
+const PROP_SWAP := {"dumpster":"dumpster_large","bollard":"bollard_metal","barrier":"water_barrier_white","trash_bin":"litter_bin_slat_black",
 	"recycle_bin":"wheelie_bin_blue","hydrant":"fire_hydrant","cone":"traffic_cone"}
 ## Primitive colliders for the street props, café furniture and campus signs (PropColliders).
 var _solids: PropColliders

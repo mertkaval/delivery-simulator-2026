@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dbonyl8xvqjnk"
-path="res://.godot/imported/hedge.glb-bed70d51a25aba72efbe03dceced0324.scn"
+uid="uid://bxq3xe7do4dyb"
+path="res://.godot/imported/cart_trio.glb-68c1d36fe68c0827cfa66523c7eb2a0d.scn"
 
 [deps]
 
-source_file="res://world/citykit/houses/hedge.glb"
-dest_files=["res://.godot/imported/hedge.glb-bed70d51a25aba72efbe03dceced0324.scn"]
+source_file="res://assets/sketchup/props/street/cart_trio.glb"
+dest_files=["res://.godot/imported/cart_trio.glb-68c1d36fe68c0827cfa66523c7eb2a0d.scn"]
 
 [params]
 

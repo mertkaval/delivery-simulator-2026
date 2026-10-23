@@ -81,7 +81,7 @@ static func load_assets() -> void:
 	var imp := far_scene.find_child("Impostor", true, false) as MeshInstance3D
 	_impostor = foliage_mesh(imp.mesh, 1.0, "impostor", true)
 	far_scene.free()
-	for file in ["forest_pack", "rocks", "garden"]:
+	for file in ["forest_pack", "rocks", "garden", "yard"]:
 		var scene: Node = (load(DIR + file + ".glb") as PackedScene).instantiate()
 		for node in scene.find_children("*", "MeshInstance3D", true, false):
 			var mi := node as MeshInstance3D
@@ -107,7 +107,8 @@ static func material_for(src: BaseMaterial3D, height: float, id: String, imposto
 	var key := "%s|%s|%.1f" % [mat_name, id if impostor else "", height]
 	if _materials.has(key): return _materials[key]
 	var result: Material
-	if src != null and (mat_name in SOLID or mat_name.begins_with("rock")):
+	# yard_* (tools/prepare_yard_planting.py): bed edging setts, mulch, pots - plain surfaces.
+	if src != null and (mat_name in SOLID or mat_name.begins_with("rock") or mat_name.begins_with("yard_")):
 		var plain := src.duplicate() as BaseMaterial3D
 		plain.vertex_color_use_as_albedo = false
 		plain.roughness = maxf(plain.roughness, 0.8)
@@ -384,9 +385,127 @@ static func porch_rects(type: String) -> Array[Rect2]:
 		rects.append(Rect2(float(r[0]), float(r[3]), float(r[1]) - float(r[0]), float(r[4]) - float(r[3])))
 	var door: Vector3 = spec.door
 	rects.append(Rect2(door.x - 1.1, -0.2, 2.2, ResidentialLayout.SETBACK + 1.0))   # walk + steps
-	rects.append(Rect2(-spec.w / 2 + 0.6, 0.6, 1.6, 1.6))                          # garden_bed
 	rects.append(Rect2(door.x - 1.7, 3.6, 3.4, 1.4))                                  # mailbox / number post
 	return rects
+
+## Front reach of a house's low parts, lot-local: for every 0.1 m strip of x (from x0) the largest
+## z of any vertex below 0.95 m (skirts, sills, bays, porch decks, stairs, railings) in the house's
+## near-LOD model, -1 where there is none. Beds and pots keep clear of it (no interpenetration).
+const PROFILE_BIN := 0.1
+static var _profiles: Dictionary = {}
+static func front_profile(type: String) -> Dictionary:
+	if _profiles.has(type): return _profiles[type]
+	var spec: Dictionary = ResidentialLayout.TYPES[type]
+	var x0: float = -float(spec.w) / 2.0 - 2.0
+	var bins := PackedFloat32Array()
+	bins.resize(ceili((float(spec.w) + 4.0) / PROFILE_BIN))
+	bins.fill(-1.0)
+	var path := ("res://assets/houses/%s.glb" if type in ResidentialLayout.IMPORTED else "res://world/citykit/houses/%s.glb") % type
+	var root: Node = (load(path) as PackedScene).instantiate()
+	var list: Array = []
+	PropKit.collect(root, Transform3D.IDENTITY, list)
+	root.free()
+	for part: Dictionary in list:
+		var xf: Transform3D = part.transform
+		for v in (part.mesh as Mesh).get_faces():
+			var p := xf * v
+			if p.y > 0.95 or p.z < -0.6: continue
+			var i := floori((p.x - x0) / PROFILE_BIN)
+			if i >= 0 and i < bins.size() and p.z > bins[i]: bins[i] = p.z
+	_profiles[type] = {"x0": x0, "z": bins}
+	return _profiles[type]
+
+## Largest front reach (lot-local z) of the house's low parts over [a, b] in x.
+static func reach(profile: Dictionary, a: float, b: float) -> float:
+	var bins: PackedFloat32Array = profile.z
+	var x0: float = profile.x0
+	var out := -1.0
+	for i in range(maxi(0, floori((minf(a, b) - x0) / PROFILE_BIN)), mini(bins.size(), floori((maxf(a, b) - x0) / PROFILE_BIN) + 1)):
+		out = maxf(out, bins[i])
+	return out
+
+## Front-yard planting kit (yard.glb): 2.4 m beds a-c, a 1.6 m bed d, door pots, boxwood ball.
+const BEDS_LONG: Array[String] = ["flower_bed_a", "flower_bed_b", "flower_bed_c"]
+const DOOR_POTS: Array[String] = ["pot_geranium_red", "pot_geranium_pink", "pot_geranium_lilac", "pot_geranium_orange"]
+const BED_DEPTH := 0.8
+## Bed-local x of the boxwood ball at the +x end of the 2.4 m beds (tools/prepare_yard_planting.py).
+const BED_BALL_X := 0.88
+## Clear distance from a bed's / pot's edge to the front walk's centre line (slab half width 0.63).
+const WALK_CLEAR := 1.1
+
+## Foundation flower beds either side of the entrance (deterministic per lot): each side of the walk
+## gets the longest bed that fits along the facade where the house's low parts (skirt, sills; not
+## the porch or the stairs: front_profile) stand no more than 0.5 m proud, 20 cm in front of them,
+## plus a boxwood ball at the house corner when room is left. A pair of potted geraniums flanks the
+## foot of the steps (or the door of a house without steps). Spots also pass the PropPlacer (no
+## driveway, walk, mailbox or other prop) and are recorded for the props placed after them.
+func front_planting(lot: Dictionary, t: Transform3D, rects: Array[Rect2], seed_i: int) -> void:
+	var spec: Dictionary = ResidentialLayout.TYPES[lot.type]
+	var profile := front_profile(lot.type)
+	var door: Vector3 = spec.door
+	var w: float = spec.w
+	var basis := Basis(Vector3.UP, float(lot.yaw))
+	for side: float in [-1.0, 1.0]:
+		# Some lots plant only one side (variety); delivery lots always both.
+		if lot.delivery < 0 and (seed_i + int(side)) % 6 == 0: continue
+		var inner := door.x + side * WALK_CLEAR
+		var outer := side * (w / 2.0 - 0.3)
+		if (outer - inner) * side < 1.6: continue
+		# Walk out from the entrance along the facade to the first stretch where it is flat enough.
+		var start := inner
+		while (outer - start) * side > 1.6 and reach(profile, start, start + side * 0.4) > 0.5: start += side * PROFILE_BIN
+		var span := (outer - start) * side
+		var length := 2.4 if span >= 2.45 else (1.6 if span >= 1.65 else 0.0)
+		if length == 0.0: continue
+		var a := start
+		var b := start + side * length
+		var back := maxf(reach(profile, a, b), 0.25) + 0.2
+		if back > 1.4: continue
+		var local := Vector3((a + b) / 2.0, 0, back + BED_DEPTH / 2.0)
+		var ends: Array[Vector3] = [local + Vector3(-length / 2.0 + 0.4, 0, 0), local, local + Vector3(length / 2.0 - 0.4, 0, 0)]
+		var ok := true
+		for e in ends:
+			if not local_clear(rects, Vector2(e.x, e.z), 0.1): ok = false
+			if ok and placer.problem("bed", t * e, 0.45, {"walk": 0.25, "gap": 0.1}) != "": ok = false
+		if not ok: continue
+		for e in ends: placer.record("bed", t * e, 0.45, "flower_bed")
+		var id: String = BEDS_LONG[(seed_i + int(side + 1.0)) % BEDS_LONG.size()] if length > 2.0 else "flower_bed_d"
+		# The beds' boxwood ball is at their +x end: turn the bed so it sits at the house corner.
+		var turn := basis if side > 0.0 else basis * Basis(Vector3.UP, PI)
+		add_prop(id, Transform3D(turn, t * local), 48.0, false)
+		if length > 2.0:
+			# The long beds leave their +x end for a clipped boxwood ball (its own prop: the beds
+			# stay two surfaces each).
+			var ball_at := t * local + turn * Vector3(BED_BALL_X, 0.02, 0)
+			add_prop("boxwood_ball", Transform3D(turn.rotated(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * rng.randf_range(0.72, 0.8)), ball_at), 48.0, true)
+		# A clipped boxwood ball at the corner beyond the bed.
+		var corner := b + side * 0.55
+		if (outer - corner) * side >= 0.0 and seed_i % 3 != 2:
+			var ball := Vector3(corner, 0, back + 0.35)
+			if reach(profile, corner - 0.35, corner + 0.35) + 0.12 < ball.z - 0.3 and placer.problem("shrub", t * ball, 0.35, {"walk": 0.3, "gap": 0.05}) == "":
+				placer.record("shrub", t * ball, 0.35, "front_boxwood")
+				add_prop("boxwood_ball", Transform3D(basis.rotated(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * rng.randf_range(1.0, 1.25)), t * ball), 48.0, true)
+	# Potted geraniums: a matching pair at the foot of the steps, or beside a ground-floor door.
+	if seed_i % 5 == 1 and lot.delivery < 0: return
+	var pot: String = DOOR_POTS[seed_i % DOOR_POTS.size()]
+	var spots: Array[Vector3] = []
+	var ramp: Array = spec.ramp
+	if not ramp.is_empty():
+		var z := float(ramp[4]) - 0.32
+		spots.append(Vector3(minf(float(ramp[0]) - 0.4, door.x - 0.9), 0, z))
+		spots.append(Vector3(maxf(float(ramp[1]) + 0.4, door.x + 0.9), 0, z))
+	else:
+		var z := maxf(door.z, 0.0) + 0.5
+		spots.append(Vector3(door.x - WALK_CLEAR + 0.05, 0, z))
+		spots.append(Vector3(door.x + WALK_CLEAR - 0.05, 0, z))
+	for spot in spots:
+		# Never on the walk, against the house's low parts, a railing post or another prop.
+		if absf(spot.x - door.x) < 0.63 + 0.25: continue
+		if reach(profile, spot.x - 0.22, spot.x + 0.22) > spot.z - 0.28: continue
+		var at := t * spot
+		if placer.problem("planter", at, 0.3, {"walk": 0.25, "gap": 0.1}) != "": continue
+		placer.record("planter", at, 0.3, "door_pot")
+		add_prop(pot, Transform3D(basis.rotated(Vector3.UP, rng.randf() * TAU), at), 45.0, true)
 
 static func local_clear(rects: Array[Rect2], p: Vector2, r: float) -> bool:
 	for rect in rects:
@@ -411,7 +530,9 @@ func plant_lot(lot: Dictionary) -> void:
 			var at := t * local
 			if placer.place("tree", at, 0.4, {"walk": 1.0, "source": "garden_tree"}) != null:
 				if not add_tree(GARDEN_TREES[seed_i % GARDEN_TREES.size()], at, rng.randf() * TAU, rng.randf_range(0.72, 0.86)): placer.unrecord_last()
-	# Shrubs at the facade corners and a flower bed beside the porch.
+	# Flower beds along the facade either side of the entrance, potted geraniums at the steps.
+	front_planting(lot, t, rects, seed_i)
+	# Shrubs at the facade corners the beds left free.
 	for sx in [-1.0, 1.0]:
 		var ids := prop_ids("shrub")
 		var sid: String = ids[(seed_i + int(sx)) % ids.size()]
@@ -426,23 +547,6 @@ func plant_lot(lot: Dictionary) -> void:
 		if placer.problem("shrub", at, 0.5, {"walk": 0.6}) != "": continue
 		placer.record("shrub", at, 0.5, "front_shrub")
 		add_prop(sid, Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * shrub_scale), at), 55.0, true)
-	if seed_i % 5 < 3:
-		var right := door.x + 1.25 + 1.3
-		if right + 1.3 < w / 2 - 1.2:
-			var local := Vector3(right + 0.1, 0, 0.75)
-			var ok := true
-			for k in [-1.15, 0.0, 1.15]:
-				if not local_clear(rects, Vector2(local.x + float(k), local.z), 0.25): ok = false
-			var at := t * local
-			if ok and placer.problem("bed", at, 1.2, {"walk": 0.4}) == "":
-				placer.record("bed", at, 1.2, "flower_bed", true)
-				var basis := Basis(Vector3.UP, float(lot.yaw))
-				add_prop("bed_edging", Transform3D(basis, at), 60.0, false)
-				var plants: Array[String] = ["bed_croton", "bed_snake", "bed_croton", "grass_b"]
-				for k in range(4):
-					var off := Vector3(-0.85 + k * 0.57 + rng.randf_range(-0.08, 0.08), 0.06, rng.randf_range(-0.1, 0.1))
-					var pid: String = plants[(seed_i + k) % plants.size()]
-					add_prop(pid, Transform3D(basis.rotated(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * rng.randf_range(0.8, 1.05)), t * (local + off)), 50.0, false)
 	# A grass clump by the front fence.
 	if seed_i % 3 == 0:
 		var local := Vector3((seed_i % 7 - 3) * 0.9, 0, 4.2)

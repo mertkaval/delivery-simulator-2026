@@ -53,12 +53,13 @@ void vertex() {
 void fragment() {
 	vec4 tex = texture(albedo_tex, UV);
 	ALBEDO = tex.rgb * tint.rgb * inst_tint * ao;
-	if (cutout) {
-		ALPHA = tex.a;
-		ALPHA_SCISSOR_THRESHOLD = alpha_cut;
-		ALPHA_ANTIALIASING_EDGE = 0.25;
-		ALPHA_TEXTURE_COORDINATE = UV * vec2(textureSize(albedo_tex, 0));
-	}
+	// Assigned on every path: a shader that writes the alpha outputs only inside a branch leaves
+	// them undefined on the other one (opaque surfaces - bark, the hedge / boxwood cores - came out
+	// partly see-through).
+	ALPHA = cutout ? tex.a : 1.0;
+	ALPHA_SCISSOR_THRESHOLD = cutout ? alpha_cut : 0.0;
+	ALPHA_ANTIALIASING_EDGE = cutout ? 0.25 : 0.0;
+	ALPHA_TEXTURE_COORDINATE = UV * vec2(textureSize(albedo_tex, 0));
 	ROUGHNESS = roughness;
 	SPECULAR = 0.25;
 	if (use_normal_map) NORMAL_MAP = texture(normal_tex, UV).rgb;

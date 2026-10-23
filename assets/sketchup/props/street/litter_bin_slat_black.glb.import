@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://vqxqw87nqevj"
-path="res://.godot/imported/bins_trio_far.glb-a1c645ccf73e1314667d981a0a565bd8.scn"
+uid="uid://bxiniiqyt0j2w"
+path="res://.godot/imported/litter_bin_slat_black.glb-38dc6a78ffc7df4e8190c7e5cf94aebd.scn"
 
 [deps]
 
-source_file="res://world/citykit/houses/bins_trio_far.glb"
-dest_files=["res://.godot/imported/bins_trio_far.glb-a1c645ccf73e1314667d981a0a565bd8.scn"]
+source_file="res://assets/sketchup/props/street/litter_bin_slat_black.glb"
+dest_files=["res://.godot/imported/litter_bin_slat_black.glb-38dc6a78ffc7df4e8190c7e5cf94aebd.scn"]
 
 [params]
 

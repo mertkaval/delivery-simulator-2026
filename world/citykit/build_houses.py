@@ -866,16 +866,8 @@ def fence_picket(m):
         m.box((0, y, -0.03), (2.4, 0.07, 0.03), "TrimPaint")
 
 
-def hedge(m):
-    """2.4 m clipped hedge, 1.1 m tall, slightly bulged sides."""
-    # 2.36 m: neighbouring sections leave a 4 cm gap (double-sided leaves must not share planes).
-    m.box((0, 0.55, 0), (2.36, 1.1, 0.8), "Hedge", skip=("-y",))
-    if near():
-        m.box((0, 1.13, 0), (2.26, 0.08, 0.7), "Hedge", skip=("-y",))
-
-
 def blob(m, cx, cy, cz, rx, ry, rz, mat, seg=7, rings=4, seed=0.0):
-    """Lumpy low-poly ellipsoid (shrubs, hedge tops): jittered radius gives a leafy silhouette."""
+    """Lumpy low-poly ellipsoid (raised-bed plants, statues): jittered radius gives a leafy silhouette."""
     pts = []
     for i in range(rings + 1):
         a = math.pi * i / rings
@@ -896,13 +888,6 @@ def shrub_blob(m, x, z, r, mat="Foliage"):
     blob(m, x, r * 0.75, z, r, r * 0.8, r, mat, seed=x + z)
     if near():
         blob(m, x + r * 0.35, r * 1.1, z - r * 0.2, r * 0.6, r * 0.55, r * 0.6, mat, seg=6, rings=3, seed=x - z)
-
-
-def garden_bed(m):
-    """2.4 x 1 m planting bed: mulch, edging and shrubs."""
-    m.box((0, 0.06, 0), (2.4, 0.12, 1.0), "Soil", skip=("-y",))
-    for x, z, r in ((-0.8, 0.1, 0.32), (0.0, -0.15, 0.42), (0.8, 0.1, 0.3)):
-        shrub_blob(m, x, z, r)
 
 
 def raised_bed(m):
@@ -939,17 +924,6 @@ def bbq(m):
     m.box((0, 1.12, 0), (0.95, 0.14, 0.5), "FrameLight")
     for x in (-0.4, 0.4):
         m.box((x, 0.42, 0), (0.05, 0.84, 0.45), "RailBlack")
-
-
-def bins_trio(m):
-    """Vancouver carts: garbage (black), recycling (blue), green compost."""
-    for i, mat in enumerate(("BinBlack", "BinBlue", "BinGreen")):
-        x = -0.75 + i * 0.75
-        m.box((x, 0.5, 0), (0.6, 1.0, 0.7), mat)
-        m.box((x, 1.03, 0.02), (0.64, 0.06, 0.76), mat)
-        if near():
-            for sx in (-0.24, 0.24):
-                m.box((x + sx, 0.12, -0.36), (0.08, 0.24, 0.24), "RailBlack")
 
 
 def garage_single(m):
@@ -1140,8 +1114,10 @@ HOUSES = {
 }
 PROPS = {
     "fence_privacy": fence_privacy, "fence_lattice": lambda m: fence_privacy(m, True), "fence_picket": fence_picket, "fence_post": fence_post,
-    "hedge": hedge, "garden_bed": garden_bed, "raised_bed": raised_bed, "patio_set": patio_set, "bbq": bbq,
-    "bins_trio": bins_trio, "garage_single": garage_single, "shed": shed, "utility_pole": utility_pole,
+    # (hedge, garden_bed and bins_trio moved out of the kit: the clipped hedge and the front-yard beds are
+    # tools/prepare_yard_planting.py -> assets/landscape/yard.glb, the lane carts are PropKit wheelie bins.)
+    "raised_bed": raised_bed, "patio_set": patio_set, "bbq": bbq,
+    "garage_single": garage_single, "shed": shed, "utility_pole": utility_pole,
     "utility_pole_transformer": lambda m: utility_pole(m, True), "tree_fir": fir, "tree_cedar": cedar_tree,
     "street_sign": street_sign, "park_sign": park_sign, "statue_bust": statue_bust, "monument_plinth": monument_plinth, "statue_figure": statue_figure,
 }

@@ -15,7 +15,10 @@ const FLAT := ["storm_drain", "manhole"]
 ## Road works: intentionally on the carriageway (a closed lane), never on an AI route.
 const ROAD_WORKS := ["cone", "barrier"]
 ## Older kit pieces replaced by the converted realistic props (PropKit) where one exists.
-const SWAP := {"hydrant": "fire_hydrant", "trash_bin": "litter_bin_green", "recycle_bin": "wheelie_bin_blue",
+## Litter bins: the slatted steel bins of tools/prepare_litter_bins.py (bench bins keep their names
+## for the colliders / tests, drawn as the new models).
+const SWAP := {"hydrant": "fire_hydrant", "trash_bin": "litter_bin_slat_green", "recycle_bin": "wheelie_bin_blue",
+	"litter_bin_red": "litter_bin_slat_red", "litter_bin_green": "litter_bin_slat_green",
 	"cone": "traffic_cone", "barrier": "water_barrier_orange"}
 var groups := {}
 var body: StaticBody3D

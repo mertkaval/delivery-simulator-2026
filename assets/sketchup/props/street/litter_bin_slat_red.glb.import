@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dpsqqybrmn7wy"
-path="res://.godot/imported/garden_bed_far.glb-47752bfac2a31d78bd1a21d850c142cb.scn"
+uid="uid://br5031sb08fnn"
+path="res://.godot/imported/litter_bin_slat_red.glb-076af92d70f6828a451279ff721acdb1.scn"
 
 [deps]
 
-source_file="res://world/citykit/houses/garden_bed_far.glb"
-dest_files=["res://.godot/imported/garden_bed_far.glb-47752bfac2a31d78bd1a21d850c142cb.scn"]
+source_file="res://assets/sketchup/props/street/litter_bin_slat_red.glb"
+dest_files=["res://.godot/imported/litter_bin_slat_red.glb-076af92d70f6828a451279ff721acdb1.scn"]
 
 [params]
 
