@@ -95,6 +95,17 @@ Catalogue renders: `tmp/roads/assets/catalogue_*.png`; test: `tools/roads/tests/
 `gantry_sign(road, along, texts)`, `text_sign(text, pos, shape, color)`, `cable_stays(road)`,
 `tunnel(road, a0, a1)` (horseshoe lining + portal frames), `bus_stop(road, along, side)`.
 
+## Materials (`mrs.materials`)
+Four shader groups, each material one group node "MRS": `MRS_AsphaltShader` (Surface Type 0 fresh /
+1 aged / 2 cracked / 3 concrete road / 4 cobblestone / 5 dirt, Cracks, Patch Amount, Tire Wear from
+the `lat` attribute, Edge Dirt, Wetness with puddles + coat, 4D-noise aggregate mosaic), `MRS_PaintShader`
+(wear on the aggregate tops, chipping, Yellow, bead Sparkle), `MRS_ConcreteShader` (slab joints by face
+orientation, pores, Rust Streaks, Grime at the base), `MRS_EmbankmentShader` (grass -> dirt -> rock by
+slope). Presets: dry, wet, worn_city, fresh_highway, old_village, dirt_track (`apply_material_preset`).
+`bake_tiles(out_dir, res)` bakes seamless albedo / normal / roughness tiles (Use UV + Tile Size, 4D
+torus coordinates) for engines; `tools/roads/tests/materials_test.py` renders every type / preset and a
+2x2 seam check (`docs/roads/v2/materials.jpg`).
+
 ## Terrain workflow
 1. `mrs.terrain.demo_terrain()` or your own mesh -> panel *Use Active as Terrain*.
 2. Roads conform to it (Conform on); embankments fill and cut.
@@ -109,7 +120,7 @@ baked tiles (`materials.bake_tiles`) in an engine.
 ## Validation
 `tools/roads/build_mrs.py` is the test: it rebuilds everything headless, asserts >= 25 roads and
 >= 12 junctions evaluate to meshes with UVs, exports the city block and renders 20 views to
-`tmp/roads/v2/samples/`. Contact sheets of the validation renders are in `docs/roads/v2/`.
+`tmp/roads/v2/samples/`. Contact sheets of the validation renders are in `docs/roads/v2/` (city_block, mountain_road, highway, village, bridge_valley, materials, assets).
 
 ## Reference research
 MRoadGen v1.1.0 (CC0, github.com/MaartenNauta-Pathtrace/MRoadGen) was downloaded to
