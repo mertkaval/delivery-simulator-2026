@@ -544,7 +544,123 @@ def tree(m, lod, spec):
         blob(m, dx, dy, dz, rx, ry, rz, "CF_Leaves", sum(map(ord, name)) + k, rings=3 if lod else 5, segs=6 if lod else 9)
 
 
-PROPS = {"garage": garage, "lamp": lamp, "traffic_light": traffic_light, "stop_sign": stop_sign, "bus_stop": bus_stop, "hydrant": hydrant, "bench": bench}
+def sign_pole(m, lod):
+    """Street-name pole: the blades are separate instances (sign_blade) at 2.65 m and 2.95 m."""
+    s = 6 if lod else 10
+    m.cylinder(0, 0, 0.0, 2.52, 0.045, 0.04, "CF_Metal", s)              # the blades sit on top of the post
+    m.box(-0.05, -0.05, 2.5, 0.05, 0.05, 2.54, "CF_Metal")
+
+
+def sign_blade(m, lod):
+    """One street-name blade, 1.1 x 0.24 m, long axis along +X, centred on the pole (tinted per district)."""
+    m.box(-0.55, -0.015, -0.12, 0.55, 0.015, 0.12, "CF_SignPlate")
+    if not lod:
+        m.box(-0.56, -0.02, 0.105, 0.56, 0.02, 0.125, "CF_SignEdge")
+        m.box(-0.56, -0.02, -0.125, 0.56, 0.02, -0.105, "CF_SignEdge")
+
+
+def vending_machine(m, lod):
+    """Japanese street vending machine: white cabinet, lit drink window, coin panel; front +Y."""
+    m.box(-0.5, -0.4, 0.0, 0.5, 0.4, 1.83, "CF_Trim")
+    m.box(-0.46, 0.4, 0.95, 0.46, 0.42, 1.72, "CF_VendGlow")
+    if not lod:
+        for r in range(3):
+            for c in range(6):
+                x, z = -0.38 + c * 0.152, 1.05 + r * 0.22
+                m.box(x - 0.05, 0.42, z, x + 0.05, 0.46, z + 0.15, ["CF_SignRed", "CF_SignBlue", "CF_SignGreen", "CF_Hydrant"][(r + c) % 4])
+        m.box(0.12, 0.4, 0.55, 0.42, 0.43, 0.88, "CF_Metal")
+        m.box(-0.42, 0.4, 0.12, 0.42, 0.45, 0.32, "CF_Metal")
+
+
+def utility_pole(m, lod):
+    """Japanese concrete utility pole with a street lamp arm and a transformer drum; arm towards +Y."""
+    s = 6 if lod else 10
+    m.cylinder(0, 0, 0.0, 9.5, 0.17, 0.12, "CF_Concrete", s)
+    m.box(-0.9, -0.05, 8.7, 0.9, 0.05, 8.85, "CF_Metal")
+    m.box(-0.9, -0.05, 9.2, 0.9, 0.05, 9.35, "CF_Metal")
+    if not lod:
+        m.cylinder(0.32, 0.0, 7.2, 8.1, 0.22, 0.22, "CF_Metal", 10)
+        for x in (-0.8, -0.3, 0.3, 0.8):
+            m.cylinder(x, 0.0, 8.85, 9.0, 0.04, 0.04, "CF_Trim", 6)
+    m.box(-0.04, 0.0, 6.0, 0.04, 1.2, 6.08, "CF_Metal")
+    m.box(-0.15, 1.0, 5.85, 0.15, 1.5, 6.0, "CF_Metal")
+    m.poly([(-0.12, 1.05, 5.84), (-0.12, 1.45, 5.84), (0.12, 1.45, 5.84), (0.12, 1.05, 5.84)], "CF_LampGlow")
+
+
+def post_box(m, lod):
+    """British red pillar box."""
+    s = 8 if lod else 14
+    m.cylinder(0, 0, 0.0, 0.12, 0.3, 0.3, "CF_Concrete", s)
+    m.cylinder(0, 0, 0.12, 1.32, 0.25, 0.25, "CF_PostRed", s)
+    m.cylinder(0, 0, 1.32, 1.5, 0.29, 0.12, "CF_PostRed", s)
+    if not lod:
+        m.box(-0.13, 0.22, 1.0, 0.13, 0.27, 1.05, "CF_Metal")
+        m.box(-0.08, 0.235, 0.7, 0.08, 0.26, 0.82, "CF_SignWhite")
+
+
+def phone_box(m, lod):
+    """British red telephone kiosk with glazed sides; door +Y."""
+    m.box(-0.5, -0.5, 0.0, 0.5, 0.5, 0.12, "CF_PostRed")
+    if lod:
+        m.box(-0.45, -0.45, 0.12, 0.45, 0.45, 2.25, "CF_PostRed")
+    else:
+        for x in (-0.45, 0.45):
+            for y in (-0.45, 0.45):
+                m.box(x - 0.05, y - 0.05, 0.12, x + 0.05, y + 0.05, 2.25, "CF_PostRed")
+        for face in ("front", "back", "left", "right"):
+            F = Face(face, -0.4, -0.4, 0.4, 0.4)
+            F.box(m, -0.36, 0.95, -0.02, 0.36, 2.0, 0.0, "CF_Glass")
+            for z in (1.2, 1.45, 1.7):
+                F.box(m, -0.36, z - 0.02, 0.0, 0.36, z + 0.02, 0.02, "CF_PostRed")
+            F.box(m, -0.4, 0.12, -0.02, 0.4, 0.95, 0.0, "CF_PostRed")
+            F.box(m, -0.36, 2.05, 0.0, 0.36, 2.2, 0.02, "CF_SignWhite")
+    m.box(-0.55, -0.55, 2.25, 0.55, 0.55, 2.4, "CF_PostRed")
+    m.box(-0.4, -0.4, 2.4, 0.4, 0.4, 2.5, "CF_PostRed")
+
+
+def ad_column(m, lod):
+    """European advertising column (Litfass / Morris column) with a domed cap."""
+    s = 10 if lod else 18
+    m.cylinder(0, 0, 0.0, 0.3, 0.68, 0.64, "CF_Metal", s)
+    m.cylinder(0, 0, 0.3, 2.8, 0.6, 0.6, "CF_Posters", s, cap=False)
+    m.cylinder(0, 0, 2.8, 3.0, 0.7, 0.7, "CF_SignGreen", s)
+    m.cylinder(0, 0, 3.0, 3.5, 0.66, 0.12, "CF_SignGreen", s)
+
+
+def cesme(m, lod):
+    """Turkish street fountain (cesme): a marble niche with a basin and a tap; front +Y."""
+    m.box(-0.9, -0.3, 0.0, 0.9, 0.3, 2.4, "CF_Ashlar")
+    m.box(-1.0, -0.35, 2.4, 1.0, 0.4, 2.6, "CF_Ashlar")
+    m.box(-0.7, 0.3, 0.0, 0.7, 0.85, 0.45, "CF_Ashlar")
+    m.box(-0.6, 0.35, 0.42, 0.6, 0.8, 0.46, "CF_Water")
+    if not lod:
+        F = Face("front", -0.9, -0.3, 0.9, 0.3)
+        F.box(m, -0.55, 0.6, -0.12, 0.55, 2.05, 0.0, "CF_Concrete")
+        F.box(m, -0.62, 2.05, 0.0, 0.62, 2.18, 0.05, "CF_Ashlar")
+        m.box(-0.04, 0.3, 1.0, 0.04, 0.55, 1.06, "CF_Brass")
+        m.box(-0.35, 0.31, 1.5, 0.35, 0.33, 1.85, "CF_Plaque")
+
+
+def cafe_set(m, lod):
+    """A cafe table with two chairs and a parasol, on the sidewalk in front of a shop."""
+    m.cylinder(0, 0, 0.0, 0.73, 0.04, 0.04, "CF_Metal", 6)
+    m.cylinder(0, 0, 0.72, 0.76, 0.38, 0.38, "CF_Metal" if lod else "CF_Trim", 10)
+    for sx in (-0.75, 0.75):
+        m.box(sx - 0.22, -0.22, 0.42, sx + 0.22, 0.22, 0.46, "CF_Wood")
+        m.box(sx + (0.2 if sx > 0 else -0.24), -0.22, 0.46, sx + (0.24 if sx > 0 else -0.2), 0.22, 0.88, "CF_Wood")
+        if not lod:
+            for dx in (-0.18, 0.18):
+                for dy in (-0.18, 0.18):
+                    m.box(sx + dx - 0.02, dy - 0.02, 0.0, sx + dx + 0.02, dy + 0.02, 0.42, "CF_Metal")
+    m.cylinder(0, 0, 0.76, 2.3, 0.025, 0.025, "CF_Metal", 6)
+    canopy = [(1.25 * math.cos(2 * math.pi * k / 8), 1.25 * math.sin(2 * math.pi * k / 8), 2.05) for k in range(8)]
+    for k in range(8):
+        m.poly([canopy[k], canopy[(k + 1) % 8], (0, 0, 2.4)], "CF_Parasol")
+        m.poly([canopy[(k + 1) % 8], canopy[k], (0, 0, 2.38)], "CF_Parasol")
+
+
+PROPS = {"garage": garage, "sign_pole": sign_pole, "sign_blade": sign_blade, "vending_machine": vending_machine, "utility_pole": utility_pole,
+         "post_box": post_box, "phone_box": phone_box, "ad_column": ad_column, "cesme": cesme, "cafe_set": cafe_set, "lamp": lamp, "traffic_light": traffic_light, "stop_sign": stop_sign, "bus_stop": bus_stop, "hydrant": hydrant, "bench": bench}
 
 
 def build_all():

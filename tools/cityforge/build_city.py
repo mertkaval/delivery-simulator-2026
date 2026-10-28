@@ -72,7 +72,13 @@ PREVIEW = {
     "CF_Storefront": (0.2, 0.28, 0.33), "CF_SignBoard": (0.85, 0.82, 0.75), "CF_FenceWood": (0.48, 0.34, 0.22), "CF_Picket": (0.94, 0.94, 0.9),
     "CF_Iron": (0.08, 0.08, 0.09), "CF_Hedge": (0.16, 0.32, 0.12), "CF_FireDoor": (0.75, 0.08, 0.06), "CF_Stone": (0.78, 0.75, 0.68),
     "CF_Railing": (0.45, 0.47, 0.5), "CF_Path": (0.62, 0.58, 0.5), "CF_BrickFacade": (0.55, 0.3, 0.22),
-    "CF_SidingV": (0.75, 0.72, 0.62), "CF_RoofV": (0.25, 0.26, 0.28), "CF_LeavesV": (0.25, 0.42, 0.16),
+    "CF_SidingV": (0.75, 0.72, 0.62), "CF_RoofV": (0.25, 0.26, 0.28), "CF_LeavesV": (0.25, 0.42, 0.16), "CF_RoofSeamV": (0.4, 0.42, 0.43),
+    "CF_Stucco": (0.85, 0.82, 0.74), "CF_Plaster": (0.92, 0.9, 0.84), "CF_BrickPainted": (0.88, 0.88, 0.86), "CF_BrickLondon": (0.55, 0.43, 0.27),
+    "CF_Ashlar": (0.76, 0.72, 0.64), "CF_Cedar": (0.45, 0.31, 0.2), "CF_Yakisugi": (0.08, 0.07, 0.06), "CF_LightWood": (0.62, 0.47, 0.3),
+    "CF_TimberDark": (0.18, 0.12, 0.08), "CF_RoofSlate": (0.2, 0.22, 0.25), "CF_RoofTerracotta": (0.6, 0.28, 0.15), "CF_RoofKawara": (0.2, 0.21, 0.23),
+    "CF_RoofSeam": (0.4, 0.42, 0.43), "CF_Shutter": (0.18, 0.32, 0.25), "CF_SignPlate": (0.1, 0.3, 0.6), "CF_SignEdge": (0.95, 0.95, 0.95),
+    "CF_VendGlow": (0.9, 0.95, 1.0), "CF_PostRed": (0.7, 0.05, 0.05), "CF_Posters": (0.85, 0.8, 0.7), "CF_Brass": (0.8, 0.6, 0.25),
+    "CF_Plaque": (0.9, 0.88, 0.8), "CF_Parasol": (0.9, 0.86, 0.76),
 }
 MATS = {}
 for name, c in PREVIEW.items():
@@ -350,7 +356,8 @@ def build_lane(ln, roads):
 
 
 # --- lots, fences ----------------------------------------------------------------------------
-FENCE_MAT = {"wood": "CF_FenceWood", "picket": "CF_Picket", "iron": "CF_Iron", "hedge": "CF_Hedge", "brick": "CF_Brick"}
+FENCE_MAT = {"wood": "CF_FenceWood", "picket": "CF_Picket", "iron": "CF_Iron", "hedge": "CF_Hedge", "brick": "CF_Brick",
+             "block": "CF_Concrete", "stucco_wall": "CF_Stucco", "stone": "CF_Ashlar"}
 
 
 def build_fence(fc, m):
@@ -360,7 +367,7 @@ def build_fence(fc, m):
         rise = abs(h_at(x0, y0) - h_at(x1, y1))
         k = max(1, min(int(math.ceil(L / 3.0)), int(math.ceil(rise / 0.25))))   # split only where the ground changes
         yaw = math.atan2(y1 - y0, x1 - x0)
-        th = {"hedge": 0.8, "brick": 0.32, "wood": 0.06, "picket": 0.05, "iron": 0.04}[kind]
+        th = {"hedge": 0.8, "brick": 0.32, "wood": 0.06, "picket": 0.05, "iron": 0.04, "block": 0.15, "stucco_wall": 0.25, "stone": 0.4}[kind]
         for i in range(k):
             ax, ay = x0 + (x1 - x0) * i / k, y0 + (y1 - y0) * i / k
             bx, by = x0 + (x1 - x0) * (i + 1) / k, y0 + (y1 - y0) * (i + 1) / k
@@ -368,7 +375,14 @@ def build_fence(fc, m):
             g = min(h_at(ax, ay), h_at(bx, by), h_at(cx, cy))
             seg = L / k + (0.02 if kind in ("hedge", "brick") else 0.0)
             hh = hgt + (0.15 * math.sin(cx * 1.7 + cy) if kind == "hedge" else 0.0)
+            if kind == "stucco_wall" and hgt < 1.5:          # a low rendered wall with an iron railing on top
+                m.obox(cx - HALF, cy - HALF, g - 0.2, seg, th, g + 0.6, yaw, "CF_Stucco", zb=g)
+                m.obox(cx - HALF, cy - HALF, g + 0.6, seg + 0.04, th + 0.06, g + 0.68, yaw, "CF_Concrete")
+                m.obox(cx - HALF, cy - HALF, g + 0.68, seg, 0.04, g + hh, yaw, "CF_Iron", zb=g + 0.68)
+                continue
             m.obox(cx - HALF, cy - HALF, g - 0.2, seg, th, g + hh, yaw, FENCE_MAT[kind], zb=g)
+            if kind in ("block", "stone", "stucco_wall"):
+                m.obox(cx - HALF, cy - HALF, g + hh, seg + 0.02, th + 0.06, g + hh + 0.06, yaw, "CF_Concrete")
             if kind == "brick":
                 m.obox(cx - HALF, cy - HALF, g + hh, seg + 0.02, th + 0.06, g + hh + 0.08, yaw, "CF_Concrete")
             elif kind in ("wood", "picket", "iron") and i == 0:
@@ -393,7 +407,7 @@ def build_shop(s, m):
     fl = s["floors"]
     H = fl * 3.4 + 0.4
     g = s["h"]
-    col = palette(s["palette"], "facade")
+    col = hex_col(s["facade"]) if "facade" in s else palette(s["palette"], "facade")
     sub = Mesh()
     sub.box(-w / 2, -d / 2, -0.8, w / 2, d / 2, H, "CF_Facade", col=col, top=False, zb=0.0)
     sub.box(-w / 2, -d / 2, H, w / 2, d / 2, H + 0.1, "CF_RoofFlat")
@@ -405,9 +419,10 @@ def build_shop(s, m):
         u0 = -w / 2 + 0.5 + (w - 1.0) * k / bays + 0.25
         u1 = -w / 2 + 0.5 + (w - 1.0) * (k + 1) / bays - 0.25
         sub.box(u0, d / 2 - 0.15, 0.25, u1, d / 2 + 0.01, 3.0, "CF_Storefront")
-    sub.box(-w / 2, d / 2, 3.05, w / 2, d / 2 + 0.25, 3.75, "CF_SignBoard", col=palette(s["palette"] + 3, "awning"))
-    sub.poly([(-w / 2 + 0.3, d / 2 + 1.6, 2.6), (w / 2 - 0.3, d / 2 + 1.6, 2.6), (w / 2 - 0.3, d / 2, 3.05), (-w / 2 + 0.3, d / 2, 3.05)], "CF_Awning", col=palette(s["palette"], "awning"))
-    sub.poly([(-w / 2 + 0.3, d / 2 + 1.6, 2.58), (-w / 2 + 0.3, d / 2, 3.03), (w / 2 - 0.3, d / 2, 3.03), (w / 2 - 0.3, d / 2 + 1.6, 2.58)], "CF_Awning", col=palette(s["palette"], "awning"))
+    awn = hex_col(s["awning"]) if "awning" in s else palette(s["palette"], "awning")
+    sub.box(-w / 2, d / 2, 3.05, w / 2, d / 2 + 0.25, 3.75, "CF_SignBoard", col=awn)
+    sub.poly([(-w / 2 + 0.3, d / 2 + 1.6, 2.6), (w / 2 - 0.3, d / 2 + 1.6, 2.6), (w / 2 - 0.3, d / 2, 3.05), (-w / 2 + 0.3, d / 2, 3.05)], "CF_Awning", col=awn)
+    sub.poly([(-w / 2 + 0.3, d / 2 + 1.6, 2.58), (-w / 2 + 0.3, d / 2, 3.03), (w / 2 - 0.3, d / 2, 3.03), (w / 2 - 0.3, d / 2 + 1.6, 2.58)], "CF_Awning", col=awn)
     if w > 14: sub.box(-2.0, -d / 4, H + 0.1, 2.0, d / 4 - 1.0, H + 1.6, "CF_MetalSiding", col=palette(0, "metal"))
     m.append(sub, s["yaw"], (s["pos"][0] - HALF, s["pos"][1] - HALF, g))
 
@@ -521,9 +536,21 @@ def build_parking_behind_shops(s, m):
 
 # --- far LOD: every repeated model merged per chunk (LOD1), tinted by vertex colour ------------
 KIT = kit.build_all()
+# the house catalogue's LOD1 meshes (tools/cityforge/houses.py) for the merged far meshes
+HOUSE_LOD1 = {}
+_lod1_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "assets", "cityforge", "houses_lod1.json")
+if os.path.exists(_lod1_path):
+    for hid, g in json.load(open(_lod1_path)).items():
+        hm = Mesh()
+        for f, mname in zip(g["f"], g["m"]):
+            hm.poly([g["v"][i] for i in f], mname)
+        HOUSE_LOD1["H_" + hid] = hm
 PAL = CITY["palettes"]
 TREE_NAMES = [t[0] for t in kit.TREES]
-TINTED = {"CF_Siding": "CF_SidingV", "CF_Roof": "CF_RoofV", "CF_Leaves": "CF_LeavesV"}
+TINTED = {"CF_Siding": "CF_SidingV", "CF_Roof": "CF_RoofV", "CF_Leaves": "CF_LeavesV", "CF_RoofSeam": "CF_RoofSeamV",
+          "CF_Stucco": "CF_Stucco", "CF_Plaster": "CF_Plaster", "CF_BrickPainted": "CF_BrickPainted"}
+TINT_ROLE = {"CF_SidingV": "wall", "CF_Stucco": "wall", "CF_Plaster": "wall", "CF_BrickPainted": "wall", "CF_RoofV": "roof",
+             "CF_RoofSeamV": "roof", "CF_LeavesV": "leaves"}
 
 
 def hex_col(h):
@@ -541,17 +568,22 @@ def tree_scale(k):
 
 def place_far(far, name, yaw, x, y, h, scale=(1.0, 1.0, 1.0), siding=None, roof=None, leaves=None):
     first = len(far.f)
-    far.append(KIT[name][-1], yaw, (x - HALF, y - HALF, h), scale)     # the coarsest LOD the kit has
-    tint = {"CF_SidingV": siding, "CF_RoofV": roof, "CF_LeavesV": leaves}
+    src = HOUSE_LOD1[name] if name in HOUSE_LOD1 else KIT[name][-1]     # the coarsest LOD there is
+    far.append(src, yaw, (x - HALF, y - HALF, h), scale)
+    tint = {"wall": siding, "roof": roof, "leaves": leaves}
     for fi in range(first, len(far.f)):
         idx, mat, uv, col, zb = far.f[fi]
         if mat in TINTED:
             mat = TINTED[mat]
-            far.f[fi] = (idx, mat, uv, tint[mat] or (1.0, 1.0, 1.0, 1.0), zb)
+            far.f[fi] = (idx, mat, uv, tint[TINT_ROLE[mat]] or (1.0, 1.0, 1.0, 1.0), zb)
 
 
 def build_far(M):
     for hs in CITY["houses"]:
+        if "kit" in hs and hs["kit"] in HOUSE_LOD1:
+            place_far(M(chunk_of(*hs["pos"]), "Far"), hs["kit"], hs["yaw"], hs["pos"][0], hs["pos"][1], hs["h"], (1.0, 1.0, 1.0),
+                      hex_col(hs["tint"]), hex_col(hs["roof_tint"]))
+            continue
         sx, sy = hs["size"][0] / kit.HOUSE_W, hs["size"][1] / kit.HOUSE_D
         place_far(M(chunk_of(*hs["pos"]), "Far"), "house_" + hs["archetype"], hs["yaw"], hs["pos"][0], hs["pos"][1], hs["h"], (sx, sy, 1.0),
                   hex_col(PAL["siding"][hs["siding"] % len(PAL["siding"])]), hex_col(PAL["roof"][hs["roof"] % len(PAL["roof"])]))

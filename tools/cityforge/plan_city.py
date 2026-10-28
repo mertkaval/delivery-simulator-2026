@@ -34,6 +34,13 @@ SIZE, CELL, N = META["size_m"], META["cell_m"], META["grid"]
 W = SPEC["widths"]
 OVR_PATH = os.path.join(os.path.dirname(os.path.abspath(spec_path)), "overrides.json")
 OVR = json.load(open(OVR_PATH, encoding="utf-8")) if os.path.exists(OVR_PATH) else {}
+SPEC_DIR = os.path.dirname(os.path.abspath(spec_path))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from street_names import StreetNamer
+CAT_PATH = os.path.join(SPEC_DIR, SPEC.get("house_catalogue", "../../assets/cityforge/houses.json"))
+CATALOGUE = json.load(open(CAT_PATH, encoding="utf-8")) if os.path.exists(CAT_PATH) else []
+CULTURES = SPEC["cultures"]
+TINTABLE = ("CF_Stucco", "CF_Siding", "CF_BrickPainted", "CF_Plaster")
 
 
 def yaw_of(f):
@@ -267,7 +274,8 @@ for i, pc in enumerate(pieces):
         p1 = (a[0] + (b[0] - a[0]) * t1, a[1] + (b[1] - a[1]) * t1)
         n0, n1 = node_at(p0), node_at(p1)
         if n0 == n1: continue
-        e = {"id": "road_%04d" % len(edges), "a": n0, "b": n1, "cls": pc["cls"], "width": pc["width"], "name": pc["name"], "bridge": pc["bridge"]}
+        e = {"id": "road_%04d" % len(edges), "a": n0, "b": n1, "cls": pc["cls"], "width": pc["width"], "name": pc["name"], "bridge": pc["bridge"],
+             "family": str(pc["family"])}
         edges.append(e)
         nodes[n0]["edges"].append(len(edges) - 1); nodes[n1]["edges"].append(len(edges) - 1)
 # prune short dead-end stubs (streets running past the waterfront drive, slivers at cuts)
@@ -306,7 +314,8 @@ for nd in nodes:
             mid_ok = all(not wet(nd["pos"][0] + (other["pos"][0] - nd["pos"][0]) * f, nd["pos"][1] + (other["pos"][1] - nd["pos"][1]) * f) for f in (0.25, 0.5, 0.75))
             if mid_ok: best, bd = other, d
     if best is not None:
-        e = {"id": "road_%04d" % len(edges), "a": nd["id"], "b": best["id"], "cls": "local", "width": W["local"], "name": own, "bridge": False}
+        e = {"id": "road_%04d" % len(edges), "a": nd["id"], "b": best["id"], "cls": "local", "width": W["local"], "name": own, "bridge": False,
+             "family": "conn", "source": nd["edges"][0]}
         edges.append(e)
         nd["edges"].append(len(edges) - 1); best["edges"].append(len(edges) - 1)
 MAJOR = ("arterial", "boulevard", "downtown")
@@ -314,6 +323,51 @@ for nd in nodes:
     cls = [edges[e]["cls"] for e in nd["edges"]]
     majors = sum(1 for c in cls if c in MAJOR)
     nd["control"] = "signal" if (majors >= 3 or (majors >= 2 and len(cls) >= 3)) else ("stop" if len(cls) >= 3 and majors >= 1 else ("none" if len(cls) < 3 else "uncontrolled"))
+
+# --- street names: one name per line per district, from the pioneers file -------------------
+NEIGH = SPEC["neighbourhoods"]
+
+
+def district(p):
+    return min(NEIGH, key=lambda n: math.hypot(p[0] - n["centre"][0], p[1] - n["centre"][1]))
+
+
+def culture_at(p):
+    return district(p)["culture"]
+
+
+NAMER = StreetNamer(os.path.join(SPEC_DIR, SPEC["street_names_file"]))
+groups = {}
+for k, e in enumerate(edges):
+    if e.get("source") is not None: continue
+    a, b = nodes[e["a"]]["pos"], nodes[e["b"]]["pos"]
+    mid = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+    cul = "downtown" if in_poly(mid, DT_POLY) or e["cls"] == "downtown" else culture_at(mid)
+    groups.setdefault((cul, e["family"]), []).append(k)
+ORDER = ["japanese", "korean", "british", "european", "turkish", "downtown", "mixed"]
+RANK = {"local": 0, "downtown": 1, "boulevard": 2, "arterial": 3}
+for key in sorted(groups, key=lambda g: (ORDER.index(g[0]), g[1])):
+    cul, fam = key
+    cls = max((edges[k]["cls"] for k in groups[key]), key=lambda c: RANK.get(c, 0))
+    name = NAMER.take("mixed" if cul == "downtown" else cul, "downtown" if cul == "downtown" and cls == "downtown" else cls)
+    for k in groups[key]:
+        edges[k]["name"] = name
+        edges[k]["culture"] = "mixed" if cul == "downtown" else cul
+for e in edges:
+    if e.get("source") is not None:
+        e["name"] = edges[e["source"]]["name"]
+        e["culture"] = edges[e["source"]].get("culture", "mixed")
+        del e["source"]
+
+
+def road_near(p, max_d=60.0):
+    """The road edge nearest a point."""
+    best, bd = None, max_d
+    for e in edges:
+        a, b = nodes[e["a"]]["pos"], nodes[e["b"]]["pos"]
+        d, _ = dist_point_seg(p, a, b)
+        if d < bd: best, bd = e, d
+    return best
 
 # --- 3. zoning, blocks, lots -----------------------------------------------------------------
 PARKS = []
@@ -348,9 +402,6 @@ def near_diagonal(p, pad):
 
 def buildable(p, pad=0.0):
     return not wet(*p) and slope_at(*p) < 9.0 and not in_poly(p, DT_POLY) and not near_diagonal(p, pad) and MARGIN < p[0] < SIZE - MARGIN and MARGIN < p[1] < SIZE - MARGIN
-
-
-NEIGH = SPEC["neighbourhoods"]
 
 
 def neighbourhood(p):
@@ -484,41 +535,53 @@ for b in blocks:
             hid = "house_%04d" % house_n
             house_n += 1
             ho = OVR.get(hid, {})
-            hw = min(lw - 3.0, LOT["house_width"][0] + (LOT["house_width"][1] - LOT["house_width"][0]) * rnd(hid, 1))
-            hd = LOT["house_depth"][0] + (LOT["house_depth"][1] - LOT["house_depth"][0]) * rnd(hid, 2)
-            setback = LOT["front_setback"] + 2.0 * rnd(hid, 3)
+            cul = culture_at((lcx, lcy))
+            rules = CULTURES[cul]
+            lot["culture"] = cul
+            # a catalogue house of the district's culture that fits the lot (mixed districts borrow 20 %)
+            pool_c = cul if cul != "mixed" or rnd(hid, 13) > 0.2 else ["turkish", "japanese", "korean", "european", "british"][int(rnd(hid, 14) * 5)]
+            fits = [c for c in CATALOGUE if c["culture"] == pool_c and c["w"] <= lw - 1.0] or [c for c in CATALOGUE if c["w"] <= lw - 1.0]
+            entry = fits[int(rnd(hid, 5) * len(fits))]
+            if "archetype" in ho:
+                entry = next((c for c in CATALOGUE if c["id"] == ho["archetype"]), entry)
+            hw, hd = entry["w"], entry["d"]
+            setback = rules["setback"] + 1.5 * rnd(hid, 3)
             hcy = front_y + (back_y - front_y) / depth * (setback + hd / 2)
-            hcx = lcx + (rnd(hid, 4) - 0.5) * max(0.0, lw - hw - 3.0)
-            arche = ho.get("archetype", ARCHETYPES[int(rnd(hid, 5) * len(ARCHETYPES))])
-            house = {"id": hid, "lot": lid, "pos": [round(hcx, 2), round(hcy, 2)], "yaw": 0.0 if facing > 0 else math.pi, "size": [round(hw, 2), round(hd, 2)],
-                     "archetype": arche, "siding": ho.get("siding", int(rnd(hid, 6) * 10)), "roof": ho.get("roof", int(rnd(hid, 7) * 5)),
-                     "trim": ho.get("trim", int(rnd(hid, 8) * 3)), "mirror": bool(rnd(hid, 9) < 0.5), "address": addr}
+            hcx = lcx + (rnd(hid, 4) - 0.5) * max(0.0, lw - hw - 2.0)
+            walls, roofs = rules["walls"], rules["roofs"]
+            house = {"id": hid, "lot": lid, "pos": [round(hcx, 2), round(hcy, 2)], "yaw": 0.0 if facing > 0 else math.pi, "size": [hw, hd],
+                     "archetype": entry["id"], "kit": "H_" + entry["id"], "scale": [1.0, 1.0], "culture": cul, "door": entry["door"],
+                     "tint": ho.get("tint", walls[int(rnd(hid, 6) * len(walls))] if entry["wall"] in TINTABLE else "ffffff"),
+                     "roof_tint": ho.get("roof_tint", roofs[int(rnd(hid, 7) * len(roofs))]),
+                     "siding": int(rnd(hid, 6) * 10), "roof": int(rnd(hid, 7) * 5), "storeys": entry["storeys"], "height": entry["height"], "address": addr}
             if ho.get("remove"): continue
             items["houses"].append(house)
-            fence = ho.get("fence", FENCES[int(rnd(hid, 10) * len(FENCES))])
+            fence = ho.get("fence", rules["fences"][int(rnd(hid, 10) * len(rules["fences"]))])
             lot["fence"] = fence
             # garage on the lane
-            garage = lane_ok and rnd(hid, 11) < LOT["garage_chance"]
+            garage = lane_ok and rnd(hid, 11) < rules["garage"]
             if garage:
                 gx = ax0 + 4.0 if rnd(hid, 12) < 0.5 else ax1 - 4.0
                 gy = back_y - (back_y - front_y) / depth * 4.0
                 items["garages"].append({"id": "garage_%04d" % len(items["garages"]), "lot": lid, "pos": [round(gx, 2), round(gy, 2)], "yaw": math.pi if facing > 0 else 0.0,
                                          "roof": house["roof"], "siding": house["siding"]})
             # fence segments: front (low, gap for the walk), east side (and west on the first lot), back (gap for the garage)
-            fh_front = 1.2 if fence == "hedge" else (0.9 if fence in ("picket", "brick", "iron") else 1.1)
+            fh_front = {"hedge": 1.2, "picket": 0.9, "brick": 0.9, "iron": 0.9, "stucco_wall": 1.2, "block": 1.2, "stone": 0.8}.get(fence, 1.1)
             fh_side = 1.6 if fence == "hedge" else 1.8
-            walk = hcx
+            walk = hcx + (entry["door"][0] if facing > 0 else -entry["door"][0])
             segs = []
             if fence != "none":
                 segs.append([ax0 + 0.2, front_y, walk - 0.8, front_y, fence, fh_front])
                 segs.append([walk + 0.8, front_y, ax1 - 0.2, front_y, fence, fh_front])
-                side_type = "hedge" if fence == "hedge" else "wood"
+                side_type = "hedge" if fence == "hedge" else rules["side"]
                 house_front = front_y + (back_y - front_y) / depth * setback
-                segs.append([ax1, front_y, ax1, house_front, fence if fence in ("hedge", "picket") else side_type, fh_front])
-                segs.append([ax1, house_front, ax1, back_y, side_type, fh_side])
-                if k == 0:
-                    segs.append([ax0, front_y, ax0, house_front, fence if fence in ("hedge", "picket") else side_type, fh_front])
-                    segs.append([ax0, house_front, ax0, back_y, side_type, fh_side])
+                if k == n - 1:                     # the last lot's east side faces a street: a front fence all along
+                    segs.append([ax1, front_y, ax1, back_y, fence, fh_front])
+                else:
+                    segs.append([ax1, front_y, ax1, house_front, fence if fence in ("hedge", "picket") else side_type, fh_front])
+                    segs.append([ax1, house_front, ax1, back_y, side_type, fh_side])
+                if k == 0:                         # the first lot's west side faces a street too
+                    segs.append([ax0, front_y, ax0, back_y, fence, fh_front])
                 if lane_ok:
                     if garage:
                         gx0 = gx - 3.3; gx1 = gx + 3.3
@@ -573,7 +636,8 @@ for pub in SPEC["public"]:
                             "yaw": math.radians(DT["angle_deg"]), "front": 1.0, "address": best["address"]})
 
 # --- 4. street furniture ---------------------------------------------------------------------
-props = {k: [] for k in ("lamp", "traffic_light", "stop_sign", "bus_stop", "tree", "hydrant", "bench", "street_sign")}
+props = {k: [] for k in ("lamp", "traffic_light", "stop_sign", "bus_stop", "tree", "hydrant", "bench", "street_sign", "utility_pole", "vending_machine",
+                         "post_box", "phone_box", "ad_column", "cesme", "cafe_set")}
 
 
 def edge_geom(e):
@@ -596,18 +660,20 @@ for e in edges:
         side = 1 if k % 2 == 0 else -1
         p = (a[0] + d[0] * s + nrm[0] * off * side, a[1] + d[1] * s + nrm[1] * off * side)
         if not wet(*p) or e["bridge"]:
-            props["lamp"].append([round(p[0], 2), round(p[1], 2), round(yaw_of((-nrm[0] * side, -nrm[1] * side)), 3)])
+            kind = "utility_pole" if e.get("culture") == "japanese" and e["cls"] == "local" else "lamp"
+            props[kind].append([round(p[0], 2), round(p[1], 2), round(yaw_of((-nrm[0] * side, -nrm[1] * side)), 3)])
         s += 32.0
         k += 1
     # boulevard trees on residential locals
     if e["cls"] == "local" and not e["bridge"]:
-        s = 9.0
-        while s < L - 9:
+        s = 14.0                                  # clear of the paved corner and its name board
+        while s < L - 14.0:
             for side in (1, -1):
                 p = (a[0] + d[0] * s + nrm[0] * off * side, a[1] + d[1] * s + nrm[1] * off * side)
                 if not wet(*p) and not in_poly(p, DT_POLY) and slope_at(*p) < 14:
                     if all(math.hypot(p[0] - l[0], p[1] - l[1]) > 3.0 for l in props["lamp"][-4:]):
-                        props["tree"].append([round(p[0], 2), round(p[1], 2), round(rnd(e["id"], int(s)) * 6.28, 2), int(rnd(e["id"], int(s) + 1) * 4)])
+                        tv = CULTURES[e.get("culture", "mixed")]["trees"]
+                        props["tree"].append([round(p[0], 2), round(p[1], 2), round(rnd(e["id"], int(s)) * 6.28, 2), tv[int(rnd(e["id"], int(s) + 1) * len(tv))]])
             s += 11.0
         s = 30.0
         while s < L - 10:
@@ -641,6 +707,52 @@ for nd in nodes:
             props["traffic_light"].append([round(p[0], 2), round(p[1], 2), round(yaw, 3), nd["id"]])
         elif e["cls"] not in MAJOR:
             props["stop_sign"].append([round(p[0], 2), round(p[1], 2), round(yaw, 3), nd["id"]])
+# street-name boards at every corner of every junction, and the districts' corner furniture
+CORNER_PROPS = {"japanese": "vending_machine", "british": "post_box", "european": "ad_column", "turkish": "cesme", "korean": "vending_machine"}
+for nd in nodes:
+    if len(nd["edges"]) < 3: continue
+    p = nd["pos"]
+    ends = []
+    for ei in nd["edges"]:
+        e = edges[ei]
+        other = nodes[e["b"] if e["a"] == nd["id"] else e["a"]]["pos"]
+        L = math.hypot(other[0] - p[0], other[1] - p[1])
+        if L < 1: continue
+        ends.append(((other[0] - p[0]) / L, (other[1] - p[1]) / L, e))
+    ends.sort(key=lambda t: math.atan2(t[1], t[0]))
+    cul = culture_at(p)
+    for k in range(len(ends)):
+        d1x, d1y, e1 = ends[k]
+        d2x, d2y, e2 = ends[(k + 1) % len(ends)]
+        if d1x * d2y - d1y * d2x < 0.25 or e1["name"] == e2["name"]: continue
+        o1, o2 = e1["width"] / 2 + VG + SW * 0.55, e2["width"] / 2 + VG + SW * 0.55
+        n1, n2 = (-d1y, d1x), (-d2y, d2x)
+        q1 = (p[0] + n1[0] * o1, p[1] + n1[1] * o1)
+        q2 = (p[0] - n2[0] * o2, p[1] - n2[1] * o2)
+        den = d1x * d2y - d1y * d2x
+        t = ((q2[0] - q1[0]) * d2y - (q2[1] - q1[1]) * d2x) / den
+        c = (q1[0] + d1x * t, q1[1] + d1y * t)
+        far = math.hypot(c[0] - p[0], c[1] - p[1])
+        if far > 22.0:                         # a sharp corner: the board stands 22 m out along its bisector
+            c = (p[0] + (c[0] - p[0]) * 22.0 / far, p[1] + (c[1] - p[1]) * 22.0 / far)
+        if wet(*c): continue
+        props["street_sign"].append([round(c[0], 2), round(c[1], 2), round(math.atan2(d1y, d1x), 3), round(math.atan2(d2y, d2x), 3), e1["name"], e2["name"], cul])
+        extra = CORNER_PROPS.get(cul)
+        if extra and rnd(str(nd["id"]), k + 40) < (0.3 if extra != "cesme" else 0.12):
+            q = (c[0] + (d1x + d2x) * 2.2, c[1] + (d1y + d2y) * 2.2)
+            if not wet(*q): props[extra].append([round(q[0], 2), round(q[1], 2), round(yaw_of((-(n1[0] - n2[0]), -(n1[1] - n2[1]))), 3)])
+# shop-front furniture: cafe tables (European, Turkish, mixed), phone boxes (British), vending machines (Japanese, Korean)
+for k, sh in enumerate(items["shops"]):
+    cul = culture_at(sh["pos"])
+    f = (-math.sin(sh["yaw"]), math.cos(sh["yaw"]))          # the shop's front (+Y turned by yaw)
+    front = (sh["pos"][0] + f[0] * (sh["size"][1] / 2 + 1.4), sh["pos"][1] + f[1] * (sh["size"][1] / 2 + 1.4))
+    r = rnd(sh["id"], 77)
+    if cul in ("european", "turkish", "mixed") and r < 0.35:
+        props["cafe_set"].append([round(front[0], 2), round(front[1], 2), round(sh["yaw"], 3)])
+    elif cul == "british" and r < 0.15:
+        props["phone_box"].append([round(front[0], 2), round(front[1], 2), round(sh["yaw"], 3)])
+    elif cul in ("japanese", "korean") and r < 0.4:
+        props["vending_machine"].append([round(front[0], 2), round(front[1], 2), round(sh["yaw"], 3)])
 # park trees and benches
 for pk in items["parks"]:
     if "rot_rect" in pk:                                   # downtown parks, turned with the grid
@@ -662,6 +774,166 @@ for pk in items["parks"]:
         for k in range(max(1, n // 12)):
             p = (x0 + 6 + (x1 - x0 - 12) * rnd(pk["id"], k + 3000), y0 + 6 + (y1 - y0 - 12) * rnd(pk["id"], k + 4000))
             if not wet(*p): props["bench"].append([round(p[0], 2), round(p[1], 2), round(rnd(pk["id"], k + 5000) * 6.28, 2)])
+# --- placement resolver: every prop checked against the street and against each other ---------
+# Priority order (traffic control first, decoration last); a prop in conflict slides along its
+# street up to 3 m, else it is dropped. Conflicts: on a carriageway or in a junction box, on the
+# sidewalk's walking line (except name boards at corners and shop-front furniture), inside a
+# building, house, garage or lot fence line, or closer to another prop than their radii allow.
+RADIUS = {"traffic_light": 0.45, "street_sign": 0.35, "bus_stop": 2.4, "lamp": 0.35, "utility_pole": 0.35, "hydrant": 0.35,
+          "stop_sign": 0.25, "post_box": 0.45, "phone_box": 0.7, "ad_column": 0.85, "cesme": 1.1, "vending_machine": 0.65,
+          "cafe_set": 1.3, "tree": 1.7, "bench": 1.0}
+PRIORITY = ["traffic_light", "street_sign", "stop_sign", "bus_stop", "lamp", "utility_pole", "hydrant", "post_box", "phone_box",
+            "ad_column", "cesme", "vending_machine", "cafe_set", "tree", "bench"]
+ON_WALK_OK = {"street_sign", "cafe_set", "bus_stop", "vending_machine", "phone_box", "ad_column", "post_box", "cesme", "bench"}
+BLOCKERS = []                                # oriented footprints (cx, cy, half w, half d, cos, sin) of every building
+
+
+def _footprint(it, w, d, yaw):
+    return (it["pos"][0], it["pos"][1], w / 2, d / 2, math.cos(yaw), math.sin(yaw))
+
+
+for hs in items["houses"]: BLOCKERS.append(_footprint(hs, hs["size"][0] + 0.6, hs["size"][1] + 0.6, hs["yaw"]))
+for g in items["garages"]: BLOCKERS.append(_footprint(g, 7.0, 7.0, g["yaw"]))
+for sh in items["shops"]: BLOCKERS.append(_footprint(sh, sh["size"][0], sh["size"][1], sh["yaw"]))
+for wh in items["warehouses"]: BLOCKERS.append(_footprint(wh, wh["size"][0], wh["size"][1], 0.0))
+for pb in items["public"]: BLOCKERS.append(_footprint(pb, min(pb["size"][0], 90), min(pb["size"][1], 30), pb["yaw"]))
+for tw in items["towers"]:
+    BLOCKERS.append(_footprint(tw, tw["podium"][0] + 1.0, tw["podium"][0] + 1.0, math.radians(tw["angle"])))
+LOT_RECTS = [lot["rect"] for lot in items["lots"]]
+CELL_R = 32.0
+EDGE_GRID = {}
+for ei, e in enumerate(edges):
+    a, b = nodes[e["a"]]["pos"], nodes[e["b"]]["pos"]
+    for t in np.linspace(0, 1, max(2, int(math.hypot(b[0] - a[0], b[1] - a[1]) / 16) + 1)):
+        q = (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
+        EDGE_GRID.setdefault((int(q[0] // CELL_R), int(q[1] // CELL_R)), set()).add(ei)
+BLOCK_GRID = {}
+for bi, (bx, by, bw, bd_, bc, bs) in enumerate(BLOCKERS):
+    ext = bw * abs(bc) + bd_ * abs(bs), bw * abs(bs) + bd_ * abs(bc)
+    x0, y0, x1, y1 = bx - ext[0], by - ext[1], bx + ext[0], by + ext[1]
+    for gx in range(int(x0 // CELL_R), int(x1 // CELL_R) + 1):
+        for gy in range(int(y0 // CELL_R), int(y1 // CELL_R) + 1):
+            BLOCK_GRID.setdefault((gx, gy), []).append(bi)
+LOT_GRID = {}
+for li, (x0, y0, x1, y1) in enumerate(LOT_RECTS):
+    for gx in range(int(x0 // CELL_R), int(x1 // CELL_R) + 1):
+        for gy in range(int(y0 // CELL_R), int(y1 // CELL_R) + 1):
+            LOT_GRID.setdefault((gx, gy), []).append(li)
+
+
+def near_cells(p, r=1):
+    gx, gy = int(p[0] // CELL_R), int(p[1] // CELL_R)
+    return [(gx + i, gy + j) for i in range(-r, r + 1) for j in range(-r, r + 1)]
+
+
+def street_conflict(kind, p):
+    """Why a prop may not stand at p (or None)."""
+    rad = RADIUS[kind]
+    for ce in near_cells(p):
+        for ei in EDGE_GRID.get(ce, ()):
+            e = edges[ei]
+            a, b = nodes[e["a"]]["pos"], nodes[e["b"]]["pos"]
+            d, t = dist_point_seg(p, a, b)
+            half = e["width"] / 2
+            if d < half + 0.3 and not e["bridge"]:               # every prop stands at least 0.3 m behind the kerb
+                return "carriageway"
+            walk0, walk1 = half + VG + SW * 0.3, half + VG + SW * 0.75
+            if kind not in ON_WALK_OK and walk0 < d < walk1 and 0.05 < t < 0.95:
+                return "walking line"
+    for ce in near_cells(p, 0):
+        for bi in BLOCK_GRID.get(ce, ()):
+            bx, by, bw, bd_, bc, bs = BLOCKERS[bi]
+            dx, dy = p[0] - bx, p[1] - by
+            if abs(dx * bc + dy * bs) < bw + rad and abs(-dx * bs + dy * bc) < bd_ + rad:
+                return "building"
+        if kind not in ("tree", "bench"):          # trees and benches may stand in parks; not inside lots
+            for li in LOT_GRID.get(ce, ()):
+                x0, y0, x1, y1 = LOT_RECTS[li]
+                if x0 + 0.3 < p[0] < x1 - 0.3 and y0 + 0.3 < p[1] < y1 - 0.3:
+                    return "inside a lot"
+    return None
+
+
+placed_grid = {}
+resolver_log = {"moved": 0, "dropped": {}, "kept": 0}
+
+
+def prop_conflict(kind, p):
+    why = street_conflict(kind, p)
+    if why: return why
+    for ce in near_cells(p):
+        for k2, q in placed_grid.get(ce, ()):
+            if math.hypot(p[0] - q[0], p[1] - q[1]) < RADIUS[kind] + RADIUS[k2]:
+                return "too close to a " + k2
+    return None
+
+
+def nearest_edge_dir(p):
+    best, bd = None, 1e9
+    for ce in near_cells(p):
+        for ei in EDGE_GRID.get(ce, ()):
+            e = edges[ei]
+            a, b = nodes[e["a"]]["pos"], nodes[e["b"]]["pos"]
+            d, _ = dist_point_seg(p, a, b)
+            if d < bd:
+                L = math.hypot(b[0] - a[0], b[1] - a[1]) or 1.0
+                best, bd = ((b[0] - a[0]) / L, (b[1] - a[1]) / L), d
+    return best or (1.0, 0.0)
+
+
+for kind in PRIORITY:
+    keep = []
+    for it in props[kind]:
+        p = (it[0], it[1])
+        why = prop_conflict(kind, p)
+        if why and kind not in ("traffic_light", "street_sign"):
+            d = nearest_edge_dir(p)
+            for step in (1.0, -1.0, 2.0, -2.0, 3.0, -3.0):
+                q = (p[0] + d[0] * step, p[1] + d[1] * step)
+                if prop_conflict(kind, q) is None:
+                    it[0], it[1] = round(q[0], 2), round(q[1], 2)
+                    p, why = q, None
+                    resolver_log["moved"] += 1
+                    break
+        if why and kind in ("traffic_light", "street_sign"):
+            # traffic control must stay at its junction: search outwards (and inwards) from the junction
+            # centre along the line through the prop for the nearest clear spot
+            nd = min(nodes, key=lambda n: (n["pos"][0] - p[0]) ** 2 + (n["pos"][1] - p[1]) ** 2)
+            vx, vy = p[0] - nd["pos"][0], p[1] - nd["pos"][1]
+            L = math.hypot(vx, vy) or 1.0
+            cands = [(p[0] + vx / L * st, p[1] + vy / L * st) for st in (1.0, 2.0, 3.0, -1.0, 4.0, 5.0, -2.0, 6.0, 8.0, 10.0, 12.0)]
+            cands += [(p[0] + r * math.cos(t * math.pi / 8), p[1] + r * math.sin(t * math.pi / 8)) for r in (1.0, 2.0, 3.0, 4.5, 6.0, 7.5, 9.0) for t in range(16)]
+            for q in cands:
+                if prop_conflict(kind, q) is None:
+                    it[0], it[1] = round(q[0], 2), round(q[1], 2)
+                    p, why = q, None
+                    resolver_log["moved"] += 1
+                    break
+        if why:
+            resolver_log["dropped"][kind + ": " + why.split(" a ")[0]] = resolver_log["dropped"].get(kind + ": " + why.split(" a ")[0], 0) + 1
+            continue
+        keep.append(it)
+        placed_grid.setdefault((int(p[0] // CELL_R), int(p[1] // CELL_R)), []).append((kind, p))
+        resolver_log["kept"] += 1
+    props[kind] = keep
+# a street whose own corner board was dropped gets an extra blade on a neighbouring board of the junction
+extra_blades = 0
+for nd in nodes:
+    if len(nd["edges"]) < 3: continue
+    p = nd["pos"]
+    boards = [sg for sg in props["street_sign"] if math.hypot(sg[0] - p[0], sg[1] - p[1]) < 30.0]
+    if not boards: continue
+    for ei in nd["edges"]:
+        e = edges[ei]
+        if any(e["name"] in sg[4:6] or e["name"] in sg[7::2] for sg in boards): continue
+        other = nodes[e["b"] if e["a"] == nd["id"] else e["a"]]["pos"]
+        yaw = math.atan2(other[1] - p[1], other[0] - p[0])
+        board = min(boards, key=lambda sg: math.hypot(sg[0] - p[0], sg[1] - p[1]))
+        board.extend([round(yaw, 3), e["name"]])
+        extra_blades += 1
+resolver_log["extra_blades"] = extra_blades
+print("RESOLVER", json.dumps(resolver_log))
+
 # overrides on props: "tree_0012": {"remove": true}
 for kind, lst in props.items():
     keep = []
@@ -671,6 +943,25 @@ for kind, lst in props.items():
             if "pos" in o: it[0], it[1] = o["pos"]
             keep.append(it)
     props[kind] = keep
+
+# district colours on shop fronts
+for sh in items["shops"]:
+    sh["culture"] = culture_at(sh["pos"])
+    rules = CULTURES[sh["culture"]]
+    sh["awning"] = rules["awnings"][int(rnd(sh["id"], 81) * len(rules["awnings"]))]
+    sh["facade"] = rules["facades"][int(rnd(sh["id"], 82) * len(rules["facades"]))]
+
+# addresses from the named streets: every lot, house, shop and public building faces its nearest road
+for lot in items["lots"]:
+    x0, y0, x1, y1 = lot["rect"]
+    e = road_near(((x0 + x1) / 2, lot["front_y"] - lot["front"] * 6.0))
+    if e is not None: lot["address"] = "%s %s" % (lot["address"].split(" ")[0], e["name"])
+addr_of = {lot["id"]: lot["address"] for lot in items["lots"]}
+for hs in items["houses"]: hs["address"] = addr_of.get(hs["lot"], hs["address"])
+for kind in ("shops", "public", "towers"):
+    for it in items[kind]:
+        e = road_near((it["pos"][0], it["pos"][1]), 120.0)
+        if e is not None: it["address"] = "%s %s" % (it["address"].split(" ")[0], e["name"])
 
 # --- 5. grading: smooth road profiles and lot pads -------------------------------------------
 G_H = H0.copy()
@@ -736,7 +1027,7 @@ city = {"name": SPEC["name"], "size_m": SIZE, "cell_m": CELL, "grid": N, "sea_le
         "nodes": [{"id": n["id"], "pos": n["pos"], "h": round(node_h[n["id"]], 2), "control": n["control"], "edges": [edges[e]["id"] for e in n["edges"]]} for n in nodes],
         "roads": edges, "lanes": items["lanes"], "lots": items["lots"], "houses": items["houses"], "garages": items["garages"], "fences": items["fences"],
         "shops": items["shops"], "towers": items["towers"], "warehouses": items["warehouses"], "public": items["public"], "parks": items["parks"],
-        "plazas": items["plazas"], "props": props, "palettes": SPEC["palettes"], "neighbourhoods": NEIGH, "water": {"lakes": META.get("lakes", []), "rivers": SPEC.get("rivers", [])},
+        "plazas": items["plazas"], "props": props, "palettes": SPEC["palettes"], "cultures": {k: {"sign": v["sign"]} for k, v in CULTURES.items()}, "neighbourhoods": NEIGH, "water": {"lakes": META.get("lakes", []), "rivers": SPEC.get("rivers", [])},
         "terrain": {"min_height": float(G_H.min()), "max_height": float(G_H.max())}}
 for lane in city["lanes"]:
     lane["h"] = [round(h_at(*lane["a"], G_H), 2), round(h_at(*lane["b"], G_H), 2)]

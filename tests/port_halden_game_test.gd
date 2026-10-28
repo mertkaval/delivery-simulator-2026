@@ -31,7 +31,8 @@ func run() -> void:
 		if w.house_door(hs).distance_to(game.world.doors[i] - Vector3(0, 0.92, 0)) < 0.1: on_house += 1
 	check(on_house == 36, "Doors 0-35 are the front doors of Port Halden houses (%d)" % on_house)
 	check(CityCatalog.address_position(7) == game.world.doors[7], "The catalog's addresses are Port Halden's")
-	check(str(DeliverySession.ADDRESSES[0]).contains("Avenue") or str(DeliverySession.ADDRESSES[0]).contains("Street"), "Addresses read like Port Halden's (%s)" % str(DeliverySession.ADDRESSES[0]))
+	var a0 := str(DeliverySession.ADDRESSES[0])
+	check(a0.get_slice(" ", 0).is_valid_int() and a0.get_slice_count(" ") >= 3, "Addresses are a number and a named street (%s)" % a0)
 	check(CityCatalog.PICKUPS.size() == CityCatalog.RESTAURANTS.size(), "Every restaurant has a pickup in Port Halden (%d)" % CityCatalog.PICKUPS.size())
 	check(game.shelves.shelves.size() == CityCatalog.RESTAURANTS.size(), "Every pickup has a courier rack (%d)" % game.shelves.shelves.size())
 	check(ShopCatalog.LOCATIONS.size() == 4 and ShopCatalog.FRAMES.size() == 4, "The four stores stand on shop fronts")
@@ -39,7 +40,7 @@ func run() -> void:
 	check(absf(start.y - 0.4 - w.ground_height(start)) < 0.01, "The courier starts on the ground of the starter neighbourhood")
 	check(game.player.position.distance_to(start) < 0.5, "The courier is placed at the start")
 	var here := StreetNames.describe(start)
-	check(here.ends_with("Avenue") or here.ends_with("Street") or here.ends_with("Boulevard"), "The HUD names Port Halden's street (%s)" % here)
+	check(here.length() > 6 and here != "Port Halden" and not here.ends_with("Park"), "The HUD names Port Halden's street (%s)" % here)
 	# routes follow the streets
 	var path := CityCatalog.route(start, game.world.doors[20], false)
 	check(path.size() >= 3 and CityCatalog.distance(path) >= start.distance_to(game.world.doors[20]) * 0.95, "Routes run along Port Halden's streets (%d points)" % path.size())

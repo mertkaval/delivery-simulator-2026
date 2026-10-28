@@ -556,3 +556,12 @@ saves remember their city. The editor's game scene shows Port Halden too (Editor
 runs (tests, captures) keep the classic city unless they set `CedarNeighborhood.city_override`;
 `tests/port_halden_game_test.gd` covers the game in Port Halden. Not yet in Port Halden: traffic,
 townspeople, buses, shop interiors, the cedar house and the big map (M) — next steps.
+
+## Culture districts, 148-house catalogue, baked material library (2026-10-28)
+
+Port Halden now has Turkish, Japanese, Korean, European and British districts plus mixed ones,
+148 house types built through the Building Tools add-on with culture parts, a 21-material baked
+PBR library (`tools/cityforge/materials.py`), pioneer street names in each culture's style with
+name boards at every corner, district street furniture, and a street-by-street audit that passes
+on every street. Details: `CITY_GENERATION_PLAN.md` section 6. Blender review files:
+`tmp/cityforge/house_catalogue.blend`, `tmp/cityforge/material_library.blend`.

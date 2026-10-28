@@ -1,0 +1,107 @@
+{
+ "brick_red": {
+  "tile_m": 2.0,
+  "tintable": false,
+  "res": 2048
+ },
+ "brick_london": {
+  "tile_m": 2.0,
+  "tintable": false,
+  "res": 2048
+ },
+ "brick_painted": {
+  "tile_m": 2.0,
+  "tintable": true,
+  "res": 2048
+ },
+ "stucco": {
+  "tile_m": 2.0,
+  "tintable": true,
+  "res": 2048
+ },
+ "siding": {
+  "tile_m": 2.0,
+  "tintable": true,
+  "res": 2048
+ },
+ "cedar_planks": {
+  "tile_m": 2.0,
+  "tintable": false,
+  "res": 2048
+ },
+ "yakisugi": {
+  "tile_m": 2.0,
+  "tintable": false,
+  "res": 2048
+ },
+ "light_wood": {
+  "tile_m": 2.0,
+  "tintable": false,
+  "res": 2048
+ },
+ "ashlar": {
+  "tile_m": 2.0,
+  "tintable": false,
+  "res": 2048
+ },
+ "shingle_asphalt": {
+  "tile_m": 2.0,
+  "tintable": true,
+  "res": 2048
+ },
+ "slate": {
+  "tile_m": 2.0,
+  "tintable": false,
+  "res": 2048
+ },
+ "terracotta": {
+  "tile_m": 2.0,
+  "tintable": false,
+  "res": 2048
+ },
+ "kawara": {
+  "tile_m": 2.0,
+  "tintable": false,
+  "res": 2048
+ },
+ "standing_seam": {
+  "tile_m": 2.0,
+  "tintable": true,
+  "res": 2048
+ },
+ "concrete": {
+  "tile_m": 2.0,
+  "tintable": false,
+  "res": 2048
+ },
+ "paving": {
+  "tile_m": 2.0,
+  "tintable": false,
+  "res": 2048
+ },
+ "cobbles": {
+  "tile_m": 2.0,
+  "tintable": false,
+  "res": 2048
+ },
+ "hedge": {
+  "tile_m": 2.0,
+  "tintable": true,
+  "res": 2048
+ },
+ "tatami": {
+  "tile_m": 2.0,
+  "tintable": false,
+  "res": 2048
+ },
+ "floor_tiles": {
+  "tile_m": 2.0,
+  "tintable": false,
+  "res": 2048
+ },
+ "parquet": {
+  "tile_m": 2.0,
+  "tintable": false,
+  "res": 2048
+ }
+}

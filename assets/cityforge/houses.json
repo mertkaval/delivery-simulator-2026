@@ -1,0 +1,2666 @@
+[
+ {
+  "id": "tur_konak_1",
+  "culture": "turkish",
+  "kind": "konak",
+  "w": 10.0,
+  "d": 9.0,
+  "storeys": 2,
+  "height": 8.0,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   4.55,
+   0.0
+  ],
+  "tris": 5042,
+  "tris_lod1": 296
+ },
+ {
+  "id": "tur_konak_2",
+  "culture": "turkish",
+  "kind": "konak",
+  "w": 10.0,
+  "d": 9.0,
+  "storeys": 2,
+  "height": 8.0,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   4.55,
+   0.0
+  ],
+  "tris": 5042,
+  "tris_lod1": 296
+ },
+ {
+  "id": "tur_konak_3",
+  "culture": "turkish",
+  "kind": "konak",
+  "w": 10.0,
+  "d": 9.0,
+  "storeys": 2,
+  "height": 8.0,
+  "wall": "CF_Siding",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   4.55,
+   0.0
+  ],
+  "tris": 5042,
+  "tris_lod1": 296
+ },
+ {
+  "id": "tur_konak_4",
+  "culture": "turkish",
+  "kind": "konak",
+  "w": 10.0,
+  "d": 9.0,
+  "storeys": 3,
+  "height": 11.12,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   4.55,
+   0.0
+  ],
+  "tris": 7660,
+  "tris_lod1": 448
+ },
+ {
+  "id": "tur_konak_5",
+  "culture": "turkish",
+  "kind": "konak",
+  "w": 10.0,
+  "d": 9.0,
+  "storeys": 3,
+  "height": 11.12,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   4.55,
+   0.0
+  ],
+  "tris": 7660,
+  "tris_lod1": 448
+ },
+ {
+  "id": "tur_konak_6",
+  "culture": "turkish",
+  "kind": "konak",
+  "w": 10.0,
+  "d": 9.0,
+  "storeys": 3,
+  "height": 11.12,
+  "wall": "CF_Siding",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   4.55,
+   0.0
+  ],
+  "tris": 7660,
+  "tris_lod1": 448
+ },
+ {
+  "id": "tur_konak_7",
+  "culture": "turkish",
+  "kind": "konak",
+  "w": 11.0,
+  "d": 10.0,
+  "storeys": 2,
+  "height": 8.0,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   5.05,
+   0.0
+  ],
+  "tris": 5570,
+  "tris_lod1": 320
+ },
+ {
+  "id": "tur_konak_8",
+  "culture": "turkish",
+  "kind": "konak",
+  "w": 11.0,
+  "d": 10.0,
+  "storeys": 2,
+  "height": 8.0,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   5.05,
+   0.0
+  ],
+  "tris": 5570,
+  "tris_lod1": 320
+ },
+ {
+  "id": "tur_konak_9",
+  "culture": "turkish",
+  "kind": "konak",
+  "w": 11.0,
+  "d": 10.0,
+  "storeys": 2,
+  "height": 8.0,
+  "wall": "CF_Siding",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   5.05,
+   0.0
+  ],
+  "tris": 5570,
+  "tris_lod1": 320
+ },
+ {
+  "id": "tur_konak_10",
+  "culture": "turkish",
+  "kind": "konak",
+  "w": 11.0,
+  "d": 10.0,
+  "storeys": 3,
+  "height": 11.12,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   5.05,
+   0.0
+  ],
+  "tris": 8452,
+  "tris_lod1": 484
+ },
+ {
+  "id": "tur_konak_11",
+  "culture": "turkish",
+  "kind": "konak",
+  "w": 11.0,
+  "d": 10.0,
+  "storeys": 3,
+  "height": 11.12,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   5.05,
+   0.0
+  ],
+  "tris": 8452,
+  "tris_lod1": 484
+ },
+ {
+  "id": "tur_konak_12",
+  "culture": "turkish",
+  "kind": "konak",
+  "w": 11.0,
+  "d": 10.0,
+  "storeys": 3,
+  "height": 11.12,
+  "wall": "CF_Siding",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   5.05,
+   0.0
+  ],
+  "tris": 8452,
+  "tris_lod1": 484
+ },
+ {
+  "id": "tur_konak_13",
+  "culture": "turkish",
+  "kind": "konak",
+  "w": 9.5,
+  "d": 9.5,
+  "storeys": 2,
+  "height": 8.0,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   1.1875,
+   4.8,
+   0.0
+  ],
+  "tris": 4380,
+  "tris_lod1": 268
+ },
+ {
+  "id": "tur_konak_14",
+  "culture": "turkish",
+  "kind": "konak",
+  "w": 9.5,
+  "d": 9.5,
+  "storeys": 2,
+  "height": 8.0,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   1.1875,
+   4.8,
+   0.0
+  ],
+  "tris": 4380,
+  "tris_lod1": 268
+ },
+ {
+  "id": "tur_konak_15",
+  "culture": "turkish",
+  "kind": "konak",
+  "w": 9.5,
+  "d": 9.5,
+  "storeys": 2,
+  "height": 8.0,
+  "wall": "CF_Siding",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   1.1875,
+   4.8,
+   0.0
+  ],
+  "tris": 4380,
+  "tris_lod1": 268
+ },
+ {
+  "id": "tur_konak_16",
+  "culture": "turkish",
+  "kind": "konak",
+  "w": 9.5,
+  "d": 9.5,
+  "storeys": 3,
+  "height": 11.12,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   1.1875,
+   4.8,
+   0.0
+  ],
+  "tris": 6602,
+  "tris_lod1": 406
+ },
+ {
+  "id": "tur_konak_17",
+  "culture": "turkish",
+  "kind": "konak",
+  "w": 9.5,
+  "d": 9.5,
+  "storeys": 3,
+  "height": 11.12,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   1.1875,
+   4.8,
+   0.0
+  ],
+  "tris": 6602,
+  "tris_lod1": 406
+ },
+ {
+  "id": "tur_konak_18",
+  "culture": "turkish",
+  "kind": "konak",
+  "w": 9.5,
+  "d": 9.5,
+  "storeys": 3,
+  "height": 11.12,
+  "wall": "CF_Siding",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   1.1875,
+   4.8,
+   0.0
+  ],
+  "tris": 6602,
+  "tris_lod1": 406
+ },
+ {
+  "id": "tur_apartman_1",
+  "culture": "turkish",
+  "kind": "apartman",
+  "w": 12.0,
+  "d": 12.0,
+  "storeys": 4,
+  "height": 14.04,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -1.1920928955078125e-07,
+   6.05,
+   0.0
+  ],
+  "tris": 13450,
+  "tris_lod1": 572
+ },
+ {
+  "id": "tur_apartman_2",
+  "culture": "turkish",
+  "kind": "apartman",
+  "w": 12.0,
+  "d": 12.0,
+  "storeys": 5,
+  "height": 17.06,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -1.1920928955078125e-07,
+   6.05,
+   0.0
+  ],
+  "tris": 16980,
+  "tris_lod1": 708
+ },
+ {
+  "id": "tur_apartman_3",
+  "culture": "turkish",
+  "kind": "apartman",
+  "w": 11.0,
+  "d": 13.0,
+  "storeys": 4,
+  "height": 14.04,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   1.375,
+   6.55,
+   0.0
+  ],
+  "tris": 11682,
+  "tris_lod1": 526
+ },
+ {
+  "id": "tur_apartman_4",
+  "culture": "turkish",
+  "kind": "apartman",
+  "w": 11.0,
+  "d": 13.0,
+  "storeys": 5,
+  "height": 17.06,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   1.375,
+   6.55,
+   0.0
+  ],
+  "tris": 14710,
+  "tris_lod1": 650
+ },
+ {
+  "id": "tur_mustakil_1",
+  "culture": "turkish",
+  "kind": "mustakil",
+  "w": 10.0,
+  "d": 9.0,
+  "storeys": 1,
+  "height": 5.08,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   1.25,
+   4.55,
+   0.0
+  ],
+  "tris": 2492,
+  "tris_lod1": 134
+ },
+ {
+  "id": "tur_mustakil_2",
+  "culture": "turkish",
+  "kind": "mustakil",
+  "w": 10.0,
+  "d": 9.0,
+  "storeys": 1,
+  "height": 5.08,
+  "wall": "CF_BrickPainted",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   1.25,
+   4.55,
+   0.0
+  ],
+  "tris": 2492,
+  "tris_lod1": 134
+ },
+ {
+  "id": "tur_mustakil_3",
+  "culture": "turkish",
+  "kind": "mustakil",
+  "w": 10.0,
+  "d": 9.0,
+  "storeys": 2,
+  "height": 8.2,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   1.25,
+   4.55,
+   0.0
+  ],
+  "tris": 4956,
+  "tris_lod1": 246
+ },
+ {
+  "id": "tur_mustakil_4",
+  "culture": "turkish",
+  "kind": "mustakil",
+  "w": 10.0,
+  "d": 9.0,
+  "storeys": 2,
+  "height": 8.2,
+  "wall": "CF_BrickPainted",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   1.25,
+   4.55,
+   0.0
+  ],
+  "tris": 4956,
+  "tris_lod1": 246
+ },
+ {
+  "id": "tur_mustakil_5",
+  "culture": "turkish",
+  "kind": "mustakil",
+  "w": 11.5,
+  "d": 9.5,
+  "storeys": 1,
+  "height": 5.08,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   4.8,
+   0.0
+  ],
+  "tris": 2796,
+  "tris_lod1": 146
+ },
+ {
+  "id": "tur_mustakil_6",
+  "culture": "turkish",
+  "kind": "mustakil",
+  "w": 11.5,
+  "d": 9.5,
+  "storeys": 1,
+  "height": 5.08,
+  "wall": "CF_BrickPainted",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   4.8,
+   0.0
+  ],
+  "tris": 2796,
+  "tris_lod1": 146
+ },
+ {
+  "id": "tur_mustakil_7",
+  "culture": "turkish",
+  "kind": "mustakil",
+  "w": 11.5,
+  "d": 9.5,
+  "storeys": 2,
+  "height": 8.2,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   4.8,
+   0.0
+  ],
+  "tris": 5564,
+  "tris_lod1": 270
+ },
+ {
+  "id": "tur_mustakil_8",
+  "culture": "turkish",
+  "kind": "mustakil",
+  "w": 11.5,
+  "d": 9.5,
+  "storeys": 2,
+  "height": 8.2,
+  "wall": "CF_BrickPainted",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   4.8,
+   0.0
+  ],
+  "tris": 5564,
+  "tris_lod1": 270
+ },
+ {
+  "id": "tur_yali_1",
+  "culture": "turkish",
+  "kind": "yali",
+  "w": 11.0,
+  "d": 9.5,
+  "storeys": 2,
+  "height": 7.8,
+  "wall": "CF_Siding",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   0.9166666865348816,
+   4.8,
+   0.0
+  ],
+  "tris": 5958,
+  "tris_lod1": 334
+ },
+ {
+  "id": "tur_yali_2",
+  "culture": "turkish",
+  "kind": "yali",
+  "w": 11.0,
+  "d": 9.5,
+  "storeys": 3,
+  "height": 10.92,
+  "wall": "CF_Siding",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   0.9166666865348816,
+   4.8,
+   0.0
+  ],
+  "tris": 8972,
+  "tris_lod1": 508
+ },
+ {
+  "id": "tur_yali_3",
+  "culture": "turkish",
+  "kind": "yali",
+  "w": 12.0,
+  "d": 10.0,
+  "storeys": 2,
+  "height": 7.8,
+  "wall": "CF_Siding",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   1.0,
+   5.05,
+   0.0
+  ],
+  "tris": 5958,
+  "tris_lod1": 334
+ },
+ {
+  "id": "tur_yali_4",
+  "culture": "turkish",
+  "kind": "yali",
+  "w": 12.0,
+  "d": 10.0,
+  "storeys": 3,
+  "height": 10.92,
+  "wall": "CF_Siding",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   1.0,
+   5.05,
+   0.0
+  ],
+  "tris": 8972,
+  "tris_lod1": 508
+ },
+ {
+  "id": "jap_machiya_1",
+  "culture": "japanese",
+  "kind": "machiya",
+  "w": 7.5,
+  "d": 11.0,
+  "storeys": 2,
+  "height": 8.0,
+  "wall": "CF_Yakisugi",
+  "roof": "CF_RoofKawara",
+  "door": [
+   -0.0,
+   5.55,
+   0.0
+  ],
+  "tris": 2800,
+  "tris_lod1": 254
+ },
+ {
+  "id": "jap_machiya_2",
+  "culture": "japanese",
+  "kind": "machiya",
+  "w": 7.5,
+  "d": 11.0,
+  "storeys": 2,
+  "height": 8.0,
+  "wall": "CF_Cedar",
+  "roof": "CF_RoofKawara",
+  "door": [
+   -0.0,
+   5.55,
+   0.0
+  ],
+  "tris": 2800,
+  "tris_lod1": 254
+ },
+ {
+  "id": "jap_machiya_3",
+  "culture": "japanese",
+  "kind": "machiya",
+  "w": 8.0,
+  "d": 12.0,
+  "storeys": 2,
+  "height": 8.0,
+  "wall": "CF_Yakisugi",
+  "roof": "CF_RoofKawara",
+  "door": [
+   1.0,
+   6.05,
+   0.0
+  ],
+  "tris": 3112,
+  "tris_lod1": 278
+ },
+ {
+  "id": "jap_machiya_4",
+  "culture": "japanese",
+  "kind": "machiya",
+  "w": 8.0,
+  "d": 12.0,
+  "storeys": 2,
+  "height": 8.0,
+  "wall": "CF_Cedar",
+  "roof": "CF_RoofKawara",
+  "door": [
+   1.0,
+   6.05,
+   0.0
+  ],
+  "tris": 3112,
+  "tris_lod1": 278
+ },
+ {
+  "id": "jap_minka_1",
+  "culture": "japanese",
+  "kind": "minka",
+  "w": 11.0,
+  "d": 9.0,
+  "storeys": 1,
+  "height": 6.57,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofKawara",
+  "door": [
+   -0.0,
+   4.55,
+   0.0
+  ],
+  "tris": 1880,
+  "tris_lod1": 316
+ },
+ {
+  "id": "jap_minka_2",
+  "culture": "japanese",
+  "kind": "minka",
+  "w": 11.0,
+  "d": 9.0,
+  "storeys": 1,
+  "height": 6.57,
+  "wall": "CF_Cedar",
+  "roof": "CF_RoofKawara",
+  "door": [
+   -0.0,
+   4.55,
+   0.0
+  ],
+  "tris": 1878,
+  "tris_lod1": 316
+ },
+ {
+  "id": "jap_minka_3",
+  "culture": "japanese",
+  "kind": "minka",
+  "w": 11.0,
+  "d": 9.0,
+  "storeys": 2,
+  "height": 9.69,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofKawara",
+  "door": [
+   -0.0,
+   4.55,
+   0.0
+  ],
+  "tris": 3266,
+  "tris_lod1": 440
+ },
+ {
+  "id": "jap_minka_4",
+  "culture": "japanese",
+  "kind": "minka",
+  "w": 11.0,
+  "d": 9.0,
+  "storeys": 2,
+  "height": 9.69,
+  "wall": "CF_Cedar",
+  "roof": "CF_RoofKawara",
+  "door": [
+   -0.0,
+   4.55,
+   0.0
+  ],
+  "tris": 3266,
+  "tris_lod1": 440
+ },
+ {
+  "id": "jap_minka_5",
+  "culture": "japanese",
+  "kind": "minka",
+  "w": 12.0,
+  "d": 9.5,
+  "storeys": 1,
+  "height": 6.57,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofKawara",
+  "door": [
+   -1.1920928955078125e-07,
+   4.8,
+   0.0
+  ],
+  "tris": 1878,
+  "tris_lod1": 316
+ },
+ {
+  "id": "jap_minka_6",
+  "culture": "japanese",
+  "kind": "minka",
+  "w": 12.0,
+  "d": 9.5,
+  "storeys": 1,
+  "height": 6.57,
+  "wall": "CF_Cedar",
+  "roof": "CF_RoofKawara",
+  "door": [
+   -1.1920928955078125e-07,
+   4.8,
+   0.0
+  ],
+  "tris": 1832,
+  "tris_lod1": 316
+ },
+ {
+  "id": "jap_minka_7",
+  "culture": "japanese",
+  "kind": "minka",
+  "w": 12.0,
+  "d": 9.5,
+  "storeys": 2,
+  "height": 9.69,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofKawara",
+  "door": [
+   -1.1920928955078125e-07,
+   4.8,
+   0.0
+  ],
+  "tris": 3316,
+  "tris_lod1": 440
+ },
+ {
+  "id": "jap_minka_8",
+  "culture": "japanese",
+  "kind": "minka",
+  "w": 12.0,
+  "d": 9.5,
+  "storeys": 2,
+  "height": 9.69,
+  "wall": "CF_Cedar",
+  "roof": "CF_RoofKawara",
+  "door": [
+   -1.1920928955078125e-07,
+   4.8,
+   0.0
+  ],
+  "tris": 3266,
+  "tris_lod1": 440
+ },
+ {
+  "id": "jap_modern_1",
+  "culture": "japanese",
+  "kind": "modern",
+  "w": 9.0,
+  "d": 10.0,
+  "storeys": 2,
+  "height": 7.76,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofFlat",
+  "door": [
+   -0.0,
+   5.05,
+   0.0
+  ],
+  "tris": 4100,
+  "tris_lod1": 254
+ },
+ {
+  "id": "jap_modern_2",
+  "culture": "japanese",
+  "kind": "modern",
+  "w": 9.0,
+  "d": 10.0,
+  "storeys": 2,
+  "height": 7.76,
+  "wall": "CF_LightWood",
+  "roof": "CF_RoofFlat",
+  "door": [
+   -0.0,
+   5.05,
+   0.0
+  ],
+  "tris": 4100,
+  "tris_lod1": 254
+ },
+ {
+  "id": "jap_modern_3",
+  "culture": "japanese",
+  "kind": "modern",
+  "w": 9.0,
+  "d": 10.0,
+  "storeys": 3,
+  "height": 10.88,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofFlat",
+  "door": [
+   -0.0,
+   5.05,
+   0.0
+  ],
+  "tris": 6000,
+  "tris_lod1": 354
+ },
+ {
+  "id": "jap_modern_4",
+  "culture": "japanese",
+  "kind": "modern",
+  "w": 9.0,
+  "d": 10.0,
+  "storeys": 3,
+  "height": 10.88,
+  "wall": "CF_LightWood",
+  "roof": "CF_RoofFlat",
+  "door": [
+   -0.0,
+   5.05,
+   0.0
+  ],
+  "tris": 6000,
+  "tris_lod1": 354
+ },
+ {
+  "id": "jap_modern_5",
+  "culture": "japanese",
+  "kind": "modern",
+  "w": 8.0,
+  "d": 11.0,
+  "storeys": 2,
+  "height": 7.76,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofFlat",
+  "door": [
+   -0.0,
+   5.55,
+   0.0
+  ],
+  "tris": 4100,
+  "tris_lod1": 254
+ },
+ {
+  "id": "jap_modern_6",
+  "culture": "japanese",
+  "kind": "modern",
+  "w": 8.0,
+  "d": 11.0,
+  "storeys": 2,
+  "height": 7.76,
+  "wall": "CF_LightWood",
+  "roof": "CF_RoofFlat",
+  "door": [
+   -0.0,
+   5.55,
+   0.0
+  ],
+  "tris": 4100,
+  "tris_lod1": 254
+ },
+ {
+  "id": "jap_modern_7",
+  "culture": "japanese",
+  "kind": "modern",
+  "w": 8.0,
+  "d": 11.0,
+  "storeys": 3,
+  "height": 10.88,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofFlat",
+  "door": [
+   -0.0,
+   5.55,
+   0.0
+  ],
+  "tris": 6000,
+  "tris_lod1": 354
+ },
+ {
+  "id": "jap_modern_8",
+  "culture": "japanese",
+  "kind": "modern",
+  "w": 8.0,
+  "d": 11.0,
+  "storeys": 3,
+  "height": 10.88,
+  "wall": "CF_LightWood",
+  "roof": "CF_RoofFlat",
+  "door": [
+   -0.0,
+   5.55,
+   0.0
+  ],
+  "tris": 6000,
+  "tris_lod1": 354
+ },
+ {
+  "id": "jap_nagaya_1",
+  "culture": "japanese",
+  "kind": "nagaya",
+  "w": 13.0,
+  "d": 8.0,
+  "storeys": 2,
+  "height": 8.2,
+  "wall": "CF_Cedar",
+  "roof": "CF_RoofKawara",
+  "door": [
+   1.0833333730697632,
+   4.05,
+   0.0
+  ],
+  "tris": 3220,
+  "tris_lod1": 302
+ },
+ {
+  "id": "jap_nagaya_2",
+  "culture": "japanese",
+  "kind": "nagaya",
+  "w": 13.0,
+  "d": 8.0,
+  "storeys": 2,
+  "height": 8.2,
+  "wall": "CF_Yakisugi",
+  "roof": "CF_RoofKawara",
+  "door": [
+   1.0833333730697632,
+   4.05,
+   0.0
+  ],
+  "tris": 3252,
+  "tris_lod1": 302
+ },
+ {
+  "id": "jap_nagaya_3",
+  "culture": "japanese",
+  "kind": "nagaya",
+  "w": 12.0,
+  "d": 8.5,
+  "storeys": 2,
+  "height": 8.2,
+  "wall": "CF_Cedar",
+  "roof": "CF_RoofKawara",
+  "door": [
+   1.0,
+   4.3,
+   0.0
+  ],
+  "tris": 3252,
+  "tris_lod1": 302
+ },
+ {
+  "id": "jap_nagaya_4",
+  "culture": "japanese",
+  "kind": "nagaya",
+  "w": 12.0,
+  "d": 8.5,
+  "storeys": 2,
+  "height": 8.2,
+  "wall": "CF_Yakisugi",
+  "roof": "CF_RoofKawara",
+  "door": [
+   1.0,
+   4.3,
+   0.0
+  ],
+  "tris": 3220,
+  "tris_lod1": 302
+ },
+ {
+  "id": "jap_shed_1",
+  "culture": "japanese",
+  "kind": "shed",
+  "w": 9.0,
+  "d": 10.0,
+  "storeys": 2,
+  "height": 8.24,
+  "wall": "CF_Yakisugi",
+  "roof": "CF_RoofSeam",
+  "door": [
+   -0.0,
+   5.05,
+   0.0
+  ],
+  "tris": 3766,
+  "tris_lod1": 210
+ },
+ {
+  "id": "jap_shed_2",
+  "culture": "japanese",
+  "kind": "shed",
+  "w": 9.0,
+  "d": 10.0,
+  "storeys": 2,
+  "height": 8.24,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofSeam",
+  "door": [
+   -0.0,
+   5.05,
+   0.0
+  ],
+  "tris": 3766,
+  "tris_lod1": 210
+ },
+ {
+  "id": "jap_shed_3",
+  "culture": "japanese",
+  "kind": "shed",
+  "w": 10.0,
+  "d": 9.5,
+  "storeys": 2,
+  "height": 8.24,
+  "wall": "CF_Yakisugi",
+  "roof": "CF_RoofSeam",
+  "door": [
+   1.25,
+   4.8,
+   0.0
+  ],
+  "tris": 4294,
+  "tris_lod1": 234
+ },
+ {
+  "id": "jap_shed_4",
+  "culture": "japanese",
+  "kind": "shed",
+  "w": 10.0,
+  "d": 9.5,
+  "storeys": 2,
+  "height": 8.24,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofSeam",
+  "door": [
+   1.25,
+   4.8,
+   0.0
+  ],
+  "tris": 4294,
+  "tris_lod1": 234
+ },
+ {
+  "id": "kor_hanok_1",
+  "culture": "korean",
+  "kind": "hanok",
+  "w": 12.0,
+  "d": 8.0,
+  "storeys": 1,
+  "height": 6.57,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofKawara",
+  "door": [
+   -1.1920928955078125e-07,
+   4.05,
+   0.0
+  ],
+  "tris": 1714,
+  "tris_lod1": 290
+ },
+ {
+  "id": "kor_hanok_2",
+  "culture": "korean",
+  "kind": "hanok",
+  "w": 13.0,
+  "d": 8.5,
+  "storeys": 1,
+  "height": 6.57,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofKawara",
+  "door": [
+   1.1920928955078125e-07,
+   4.3,
+   0.0
+  ],
+  "tris": 1724,
+  "tris_lod1": 290
+ },
+ {
+  "id": "kor_hanok_3",
+  "culture": "korean",
+  "kind": "hanok",
+  "w": 11.0,
+  "d": 7.5,
+  "storeys": 1,
+  "height": 6.57,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofKawara",
+  "door": [
+   1.375,
+   3.8,
+   0.0
+  ],
+  "tris": 1558,
+  "tris_lod1": 278
+ },
+ {
+  "id": "kor_villa_1",
+  "culture": "korean",
+  "kind": "villa",
+  "w": 12.0,
+  "d": 12.0,
+  "storeys": 4,
+  "height": 12.24,
+  "wall": "CF_Brick",
+  "roof": "CF_RoofFlat",
+  "door": [
+   -1.1920928955078125e-07,
+   6.05,
+   0.0
+  ],
+  "tris": 13456,
+  "tris_lod1": 578
+ },
+ {
+  "id": "kor_villa_2",
+  "culture": "korean",
+  "kind": "villa",
+  "w": 12.0,
+  "d": 12.0,
+  "storeys": 4,
+  "height": 12.24,
+  "wall": "CF_BrickLondon",
+  "roof": "CF_RoofFlat",
+  "door": [
+   -1.1920928955078125e-07,
+   6.05,
+   0.0
+  ],
+  "tris": 13360,
+  "tris_lod1": 578
+ },
+ {
+  "id": "kor_villa_3",
+  "culture": "korean",
+  "kind": "villa",
+  "w": 11.0,
+  "d": 12.5,
+  "storeys": 4,
+  "height": 12.24,
+  "wall": "CF_Brick",
+  "roof": "CF_RoofFlat",
+  "door": [
+   1.375,
+   6.3,
+   0.0
+  ],
+  "tris": 11686,
+  "tris_lod1": 530
+ },
+ {
+  "id": "kor_villa_4",
+  "culture": "korean",
+  "kind": "villa",
+  "w": 11.0,
+  "d": 12.5,
+  "storeys": 4,
+  "height": 12.24,
+  "wall": "CF_BrickLondon",
+  "roof": "CF_RoofFlat",
+  "door": [
+   1.375,
+   6.3,
+   0.0
+  ],
+  "tris": 11686,
+  "tris_lod1": 530
+ },
+ {
+  "id": "kor_modern_1",
+  "culture": "korean",
+  "kind": "modern",
+  "w": 10.0,
+  "d": 10.0,
+  "storeys": 2,
+  "height": 7.76,
+  "wall": "CF_Concrete",
+  "roof": "CF_RoofFlat",
+  "door": [
+   1.25,
+   5.05,
+   0.0
+  ],
+  "tris": 4646,
+  "tris_lod1": 278
+ },
+ {
+  "id": "kor_modern_2",
+  "culture": "korean",
+  "kind": "modern",
+  "w": 10.0,
+  "d": 10.0,
+  "storeys": 2,
+  "height": 7.76,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofFlat",
+  "door": [
+   1.25,
+   5.05,
+   0.0
+  ],
+  "tris": 4648,
+  "tris_lod1": 278
+ },
+ {
+  "id": "kor_modern_3",
+  "culture": "korean",
+  "kind": "modern",
+  "w": 10.0,
+  "d": 10.0,
+  "storeys": 3,
+  "height": 10.88,
+  "wall": "CF_Concrete",
+  "roof": "CF_RoofFlat",
+  "door": [
+   1.25,
+   5.05,
+   0.0
+  ],
+  "tris": 6810,
+  "tris_lod1": 390
+ },
+ {
+  "id": "kor_modern_4",
+  "culture": "korean",
+  "kind": "modern",
+  "w": 10.0,
+  "d": 10.0,
+  "storeys": 3,
+  "height": 10.88,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofFlat",
+  "door": [
+   1.25,
+   5.05,
+   0.0
+  ],
+  "tris": 6812,
+  "tris_lod1": 390
+ },
+ {
+  "id": "kor_modern_5",
+  "culture": "korean",
+  "kind": "modern",
+  "w": 11.0,
+  "d": 9.0,
+  "storeys": 2,
+  "height": 7.76,
+  "wall": "CF_Concrete",
+  "roof": "CF_RoofFlat",
+  "door": [
+   1.375,
+   4.55,
+   0.0
+  ],
+  "tris": 4138,
+  "tris_lod1": 254
+ },
+ {
+  "id": "kor_modern_6",
+  "culture": "korean",
+  "kind": "modern",
+  "w": 11.0,
+  "d": 9.0,
+  "storeys": 2,
+  "height": 7.76,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofFlat",
+  "door": [
+   1.375,
+   4.55,
+   0.0
+  ],
+  "tris": 4140,
+  "tris_lod1": 254
+ },
+ {
+  "id": "kor_modern_7",
+  "culture": "korean",
+  "kind": "modern",
+  "w": 11.0,
+  "d": 9.0,
+  "storeys": 3,
+  "height": 10.88,
+  "wall": "CF_Concrete",
+  "roof": "CF_RoofFlat",
+  "door": [
+   1.375,
+   4.55,
+   0.0
+  ],
+  "tris": 6038,
+  "tris_lod1": 354
+ },
+ {
+  "id": "kor_modern_8",
+  "culture": "korean",
+  "kind": "modern",
+  "w": 11.0,
+  "d": 9.0,
+  "storeys": 3,
+  "height": 10.88,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofFlat",
+  "door": [
+   1.375,
+   4.55,
+   0.0
+  ],
+  "tris": 6040,
+  "tris_lod1": 354
+ },
+ {
+  "id": "kor_hanok_large_1",
+  "culture": "korean",
+  "kind": "hanok_large",
+  "w": 15.0,
+  "d": 9.0,
+  "storeys": 1,
+  "height": 6.77,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofKawara",
+  "door": [
+   1.25,
+   4.55,
+   0.0
+  ],
+  "tris": 1876,
+  "tris_lod1": 302
+ },
+ {
+  "id": "kor_hanok_large_2",
+  "culture": "korean",
+  "kind": "hanok_large",
+  "w": 14.0,
+  "d": 8.5,
+  "storeys": 1,
+  "height": 6.77,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofKawara",
+  "door": [
+   -0.0,
+   4.3,
+   0.0
+  ],
+  "tris": 1720,
+  "tris_lod1": 290
+ },
+ {
+  "id": "kor_townhouse_1",
+  "culture": "korean",
+  "kind": "townhouse",
+  "w": 8.0,
+  "d": 12.0,
+  "storeys": 3,
+  "height": 10.88,
+  "wall": "CF_Brick",
+  "roof": "CF_RoofFlat",
+  "door": [
+   -0.0,
+   6.05,
+   0.0
+  ],
+  "tris": 6792,
+  "tris_lod1": 390
+ },
+ {
+  "id": "kor_townhouse_2",
+  "culture": "korean",
+  "kind": "townhouse",
+  "w": 8.0,
+  "d": 12.0,
+  "storeys": 3,
+  "height": 10.88,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofFlat",
+  "door": [
+   -0.0,
+   6.05,
+   0.0
+  ],
+  "tris": 6792,
+  "tris_lod1": 390
+ },
+ {
+  "id": "kor_townhouse_3",
+  "culture": "korean",
+  "kind": "townhouse",
+  "w": 9.0,
+  "d": 12.0,
+  "storeys": 3,
+  "height": 10.88,
+  "wall": "CF_Brick",
+  "roof": "CF_RoofFlat",
+  "door": [
+   1.125,
+   6.05,
+   0.0
+  ],
+  "tris": 7584,
+  "tris_lod1": 426
+ },
+ {
+  "id": "kor_townhouse_4",
+  "culture": "korean",
+  "kind": "townhouse",
+  "w": 9.0,
+  "d": 12.0,
+  "storeys": 3,
+  "height": 10.88,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofFlat",
+  "door": [
+   1.125,
+   6.05,
+   0.0
+  ],
+  "tris": 7584,
+  "tris_lod1": 426
+ },
+ {
+  "id": "eur_fachwerk_1",
+  "culture": "european",
+  "kind": "fachwerk",
+  "w": 8.5,
+  "d": 11.0,
+  "storeys": 2,
+  "height": 10.9,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   5.55,
+   0.0
+  ],
+  "tris": 6262,
+  "tris_lod1": 330
+ },
+ {
+  "id": "eur_fachwerk_2",
+  "culture": "european",
+  "kind": "fachwerk",
+  "w": 8.5,
+  "d": 11.0,
+  "storeys": 3,
+  "height": 14.02,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   5.55,
+   0.0
+  ],
+  "tris": 9562,
+  "tris_lod1": 478
+ },
+ {
+  "id": "eur_fachwerk_3",
+  "culture": "european",
+  "kind": "fachwerk",
+  "w": 9.0,
+  "d": 12.0,
+  "storeys": 2,
+  "height": 10.9,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   5.960464477539063e-08,
+   6.05,
+   0.0
+  ],
+  "tris": 6814,
+  "tris_lod1": 354
+ },
+ {
+  "id": "eur_fachwerk_4",
+  "culture": "european",
+  "kind": "fachwerk",
+  "w": 9.0,
+  "d": 12.0,
+  "storeys": 3,
+  "height": 14.02,
+  "wall": "CF_Plaster",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   5.960464477539063e-08,
+   6.05,
+   0.0
+  ],
+  "tris": 10402,
+  "tris_lod1": 514
+ },
+ {
+  "id": "eur_maison_1",
+  "culture": "european",
+  "kind": "maison",
+  "w": 11.0,
+  "d": 10.0,
+  "storeys": 2,
+  "height": 9.24,
+  "wall": "CF_Ashlar",
+  "roof": "CF_RoofSlate",
+  "door": [
+   -0.0,
+   5.05,
+   0.0
+  ],
+  "tris": 6364,
+  "tris_lod1": 400
+ },
+ {
+  "id": "eur_maison_2",
+  "culture": "european",
+  "kind": "maison",
+  "w": 11.0,
+  "d": 10.0,
+  "storeys": 2,
+  "height": 9.24,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofSlate",
+  "door": [
+   -0.0,
+   5.05,
+   0.0
+  ],
+  "tris": 6412,
+  "tris_lod1": 400
+ },
+ {
+  "id": "eur_maison_3",
+  "culture": "european",
+  "kind": "maison",
+  "w": 11.0,
+  "d": 10.0,
+  "storeys": 3,
+  "height": 12.36,
+  "wall": "CF_Ashlar",
+  "roof": "CF_RoofSlate",
+  "door": [
+   -0.0,
+   5.05,
+   0.0
+  ],
+  "tris": 9532,
+  "tris_lod1": 536
+ },
+ {
+  "id": "eur_maison_4",
+  "culture": "european",
+  "kind": "maison",
+  "w": 11.0,
+  "d": 10.0,
+  "storeys": 3,
+  "height": 12.36,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofSlate",
+  "door": [
+   -0.0,
+   5.05,
+   0.0
+  ],
+  "tris": 9532,
+  "tris_lod1": 536
+ },
+ {
+  "id": "eur_maison_5",
+  "culture": "european",
+  "kind": "maison",
+  "w": 12.0,
+  "d": 10.5,
+  "storeys": 2,
+  "height": 9.24,
+  "wall": "CF_Ashlar",
+  "roof": "CF_RoofSlate",
+  "door": [
+   -1.1920928955078125e-07,
+   5.3,
+   0.0
+  ],
+  "tris": 6460,
+  "tris_lod1": 400
+ },
+ {
+  "id": "eur_maison_6",
+  "culture": "european",
+  "kind": "maison",
+  "w": 12.0,
+  "d": 10.5,
+  "storeys": 2,
+  "height": 9.24,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofSlate",
+  "door": [
+   -1.1920928955078125e-07,
+   5.3,
+   0.0
+  ],
+  "tris": 6460,
+  "tris_lod1": 400
+ },
+ {
+  "id": "eur_maison_7",
+  "culture": "european",
+  "kind": "maison",
+  "w": 12.0,
+  "d": 10.5,
+  "storeys": 3,
+  "height": 12.36,
+  "wall": "CF_Ashlar",
+  "roof": "CF_RoofSlate",
+  "door": [
+   -1.1920928955078125e-07,
+   5.3,
+   0.0
+  ],
+  "tris": 9532,
+  "tris_lod1": 536
+ },
+ {
+  "id": "eur_maison_8",
+  "culture": "european",
+  "kind": "maison",
+  "w": 12.0,
+  "d": 10.5,
+  "storeys": 3,
+  "height": 12.36,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofSlate",
+  "door": [
+   -1.1920928955078125e-07,
+   5.3,
+   0.0
+  ],
+  "tris": 9532,
+  "tris_lod1": 536
+ },
+ {
+  "id": "eur_casa_1",
+  "culture": "european",
+  "kind": "casa",
+  "w": 11.0,
+  "d": 10.0,
+  "storeys": 2,
+  "height": 7.8,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   5.05,
+   0.0
+  ],
+  "tris": 6344,
+  "tris_lod1": 270
+ },
+ {
+  "id": "eur_casa_2",
+  "culture": "european",
+  "kind": "casa",
+  "w": 11.0,
+  "d": 10.0,
+  "storeys": 3,
+  "height": 10.92,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -0.0,
+   5.05,
+   0.0
+  ],
+  "tris": 9922,
+  "tris_lod1": 394
+ },
+ {
+  "id": "eur_casa_3",
+  "culture": "european",
+  "kind": "casa",
+  "w": 12.0,
+  "d": 11.0,
+  "storeys": 2,
+  "height": 7.8,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -1.1920928955078125e-07,
+   5.55,
+   0.0
+  ],
+  "tris": 7000,
+  "tris_lod1": 294
+ },
+ {
+  "id": "eur_casa_4",
+  "culture": "european",
+  "kind": "casa",
+  "w": 12.0,
+  "d": 11.0,
+  "storeys": 3,
+  "height": 10.92,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofTerracotta",
+  "door": [
+   -1.1920928955078125e-07,
+   5.55,
+   0.0
+  ],
+  "tris": 10930,
+  "tris_lod1": 430
+ },
+ {
+  "id": "eur_townhouse_1",
+  "culture": "european",
+  "kind": "townhouse",
+  "w": 8.0,
+  "d": 11.0,
+  "storeys": 3,
+  "height": 13.12,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.0,
+   5.55,
+   0.0
+  ],
+  "tris": 9222,
+  "tris_lod1": 442
+ },
+ {
+  "id": "eur_townhouse_2",
+  "culture": "european",
+  "kind": "townhouse",
+  "w": 8.0,
+  "d": 11.0,
+  "storeys": 3,
+  "height": 13.12,
+  "wall": "CF_Ashlar",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.0,
+   5.55,
+   0.0
+  ],
+  "tris": 9222,
+  "tris_lod1": 442
+ },
+ {
+  "id": "eur_townhouse_3",
+  "culture": "european",
+  "kind": "townhouse",
+  "w": 8.0,
+  "d": 11.0,
+  "storeys": 3,
+  "height": 13.12,
+  "wall": "CF_BrickPainted",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.0,
+   5.55,
+   0.0
+  ],
+  "tris": 9222,
+  "tris_lod1": 442
+ },
+ {
+  "id": "eur_townhouse_4",
+  "culture": "european",
+  "kind": "townhouse",
+  "w": 8.0,
+  "d": 11.0,
+  "storeys": 4,
+  "height": 16.24,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.0,
+   5.55,
+   0.0
+  ],
+  "tris": 12294,
+  "tris_lod1": 578
+ },
+ {
+  "id": "eur_townhouse_5",
+  "culture": "european",
+  "kind": "townhouse",
+  "w": 8.0,
+  "d": 11.0,
+  "storeys": 4,
+  "height": 16.24,
+  "wall": "CF_Ashlar",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.0,
+   5.55,
+   0.0
+  ],
+  "tris": 12294,
+  "tris_lod1": 578
+ },
+ {
+  "id": "eur_townhouse_6",
+  "culture": "european",
+  "kind": "townhouse",
+  "w": 8.0,
+  "d": 11.0,
+  "storeys": 4,
+  "height": 16.24,
+  "wall": "CF_BrickPainted",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.0,
+   5.55,
+   0.0
+  ],
+  "tris": 12294,
+  "tris_lod1": 578
+ },
+ {
+  "id": "eur_townhouse_7",
+  "culture": "european",
+  "kind": "townhouse",
+  "w": 9.0,
+  "d": 12.0,
+  "storeys": 3,
+  "height": 13.12,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.375,
+   6.05,
+   0.0
+  ],
+  "tris": 9222,
+  "tris_lod1": 442
+ },
+ {
+  "id": "eur_townhouse_8",
+  "culture": "european",
+  "kind": "townhouse",
+  "w": 9.0,
+  "d": 12.0,
+  "storeys": 3,
+  "height": 13.12,
+  "wall": "CF_Ashlar",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.375,
+   6.05,
+   0.0
+  ],
+  "tris": 9222,
+  "tris_lod1": 442
+ },
+ {
+  "id": "eur_townhouse_9",
+  "culture": "european",
+  "kind": "townhouse",
+  "w": 9.0,
+  "d": 12.0,
+  "storeys": 3,
+  "height": 13.12,
+  "wall": "CF_BrickPainted",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.375,
+   6.05,
+   0.0
+  ],
+  "tris": 9222,
+  "tris_lod1": 442
+ },
+ {
+  "id": "eur_townhouse_10",
+  "culture": "european",
+  "kind": "townhouse",
+  "w": 9.0,
+  "d": 12.0,
+  "storeys": 4,
+  "height": 16.24,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.375,
+   6.05,
+   0.0
+  ],
+  "tris": 12294,
+  "tris_lod1": 578
+ },
+ {
+  "id": "eur_townhouse_11",
+  "culture": "european",
+  "kind": "townhouse",
+  "w": 9.0,
+  "d": 12.0,
+  "storeys": 4,
+  "height": 16.24,
+  "wall": "CF_Ashlar",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.375,
+   6.05,
+   0.0
+  ],
+  "tris": 12294,
+  "tris_lod1": 578
+ },
+ {
+  "id": "eur_townhouse_12",
+  "culture": "european",
+  "kind": "townhouse",
+  "w": 9.0,
+  "d": 12.0,
+  "storeys": 4,
+  "height": 16.24,
+  "wall": "CF_BrickPainted",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.375,
+   6.05,
+   0.0
+  ],
+  "tris": 12294,
+  "tris_lod1": 578
+ },
+ {
+  "id": "bri_semi_1",
+  "culture": "british",
+  "kind": "semi",
+  "w": 13.0,
+  "d": 9.0,
+  "storeys": 2,
+  "height": 9.96,
+  "wall": "CF_BrickLondon",
+  "roof": "CF_RoofSlate",
+  "door": [
+   2.6000001430511475,
+   4.55,
+   0.0
+  ],
+  "tris": 4868,
+  "tris_lod1": 336
+ },
+ {
+  "id": "bri_semi_2",
+  "culture": "british",
+  "kind": "semi",
+  "w": 13.0,
+  "d": 9.0,
+  "storeys": 2,
+  "height": 9.96,
+  "wall": "CF_Brick",
+  "roof": "CF_RoofSlate",
+  "door": [
+   2.6000001430511475,
+   4.55,
+   0.0
+  ],
+  "tris": 4868,
+  "tris_lod1": 336
+ },
+ {
+  "id": "bri_semi_3",
+  "culture": "british",
+  "kind": "semi",
+  "w": 12.5,
+  "d": 9.5,
+  "storeys": 2,
+  "height": 9.96,
+  "wall": "CF_BrickLondon",
+  "roof": "CF_RoofSlate",
+  "door": [
+   2.5,
+   4.8,
+   0.0
+  ],
+  "tris": 4868,
+  "tris_lod1": 336
+ },
+ {
+  "id": "bri_semi_4",
+  "culture": "british",
+  "kind": "semi",
+  "w": 12.5,
+  "d": 9.5,
+  "storeys": 2,
+  "height": 9.96,
+  "wall": "CF_Brick",
+  "roof": "CF_RoofSlate",
+  "door": [
+   2.5,
+   4.8,
+   0.0
+  ],
+  "tris": 4868,
+  "tris_lod1": 336
+ },
+ {
+  "id": "bri_victorian_1",
+  "culture": "british",
+  "kind": "victorian",
+  "w": 8.0,
+  "d": 11.0,
+  "storeys": 2,
+  "height": 10.56,
+  "wall": "CF_Brick",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.0,
+   5.55,
+   0.0
+  ],
+  "tris": 4716,
+  "tris_lod1": 328
+ },
+ {
+  "id": "bri_victorian_2",
+  "culture": "british",
+  "kind": "victorian",
+  "w": 8.0,
+  "d": 11.0,
+  "storeys": 2,
+  "height": 10.56,
+  "wall": "CF_BrickLondon",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.0,
+   5.55,
+   0.0
+  ],
+  "tris": 4716,
+  "tris_lod1": 328
+ },
+ {
+  "id": "bri_victorian_3",
+  "culture": "british",
+  "kind": "victorian",
+  "w": 8.0,
+  "d": 11.0,
+  "storeys": 3,
+  "height": 13.68,
+  "wall": "CF_Brick",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.0,
+   5.55,
+   0.0
+  ],
+  "tris": 7124,
+  "tris_lod1": 452
+ },
+ {
+  "id": "bri_victorian_4",
+  "culture": "british",
+  "kind": "victorian",
+  "w": 8.0,
+  "d": 11.0,
+  "storeys": 3,
+  "height": 13.68,
+  "wall": "CF_BrickLondon",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.0,
+   5.55,
+   0.0
+  ],
+  "tris": 7124,
+  "tris_lod1": 452
+ },
+ {
+  "id": "bri_victorian_5",
+  "culture": "british",
+  "kind": "victorian",
+  "w": 8.5,
+  "d": 12.0,
+  "storeys": 2,
+  "height": 10.56,
+  "wall": "CF_Brick",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.1875,
+   6.05,
+   0.0
+  ],
+  "tris": 4716,
+  "tris_lod1": 328
+ },
+ {
+  "id": "bri_victorian_6",
+  "culture": "british",
+  "kind": "victorian",
+  "w": 8.5,
+  "d": 12.0,
+  "storeys": 2,
+  "height": 10.56,
+  "wall": "CF_BrickLondon",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.1875,
+   6.05,
+   0.0
+  ],
+  "tris": 4716,
+  "tris_lod1": 328
+ },
+ {
+  "id": "bri_victorian_7",
+  "culture": "british",
+  "kind": "victorian",
+  "w": 8.5,
+  "d": 12.0,
+  "storeys": 3,
+  "height": 13.68,
+  "wall": "CF_Brick",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.1875,
+   6.05,
+   0.0
+  ],
+  "tris": 7124,
+  "tris_lod1": 452
+ },
+ {
+  "id": "bri_victorian_8",
+  "culture": "british",
+  "kind": "victorian",
+  "w": 8.5,
+  "d": 12.0,
+  "storeys": 3,
+  "height": 13.68,
+  "wall": "CF_BrickLondon",
+  "roof": "CF_RoofSlate",
+  "door": [
+   3.1875,
+   6.05,
+   0.0
+  ],
+  "tris": 7124,
+  "tris_lod1": 452
+ },
+ {
+  "id": "bri_georgian_1",
+  "culture": "british",
+  "kind": "georgian",
+  "w": 12.0,
+  "d": 9.0,
+  "storeys": 2,
+  "height": 9.56,
+  "wall": "CF_BrickLondon",
+  "roof": "CF_RoofSlate",
+  "door": [
+   -1.1920928955078125e-07,
+   4.55,
+   0.0
+  ],
+  "tris": 7494,
+  "tris_lod1": 290
+ },
+ {
+  "id": "bri_georgian_2",
+  "culture": "british",
+  "kind": "georgian",
+  "w": 12.0,
+  "d": 9.0,
+  "storeys": 2,
+  "height": 9.56,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofSlate",
+  "door": [
+   -1.1920928955078125e-07,
+   4.55,
+   0.0
+  ],
+  "tris": 7494,
+  "tris_lod1": 290
+ },
+ {
+  "id": "bri_georgian_3",
+  "culture": "british",
+  "kind": "georgian",
+  "w": 12.0,
+  "d": 9.0,
+  "storeys": 3,
+  "height": 12.68,
+  "wall": "CF_BrickLondon",
+  "roof": "CF_RoofSlate",
+  "door": [
+   -1.1920928955078125e-07,
+   4.55,
+   0.0
+  ],
+  "tris": 11234,
+  "tris_lod1": 414
+ },
+ {
+  "id": "bri_georgian_4",
+  "culture": "british",
+  "kind": "georgian",
+  "w": 12.0,
+  "d": 9.0,
+  "storeys": 3,
+  "height": 12.68,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofSlate",
+  "door": [
+   -1.1920928955078125e-07,
+   4.55,
+   0.0
+  ],
+  "tris": 11234,
+  "tris_lod1": 414
+ },
+ {
+  "id": "bri_georgian_5",
+  "culture": "british",
+  "kind": "georgian",
+  "w": 11.0,
+  "d": 9.0,
+  "storeys": 2,
+  "height": 9.56,
+  "wall": "CF_BrickLondon",
+  "roof": "CF_RoofSlate",
+  "door": [
+   -0.0,
+   4.55,
+   0.0
+  ],
+  "tris": 7494,
+  "tris_lod1": 290
+ },
+ {
+  "id": "bri_georgian_6",
+  "culture": "british",
+  "kind": "georgian",
+  "w": 11.0,
+  "d": 9.0,
+  "storeys": 2,
+  "height": 9.56,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofSlate",
+  "door": [
+   -0.0,
+   4.55,
+   0.0
+  ],
+  "tris": 7494,
+  "tris_lod1": 290
+ },
+ {
+  "id": "bri_georgian_7",
+  "culture": "british",
+  "kind": "georgian",
+  "w": 11.0,
+  "d": 9.0,
+  "storeys": 3,
+  "height": 12.68,
+  "wall": "CF_BrickLondon",
+  "roof": "CF_RoofSlate",
+  "door": [
+   -0.0,
+   4.55,
+   0.0
+  ],
+  "tris": 11234,
+  "tris_lod1": 414
+ },
+ {
+  "id": "bri_georgian_8",
+  "culture": "british",
+  "kind": "georgian",
+  "w": 11.0,
+  "d": 9.0,
+  "storeys": 3,
+  "height": 12.68,
+  "wall": "CF_Stucco",
+  "roof": "CF_RoofSlate",
+  "door": [
+   -0.0,
+   4.55,
+   0.0
+  ],
+  "tris": 11234,
+  "tris_lod1": 414
+ },
+ {
+  "id": "bri_tudor_1",
+  "culture": "british",
+  "kind": "tudor",
+  "w": 10.0,
+  "d": 12.0,
+  "storeys": 2,
+  "height": 11.36,
+  "wall": "CF_Brick",
+  "roof": "CF_Roof",
+  "door": [
+   -0.0,
+   6.05,
+   0.0
+  ],
+  "tris": 7038,
+  "tris_lod1": 308
+ },
+ {
+  "id": "bri_tudor_2",
+  "culture": "british",
+  "kind": "tudor",
+  "w": 9.5,
+  "d": 11.5,
+  "storeys": 2,
+  "height": 11.36,
+  "wall": "CF_Brick",
+  "roof": "CF_Roof",
+  "door": [
+   1.1875,
+   5.8,
+   0.0
+  ],
+  "tris": 6362,
+  "tris_lod1": 284
+ },
+ {
+  "id": "mix_craftsman_1",
+  "culture": "mixed",
+  "kind": "craftsman",
+  "w": 10.0,
+  "d": 12.0,
+  "storeys": 1,
+  "height": 7.24,
+  "wall": "CF_Siding",
+  "roof": "CF_Roof",
+  "door": [
+   1.25,
+   6.05,
+   0.0
+  ],
+  "tris": 2522,
+  "tris_lod1": 196
+ },
+ {
+  "id": "mix_craftsman_2",
+  "culture": "mixed",
+  "kind": "craftsman",
+  "w": 10.0,
+  "d": 12.0,
+  "storeys": 2,
+  "height": 10.36,
+  "wall": "CF_Siding",
+  "roof": "CF_Roof",
+  "door": [
+   1.25,
+   6.05,
+   0.0
+  ],
+  "tris": 4930,
+  "tris_lod1": 320
+ },
+ {
+  "id": "mix_craftsman_3",
+  "culture": "mixed",
+  "kind": "craftsman",
+  "w": 9.5,
+  "d": 11.5,
+  "storeys": 1,
+  "height": 7.24,
+  "wall": "CF_Siding",
+  "roof": "CF_Roof",
+  "door": [
+   1.1875,
+   5.8,
+   0.0
+  ],
+  "tris": 2522,
+  "tris_lod1": 196
+ },
+ {
+  "id": "mix_craftsman_4",
+  "culture": "mixed",
+  "kind": "craftsman",
+  "w": 9.5,
+  "d": 11.5,
+  "storeys": 2,
+  "height": 10.36,
+  "wall": "CF_Siding",
+  "roof": "CF_Roof",
+  "door": [
+   1.1875,
+   5.8,
+   0.0
+  ],
+  "tris": 4930,
+  "tris_lod1": 320
+ },
+ {
+  "id": "mix_vancouver_special_1",
+  "culture": "mixed",
+  "kind": "vancouver_special",
+  "w": 11.0,
+  "d": 12.0,
+  "storeys": 2,
+  "height": 7.8,
+  "wall": "CF_Stucco",
+  "roof": "CF_Roof",
+  "door": [
+   1.375,
+   6.05,
+   0.0
+  ],
+  "tris": 4934,
+  "tris_lod1": 258
+ },
+ {
+  "id": "mix_vancouver_special_2",
+  "culture": "mixed",
+  "kind": "vancouver_special",
+  "w": 11.0,
+  "d": 12.0,
+  "storeys": 2,
+  "height": 7.8,
+  "wall": "CF_Siding",
+  "roof": "CF_Roof",
+  "door": [
+   1.375,
+   6.05,
+   0.0
+  ],
+  "tris": 4934,
+  "tris_lod1": 258
+ },
+ {
+  "id": "mix_foursquare_1",
+  "culture": "mixed",
+  "kind": "foursquare",
+  "w": 10.0,
+  "d": 10.0,
+  "storeys": 2,
+  "height": 9.76,
+  "wall": "CF_Siding",
+  "roof": "CF_Roof",
+  "door": [
+   1.25,
+   5.05,
+   0.0
+  ],
+  "tris": 4400,
+  "tris_lod1": 290
+ },
+ {
+  "id": "mix_foursquare_2",
+  "culture": "mixed",
+  "kind": "foursquare",
+  "w": 10.0,
+  "d": 10.0,
+  "storeys": 2,
+  "height": 9.76,
+  "wall": "CF_BrickPainted",
+  "roof": "CF_Roof",
+  "door": [
+   1.25,
+   5.05,
+   0.0
+  ],
+  "tris": 4400,
+  "tris_lod1": 290
+ },
+ {
+  "id": "mix_foursquare_3",
+  "culture": "mixed",
+  "kind": "foursquare",
+  "w": 10.5,
+  "d": 10.5,
+  "storeys": 2,
+  "height": 9.76,
+  "wall": "CF_Siding",
+  "roof": "CF_Roof",
+  "door": [
+   1.3125,
+   5.3,
+   0.0
+  ],
+  "tris": 4400,
+  "tris_lod1": 290
+ },
+ {
+  "id": "mix_foursquare_4",
+  "culture": "mixed",
+  "kind": "foursquare",
+  "w": 10.5,
+  "d": 10.5,
+  "storeys": 2,
+  "height": 9.76,
+  "wall": "CF_BrickPainted",
+  "roof": "CF_Roof",
+  "door": [
+   1.3125,
+   5.3,
+   0.0
+  ],
+  "tris": 4400,
+  "tris_lod1": 290
+ },
+ {
+  "id": "mix_ranch_1",
+  "culture": "mixed",
+  "kind": "ranch",
+  "w": 13.0,
+  "d": 9.0,
+  "storeys": 1,
+  "height": 4.88,
+  "wall": "CF_Siding",
+  "roof": "CF_Roof",
+  "door": [
+   1.1920928955078125e-07,
+   4.55,
+   0.0
+  ],
+  "tris": 2162,
+  "tris_lod1": 134
+ },
+ {
+  "id": "mix_ranch_2",
+  "culture": "mixed",
+  "kind": "ranch",
+  "w": 13.0,
+  "d": 9.0,
+  "storeys": 1,
+  "height": 4.88,
+  "wall": "CF_Brick",
+  "roof": "CF_Roof",
+  "door": [
+   1.1920928955078125e-07,
+   4.55,
+   0.0
+  ],
+  "tris": 2162,
+  "tris_lod1": 134
+ },
+ {
+  "id": "mix_ranch_3",
+  "culture": "mixed",
+  "kind": "ranch",
+  "w": 12.0,
+  "d": 9.5,
+  "storeys": 1,
+  "height": 4.88,
+  "wall": "CF_Siding",
+  "roof": "CF_Roof",
+  "door": [
+   1.5,
+   4.8,
+   0.0
+  ],
+  "tris": 1898,
+  "tris_lod1": 122
+ },
+ {
+  "id": "mix_ranch_4",
+  "culture": "mixed",
+  "kind": "ranch",
+  "w": 12.0,
+  "d": 9.5,
+  "storeys": 1,
+  "height": 4.88,
+  "wall": "CF_Brick",
+  "roof": "CF_Roof",
+  "door": [
+   1.5,
+   4.8,
+   0.0
+  ],
+  "tris": 1898,
+  "tris_lod1": 122
+ },
+ {
+  "id": "mix_west_coast_1",
+  "culture": "mixed",
+  "kind": "west_coast",
+  "w": 11.0,
+  "d": 10.0,
+  "storeys": 2,
+  "height": 8.44,
+  "wall": "CF_Cedar",
+  "roof": "CF_RoofSeam",
+  "door": [
+   1.375,
+   5.05,
+   0.0
+  ],
+  "tris": 3766,
+  "tris_lod1": 210
+ }
+]

@@ -7,6 +7,15 @@ uniform vec4 tint : source_color = vec4(1.0);
 uniform int surface_kind = 0;
 uniform bool roof_from_custom = false;
 uniform bool tinted = false;            // only siding, leaves and facades take COLOR; trim, glass, bark... don't
+// Baked material library (tools/cityforge/materials.py): albedo, OpenGL normal, ORM (occlusion,
+// roughness, metallic), one 2 m tile. Mapped by world-space box projection: one texel density
+// everywhere, walls by height, roofs along their slope, floors by x/z; no UVs needed.
+uniform bool textured = false;
+uniform sampler2D albedo_tex : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D normal_tex : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D orm_tex : hint_default_white, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform float tile_m = 2.0;
+uniform float normal_strength = 1.0;
 uniform float emission_energy = 0.0;
 varying vec3 world_position;
 varying vec3 world_normal;
@@ -31,6 +40,7 @@ void fragment() {
 	float broad = noise(p * 1.7);
 	float value = 0.94 + 0.08 * fine;
 	vec3 extra = vec3(1.0);
+	bool window_px = false;
 	ROUGHNESS = 0.85;
 	METALLIC = 0.0;
 	if (surface_kind == 1) { // Asphalt
@@ -81,6 +91,7 @@ void fragment() {
 			float win = step(0.2, fx) * step(fx, 0.8) * step(0.3, fy) * step(fy, 0.86);
 			float frame = win * (1.0 - step(0.23, fx) * step(fx, 0.77) * step(0.33, fy) * step(fy, 0.83));
 			if (win > 0.5) {
+				window_px = true;
 				float lit = step(0.7, hash(floor(vec3(uv.x / 3.0, uv.y / 3.4, p.x * 0.01 + p.z * 0.013))));
 				value = frame > 0.5 ? 0.95 : 0.22 + 0.1 * smoothstep(-0.2, 1.0, fy);
 				extra = frame > 0.5 ? vec3(0.85, 0.85, 0.82) / max(instance_tint * tint.rgb, vec3(0.05)) : vec3(0.45, 0.6, 0.7) / max(instance_tint * tint.rgb, vec3(0.05));
@@ -122,6 +133,35 @@ void fragment() {
 		value = 0.62 + 0.5 * clump; ROUGHNESS = 0.9;
 		NORMAL = normalize(NORMAL + (vec3(noise(p * 6.0), noise(p * 6.0 + 4.0), noise(p * 6.0 + 9.0)) - 0.5) * 0.35);
 		BACKLIGHT = vec3(0.25, 0.3, 0.12);
+	}
+	if (textured && !window_px && surface_kind != 13) {
+		vec3 n = normalize(world_normal);
+		vec3 T;
+		vec2 tuv;
+		if (abs(n.y) > 0.95) {
+			T = vec3(1.0, 0.0, 0.0);
+			tuv = vec2(p.x, -p.z * sign(n.y));
+		} else {
+			vec2 d = normalize(n.xz);
+			T = vec3(-d.y, 0.0, d.x);
+			float along = dot(p.xz, vec2(-d.y, d.x));
+			float up_v = abs(n.y) < 0.2 ? p.y : -dot(p.xz, d) / max(n.y, 0.25);
+			tuv = vec2(along, up_v);
+		}
+		vec3 B = cross(T, n);
+		tuv = vec2(tuv.x, -tuv.y) / tile_m;
+		vec3 alb = texture(albedo_tex, tuv).rgb;
+		vec3 orm = texture(orm_tex, tuv).rgb;
+		vec3 nm = texture(normal_tex, tuv).rgb * 2.0 - 1.0;
+		nm.xy *= normal_strength;
+		vec3 wn = normalize(T * nm.x + B * nm.y + n * nm.z);
+		NORMAL = normalize((VIEW_MATRIX * vec4(wn, 0.0)).xyz);
+		AO = orm.r;
+		AO_LIGHT_AFFECT = 0.3;
+		ROUGHNESS = orm.g;
+		METALLIC = orm.b;
+		value = 1.0;
+		extra = alb;
 	}
 	float up = smoothstep(0.6, 0.95, world_normal.y);
 	float w = (surface_kind == 7 || surface_kind == 8 || surface_kind == 13) ? 0.0 : wetness;

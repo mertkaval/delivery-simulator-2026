@@ -59,6 +59,7 @@ func build() -> void:
 	_load_chunks()
 	_place_instances()
 	_place_labels()
+	_place_sign_labels()
 	stats["build_ms"] = Time.get_ticks_msec() - t0
 
 ## City plan metres (x east, y north) and a height -> Godot position.
@@ -110,7 +111,11 @@ func _build_ground_collision() -> void:
 
 # --- kit -------------------------------------------------------------------------------------
 func _load_kit() -> void:
-	var scene := (load(DIR + "kit.glb") as PackedScene).instantiate()
+	_load_kit_file(DIR + "kit.glb")
+	if ResourceLoader.exists(DIR + "houses.glb"): _load_kit_file(DIR + "houses.glb")      # the house catalogue (houses.py)
+
+func _load_kit_file(path: String) -> void:
+	var scene := (load(path) as PackedScene).instantiate()
 	for node in scene.find_children("*", "MeshInstance3D", true, false):
 		var mi := node as MeshInstance3D
 		var key := str(mi.name)
@@ -179,6 +184,9 @@ func _place_instances() -> void:
 	var roof: Array = pal.roof
 	var leaves: Array = pal.leaves
 	for hs: Dictionary in city.houses:
+		if hs.has("kit"):            # a catalogue house: its own size, its own paint
+			_add(groups, str(hs.kit), hs.pos, float(hs.h), float(hs.yaw), Vector3.ONE, Color(str(hs.tint)), Color(str(hs.roof_tint)))
+			continue
 		var size_: Array = hs.size
 		var sc := Vector3(float(size_[0]) / 10.0, 1.0, float(size_[1]) / 12.0)
 		_add(groups, "house_" + str(hs.archetype), hs.pos, float(hs.h), float(hs.yaw), sc,
@@ -193,9 +201,19 @@ func _place_instances() -> void:
 		var s := 0.85 + 0.3 * fmod(k * 0.6180339, 1.0)
 		var choices: Array = leaves[int(t[4])]
 		_add(groups, TREES[int(t[4])], [t[0], t[1]], float(t[2]), float(t[3]), Vector3.ONE * s, Color(str(choices[(k * 7919) % choices.size()])), Color.WHITE)
-	for kind: String in ["lamp", "traffic_light", "bus_stop", "hydrant", "bench", "stop_sign"]:
-		for p: Array in props[kind]:
+	for kind: String in ["lamp", "traffic_light", "bus_stop", "hydrant", "bench", "stop_sign", "utility_pole", "vending_machine",
+			"post_box", "phone_box", "ad_column", "cesme", "cafe_set"]:
+		for p: Array in props.get(kind, []):
 			_add(groups, kind, [p[0], p[1]], float(p[2]), float(p[3]), Vector3.ONE, Color.WHITE, Color.WHITE)
+	# street-name boards: a pole and two blades in the district's colours (the names are Label3Ds)
+	var cultures: Dictionary = city.get("cultures", {})
+	for p: Array in props.get("street_sign", []):
+		var sign_col := Color(str((cultures.get(str(p[7]), {"sign": "1f6b3a"}) as Dictionary).sign))
+		_add(groups, "sign_pole", [p[0], p[1]], float(p[2]), 0.0, Vector3.ONE, Color.WHITE, Color.WHITE)
+		_add(groups, "sign_blade", [p[0], p[1]], float(p[2]) + 2.95, float(p[3]), Vector3.ONE, sign_col, Color.WHITE)
+		_add(groups, "sign_blade", [p[0], p[1]], float(p[2]) + 2.65, float(p[4]), Vector3.ONE, sign_col, Color.WHITE)
+		for k in range(8, p.size(), 2):          # extra blades for streets whose own corner had no room
+			_add(groups, "sign_blade", [p[0], p[1]], float(p[2]) + 2.35 - 0.3 * ((k - 8) / 2), float(p[k]), Vector3.ONE, sign_col, Color.WHITE)
 	var count := 0
 	var nodes := 0
 	for key: Array in groups:
@@ -203,8 +221,9 @@ func _place_instances() -> void:
 		var cell_key: Vector2i = key[1]
 		var items: Array = groups[key]
 		count += items.size()
-		var detail := name_ in ["hydrant", "bench", "stop_sign"]
-		var in_far := name_.begins_with("house_") or name_ == "garage" or name_.begins_with("tree_")
+		var detail := name_ in ["hydrant", "bench", "stop_sign", "sign_pole", "sign_blade", "vending_machine", "post_box", "phone_box",
+			"ad_column", "cesme", "cafe_set"]
+		var in_far := name_.begins_with("house_") or name_.begins_with("H_") or name_ == "garage" or name_.begins_with("tree_")
 		var mi := _multimesh(kit[name_][0] as Mesh, items)
 		mi.name = "%s_%d_%d" % [name_, cell_key.x, cell_key.y]
 		var centre := Vector2((cell_key.x + 0.5) * CELL_LOD0, (cell_key.y + 0.5) * CELL_LOD0)
@@ -250,6 +269,38 @@ func _multimesh(mesh: Mesh, items: Array) -> MultiMeshInstance3D:
 	return mi
 
 # --- names -----------------------------------------------------------------------------------
+const SIGN_RANGE := 45.0
+
+## Street names on both faces of every blade of every corner board (only drawn near the camera).
+func _place_sign_labels() -> void:
+	var cultures: Dictionary = city.get("cultures", {})
+	var holder := Node3D.new()
+	holder.name = "StreetSigns"
+	add_child(holder)
+	var count := 0
+	for p: Array in (city.props as Dictionary).get("street_sign", []):
+		var sign_col := Color(str((cultures.get(str(p[7]), {"sign": "1f6b3a"}) as Dictionary).sign))
+		var ink := Color("1c1c1c") if sign_col.get_luminance() > 0.6 else Color("f6f6f2")
+		var blades: Array = [[float(p[3]), 2.95, str(p[5])], [float(p[4]), 2.65, str(p[6])]]
+		for k in range(8, p.size(), 2): blades.append([float(p[k]), 2.35 - 0.3 * ((k - 8) / 2), str(p[k + 1])])
+		for blade: Array in blades:
+			var yaw: float = blade[0]
+			var basis := Basis(Vector3.UP, yaw)
+			var at := to_world(float(p[0]), float(p[1]), float(p[2]) + float(blade[1]))
+			for side in [1.0, -1.0]:
+				var label := Label3D.new()
+				label.text = str(blade[2])
+				label.font_size = 48
+				label.outline_size = 0
+				label.modulate = ink
+				label.pixel_size = minf(0.0021, 1.0 / maxf(1.0, label.text.length() * 0.56 * 48.0))
+				label.double_sided = false
+				label.visibility_range_end = SIGN_RANGE
+				label.transform = Transform3D(basis if side > 0 else basis * Basis(Vector3.UP, PI), at + basis * Vector3(0, 0, 0.018 * side))
+				holder.add_child(label)
+				count += 1
+	stats["sign_labels"] = count
+
 func _place_labels() -> void:
 	for pb: Dictionary in city.public:
 		var label := Label3D.new()
@@ -300,7 +351,7 @@ func _build_chunk_collision(key: Vector2i) -> void:
 	var lo := Vector2(key.x * CHUNK, key.y * CHUNK)
 	var hi := lo + Vector2(CHUNK, CHUNK)
 	for hs: Dictionary in city.houses:
-		_box_if_inside(body, hs.pos, lo, hi, float(hs.h), float(hs.yaw), Vector3(float((hs.size as Array)[0]), 6.5, float((hs.size as Array)[1])))
+		_box_if_inside(body, hs.pos, lo, hi, float(hs.h), float(hs.yaw), Vector3(float((hs.size as Array)[0]), float(hs.get("height", 6.5)), float((hs.size as Array)[1])))
 	for g: Dictionary in city.garages:
 		_box_if_inside(body, g.pos, lo, hi, float(g.h), float(g.yaw), Vector3(6.4, 3.4, 6.4))
 	var props: Dictionary = city.props
@@ -459,9 +510,13 @@ func nearest_house(p: Vector3) -> Dictionary:
 ## The front door of a house (world position on the step, facing out).
 func house_door(hs: Dictionary) -> Vector3:
 	var pos: Array = hs.pos
+	var base := to_world(float(pos[0]), float(pos[1]), float(hs.h))
+	var basis := Basis(Vector3.UP, float(hs.yaw))
+	if hs.has("door"):           # the catalogue's door (Blender x, y: front +Y) plus a step out
+		var d: Array = hs.door
+		return base + basis * Vector3(float(d[0]), 0.0, -float(d[1]) - 0.4)
 	var depth := float((hs.size as Array)[1])
-	var front := Vector3(0, 0, -1).rotated(Vector3.UP, float(hs.yaw))
-	return to_world(float(pos[0]), float(pos[1]), float(hs.h)) + front * (depth * 0.5 + 0.4)
+	return base + basis * Vector3(0, 0, -(depth * 0.5 + 0.4))
 
 func set_night(amount: float) -> void:
 	CityForgeMaterials.set_night(amount)

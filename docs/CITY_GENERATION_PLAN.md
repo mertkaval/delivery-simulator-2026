@@ -128,3 +128,41 @@ minute (`tools/cityforge/build.sh`; details in `tools/cityforge/README.md`, tool
 **Next**: make it the game's world (spawn, deliveries to lot addresses, shops, the sidewalk graph for
 townspeople, traffic lanes via the Godot Road Generator, buses on the arterials), then the culture
 districts on the rotated-grid and tensor-field plans.
+
+## 6. Culture districts, the house catalogue and the material library (2026-10-28)
+
+- **Material library** (`tools/cityforge/materials.py`): 21 procedural node materials (bricks,
+  stucco, siding, cedar, yakisugi, ashlar, asphalt shingle, slate, terracotta, kawara, standing
+  seam, concrete, paving, cobbles, hedge, tatami, floor tiles, parquet ...) built in code as the
+  node graphs from the realism guide, baked with Cycles to seamless 2 m tiles: albedo, OpenGL
+  normal, ORM (occlusion / roughness / metallic) in `assets/cityforge/materials/`. The game's
+  CityForge shader maps them by world-space box projection (no UVs, one texel density); tintable
+  ones are baked neutral and take each house's paint.
+- **House catalogue** (`tools/cityforge/houses.py`, 148 types): shells from the Building Tools
+  add-on (vendored, MIT: `tools/thirdparty/building_tools`), real window and door frames, then
+  culture parts in code: Turkish konak with cumba bays, apartman, mustakil, yali; Japanese
+  machiya, minka (irimoya roof, engawa), nagaya, modern, shed; Korean hanok (upturned giwa roof),
+  villa, townhouse, modern; European Fachwerk, mansard maison with dormers, casa, townhouse;
+  British semi with bay window and chimneys, Victorian, Georgian, Tudor; the Vancouver mix.
+  Every type has a LOD1. `assets/cityforge/houses.glb` + `houses.json`; review sheets from
+  `qa_houses.py`.
+- **Districts** (`port_halden_city.json` `neighbourhoods` + `cultures`): Cinaralti (Turkish),
+  Sakuragaoka (Japanese), Hanbit-dong (Korean), Europa Quarter, Kingsbury (British), and six mixed
+  districts that borrow 20 % of their houses from the five cultures. Each culture sets setbacks,
+  garage chance, fence and wall types, paint and roof palettes, tree species, sign colours,
+  awning and facade colours, and corner furniture: vending machines and utility poles (Japan,
+  Korea), pillar and phone boxes (Britain), advertising columns and cafe tables (Europe), cesme
+  fountains (Turkey).
+- **Street names** (`street_names.py` + `names/modern_pioneers_500.md`): every street in a district is
+  named for a pioneer in the district's style (Caddesi / Sokak, -dori, -ro, Rue / Via / -Strasse,
+  Road / Lane / Close ...); downtown and mixed districts alternate Turkish and world pioneers.
+  Addresses follow the named streets. Name boards stand at every corner of every junction (two
+  blades in the district's colour, the names as labels), plus extra blades where a corner had no room.
+- **Street-by-street check** (`audit_streets.py`, run by `build.sh`): every named street is checked
+  for props on the carriageway, overlapping props, houses outside lots or facing away, fences through
+  houses or across doors, missing name boards, trees against lamps and signs, dark stretches. The
+  planner's placement resolver (priority order, slide-or-drop, oriented building footprints) brought
+  Port Halden to 106 / 106 streets passing.
+
+Next: restaurant interiors (the pickup shops get fitted-out rooms per culture), shop signage in the
+district scripts, townspeople and traffic in Port Halden.
