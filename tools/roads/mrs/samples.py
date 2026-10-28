@@ -19,7 +19,7 @@ def _scene(name):
     return sc, col
 
 
-def _ground(col, size=600.0, z=-0.02):
+def _ground(col, size=600.0, z=-0.12):      # well below the roads: a 2 cm gap z-fights in the viewport at distance
     me = bpy.data.meshes.new("MRS_Ground"); me.from_pydata([(-size, -size, z), (size, -size, z), (size, size, z), (-size, size, z)], [], [(0, 1, 2, 3)])
     from .props import mat
     me.materials.append(mat(MRS + "Ground", (0.16, 0.24, 0.09), 0.95)); o = bpy.data.objects.new("MRS_GroundPlane", me); col.objects.link(o); return o
