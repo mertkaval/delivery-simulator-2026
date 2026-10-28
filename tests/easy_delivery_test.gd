@@ -241,13 +241,15 @@ func run() -> void:
 	check(roles.has("bag_take") and roles.has("handover") and (roles.has("bag_put_on") or roles.has("bag_put_on_holding") and roles.has("bag_strap_right")), "Bag_TakeItem -> (Bag_PutOn_Holding) -> Handover -> Bag_PutOn / Bag_StrapRight (%s)" % ", ".join(roles.keys()))
 	game.close_menu()
 	# --- Riding with the backpack on, first person ----------------------------------------------------
+	# On the open park lawn: the avenue lane (x 1.95) carries AI traffic, and a passing car there
+	# blocked the mount now and then.
 	s.active_vehicle = "bicycle"
-	player.replace_vehicle(Vector3(1.95, 0.05, -40))
+	player.replace_vehicle(Vector3(-52, 0.05, -128))
 	player.bicycle.rotation = Vector3.ZERO
-	player.position = Vector3(2.9, 0.1, -40)
+	player.position = Vector3(-51.05, 0.1, -128)
 	player.rotation = Vector3.ZERO
 	await physics(10)
-	player.toggle_bicycle()
+	var mount_message := player.toggle_bicycle()
 	Input.action_press("move_forward")
 	await physics(80)
 	var riding_ok := false
@@ -257,7 +259,7 @@ func run() -> void:
 		to_bag = bag_centre(bp) - chest
 		riding_ok = player.mounted and bp.model.is_visible_in_tree() and to_bag.length() < 0.7 and to_bag.dot(-player.bicycle.global_basis.z) < -0.1
 		if riding_ok: break
-	check(riding_ok, "riding: the bag stays on the back (%.2f m from the chest, mounted %s, visible %s, behind %.2f)" % [to_bag.length(), player.mounted, bp.model.is_visible_in_tree(), to_bag.dot(-player.bicycle.global_basis.z)])
+	check(riding_ok, "riding: the bag stays on the back (%.2f m from the chest, mounted %s: %s, visible %s, behind %.2f)" % [to_bag.length(), player.mounted, mount_message, bp.model.is_visible_in_tree(), to_bag.dot(-player.bicycle.global_basis.z)])
 	Input.action_release("move_forward")
 	Input.action_press("jump")
 	await physics(100)
