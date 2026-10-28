@@ -88,6 +88,9 @@ def _mesh_object(name, bm, collection, materials, meta):
     bm.normal_update()
     for f in bm.faces:
         if abs(f.normal.z) > 0.5 and f.normal.z < 0: f.normal_flip()
+    # the junction surface is a large concave n-gon: triangulate it so viewport and render agree
+    big = [f for f in bm.faces if len(f.verts) > 4]
+    if big: bmesh.ops.triangulate(bm, faces=big, quad_method="BEAUTY", ngon_method="BEAUTY")
     me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
     for m in materials: me.materials.append(bpy.data.materials[m])
     uvl = me.uv_layers.new(name="UVMap")
