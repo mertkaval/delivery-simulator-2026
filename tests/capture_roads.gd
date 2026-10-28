@@ -83,4 +83,5 @@ func run() -> void:
 	await shot(out, "overhead", Vector3(30, 200, 10), Vector3(30, 0, -10), 50.0)
 	await shot(out, "street", Vector3(-40, 1.7, 2.5), Vector3(-5, 1.2, -0.5), 60.0)
 	await shot(out, "junction", Vector3(-26, 2.2, 10), Vector3(2, 0.8, -2), 55.0)
+	await shot(out, "curb", Vector3(-50, 1.5, 15.5), Vector3(-38, 0.2, 12.0), 50.0)
 	quit()
