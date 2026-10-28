@@ -76,3 +76,61 @@ def export_glb(path, collection_name=MRS + "Roads", collision=True):
             stats["collision_tris"] = sum(len(p.vertices) - 2 for o in cobjs for p in o.data.polygons); stats["collision_bytes"] = os.path.getsize(cpath)
     for o in list(tmp.objects): bpy.data.objects.remove(o)
     return stats
+
+
+def export_block(path, collection_name, lod_trees=True):
+    """Game export of a street block: `<path>.glb` (roads, junctions, structures), `<path>_collision.glb`,
+    `<path>_props.glb` (placed props as named nodes, tree LOD1 swapped in when `lod_trees`),
+    `<path>_signals.glb` (signal poles and heads as separate named nodes with the per-lens State
+    materials) and `<path>.json` (shared street model: lanes, paths, crossings, signals, phases,
+    placement report, validation). Returns stats."""
+    from . import street_model
+    src = bpy.data.collections[collection_name]
+    stats = export_glb(path + ".glb", collection_name, collision=True)
+    placed = bpy.data.collections.get(collection_name + "_Placed")
+    sc = _scene(); vl = sc.view_layers[0]
+    tmp = bpy.data.collections.get(MRS + "ExportTmp") or bpy.data.collections.new(MRS + "ExportTmp")
+    if tmp.name not in sc.collection.children: sc.collection.children.link(tmp)
+    for o in list(tmp.objects): bpy.data.objects.remove(o)
+    def _export(sel, fp, **kw):
+        for o in bpy.context.view_layer.objects: o.select_set(o in sel)
+        bpy.context.view_layer.objects.active = sel[0]
+        bpy.ops.export_scene.gltf(filepath=fp, export_format="GLB", use_selection=True, export_apply=True, export_yup=True, export_extras=True, **kw)
+    def _copy_tree(o, extra=None):
+        c = bpy.data.objects.new(o.name, o.data); c.matrix_world = o.matrix_world.copy(); tmp.objects.link(c)
+        for k, v in (extra or {}).items(): c[k] = v
+        out = [c]
+        for ch in o.children:
+            c2 = bpy.data.objects.new(ch.name, ch.data); c2.parent = c; c2.matrix_parent_inverse = ch.matrix_parent_inverse.copy()
+            c2.location = ch.location; c2.rotation_euler = ch.rotation_euler; c2.scale = ch.scale; tmp.objects.link(c2); out.append(c2)
+        return out
+    if placed:
+        sel = []
+        for o in placed.objects:
+            if o.parent is not None: continue
+            lib = o.get("mrs_placed", "")
+            if lod_trees and lib.startswith("MRS_Tree_") and bpy.data.objects.get(lib + "_LOD1"):
+                c = bpy.data.objects.new(o.name, bpy.data.objects[lib + "_LOD1"].data); c.matrix_world = o.matrix_world.copy(); tmp.objects.link(c); c["mrs_lib"] = lib + "_LOD1"; sel.append(c)
+            else:
+                sel += _copy_tree(o, {"mrs_lib": lib})
+        if sel:
+            vl.update(); _export(sel, path + "_props.glb", export_materials="EXPORT")
+            stats["props"] = len([o for o in sel if o.parent is None]); stats["props_tris"] = sum(len(p.vertices) - 2 for o in sel for p in o.data.polygons); stats["props_bytes"] = os.path.getsize(path + "_props.glb")
+        for o in list(tmp.objects): bpy.data.objects.remove(o)
+    signals = [o for o in src.all_objects if o.get("mrs_signal_id")]
+    if signals:
+        sel = []
+        for o in signals: sel += _copy_tree(o, {"mrs_signal_id": o["mrs_signal_id"]})
+        vl.update(); _export(sel, path + "_signals.glb", export_materials="EXPORT")
+        stats["signals"] = len(signals); stats["signals_bytes"] = os.path.getsize(path + "_signals.glb")
+        for o in list(tmp.objects): bpy.data.objects.remove(o)
+    model = street_model.collect(src)
+    model["export"] = {"glb": os.path.basename(path) + ".glb", "collision": os.path.basename(path) + "_collision.glb", "props": os.path.basename(path) + "_props.glb",
+                       "signals": os.path.basename(path) + "_signals.glb",
+                       "lens_materials": "MRS_Lens_<Red|Amber|Green|PedRed|PedGreen>: KHR_materials_emissive_strength carries the lit state; in Blender a Value node named State (0/1) drives it",
+                       "stats": stats}
+    report = sc.get("mrs_placement_report")
+    if report: model["placement_report"] = {k: (dict(v) if hasattr(v, "keys") else list(v)) for k, v in dict(report).items()}
+    street_model.export_json(path + ".json", model)
+    stats["json"] = path + ".json"; stats["validation"] = model["validation"]
+    return stats

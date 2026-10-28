@@ -117,7 +117,45 @@ def bridge_valley():
     return sc
 
 
-ALL = {"city_block": city_block, "mountain_road": mountain_road, "highway": highway, "roundabout_village": roundabout_village, "bridge_valley": bridge_valley}
+def street_block(wear="light_wear"):
+    """The representative demonstration block (brief section 14): a straight avenue with a lane increase
+    then a decrease, an S-curve, a T-junction (priority, parallel-line crossings) and a signalised
+    four-way, painted / buffered / protected cycleways, planting strips, crossings with ramps, signs, a
+    direction board, rule-placed lights / furniture / trees, a bus stop; `wear` = material preset."""
+    from . import placement, materials
+    sc, col = _scene("MRS_StreetBlock")
+    _ground(col)
+    R = lambda n, pts, preset, **kw: roads.make_road(n, pts, col, preset, Conform=False, Embankment=False, **kw)
+    r = {}
+    r["avW"] = R("SB_AvenueW", [(-150, 0, 0), (-75, 0, 0), (0, 0, 0)], "urban", Median=1.8, Bike_Left="Protected", Bike_Right="Protected", Planting_Strip_Left=1.2, Planting_Strip_Right=1.2,
+                 Sidewalk_Width_Left=4.0, Sidewalk_Width_Right=4.0, Transition=True, Lanes_Forward_End=3, Lanes_Backward_End=2, Transition_Start=45.0, Taper_Length=40.0)
+    r["avE"] = R("SB_AvenueE", [(0, 0, 0), (60, 0, 0), (120, 0, 0)], "urban", Median=1.8, Bike_Left="Protected", Bike_Right="Protected", Planting_Strip_Left=1.2, Planting_Strip_Right=1.2,
+                 Sidewalk_Width_Left=4.0, Sidewalk_Width_Right=4.0, Lanes_Forward=3, Transition=True, Lanes_Forward_End=2, Lanes_Backward_End=2, Transition_Start=35.0, Taper_Length=40.0)
+    r["n"] = R("SB_North", [(0, 0, 0), (0, 45, 0), (0, 90, 0)], "residential", Bike_Right="Painted", Bike_Left="Painted", Sidewalk_Width_Left=3.0, Sidewalk_Width_Right=3.0)
+    r["s"] = R("SB_South", [(0, 0, 0), (0, -45, 0), (0, -90, 0)], "residential", Sidewalk_Width_Left=3.2, Sidewalk_Width_Right=3.2, Planting_Strip_Left=1.0, Planting_Strip_Right=1.0)
+    r["scurve"] = R("SB_SCurve", [(120, 0, 0), (160, 8, 0), (200, -8, 0), (240, 0, 0)], "residential", Bike_Right="Buffered", Sidewalk_Width_Left=3.0, Sidewalk_Width_Right=3.2, Planting_Strip_Right=1.0)
+    r["t"] = R("SB_TSide", [(120, 0, 0), (120, -40, 0), (120, -80, 0)], "residential", Sidewalk_Width_Left=3.0, Sidewalk_Width_Right=3.0)
+    names = {"SB_AvenueW": "HARBOUR AVE", "SB_AvenueE": "HARBOUR AVE", "SB_North": "MAPLE ST", "SB_South": "MAPLE ST", "SB_SCurve": "RIVER RD", "SB_TSide": "MILL LANE"}
+    for o in r.values(): o["mrs_street_name"] = names[o.name]
+    junction.build_junction("SB_J4", (0, 0, 0), [r["avW"], r["avE"], r["n"], r["s"]], col, control="signals", corner_radius=5.0, main_roads=["SB_AvenueW", "SB_AvenueE"])
+    junction.build_junction("SB_JT", (120, 0, 0), [r["avE"], r["scurve"], r["t"]], col, control="priority", corner_radius=5.0, main_roads=["SB_AvenueE", "SB_SCurve"], crossing="parallel")
+    structures.bus_stop(r["avE"], 40.0, 1, col)
+    try:
+        from . import signage
+        board = signage.make_direction_board("SB_Board", [("CITY CENTRE", "ahead"), ("HARBOUR", "right"), ("STATION", "left")], collection=col)
+        p, t, rr = structures.road_sample(r["avW"], 30.0); w = roads.road_widths(r["avW"])
+        board.location = p + rr * (w["half_r"] + w["curb"] + 1.0); board.rotation_euler = (0, 0, math.atan2(t.y, t.x) + math.pi / 2)
+    except Exception as e:
+        print("direction board skipped:", e)
+    rep = placement.place_all(col, seed=7, style="avenue", speed_limits={"SB_AvenueW": 50, "SB_AvenueE": 50, "SB_North": 30, "SB_South": 30, "SB_SCurve": 30, "SB_TSide": 30})
+    sc["mrs_placement_report"] = {"counts": rep["counts"], "by_kind": rep["by_kind"], "skipped": [list(x) for x in rep["skipped"][:200]]}
+    print("PLACEMENT", rep["counts"], rep["by_kind"])
+    for x in rep["skipped"][:12]: print("  skipped", x)
+    materials.apply_material_preset(wear)
+    return sc
+
+
+ALL = {"street_block": street_block, "city_block": city_block, "mountain_road": mountain_road, "highway": highway, "roundabout_village": roundabout_village, "bridge_valley": bridge_valley}
 
 
 def build_all():
@@ -132,7 +170,10 @@ def render_all(out_dir):
         "MRS_Mountain": [("over", (-40, -260, 220), (0, 20, 0), 35), ("bend", "road:MT_Main:0.35"), ("tunnel", "road:MT_Main2:0.3"), ("cut", "road:MT_Main2:0.8")],
         "MRS_Highway": [("over", (-80, -230, 150), (20, 0, 0), 35), ("under", (-50, -70, 2.5), (20, 0, 6), 32), ("drive", "road:HW_Main:0.2"), ("overpass", "road:HW_Overpass:0.4")],
         "MRS_Village": [("over", (-70, -120, 110), (0, 0, 0), 35), ("entry", "road:VL_South:0.85"), ("ring", (18, -26, 6), (0, 0, 1), 32), ("bus", "road:VL_East:0.35")],
-        "MRS_BridgeValley": [("over", (-120, -200, 90), (0, 0, 5), 35), ("deck", "road:BV_Bridge:0.1"), ("below", (0, -80, -2), (0, 0, 8), 30), ("east", "road:BV_East:0.3")],
+        "MRS_BridgeValley": [("over", (-120, -200, 90), (0, 0, 5), 35), ("deck", "road:BV_Bridge:0.1"), ("below", (-30, -90, 2), (0, 0, 12), 30), ("east", "road:BV_East:0.3")],
+        "MRS_StreetBlock": [("overhead", (45, -40, 190), (45, 0, 0), 30), ("driver", "road:SB_South:0.75"), ("cyclist", "road:SB_AvenueW:0.78"), ("pedestrian", (-14, -16.5, 1.65), (0, -11, 1.0), 32),
+                            ("crossing", (9, -14, 3.5), (3, -9, 0.1), 40), ("curb", (-9.0, -12.5, 1.3), (-6.5, -10.0, 0.1), 45), ("tree", (-40, -14, 2.0), (-45, -9.5, 4.5), 40), ("material", (30, -1.0, 1.2), (36, 2.5, 0.0), 45),
+                            ("taper", (-110, -40, 25), (-95, 0, 0), 35), ("tjunction", (95, -40, 22), (122, 0, 0), 35), ("scurve", "road:SB_SCurve:0.3")],
     }
     paths = []
     headless = getattr(bpy.context, "window", None) is None

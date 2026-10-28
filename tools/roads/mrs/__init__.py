@@ -9,7 +9,7 @@ import bpy
 
 from . import nodes, materials, props, road, terrain
 
-MODULES = ("nodes", "materials", "props", "road", "terrain", "roads", "qa", "junction", "structures", "assets", "trees", "signage", "ui", "export", "samples")
+MODULES = ("nodes", "materials", "props", "road", "terrain", "roads", "qa", "junction", "structures", "assets", "trees", "signage", "placement", "street_model", "ui", "export", "samples")
 
 
 def reload():
@@ -49,6 +49,6 @@ def register():
 
 
 from .nodes import MRS, mod_input_set, mod_input_get  # noqa: E402
-for _m in ("roads", "qa", "junction", "structures", "assets", "trees", "signage", "ui", "export", "samples"):
+for _m in ("roads", "qa", "junction", "structures", "assets", "trees", "signage", "placement", "street_model", "ui", "export", "samples"):
     try: globals()[_m] = importlib.import_module(__name__ + "." + _m)
     except ModuleNotFoundError: pass

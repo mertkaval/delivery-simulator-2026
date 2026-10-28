@@ -39,7 +39,7 @@ def _fillet(p_a, d_a, p_b, d_b, radius, n=8):
     while da > math.pi: da -= 2 * math.pi
     while da < -math.pi: da += 2 * math.pi
     pts = [Vector((centre.x + radius * math.cos(a0 + da * k / n), centre.y + radius * math.sin(a0 + da * k / n), 0.0)) for k in range(n + 1)]
-    return pts, C, t
+    return pts, C, t, centre, a0, da, radius
 
 
 _bvh_cache = {}
@@ -68,27 +68,40 @@ def _approaches(at, roads, snap):
     for r in roads:
         for p, t, is_start in road_ends(r):
             if (p - at).length <= snap:
-                w = road_widths(r)
+                w = road_widths(r, at_end=not is_start)        # lane counts at THIS end (transitions)
                 out.append(dict(road=r, p=p, d=Vector((t.x, t.y, 0)).normalized(), start=is_start, **w))
     out.sort(key=lambda a: math.atan2(a["d"].y, a["d"].x))
     return out
 
 
-def _set_end(a, trim, clear, lock_z):
+def _set_end(a, trim, clear, lock_z, ramp=False):
     mod = a["road"].modifiers["MRS_Road"]
     s = a["start"]
-    mod_input_set(mod, "Trim Start" if s else "Trim End", trim)
-    mod_input_set(mod, "Clear Start" if s else "Clear End", clear)
-    mod_input_set(mod, "Lock Start" if s else "Lock End", True)
-    mod_input_set(mod, "Lock Start Z" if s else "Lock End Z", lock_z)
+    values = {("Trim Start" if s else "Trim End"): trim, ("Clear Start" if s else "Clear End"): clear, ("Lock Start" if s else "Lock End"): True,
+              ("Lock Start Z" if s else "Lock End Z"): lock_z, ("Ramp Start" if s else "Ramp End"): bool(ramp)}
+    for k, v in values.items(): mod_input_set(mod, k, v)
+    inputs = dict(a["road"].get("mrs_inputs", {})); inputs.update(values); a["road"]["mrs_inputs"] = inputs
     a["road"].update_tag()
+
+
+KIND_OF_SLOT = {0: 0.0, 1: 1.0, 2: 2.0, 3: 6.0, 4: 5.0, 5: 7.0, 6: 8.0}     # material slot -> kind attribute
+
+
+def _mats():
+    """Material names for the junction slots (asphalt, paint, concrete, paving, cycleway, tactile, crossing),
+    falling back when a dedicated material is missing."""
+    def pick(*names):
+        return next((MRS + n for n in names if bpy.data.materials.get(MRS + n)), MRS + "Concrete")
+    return (pick("Asphalt"), pick("Paint"), pick("Concrete"), pick("Paving", "Concrete"), pick("Cycleway", "BikeLane"), pick("Tactile", "Paint"), pick("Cycleway", "BikeLane"))
+
+
+MATS = _mats
 
 
 def _mesh_object(name, bm, collection, materials, meta):
     bm.normal_update()
     for f in bm.faces:
         if abs(f.normal.z) > 0.5 and f.normal.z < 0: f.normal_flip()
-    # the junction surface is a large concave n-gon: triangulate it so viewport and render agree
     big = [f for f in bm.faces if len(f.verts) > 4]
     if big: bmesh.ops.triangulate(bm, faces=big, quad_method="BEAUTY", ngon_method="BEAUTY")
     me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
@@ -97,7 +110,7 @@ def _mesh_object(name, bm, collection, materials, meta):
     for loop in me.loops:
         v = me.vertices[loop.vertex_index].co; uvl.data[loop.index].uv = (v.x, v.y)
     kind = me.attributes.new("kind", "FLOAT", "FACE")
-    for p in me.polygons: kind.data[p.index].value = {0: 0.0, 1: 1.0, 2: 2.0}.get(p.material_index, 2.0)
+    for p in me.polygons: kind.data[p.index].value = KIND_OF_SLOT.get(p.material_index, 2.0)
     old = bpy.data.objects.get(name)
     if old:
         for ch in list(old.children): bpy.data.objects.remove(ch)
@@ -107,13 +120,18 @@ def _mesh_object(name, bm, collection, materials, meta):
     return o
 
 
-MATS = (MRS + "Asphalt", MRS + "Paint", MRS + "Concrete")
+CONTROLS = ("none", "signals", "stop", "yield", "priority")
 
 
 def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True, corner_radius=6.0, traffic_lights=False,
-                   snap=0.8, terrain=None, lights_collection=None):
-    """Connect the road ends within `snap` of `at`. Any number (>= 2) of approaches; neighbours must be
-    at least 25 degrees apart. Returns the junction object; raises ValueError for unsupported layouts."""
+                   snap=0.8, terrain=None, lights_collection=None, crossing="zebra", stop_setback=0.6, refuge=True, control=None,
+                   main_roads=None, bike_crossings=True, crossing_width=2.5):
+    """Connect the road ends within `snap` of `at`. Any number (>= 2) of approaches; neighbours must be at
+    least 25 degrees apart. Builds the asphalt surface with filleted corners, curb / paving corner pieces,
+    crossings (zebra or parallel lines) with ramps on the roads, stop lines set back from the crossing,
+    median noses and refuge islands, coloured bicycle crossings, and signal poles with IDs
+    (control = "signals"); "stop" / "yield" / "priority" are consumed by the sign placer.
+    Returns the junction object; raises ValueError for unsupported layouts."""
     at = Vector(at)
     approaches = _approaches(at, roads, snap)
     n = len(approaches)
@@ -122,58 +140,67 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
         a, b = approaches[i], approaches[(i + 1) % n]
         ang = math.degrees(math.atan2(b["d"].y, b["d"].x) - math.atan2(a["d"].y, a["d"].x)) % 360.0
         if n > 2 and ang < 25.0: raise ValueError("%s: roads %s and %s meet at %.0f degrees (min 25)" % (name, a["road"].name, b["road"].name, ang))
-    z = _ground_z(at, terrain) if terrain is not None else at.z
-    # corners between consecutive approaches: a's left edge meets b's right edge (counter-clockwise order)
+    zs = [a["p"].z for a in approaches]
+    if max(zs) - min(zs) > 1.5: raise ValueError("%s: road ends differ in height by %.1f m (max 1.5 for a flat junction)" % (name, max(zs) - min(zs)))
+    z = _ground_z(at, terrain) if terrain is not None else sum(zs) / len(zs)
+    if control is None: control = "signals" if traffic_lights else ("priority" if n >= 3 else "none")
+    traffic_lights = control == "signals"
+    main_roads = set(main_roads or [])
     corners = []
     for i in range(n):
         a, b = approaches[i], approaches[(i + 1) % n]
-        la = a["d"].cross(UP).normalized(); lb = b["d"].cross(UP).normalized()      # right-hand vectors
+        la = a["d"].cross(UP).normalized(); lb = b["d"].cross(UP).normalized()
         swa, swb = a["swl"], b["swr"]
-        rings = []                                        # polylines at offsets: asphalt edge, curb outer, sidewalk outer
-        offsets = [(a["half_l"], b["half_r"], 0), (a["half_l"] + a["curb"], b["half_r"] + b["curb"], 1), (a["half_l"] + a["curb"] + swa, b["half_r"] + b["curb"] + swb, 2)]
-        tan_dist = 0.0
-        for offa, offb, k in offsets:
-            pa = at - la * offa; pb = at + lb * offb
-            fil = _fillet(pa, a["d"], pb, b["d"], corner_radius + (0.0 if k == 0 else (a["curb"] if k == 1 else a["curb"] + max(swa, swb))))
-            if fil is None:
-                # straight-through pair: the "corner" is the midpoint of the gap between the two parallel edges
-                mid = (pa + pb) * 0.5
+        rings = []
+        # ring 0: fillet of the asphalt edges; rings 1 / 2 (curb, sidewalk back): concentric arcs around the same
+        # centre with radius R - offset (the back of a sidewalk corner is a TIGHTER arc; <= 0 collapses to a point),
+        # so every ring starts at the same station as the asphalt tangent point and meets the road's straight edges
+        pa = at - la * a["half_l"]; pb = at + lb * b["half_r"]
+        fil = _fillet(pa, a["d"], pb, b["d"], corner_radius)
+        offs = [0.0, a["curb"], a["curb"] + max(swa, swb)]
+        if fil is None:
+            for k, off in enumerate(offs):
+                mid = ((at - la * (a["half_l"] + off)) + (at + lb * (b["half_r"] + off))) * 0.5
                 rings.append(([mid], mid, 0.0))
-            else:
-                pts, C, t = fil
-                rings.append((pts, C, t))
-                tan_dist = max(tan_dist, (pts[0] - at).dot(a["d"]), (pts[-1] - at).dot(b["d"]))
-        corners.append(dict(a=a, b=b, la=la, lb=lb, rings=rings, tan_dist=tan_dist))
-    # trim each approach past the furthest tangent point of its two corners
+        else:
+            pts, C, t, centre, a0, da, Rr = fil
+            for k, off in enumerate(offs):
+                rk = Rr - off
+                if rk > 0.05:
+                    rings.append(([Vector((centre.x + rk * math.cos(a0 + da * j / 8), centre.y + rk * math.sin(a0 + da * j / 8), 0.0)) for j in range(9)], C, t))
+                else:
+                    rings.append(([Vector((centre.x, centre.y, 0.0))], C, t))
+        corners.append(dict(a=a, b=b, la=la, lb=lb, rings=rings))
+    cw = crossing_width
     for i, a in enumerate(approaches):
-        cs = [corners[i - 1], corners[i]]
         reach = 0.0
-        for c in cs:
+        for c in (corners[i - 1], corners[i]):
             for pts, C, t in c["rings"]:
                 reach = max(reach, max((p - at).dot(a["d"]) for p in pts))
         a["trim"] = max(reach + 0.3, a["half"] + 1.0)
-        _set_end(a, a["trim"], a["trim"] + (8.0 if crosswalks else 3.0), z)
+        a["cross"] = crosswalks and (a["swl"] > 0 or a["swr"] > 0)
+        clear = a["trim"] + (stop_setback + cw + 5.0 if a["cross"] else 3.0)
+        _set_end(a, a["trim"], clear, z, ramp=a["cross"])
+        mod = a["road"].modifiers["MRS_Road"]
+        mod_input_set(mod, "Ramp Offset", stop_setback); mod_input_set(mod, "Ramp Width", cw)
     bm = bmesh.new()
     def V(p, zz): return bm.verts.new((p.x, p.y, zz))
-    # the asphalt polygon (counter-clockwise): right corner, left corner of each approach end, then the rounded corner
+    def quad(p0, p1, p2, p3, zz, mat):
+        try:
+            ff = bm.faces.new([V(p, zz) for p in (p0, p1, p2, p3)]); ff.material_index = mat; return ff
+        except ValueError: return None
     poly = []
     for i, a in enumerate(approaches):
         r = a["d"].cross(UP).normalized(); end = at + a["d"] * a["trim"]
         poly.append(end + r * a["half_r"]); poly.append(end - r * a["half_l"])
-        c = corners[i]
-        pts = c["rings"][0][0]
-        # from the trimmed end along a's left edge to the tangent point, the arc, then along b's right edge to b's end
-        poly.extend(pts)
-    verts = []
-    last = None
+        poly.extend(corners[i]["rings"][0][0])
+    verts = []; last = None
     for p in poly:
         if last is not None and (p - last).length < 0.02: continue
         verts.append(V(p, z)); last = p
     try:
         f = bm.faces.new(verts); f.material_index = 0
-    except ValueError:
-        pass
-    # sidewalk / curb corner pieces between ring 0 (asphalt edge), ring 1 (curb) and ring 2 (sidewalk)
+    except ValueError: pass
     for c in corners:
         a, b = c["a"], c["b"]
         if a["h"] <= 0 and b["h"] <= 0: continue
@@ -182,11 +209,9 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
         def ring_pts(k):
             offa = (a["half_l"], a["half_l"] + a["curb"], a["half_l"] + a["curb"] + a["swl"])[k]
             offb = (b["half_r"], b["half_r"] + b["curb"], b["half_r"] + b["curb"] + b["swr"])[k]
-            core = c["rings"][k][0]
-            return [ea - c["la"] * offa] + list(core) + [eb + c["lb"] * offb]
+            return [ea - c["la"] * offa] + list(c["rings"][k][0]) + [eb + c["lb"] * offb]
         r0, r1, r2 = ring_pts(0), ring_pts(1), ring_pts(2)
         def loft(ra, rb, za, zb, mat):
-            # strips between two polylines (resampled to the same count by index)
             m = max(len(ra), len(rb))
             def samp(ring, k):
                 if len(ring) == 1: return ring[0]
@@ -197,51 +222,116 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
                 try:
                     ff = bm.faces.new((V(p0, za), V(p1, za), V(p2, zb), V(p3, zb))); ff.material_index = mat
                 except ValueError: pass
-        loft(r0, r0, z, z + h, 2)        # curb face (vertical)
-        loft(r0, r1, z + h, z + h, 2)    # curb top
+        loft(r0, r0, z, z + h, 2); loft(r0, r1, z + h, z + h, 2)
         if a["swl"] > 0 or b["swr"] > 0:
-            loft(r1, r2, z + h, z + h, 2)    # sidewalk slab
-            loft(r2, r2, z + h, z, 2)        # outer edge down to the ground
-    # crosswalks and stop lines
-    for a in approaches:
+            loft(r1, r2, z + h, z + h, 3); loft(r2, r2, z + h, z, 2)
+    crossings_meta = []
+    for ai, a in enumerate(approaches):
         r = a["d"].cross(UP).normalized(); end = at + a["d"] * a["trim"]
-        width = a["half_l"] + a["half_r"]
-        if crosswalks and (a["swl"] > 0 or a["swr"] > 0):
-            k = 0
-            while True:
-                x0 = -a["half_l"] + 0.3 + k * 1.0; x1 = x0 + 0.5
-                if x1 > a["half_r"] - 0.2: break
-                p0 = end + a["d"] * 0.6 + r * x0; p1 = end + a["d"] * 0.6 + r * x1; p2 = end + a["d"] * 3.1 + r * x1; p3 = end + a["d"] * 3.1 + r * x0
-                ff = bm.faces.new([V(p, z + Z_PAINT) for p in (p0, p1, p2, p3)]); ff.material_index = 1
-                k += 1
-            y0 = 3.7
-        else:
-            y0 = 1.0
-        if stop_lines and a["lanes_b"] > 0:
-            # right-hand traffic: cars arrive on their right, which is -r when looking out
-            x_in = -a["half_l"] + (a["half_l"] - a["lanes_b"] * a["lw"] - a["median"] * 0.5)
-            p0 = end + a["d"] * y0 - r * a["half_l"]; p1 = end + a["d"] * y0 - r * (a["median"] * 0.5 + 0.05); p2 = end + a["d"] * (y0 + 0.4) - r * (a["median"] * 0.5 + 0.05); p3 = end + a["d"] * (y0 + 0.4) - r * a["half_l"]
-            ff = bm.faces.new([V(p, z + Z_PAINT) for p in (p0, p1, p2, p3)]); ff.material_index = 1
+        med = a["median"] * 0.5
+        y0 = stop_setback; y1 = y0 + cw
+        in_r = -1.0 if a["rht"] else 1.0            # incoming traffic is on the junction's left (looking out) under RHT
+        half_in = a["half_l"] if in_r < 0 else a["half_r"]
+        def stripe(x0, x1, ya, yb, mat=1, lift=Z_PAINT):
+            quad(end + a["d"] * ya + r * x0, end + a["d"] * ya + r * x1, end + a["d"] * yb + r * x1, end + a["d"] * yb + r * x0, z + lift, mat)
+        if a["cross"]:
+            has_refuge = refuge and med >= 0.85
+            spans = [(-a["half_l"] + 0.3, -med - 0.4), (med + 0.4, a["half_r"] - 0.3)] if has_refuge else [(-a["half_l"] + 0.3, a["half_r"] - 0.3)]
+            for x_lo, x_hi in spans:
+                if crossing == "zebra":
+                    x = x_lo
+                    while x + 0.5 <= x_hi:
+                        stripe(x, x + 0.5, y0, y1); x += 1.0
+                else:
+                    stripe(x_lo, x_hi, y0, y0 + 0.2); stripe(x_lo, x_hi, y1 - 0.2, y1)
+            crossings_meta.append({"id": "%s_X%d" % (name, ai), "road": a["road"].name, "end": "start" if a["start"] else "end",
+                                   "from": list(end + a["d"] * (y0 + cw / 2) - r * (a["half_l"] + a["curb"])), "to": list(end + a["d"] * (y0 + cw / 2) + r * (a["half_r"] + a["curb"])),
+                                   "style": crossing, "refuge": has_refuge})
+            if has_refuge:
+                quad(end + a["d"] * (y0 - 0.3) - r * med, end + a["d"] * (y0 - 0.3) + r * med, end + a["d"] * (y1 + 0.3) + r * med, end + a["d"] * (y1 + 0.3) - r * med, z + 0.02, 5)
+            if stop_lines and a["lanes_b"] > 0:
+                xa, xb = sorted((in_r * (med + 0.05), in_r * half_in))
+                stripe(xa, xb, y1 + 0.4, y1 + 0.8)
+        elif stop_lines and a["lanes_b"] > 0:
+            xa, xb = sorted((in_r * (med + 0.05), in_r * half_in))
+            stripe(xa, xb, 1.0, 1.4)
+        if bike_crossings:
+            for s, sgn in (("r", 1.0), ("l", -1.0)):
+                if not a.get("bike_on_" + s): continue
+                x0, x1 = sorted((a["bike0_" + s] * sgn, a["bike1_" + s] * sgn))
+                ymax = (y1 + 1.0) if a["cross"] else 2.5
+                quad(end + r * x0, end + r * x1, end + a["d"] * ymax + r * x1, end + a["d"] * ymax + r * x0, z + 0.003, 6)
+                yy = 0.3
+                while yy + 0.4 <= ymax:
+                    stripe(x0 - 0.1, x0 + 0.3, yy, yy + 0.4); stripe(x1 - 0.3, x1 + 0.1, yy, yy + 0.4)
+                    yy += 0.8
+        if med > 0.05:
+            nose_y = (y1 + 0.3) if (a["cross"] and refuge and med >= 0.9) else 0.0
+            mh = max(0.02, a["h"] if a["h"] > 0 else 0.15)
+            base = end + a["d"] * nose_y
+            ring = [base + r * (med * math.cos(math.pi * k / 8)) - a["d"] * (med * math.sin(math.pi * k / 8)) for k in range(9)]
+            try:
+                ff = bm.faces.new([V(q, z + mh) for q in ring]); ff.material_index = 2
+            except ValueError: pass
+            for k in range(8):
+                try:
+                    ff = bm.faces.new((V(ring[k], z), V(ring[k + 1], z), V(ring[k + 1], z + mh), V(ring[k], z + mh))); ff.material_index = 2
+                except ValueError: pass
+            if nose_y > 0.0:
+                quad(end + r * med, end - r * med, base - r * med, base + r * med, z + 0.02, 5)
     meta = {"at": list(at), "roads": [a["road"].name for a in approaches], "crosswalks": crosswalks, "stop_lines": stop_lines, "corner_radius": corner_radius,
-            "traffic_lights": traffic_lights, "terrain": terrain.name if terrain else "", "z": z, "type": "junction"}
-    o = _mesh_object(name, bm, collection, MATS, meta)
-    # traffic lights at the corners: the pole at corner (a, b) faces the cars arriving on a (looking out along a)
+            "traffic_lights": traffic_lights, "control": control, "main_roads": sorted(main_roads), "terrain": terrain.name if terrain else "", "z": z, "type": "junction",
+            "crossing": crossing, "stop_setback": stop_setback, "refuge": refuge, "crossings": crossings_meta,
+            "approaches": [{"road": a["road"].name, "end": "start" if a["start"] else "end", "heading": [a["d"].x, a["d"].y], "trim": a["trim"],
+                            "lanes_in": a["lanes_b"] if a["rht"] else a["lanes_f"], "lanes_out": a["lanes_f"] if a["rht"] else a["lanes_b"],
+                            "half_l": a["half_l"], "half_r": a["half_r"], "main": a["road"].name in main_roads} for a in approaches]}
+    o = _mesh_object(name, bm, collection, _mats(), meta)
     if traffic_lights and n >= 3:
-        lights = lights_collection or bpy.data.collections.get(MRS + "TrafficLights")
-        src = next((ob for ob in lights.objects), None) if lights else None
-        if src is not None:
-            for i, c in enumerate(corners):
-                ring = c["rings"][1][0]
-                mid = ring[len(ring) // 2]
-                d = c["a"]["d"]
-                out_v = (mid - at); out_v.z = 0; out_v.normalize()
-                pos = Vector((mid.x, mid.y, z + max(c["a"]["h"], c["b"]["h"]))) + out_v * 0.6
-                inst = bpy.data.objects.new("%s_signal_%d" % (name, i), src.data)
-                collection.objects.link(inst); inst.parent = o
-                inst.matrix_world = bpy.data.objects[name].matrix_world
-                inst.location = pos
-                inst.rotation_euler = (0, 0, math.atan2(d.y, d.x) - math.pi / 2)     # local +Y toward +d (the arriving cars)
+        _place_signals(name, o, at, z, approaches, corners, collection)
     return o
+
+
+def _place_signals(name, jobj, at, z, approaches, corners, collection):
+    """Signal poles on the corners: the pole at corner (a, b) stands on a's left sidewalk corner and faces
+    the cars arriving on a (looking out along a); combined vehicle + pedestrian head. IDs link heads to
+    approaches and crossings; phases pair opposite approaches (no conflicting greens)."""
+    try:
+        from . import signage
+    except ImportError:
+        signage = None
+    n = len(approaches)
+    phases = []
+    for i, a in enumerate(approaches):
+        opp = next((j for j in range(n) if j != i and abs(approaches[j]["d"].dot(a["d"]) + 1.0) < 0.35), None)
+        grp = tuple(sorted({i} | ({opp} if opp is not None else set())))
+        if grp not in phases: phases.append(grp)
+    signals_meta = []
+    for i, c in enumerate(corners):
+        a, b = c["a"], c["b"]
+        ring = c["rings"][1][0]
+        mid = ring[len(ring) // 2]
+        out_v = (mid - at); out_v.z = 0; out_v.normalize()
+        pos = Vector((mid.x, mid.y, z + max(a["h"], b["h"]))) + out_v * 0.7
+        d = a["d"]
+        sid = "%s_S%d" % (name, i)
+        if signage is not None:
+            sig = signage.make_signal(sid, style="combined", pole_height=4.2, collection=collection)
+            sig.location = pos
+            sig.rotation_euler = (0, 0, math.atan2(d.y, d.x) + math.pi / 2)      # heads (local -Y) look along +d at the arriving cars
+        else:
+            lights = bpy.data.collections.get(MRS + "TrafficLights")
+            src = next((ob for ob in lights.objects), None) if lights else None
+            if src is None: continue
+            sig = bpy.data.objects.new(sid, src.data); collection.objects.link(sig)
+            sig.location = pos; sig.rotation_euler = (0, 0, math.atan2(d.y, d.x) - math.pi / 2)
+        sig.parent = jobj; sig.matrix_parent_inverse = jobj.matrix_world.inverted()
+        ai = approaches.index(a)
+        phase = next(k for k, p in enumerate(phases) if ai in p)
+        sig["mrs_signal_id"] = sid
+        signals_meta.append({"id": sid, "controls_road": a["road"].name, "approach": ai, "phase": phase, "pedestrian_crossing": "%s_X%d" % (name, approaches.index(b)),
+                             "position": list(pos), "heading": [d.x, d.y]})
+    meta = dict(jobj["mrs_junction"]); meta["signals"] = signals_meta; meta["signal_phases"] = [list(p) for p in phases]
+    jobj["mrs_junction"] = meta
 
 
 def build_dead_end(name, road, end="end", radius=9.0, collection=None, terrain=None):
@@ -276,7 +366,7 @@ def build_dead_end(name, road, end="end", radius=9.0, collection=None, terrain=N
             ff = bm.faces.new((V(ring1[k], z + h), V(ring1[(k + 1) % nseg], z + h), V(ring2[(k + 1) % nseg], z + h), V(ring2[k], z + h))); ff.material_index = 2
             ff = bm.faces.new((V(ring2[k], z + h), V(ring2[(k + 1) % nseg], z + h), V(ring2[(k + 1) % nseg], z), V(ring2[k], z))); ff.material_index = 2
     meta = {"at": list(p), "roads": [road.name], "end": end, "radius": radius, "terrain": terrain.name if terrain else "", "z": z, "type": "dead_end"}
-    return _mesh_object(name, bm, collection or road.users_collection[0], MATS, meta)
+    return _mesh_object(name, bm, collection or road.users_collection[0], _mats(), meta)
 
 
 def build_roundabout(name, at, roads, collection, island_radius=8.0, lanes=1, lane_width=5.5, snap=0.8, terrain=None, sidewalk=2.0, curb=0.25, h=0.15):
@@ -372,7 +462,7 @@ def build_roundabout(name, at, roads, collection, island_radius=8.0, lanes=1, la
             ff = bm.faces.new((V(circ(r_out + curb + sidewalk, k), z + h), V(circ(r_out + curb + sidewalk, k + 1), z + h), V(circ(r_out + curb + sidewalk, k + 1), z), V(circ(r_out + curb + sidewalk, k), z))); ff.material_index = 2
     meta = {"at": list(at), "roads": [a["road"].name for a in approaches], "island_radius": island_radius, "lanes": lanes, "lane_width": lane_width,
             "terrain": terrain.name if terrain else "", "z": z, "type": "roundabout", "sidewalk": sidewalk}
-    return _mesh_object(name, bm, collection, MATS, meta)
+    return _mesh_object(name, bm, collection, _mats(), meta)
 
 
 # ---------------------------------------------------------------------------- rebuild / auto update
@@ -392,7 +482,8 @@ def rebuild(obj):
     ends = [p for r in roads for p, t, s in road_ends(r) if (p - at).length < 6.0]
     if ends: at = sum(ends, Vector()) / len(ends)
     return build_junction(obj.name, at, roads, col, meta.get("crosswalks", True), meta.get("stop_lines", True), meta.get("corner_radius", 6.0),
-                          meta.get("traffic_lights", False), snap=6.0, terrain=terrain)
+                          meta.get("traffic_lights", False), snap=6.0, terrain=terrain, crossing=meta.get("crossing", "zebra"), stop_setback=meta.get("stop_setback", 0.6),
+                          refuge=meta.get("refuge", True), control=meta.get("control"), main_roads=list(meta.get("main_roads", [])))
 
 
 def all_junctions():
