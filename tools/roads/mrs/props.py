@@ -96,6 +96,30 @@ def build_prop_collections():
     make(col, "MRS_ArrowStraightLeft", lambda bm: (shaft(bm), head(bm), turn(bm, -1)), paint)
     make(col, "MRS_ArrowStraightRight", lambda bm: (shaft(bm), head(bm), turn(bm, 1)), paint)
     make(col, "MRS_MarkTick", lambda bm: _poly(bm, [(-0.5, -0.5), (0.5, -0.5), (0.5, 0.5), (-0.5, 0.5)], 0.0), paint)
+    # merge arrows (lane ends): a bent shaft toward the remaining lane
+    def merge(bm, sgn):
+        _poly(bm, [(-0.1, 0.0), (0.1, 0.0), (0.1, 1.6), (-0.1, 1.6)], 0.0)
+        pts = [(0.0, 1.5), (sgn * 0.9, 2.6), (sgn * 1.05, 2.45), (0.15 * -sgn + 0.0, 1.35)]
+        _poly(bm, pts if sgn > 0 else pts[::-1], 0.0)
+        tri = [(sgn * 0.6, 2.75), (sgn * 1.3, 2.35), (sgn * 1.25, 3.0)]
+        _poly(bm, tri if sgn > 0 else tri[::-1], 0.0)
+    make(col, "MRS_ArrowMergeLeft", lambda bm: merge(bm, -1), paint); make(col, "MRS_ArrowMergeRight", lambda bm: merge(bm, 1), paint)
+    # bicycle symbol (two wheels, frame, rider dash) + a small direction arrow ahead of it, 1.6 m long along +Y
+    def bike(bm):
+        for cy in (-0.45, 0.45):
+            n = 16
+            outer = [(0.28 * math.cos(2 * math.pi * i / n), cy + 0.28 * math.sin(2 * math.pi * i / n)) for i in range(n)]
+            inner = [(0.2 * math.cos(2 * math.pi * i / n), cy + 0.2 * math.sin(2 * math.pi * i / n)) for i in range(n)]
+            for i in range(n):
+                _poly(bm, [outer[i], outer[(i + 1) % n], inner[(i + 1) % n], inner[i]], 0.0)
+        _poly(bm, [(-0.04, -0.45), (0.04, -0.45), (0.04, 0.45), (-0.04, 0.45)], 0.0)            # frame tube
+        _poly(bm, [(-0.04, 0.0), (0.04, 0.0), (0.3, 0.5), (0.22, 0.52)], 0.0)                     # seat stay
+        _poly(bm, [(0.2, 0.52), (0.42, 0.52), (0.42, 0.6), (0.2, 0.6)], 0.0)                      # saddle
+        _poly(bm, [(-0.15, 1.0), (0.15, 1.0), (0.15, 1.5), (-0.15, 1.5)], 0.0); _poly(bm, [(-0.4, 1.5), (0.4, 1.5), (0.0, 1.95)], 0.0)   # arrow
+    make(col, "MRS_BikeSymbol", bike, paint)
+    # separator post (flexible bollard) and planter for protected cycleways (instanced from the markings collection)
+    make(col, "MRS_SepPost", lambda bm: (_cyl(bm, 0, 0, 0, 0.9, 0.05, 0.045, 8), _cyl(bm, 0, 0, 0.0, 0.05, 0.12, 0.12, 8)), mat(MRS + "PropWhite", (0.9, 0.9, 0.9), 0.5))
+    make(col, "MRS_SepPlanter", lambda bm: (_box(bm, -0.3, -0.6, 0.0, 0.3, 0.6, 0.5), _box(bm, -0.25, -0.55, 0.5, 0.25, 0.55, 0.62)), concrete)
     # pillars: 1 m tall, scaled in z (and x with the road width)
     col = collection(MRS + "Pillars")
     def pillar(bm): _box(bm, -1.2, -0.6, 0.0, 1.2, 0.6, 1.0); _box(bm, -1.6, -0.9, 0.0, 1.6, 0.9, 0.06)

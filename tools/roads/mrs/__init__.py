@@ -9,7 +9,7 @@ import bpy
 
 from . import nodes, materials, props, road, terrain
 
-MODULES = ("nodes", "materials", "props", "road", "terrain", "roads", "qa", "junction", "structures", "assets", "ui", "export", "samples")
+MODULES = ("nodes", "materials", "props", "road", "terrain", "roads", "qa", "junction", "structures", "assets", "trees", "signage", "ui", "export", "samples")
 
 
 def reload():
@@ -24,15 +24,23 @@ def reload():
             except ModuleNotFoundError: pass
 
 
-def build_all():
-    materials.build_materials()
-    materials.extra_materials()
-    props.build_prop_collections()
+def build_all(verbose=True):
+    import time
+    def step(name, fn):
+        t = time.time(); r = fn()
+        if verbose: print("  build %-14s %5.1fs" % (name, time.time() - t))
+        return r
+    step("materials", materials.build_materials); step("extra mats", materials.extra_materials)
+    step("props", props.build_prop_collections)
     a = globals().get("assets")
-    if a and hasattr(a, "build_assets"): a.build_assets()        # the detailed library replaces the placeholders
-    road.build_road_group()                                       # after the collections exist: pick indices follow sorted names
-    terrain.build_terrain_conform_group()
-    roads.refresh_all()
+    if a and hasattr(a, "build_assets"): step("assets", a.build_assets)      # the detailed library replaces the placeholders
+    tr = globals().get("trees")
+    if tr and hasattr(tr, "build_trees"): step("trees", tr.build_trees)      # after assets: refills MRS_Trees with the generated variants
+    sg = globals().get("signage")
+    if sg and hasattr(sg, "build_signage"): step("signage", sg.build_signage)
+    step("road group", road.build_road_group)                                  # after the collections exist: pick indices follow sorted names
+    step("terrain", terrain.build_terrain_conform_group)
+    step("refresh", roads.refresh_all)
 
 
 def register():
@@ -41,6 +49,6 @@ def register():
 
 
 from .nodes import MRS, mod_input_set, mod_input_get  # noqa: E402
-for _m in ("roads", "qa", "junction", "structures", "assets", "ui", "export", "samples"):
+for _m in ("roads", "qa", "junction", "structures", "assets", "trees", "signage", "ui", "export", "samples"):
     try: globals()[_m] = importlib.import_module(__name__ + "." + _m)
     except ModuleNotFoundError: pass

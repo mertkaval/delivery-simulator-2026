@@ -6,37 +6,38 @@ from .nodes import MRS, mod_input_set, mod_input_get
 PRESETS = {
     "residential": {"Lanes Forward": 1, "Lanes Backward": 1, "Lane Width": 3.2, "Shoulder": 0.0, "Median": 0.0, "Sidewalk Left": True, "Sidewalk Right": True,
                     "Sidewalk Width Left": 2.0, "Sidewalk Width Right": 2.0, "Curb Height": 0.15, "Curb Width": 0.25, "Centre Line": "Dashed", "Edge Lines": False,
-                    "Dash Length": 3.0, "Dash Gap": 6.0, "Marking Width": 0.12, "Prop Spacing": 28.0, "Prop Offset": 0.5, "Light Spacing": 30.0, "Light Side": "Alternate",
-                    "Tree Side": "None", "Parking Left": 0.0, "Parking Right": 0.0, "Bike Lane Left": 0.0, "Bike Lane Right": 0.0, "Crown": 2.0, "Mode": "Ground",
+                    "Dash Length": 3.0, "Dash Gap": 6.0, "Marking Width": 0.12, "Prop Spacing": 28.0, "Prop Offset": 0.5, "Light Spacing": 30.0, "Light Side": "Alternate", "Prop Side": "None",
+                    "Tree Side": "None", "Parking Left": 0.0, "Parking Right": 0.0, "Bike Left": "None", "Bike Right": "None", "Crown": 2.0, "Mode": "Ground",
                     "Barrier Left": "None", "Barrier Right": "None"},
     "urban": {"Lanes Forward": 2, "Lanes Backward": 2, "Lane Width": 3.5, "Shoulder": 0.0, "Median": 1.6, "Sidewalk Left": True, "Sidewalk Right": True,
               "Sidewalk Width Left": 3.5, "Sidewalk Width Right": 3.5, "Curb Height": 0.15, "Curb Width": 0.3, "Centre Line": "None", "Edge Lines": True,
               "Dash Length": 3.0, "Dash Gap": 4.5, "Marking Width": 0.12, "Prop Spacing": 24.0, "Prop Offset": 0.6, "Light Spacing": 28.0, "Light Side": "Both",
-              "Tree Side": "Both", "Tree Spacing": 14.0, "Tree Offset": -2.0, "Parking Left": 2.2, "Parking Right": 2.2, "Bike Lane Left": 1.6, "Bike Lane Right": 1.6, "Crown": 2.0, "Mode": "Ground",
+              "Tree Side": "Both", "Tree Spacing": 14.0, "Tree Offset": -2.0, "Parking Left": 2.2, "Parking Right": 2.2, "Bike Left": "Buffered", "Bike Right": "Buffered", "Bike Width": 1.8, "Crown": 2.0, "Mode": "Ground",
               "Barrier Left": "None", "Barrier Right": "None"},
     "highway": {"Lanes Forward": 2, "Lanes Backward": 2, "Lane Width": 3.7, "Shoulder": 2.5, "Median": 3.0, "Sidewalk Left": False, "Sidewalk Right": False,
                 "Curb Height": 0.0, "Curb Width": 0.1, "Centre Line": "None", "Edge Lines": True, "Dash Length": 6.0, "Dash Gap": 12.0, "Marking Width": 0.15,
                 "Prop Spacing": 60.0, "Prop Side": "None", "Light Spacing": 45.0, "Light Side": "Alternate", "Tree Side": "None", "Parking Left": 0.0, "Parking Right": 0.0,
-                "Bike Lane Left": 0.0, "Bike Lane Right": 0.0, "Crown": 2.5, "Superelevation": 7.0, "Mode": "Ground", "Barrier Left": "Guardrail", "Barrier Right": "Guardrail",
+                "Bike Left": "None", "Bike Right": "None", "Crown": 2.5, "Superelevation": 7.0, "Mode": "Ground", "Barrier Left": "Guardrail", "Barrier Right": "Guardrail",
                 "Embankment Width": 9.0, "Lane Arrows": False},
     "rural": {"Lanes Forward": 1, "Lanes Backward": 1, "Lane Width": 3.5, "Shoulder": 1.0, "Median": 0.0, "Sidewalk Left": False, "Sidewalk Right": False,
               "Curb Height": 0.0, "Curb Width": 0.1, "Centre Line": "Dashed", "Edge Lines": True, "Dash Length": 3.0, "Dash Gap": 9.0, "Marking Width": 0.12,
               "Prop Spacing": 50.0, "Prop Side": "Alternate", "Light Side": "None", "Tree Side": "Alternate", "Tree Spacing": 18.0, "Tree Offset": 3.0, "Parking Left": 0.0, "Parking Right": 0.0,
-              "Bike Lane Left": 0.0, "Bike Lane Right": 0.0, "Crown": 2.5, "Superelevation": 6.0, "Mode": "Ground", "Barrier Left": "None", "Barrier Right": "None",
+              "Bike Left": "None", "Bike Right": "None", "Crown": 2.5, "Superelevation": 6.0, "Mode": "Ground", "Barrier Left": "None", "Barrier Right": "None",
               "Embankment Width": 5.0, "Lane Arrows": False},
     "service": {"Lanes Forward": 1, "Lanes Backward": 0, "Lane Width": 4.5, "Shoulder": 0.6, "Median": 0.0, "Sidewalk Left": False, "Sidewalk Right": False,
                 "Curb Height": 0.12, "Curb Width": 0.2, "Centre Line": "None", "Edge Lines": True, "Dash Length": 2.0, "Dash Gap": 4.0, "Marking Width": 0.1,
-                "Prop Spacing": 40.0, "Prop Offset": 0.8, "Light Side": "None", "Tree Side": "None", "Parking Left": 0.0, "Parking Right": 0.0, "Bike Lane Left": 0.0, "Bike Lane Right": 0.0,
+                "Prop Spacing": 40.0, "Prop Offset": 0.8, "Light Side": "None", "Tree Side": "None", "Parking Left": 0.0, "Parking Right": 0.0, "Bike Left": "None", "Bike Right": "None",
                 "Crown": 1.5, "Mode": "Ground", "Barrier Left": "None", "Barrier Right": "None", "Lane Arrows": False},
     "bridge": {"Lanes Forward": 1, "Lanes Backward": 1, "Lane Width": 3.5, "Shoulder": 0.5, "Median": 0.0, "Sidewalk Left": True, "Sidewalk Right": True,
                "Sidewalk Width Left": 1.8, "Sidewalk Width Right": 1.8, "Curb Height": 0.15, "Curb Width": 0.25, "Centre Line": "Solid", "Edge Lines": True,
-               "Prop Side": "None", "Light Side": "Alternate", "Light Spacing": 24.0, "Tree Side": "None", "Parking Left": 0.0, "Parking Right": 0.0, "Bike Lane Left": 0.0, "Bike Lane Right": 0.0,
+               "Prop Side": "None", "Light Side": "Alternate", "Light Spacing": 24.0, "Tree Side": "None", "Parking Left": 0.0, "Parking Right": 0.0, "Bike Left": "None", "Bike Right": "None",
                "Crown": 1.5, "Mode": "Elevated", "Barrier Left": "Parapet", "Barrier Right": "Parapet", "Conform": False, "Embankment": False, "Lane Arrows": False},
 }
 COLLECTION_INPUTS = {"Props": "Props", "Streetlights": "Streetlights", "Trees": "Trees", "Manholes": "Manholes", "Drains": "Drains", "Markings Collection": "Markings",
                      "Pillars": "Pillars", "Barriers": "Barriers", "Scatter": "Scatter"}
-MATERIAL_INPUTS = {"Asphalt Material": "Asphalt", "Marking Material": "Paint", "Concrete Material": "Concrete", "Bike Lane Material": "BikeLane",
-                   "Structure Material": "Structure", "Embankment Material": "Embankment"}
+MATERIAL_INPUTS = {"Asphalt Material": ("Asphalt",), "Marking Material": ("Paint",), "Concrete Material": ("Concrete",), "Paving Material": ("Paving", "Concrete"),
+                   "Tactile Material": ("Tactile", "Paint"), "Cycleway Material": ("Cycleway", "BikeLane"), "Bus Lane Material": ("BusLane", "Cycleway", "BikeLane"),
+                   "Structure Material": ("Structure",), "Embankment Material": ("Embankment",)}
 
 
 def curve_object(name, points, collection, cyclic=False, kind="BEZIER"):
@@ -80,8 +81,9 @@ def set_road(o, preset=None, terrain=None, **overrides):
     for k, v in vals.items(): mod_input_set(mod, k, v)
     for k, c in COLLECTION_INPUTS.items():
         if bpy.data.collections.get(MRS + c): mod_input_set(mod, k, bpy.data.collections[MRS + c])
-    for k, m in MATERIAL_INPUTS.items():
-        if bpy.data.materials.get(MRS + m): mod_input_set(mod, k, bpy.data.materials[MRS + m])
+    for k, names in MATERIAL_INPUTS.items():
+        m = next((bpy.data.materials[MRS + n] for n in names if bpy.data.materials.get(MRS + n)), None)
+        if m is not None: mod_input_set(mod, k, m)
     if terrain is not None:
         if isinstance(terrain, bpy.types.Collection): mod_input_set(mod, "Terrain Collection", terrain); o["mrs_terrain_col"] = terrain.name
         else: mod_input_set(mod, "Terrain", terrain); o["mrs_terrain"] = terrain.name
@@ -115,16 +117,41 @@ def road_input(o, name):
     return mod_input_get(o.modifiers["MRS_Road"], name)
 
 
-def road_widths(o):
-    """Half widths of the asphalt on each side, curb, sidewalks, curb height (for the junction builder)."""
+BIKE_KINDS = ("None", "Painted", "Buffered", "Protected", "Two-Way")
+
+
+def bike_layout(o, side):
+    """(buffer, width, protected, on) of the cycleway on a side ('l'/'r'), mirroring the node group."""
+    kind = road_input(o, "Bike Right" if side == "r" else "Bike Left") or "None"
+    idx = BIKE_KINDS.index(kind) if kind in BIKE_KINDS else 0
+    on = idx > 0
+    width = (road_input(o, "Bike Width") * (2.0 if idx == 4 else 1.0)) if on else 0.0
+    buf = road_input(o, "Bike Buffer") if idx > 1 else 0.0
+    return buf, width, idx > 2, on
+
+
+def road_widths(o, at_end=None):
+    """Half widths of the asphalt on each side, curb, sidewalks, curb height, cycleway layout (for the
+    junction builder). `at_end` True uses the lane counts after a transition (end of the road)."""
     lw = road_input(o, "Lane Width"); med = road_input(o, "Median") * 0.5; sh = road_input(o, "Shoulder")
-    half_r = med + road_input(o, "Lanes Forward") * lw + sh + road_input(o, "Bike Lane Right") + road_input(o, "Parking Right")
-    half_l = med + road_input(o, "Lanes Backward") * lw + sh + road_input(o, "Bike Lane Left") + road_input(o, "Parking Left")
-    curb = road_input(o, "Curb Width")
-    swl = road_input(o, "Sidewalk Width Left") if road_input(o, "Sidewalk Left") else 0.0
-    swr = road_input(o, "Sidewalk Width Right") if road_input(o, "Sidewalk Right") else 0.0
-    return dict(half_l=half_l, half_r=half_r, half=max(half_l, half_r), curb=curb, swl=swl, swr=swr, h=road_input(o, "Curb Height"),
-                lanes_f=road_input(o, "Lanes Forward"), lanes_b=road_input(o, "Lanes Backward"), lw=lw, median=med * 2)
+    rht = (road_input(o, "Driving Side") or "Right") == "Right"
+    lf, lb = road_input(o, "Lanes Forward"), road_input(o, "Lanes Backward")
+    if at_end and road_input(o, "Transition"): lf, lb = road_input(o, "Lanes Forward End"), road_input(o, "Lanes Backward End")
+    lanes_r, lanes_l = (lb, lf) if rht else (lf, lb)
+    out = dict(lw=lw, median=med * 2, curb=road_input(o, "Curb Width"), h=road_input(o, "Curb Height"), lanes_f=lf, lanes_b=lb, rht=rht)
+    for s, lanes, pk in (("r", lanes_r, road_input(o, "Parking Right")), ("l", lanes_l, road_input(o, "Parking Left"))):
+        buf, bw, prot, on = bike_layout(o, s)
+        carr = med + lanes * lw; shd = carr + sh
+        buf0 = shd if prot else shd + pk
+        bike0 = buf0 + buf; bike1 = bike0 + bw
+        park0 = bike1 if prot else shd; park1 = park0 + pk
+        half = park1 if prot else bike1
+        out["carr_" + s] = carr; out["bike0_" + s] = bike0; out["bike1_" + s] = bike1; out["bike_on_" + s] = on; out["bike_prot_" + s] = prot
+        out["half_" + s] = half; out["lanes_" + s] = lanes
+    out["half"] = max(out["half_l"], out["half_r"])
+    out["swl"] = road_input(o, "Sidewalk Width Left") if road_input(o, "Sidewalk Left") else 0.0
+    out["swr"] = road_input(o, "Sidewalk Width Right") if road_input(o, "Sidewalk Right") else 0.0
+    return out
 
 
 def road_ends(o):
