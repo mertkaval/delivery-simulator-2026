@@ -105,3 +105,26 @@ Terrain tools compared:
 
 Next: the road planner reads `meta.json` and the masks: no lots on water or steep ground, roads
 along the contours on hills (the tensor field turns with the slope), bridges where roads cross rivers.
+
+## 5. CityForge: Port Halden, built (2026-10-28)
+
+The first complete generated city, from two spec files to a playable-scale Godot world in about a
+minute (`tools/cityforge/build.sh`; details in `tools/cityforge/README.md`, tool findings in
+`TOOL_EVALUATION.md`).
+
+- **Ground**: 2 km × 2 km at 4 m: a 100 m ridge (forest) in the north-east, a park hill, a lake in a
+  park, a river with four bridges, a harbour and a bay, a downtown peninsula; outskirts carry the
+  land into wooded hills and the sea to the horizon. Roads and lot pads are graded into the terrain.
+- **Plan** (`plan_city.py`): 473 road segments (arterials, locals, a rotated downtown grid, Seawall
+  Drive, a diagonal arterial), 130 signalised junctions with crosswalks, 80 back lanes, 1,170
+  Burnaby lots (15 m, fenced: wood, hedge, brick, picket, iron), 1,170 houses in 8 archetypes and
+  736 lane garages, 415 shops on the arterials, 20 towers, 16 public buildings, 42 parks, 65 bus
+  stops, 1,514 lamps, 500 traffic lights, 5,892 trees; fictional street names and an address for every lot.
+  Every item has an id; `overrides.json` edits any single one.
+- **Build** (`build_city.py`, Blender headless, 20 s): 64 chunk GLBs (1.19M tris) + kit + outskirts.
+- **Godot** (`CityForgeWorld`): loads in ~1.5 s; MultiMesh LOD0 near, merged far mesh per chunk via
+  HLOD, collision near the player. Contract test `tests/cityforge_test.gd` (19 checks).
+
+**Next**: make it the game's world (spawn, deliveries to lot addresses, shops, the sidewalk graph for
+townspeople, traffic lanes via the Godot Road Generator, buses on the arterials), then the culture
+districts on the rotated-grid and tensor-field plans.

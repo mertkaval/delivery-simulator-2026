@@ -65,6 +65,13 @@ def falloff(cx, cy, radius, power=2.0):
     return np.clip(1.0 - d, 0.0, 1.0) ** power
 
 
+def shifted(a, dy, dx):
+    """a moved by (dy, dx) cells with the edges repeated (np.roll would wrap north onto south)."""
+    w = max(abs(dy), abs(dx), 1)
+    p = np.pad(a, w, mode="edge")
+    return p[w - dy:w - dy + a.shape[0], w - dx:w - dx + a.shape[1]]
+
+
 t0 = time.time()
 # --- relief ----------------------------------------------------------------------------------
 H = np.full_like(X, float(SPEC.get("base_height", 12.0)))
@@ -106,15 +113,78 @@ if sea:
     shore = width * (1.0 + 0.35 * fbm(3, 4, 200))
     H = np.where(dist < shore, H - (1.0 - dist / shore) ** 1.5 * (H + 8.0), H)
 
+
+def poly_mask(poly):
+    """Cells inside a polygon [[x, y], ...] (metres), even-odd rule."""
+    inside = np.zeros(X.shape, bool)
+    n = len(poly)
+    for k in range(n):
+        x1, y1 = poly[k]
+        x2, y2 = poly[(k + 1) % n]
+        if y1 == y2: continue
+        cond = (Y >= min(y1, y2)) & (Y < max(y1, y2))
+        xint = x1 + (Y - y1) * (x2 - x1) / (y2 - y1)
+        inside ^= cond & (X < xint)
+    return inside
+
+
+def distance_from(mask, max_cells):
+    """Approximate distance (cells) from the mask, up to max_cells (chamfer, 8-neighbour)."""
+    d = np.where(mask, 0.0, max_cells)
+    for _ in range(max_cells):
+        nd = d
+        for dy, dx, w in ((1, 0, 1), (-1, 0, 1), (0, 1, 1), (0, -1, 1), (1, 1, 1.414), (1, -1, 1.414), (-1, 1, 1.414), (-1, -1, 1.414)):
+            nd = np.minimum(nd, shifted(d, dy, dx) + w)
+        if np.array_equal(nd, d): break
+        d = nd
+    return d
+
+
+# Authored water and land (fictional city maps): sea / bay / inlet polygons with beaches, land that
+# must stay above water (a peninsula), and rivers along a drawn path to the sea.
+SEA_POLY = np.zeros(X.shape, bool)
+for poly in SPEC.get("sea_areas", []):
+    SEA_POLY |= poly_mask(poly)
+if SEA_POLY.any():
+    shore_m = float(SPEC.get("beach_m", 36.0))
+    d_out = distance_from(SEA_POLY, int(shore_m / CELL) + 1) * CELL
+    d_in = distance_from(~SEA_POLY, 12) * CELL
+    H = np.where(SEA_POLY, -1.5 - np.minimum(d_in, 40.0) * 0.18 + fbm(8, 2, 400) * 0.6, H)
+    t = np.clip(d_out / shore_m, 0, 1)
+    t = t * t * (3 - 2 * t)
+    H = np.where(~SEA_POLY & (d_out < shore_m), 0.8 + (H - 0.8) * t, H)
+    sea = sea or {"edge": None}
+for poly in SPEC.get("land_areas", []):
+    H = np.where(poly_mask(poly) & ~SEA_POLY, np.maximum(H, float(SPEC.get("land_min_m", 2.5))), H)
+RIVER_PATH = np.zeros(X.shape, bool)
+river_bed = np.full(X.shape, np.inf)
+for rv in SPEC.get("rivers", []):                                          # {"path": [[x, y], ...] source -> mouth, "width": m, "depth": m}
+    pts = np.array(rv["path"], float)
+    w2 = float(rv.get("width", 40)) / 2
+    depth_m = float(rv.get("depth", 5))
+    seg_len = np.hypot(*(pts[1:] - pts[:-1]).T)
+    cum = np.concatenate([[0], np.cumsum(seg_len)])
+    best_d = np.full(X.shape, np.inf)
+    best_s = np.zeros(X.shape)
+    for k in range(len(pts) - 1):
+        a, b = pts[k], pts[k + 1]
+        ab = b - a
+        tt = np.clip(((X - a[0]) * ab[0] + (Y - a[1]) * ab[1]) / max(ab @ ab, 1e-9), 0, 1)
+        dd = np.hypot(X - (a[0] + ab[0] * tt), Y - (a[1] + ab[1] * tt))
+        closer = dd < best_d
+        best_d = np.where(closer, dd, best_d)
+        best_s = np.where(closer, cum[k] + tt * seg_len[k], best_s)
+    j0, i0 = int(np.clip(pts[0][1] / CELL, 0, N - 1)), int(np.clip(pts[0][0] / CELL, 0, N - 1))
+    top = float(H[j0, i0]) - depth_m
+    bed = top + (-2.5 - top) * (best_s / cum[-1])                         # falls steadily to the mouth
+    bank = float(rv.get("bank_m", 30))
+    H = np.where(best_d < w2, np.minimum(H, bed), H)
+    H = np.where((best_d >= w2) & (best_d < w2 + bank), np.minimum(H, bed + depth_m * 0.6 + (best_d - w2) * 0.22), H)
+    RIVER_PATH |= best_d < w2
+    river_bed = np.where(best_d < w2, np.minimum(river_bed, bed), river_bed)
+
 # --- thermal erosion: material slides off slopes steeper than the talus angle ----------------
 talus = math.tan(math.radians(float(SPEC.get("talus_deg", 33)))) * CELL
-def shifted(a, dy, dx):
-    """a moved by (dy, dx) cells with the edges repeated (np.roll would wrap north onto south)."""
-    w = max(abs(dy), abs(dx), 1)
-    p = np.pad(a, w, mode="edge")
-    return p[w - dy:w - dy + a.shape[0], w - dx:w - dx + a.shape[1]]
-
-
 for it in range(int(SPEC.get("thermal_iterations", 40))):
     for dy, dx in ((0, 1), (1, 0), (0, -1), (-1, 0)):
         diff = H - shifted(H, dy, dx) - talus
@@ -129,9 +199,11 @@ def coast_sea():
     """Ground below sea level that is connected to the coast edge (inland pits are not sea)."""
     if not sea: return np.zeros(H.shape, bool)
     low = H < SEA_LEVEL
-    edge_cells = {"south": (0, slice(None)), "north": (N - 1, slice(None)), "west": (slice(None), 0), "east": (slice(None), N - 1)}[sea["edge"]]
     out = np.zeros(H.shape, bool)
-    seeds = np.zeros(H.shape, bool); seeds[edge_cells] = True
+    seeds = SEA_POLY.copy()
+    if sea.get("edge"):
+        edge_cells = {"south": (0, slice(None)), "north": (N - 1, slice(None)), "west": (slice(None), 0), "east": (slice(None), N - 1)}[sea["edge"]]
+        seeds[edge_cells] = True
     stack = list(zip(*np.nonzero(seeds & low)))
     for j, i in stack: out[j, i] = True
     while stack:
@@ -242,8 +314,9 @@ carve = np.where(river, 1.2 * strength + 0.8, 0.0)
 for _ in range(2):                                             # widen the banks
     carve = np.maximum(carve, 0.55 * np.maximum.reduce([shifted(carve, dy, dx) for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1))]))
 H -= carve
-river_wide = carve > 0.6
+river_wide = (carve > 0.6) | RIVER_PATH
 water_level = np.where(lake_mask, filled, H + np.where(river_wide, np.minimum(carve * 0.7, 2.5), 0.0))
+water_level = np.where(RIVER_PATH, np.maximum(np.minimum(river_bed, H) + float(SPEC.get("river_water_depth", 3.0)), SEA_LEVEL if sea else -1e9), water_level)
 water = lake_mask | river_wide | SEA
 
 # river polylines (for the road planner): trace from each source down to a lake, the sea or the edge
@@ -326,6 +399,9 @@ meta = {"size_m": SIZE, "cell_m": CELL, "grid": N, "min_height": hmin, "max_heig
         "seed": SEED, "lakes": lakes, "rivers": rivers, "spec": SPEC,
         "water_fraction": float(water.mean()), "buildable_fraction": float(buildable.mean())}
 json.dump(meta, open(os.path.join(OUT, "meta.json"), "w"), indent=1)
+# raw arrays for the city planner (row 0 = south, x east; metres)
+np.savez_compressed(os.path.join(OUT, "terrain.npz"), height=H.astype(np.float32), water=water, water_level=water_level.astype(np.float32),
+                    slope=slope.astype(np.float32), sea=SEA, lake=lake_mask, river=river_wide)
 
 # --- Blender: terrain mesh coloured by ground type, water surfaces ---------------------------
 for o in list(bpy.data.objects): bpy.data.objects.remove(o)

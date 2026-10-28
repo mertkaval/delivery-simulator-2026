@@ -538,3 +538,13 @@ The game is CPU-bound (GPU ~6.5 ms). Fixes:
   the courier's home fade out beyond 30 m (shadows beyond 18 m).
 - People exporter keeps its `_export.blend` beside the master (a .blend under `assets/` made
   Godot's headless import fail).
+
+## Port Halden: the generated city (CityForge) (2026-10-28)
+
+The classic city is tagged `v0.9-classic-city`. CityForge (`tools/cityforge/`) now generates a
+whole new city, Port Halden, modelled on Vancouver / Burnaby: real topography with a lake, a river,
+a harbour and hills, a rotated downtown grid on a peninsula, Burnaby-style fenced lots with back lanes
+and garages, shop strips, towers, public buildings, parks and street furniture, with an edit-by-id
+override file. It runs as its own world (`world/cityforge/port_halden_preview.tscn`, `CityForgeWorld`)
+and is not yet the game's world; the classic city still runs the game. See `CITY_GENERATION_PLAN.md`
+section 5 and `TOOL_EVALUATION.md`.

@@ -36,3 +36,6 @@
 /.env.*
 __pycache__/
 *.pyc
+
+# CityForge: Python byte-code from the Blender build
+tools/cityforge/__pycache__/

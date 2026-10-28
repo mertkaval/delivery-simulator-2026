@@ -1,0 +1,72 @@
+{
+  "name": "Port Halden",
+  "seed": 7,
+  "terrain": "port_halden_terrain.json",
+  "grid": {
+    "streets_x": {"from": 200, "to": 2000, "step": 200},
+    "avenues_y": {"from": 100, "to": 1850, "step": 100},
+    "arterials_x": [400, 1000, 1600],
+    "arterials_y": [600, 1000, 1200, 1700],
+    "max_local_grade": 0.12,
+    "margin_m": 30
+  },
+  "widths": {"arterial": 18, "local": 11, "downtown": 16, "lane": 6, "boulevard": 18, "sidewalk": 3.0, "verge": 1.6},
+  "downtown": {
+    "poly": [[160, 1410], [835, 1410], [905, 1872], [160, 1872]],
+    "angle_deg": 36,
+    "spacing": 92,
+    "centre": [560, 1640],
+    "park_west_of_x": 300,
+    "boundary_road": [[835, 1405], [870, 1640], [905, 1878]]
+  },
+  "diagonal": {"name": "Kingsgate Road", "from": [905, 1405], "to": [2048, 520]},
+  "bridge_max_span_m": 180,
+  "lots": {"width": 15.0, "front_setback": 7.0, "house_width": [9.5, 11.5], "house_depth": [11.0, 14.5], "garage_chance": 0.7},
+  "parks": [
+    {"name": "Lookout Park", "centre": [950, 760], "radius": 230},
+    {"name": "Lakeside Park", "centre": [1580, 1000], "radius": 260},
+    {"name": "Halden Ridge Forest", "min_height": 70},
+    {"name": "Harbour Point Park", "downtown_west": true}
+  ],
+  "neighbourhood_park_every": 9,
+  "industrial": [[[900, 300], [2048, 370], [2048, 470], [900, 430]], [[1350, 1780], [2048, 1790], [2048, 1890], [1350, 1880]]],
+  "public": [
+    {"kind": "city_hall", "name": "Port Halden City Hall", "at": [1000, 1250]},
+    {"kind": "hospital", "name": "Halden General Hospital", "at": [1300, 1150]},
+    {"kind": "police", "name": "Harbourside Police Station", "at": [640, 1560]},
+    {"kind": "police", "name": "Southgate Police Station", "at": [1500, 650]},
+    {"kind": "police", "name": "Westbank Police Station", "at": [500, 900]},
+    {"kind": "fire", "name": "Fire Hall No. 1", "at": [700, 1500]},
+    {"kind": "fire", "name": "Fire Hall No. 2", "at": [450, 450]},
+    {"kind": "fire", "name": "Fire Hall No. 3", "at": [1250, 600]},
+    {"kind": "fire", "name": "Fire Hall No. 4", "at": [1750, 1300]},
+    {"kind": "school", "name": "Alder Elementary", "at": [300, 1050]},
+    {"kind": "school", "name": "Cedarview Secondary", "at": [800, 1100]},
+    {"kind": "school", "name": "Rivermouth Elementary", "at": [650, 450]},
+    {"kind": "school", "name": "Eastridge Elementary", "at": [1450, 850]},
+    {"kind": "school", "name": "Northshore Elementary", "at": [1150, 1600]},
+    {"kind": "library", "name": "Central Library", "at": [480, 1720]},
+    {"kind": "community_centre", "name": "Lakeside Community Centre", "at": [1800, 950]}
+  ],
+  "neighbourhoods": [
+    {"name": "Downtown", "centre": [520, 1640]},
+    {"name": "Harbour Heights", "centre": [1300, 1650]},
+    {"name": "Westbank", "centre": [350, 1000]},
+    {"name": "Lookout", "centre": [950, 900]},
+    {"name": "Lakeside", "centre": [1650, 1050]},
+    {"name": "Riverside", "centre": [700, 450]},
+    {"name": "Eastgate", "centre": [1600, 600]},
+    {"name": "Ridgeview", "centre": [1750, 1450]}
+  ],
+  "palettes": {
+    "siding": ["d9d4c3", "8c9d86", "6f8794", "b6a287", "a65f4b", "e7e2d6", "4f5d57", "c9a86a", "7a8a99", "9b8c7a"],
+    "roof": ["3b3e42", "5a4a40", "6b6f70", "2f3a40", "7a4a38"],
+    "leaves": [["4f7a2e", "5d8a33", "6b8f2e"], ["d79ab4", "c98aa5", "5d7f34"], ["456b2c", "3f6328"], ["5f8a35", "6a9139"],
+               ["48652a", "53702c"], ["2f4a2a", "34502c"], ["7a9a3a", "86a43f"]]
+  },
+  "names": {
+    "avenue_ordinals": true,
+    "streets": ["Alder", "Birch", "Cedar", "Douglas", "Elm", "Fir", "Granite", "Hemlock", "Ivy", "Juniper", "Kestrel", "Larch", "Maple", "Nootka", "Osprey", "Pine", "Quarry", "Rowan", "Spruce", "Tamarack"],
+    "downtown": ["Harbour", "Quay", "Anchor", "Beacon", "Lantern", "Mariner", "Pier", "Sextant", "Tide", "Wharf", "Compass", "Ferry"]
+  }
+}
