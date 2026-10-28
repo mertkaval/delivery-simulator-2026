@@ -8,8 +8,9 @@ import glob, os, re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LIB = os.path.join(HERE, "..", "..", "assets", "cityforge", "materials")
+PROTO = os.path.join(HERE, "..", "..", "assets", "cityforge", "prototypes")
 changed = 0
-for path in glob.glob(os.path.join(LIB, "*.import")):
+for path in glob.glob(os.path.join(LIB, "*.import")) + glob.glob(os.path.join(PROTO, "*.png.import")):
     s = open(path, encoding="utf-8").read()
     if "importer=\"texture\"" not in s: continue
     normal = "_normal." in os.path.basename(path)

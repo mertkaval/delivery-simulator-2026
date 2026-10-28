@@ -460,6 +460,18 @@ def bake_object(obj, out_dir, res=2048, samples=32):
     sc = bpy.context.scene
     prev_engine = sc.render.engine
     sc.render.engine = "CYCLES"
+    try:                                           # GPU when there is one (OptiX / CUDA / HIP)
+        cp = bpy.context.preferences.addons["cycles"].preferences
+        for dev in ("OPTIX", "CUDA", "HIP", "ONEAPI", "METAL"):
+            try:
+                cp.compute_device_type = dev; cp.get_devices()
+                if any(d.type == dev for d in cp.devices):
+                    for d in cp.devices: d.use = d.type == dev
+                    sc.cycles.device = "GPU"; break
+            except TypeError:
+                continue
+    except Exception:
+        pass
     sc.cycles.samples = samples
     sc.cycles.use_denoising = False
     sc.render.bake.margin = 8
@@ -526,7 +538,11 @@ def baked_material(obj, paths, name):
     bsdf = nt.nodes.new("ShaderNodeBsdfPrincipled"); out = nt.nodes.new("ShaderNodeOutputMaterial")
     nt.links.new(bsdf.outputs[0], out.inputs["Surface"])
     def img(path, srgb):
-        n = nt.nodes.new("ShaderNodeTexImage"); n.image = bpy.data.images.load(path, check_existing=True)
+        # a fresh datablock from disk: the bake images are packed in the .blend and the glTF exporter
+        # would write their packed (previous) pixels instead of the file just saved
+        for old in [i for i in bpy.data.images if os.path.abspath(bpy.path.abspath(i.filepath_raw or "")) == os.path.abspath(path)]:
+            bpy.data.images.remove(old)
+        n = nt.nodes.new("ShaderNodeTexImage"); n.image = bpy.data.images.load(path, check_existing=False)
         n.image.colorspace_settings.name = "sRGB" if srgb else "Non-Color"; return n
     a = img(paths["albedo"], True); nt.links.new(a.outputs["Color"], bsdf.inputs["Base Color"])
     o = img(paths["orm"], False); sep = nt.nodes.new("ShaderNodeSeparateColor"); nt.links.new(o.outputs["Color"], sep.inputs[0])
