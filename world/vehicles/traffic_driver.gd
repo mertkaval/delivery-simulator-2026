@@ -89,9 +89,10 @@ static func drive(car: Dictionary, delta: float, limit: float, physics := true) 
 		var hit := physics and float(car.get("dist", 0.0)) < SWEEP and body.test_move(body.global_transform, motion, _touch)
 		if hit and float(car.get("go_t", 0.0)) > 1.5:
 			var c := _touch.get_collider() as CollisionObject3D
-			# Two cars wedged side by side where lanes merge: the one in front drives on (the
-			# contact is beside or behind it), which frees the other.
-			if c is CharacterBody3D and c.has_meta("car"):
+			# Two vehicles wedged side by side where lanes merge or cross in a junction box (a car
+			# and a car, or a car and a bus): the one in front drives on (the contact is beside or
+			# behind it), which frees the other.
+			if c is CharacterBody3D and (c.has_meta("car") or str(c.name).begins_with("Bus_")):
 				var rel := (c as Node3D).global_position - body.global_position
 				if rel.dot(motion.normalized()) < 0.0: hit = false
 			elif float(car.go_t) > 6.0 and c is CharacterBody3D and (c.collision_layer & 1) == 0: hit = false

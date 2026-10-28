@@ -390,11 +390,13 @@ func _physics_process(delta: float) -> void:
 						break
 				step += 2.0
 			if blocker != null:
-				# AI cars (TrafficDriver) queue at signals and always move on, so the bus waits for
-				# them; only two buses waiting on each other at a junction edge through.
+				# The bus waits for what is ahead; two buses waiting on each other edge through after
+				# 8 s, and a car that has itself stopped against the bus (wedged in a junction box)
+				# is edged past after 12 s (the car's own swept test keeps it from driving into us).
 				var vehicle := str(blocker.name).begins_with("Bus_")
+				var stuck_car: bool = blocker.has_meta("car") and absf(float((blocker.get_meta("car") as Dictionary).get("speed", 1.0))) < 0.05
 				bus.blocked += delta
-				if not (vehicle and bus.blocked > 8.0): target = 0.0
+				if not ((vehicle and bus.blocked > 8.0) or (stuck_car and bus.blocked > 12.0)): target = 0.0
 			else:
 				bus.blocked = 0.0
 		bus.speed = move_toward(bus.speed, target, delta * (ACCEL if target > bus.speed else BRAKE * 1.6))
