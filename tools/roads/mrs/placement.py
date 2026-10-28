@@ -154,14 +154,21 @@ def place_all(roads_col, seed=0, style="avenue", speed_limits=None, log=None):
             for a2, k2 in placed_along[side]:
                 if abs(a2 - a) < min_gap: return "too close to %s" % k2
             return None
-        def put(side, a, lib, kind, offset, face_road=True, yaw_extra=0.0, scale=1.0, min_gap=2.0, min_sidewalk=0.0):
+        def put(side, a, lib, kind, offset, face_road=True, yaw_extra=0.0, scale=1.0, min_gap=2.0, min_sidewalk=0.0, facing=None):
+            """facing: 'traffic' (sign front toward the cars driving on this side), 'road' (prop front toward the
+            road), 'along' (aligned with the road). Signs default to 'traffic', everything else to 'road'."""
+            if facing is None: facing = "traffic" if kind.startswith("sign") else ("road" if face_road else "along")
             sw = w["swr"] if side == "r" else w["swl"]
             if sw <= 0.05: report["skipped"].append((road.name, kind, round(a, 1), "no sidewalk on side " + side)); return None
             if sw < min_sidewalk: report["skipped"].append((road.name, kind, round(a, 1), "sidewalk %.1f m < %.1f m" % (sw, min_sidewalk))); return None
             why = free(side, a, kind, min_gap=min_gap)
             if why: report["skipped"].append((road.name, kind, round(a, 1), why)); return None
             pos, t, r, sgn = _side_point(road, a, side, offset)
-            yaw = math.atan2(t.y, t.x) + (-math.pi / 2 if sgn > 0 else math.pi / 2) + math.pi + yaw_extra if face_road else math.atan2(t.y, t.x)
+            travel = 1.0 if ((side == "r") == rht) else -1.0            # direction of the traffic on this side (+1 = with the curve)
+            if facing == "traffic": f = -t * travel                     # the plate's +Y looks back at the arriving cars
+            elif facing == "road": f = -r * sgn                         # +Y toward the carriageway
+            else: f = t
+            yaw = math.atan2(f.y, f.x) - math.pi / 2 + yaw_extra        # local +Y -> f
             o = _place(lib, "%s_%s_%s%d" % (road.name, kind, side, len(placed_along[side])), pos, yaw, col, scale)
             if o is None: report["skipped"].append((road.name, kind, round(a, 1), "library object missing: " + lib)); return None
             placed_along[side].append((a, kind)); report["placed"].append((road.name, kind, side, round(a, 1), lib))

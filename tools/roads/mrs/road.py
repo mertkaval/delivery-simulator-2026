@@ -380,9 +380,14 @@ def build_road_group():
         node = tb.group("Road_Sweep", **kw); node.label = label
         return node.outputs[0]
 
+    def crown_factor(along):
+        """1 mid-road, 0 at a height-locked (junction) end: the crown flattens into the flat junction surface."""
+        f_s = smooth01(tb.map_range(along, 0.0, I("Lock Length"), 0.0, 1.0)); f_e = smooth01(tb.map_range(tb.math("SUBTRACT", L, along), 0.0, I("Lock Length"), 0.0, 1.0))
+        return tb.math("MULTIPLY", tb.switch(I("Lock Start"), 1.0, f_s, "FLOAT"), tb.switch(I("Lock End"), 1.0, f_e, "FLOAT"))
     def camber(lat, along, w):
         half = tb.switch(tb.compare("LESS_THAN", lat, 0.0), w["half_r"], w["half_l"], "FLOAT")
-        return tb.math("MULTIPLY", w["crown"], tb.math("SUBTRACT", 1.0, tb.math("POWER", tb.math("DIVIDE", tb.math("ABSOLUTE", lat), tb.math("MAXIMUM", half, 0.01)), 2.0)))
+        c = tb.math("MULTIPLY", w["crown"], tb.math("SUBTRACT", 1.0, tb.math("POWER", tb.math("DIVIDE", tb.math("ABSOLUTE", lat), tb.math("MAXIMUM", half, 0.01)), 2.0)))
+        return tb.math("MULTIPLY", c, crown_factor(along))
 
     def ramp_factor(along):
         """Sidewalk height factor: dips to 4 % over the crossing span with 1 m flanks at ramped ends."""

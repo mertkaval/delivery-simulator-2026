@@ -17,14 +17,41 @@ Headless deliverable + smoke test + validation renders:
 Open `tools/roads/mert_road_studio_v2.blend` and the sidebar tab **Road Studio** (N panel) has
 everything; the modifier panel of a road shows all inputs grouped in panels.
 
+## v3 additions (street generator brief)
+- **Shared street model** (`street_model.py`): every road's lanes, directions, widths, offsets, cycleways,
+  sidewalks, trims, ramps, lane / pedestrian paths and every junction's approaches, crossings, signals and
+  phases in one JSON (`docs/roads/STREET_MODEL.md`); `export.export_block()` writes it next to the GLBs.
+- **Analytic sweep** (`Road_Sweep` group): strips are grids whose vertices sample the rail at their own
+  station, so the cross-section is a function of the station: **lane transitions** (`Transition`, end lane
+  counts, `Transition Start`, `Taper Length`, merge arrows), **curb ramps + tactile paving** at crossings
+  (`Ramp Start/End`), per-station `half_l/half_r/drain` attributes for the shaders.
+- **Cycleways** per side: None / Painted / Buffered (hatched buffer) / Protected (curb, posts or planters
+  separator) / Two-Way (centre dash, symbols both ways); bicycle symbols + arrows; coloured bicycle
+  crossings with elephant feet through junction approaches; **bus lanes**; **planting strips**.
+- **Junction v3**: concentric curb / sidewalk corners (tighter outer arcs, roads trimmed at the asphalt
+  tangent), zebra or parallel-line crossings, stop lines set back from the crossing, median noses, refuge
+  islands, ramps requested on the roads, `control` = none / signals / stop / yield / priority, signal poles
+  (`signage.make_signal`) with IDs and non-conflicting phases; slopes > 1.5 m, angles < 25 deg and nearby
+  junctions are reported, not faked.
+- **Rule-based placement** (`placement.py`, rules in `docs/roads/PLACEMENT_RULES.md`): reserved zones ->
+  signs by condition -> lights -> furniture -> trees, with a skipped-items report.
+- **Trees** (`trees.py`, `Tree_Variants` group): 12 species variants + LOD1, bark / foliage shaders.
+- **Signage** (`signage.py`): 24 sign kinds with editable text, direction boards, signals with per-lens
+  `State` materials.
+- **Materials**: `clean` / `light_wear` / `heavy_wear` (+ `wet`, `fresh_highway`, `old_village`, `dirt_track`);
+  paving, tactile, cycleway, pole metal groups; masks from `lat`/`half_l`/`half_r`/`drain`.
+- **Demo block**: `samples.street_block()`; test `tools/roads/tests/street_block_test.py` (regeneration
+  checks, export, renders); Godot check `tests/capture_street_block.gd`.
+
 ## Package (`tools/roads/mrs/`)
 | module | what it builds |
 |---|---|
 | `nodes.py` | node-tree builder `T`, interface panels, menu switches, modifier input access |
-| `road.py` | **`MRS_Road`** Geometry Nodes group (~1800 nodes, 80 inputs in 10 panels) |
+| `road.py` | **`MRS_Road`** Geometry Nodes group (+ `Road_Profile`, `Road_Sweep` sub-groups; 100+ inputs in 11 panels) |
 | `terrain.py` | demo terrain, **`MRS_TerrainConform`** (pull terrain to roads), `conform_terrain()` |
 | `roads.py` | road objects, 6 presets, remembered inputs, `refresh_all()` |
-| `junction.py` | n-way junctions, roundabouts, dead ends, rebuild + auto-update handler |
+| `junction.py` | n-way junctions (crossings, ramps, refuges, signals), roundabouts, dead ends, rebuild + auto-update |
+| `street_model.py` / `placement.py` / `trees.py` / `signage.py` | shared model + export JSON, rule-based placement, tree variants, signs and signals |
 | `structures.py` | gantry signs with text, custom text signs, cable-stayed pylons + stays, tunnels, bus stops |
 | `materials.py` | shader groups `MRS_AsphaltShader` / `PaintShader` / `ConcreteShader`, presets, tile baking |
 | `props.py` / `assets.py` | prop collections the group instances from (placeholders / generated library) |

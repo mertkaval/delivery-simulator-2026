@@ -6,7 +6,7 @@ remember their inputs and rebuild (`rebuild`, `rebuild_all`, optional depsgraph 
 import bpy, bmesh, math
 from mathutils import Vector
 from .nodes import MRS, mod_input_set
-from .roads import road_widths, road_ends, all_roads
+from .roads import road_widths, road_ends, all_roads, road_input
 
 UP = Vector((0, 0, 1))
 Z_PAINT = 0.004
@@ -113,8 +113,10 @@ def _mesh_object(name, bm, collection, materials, meta):
     for p in me.polygons: kind.data[p.index].value = KIND_OF_SLOT.get(p.material_index, 2.0)
     old = bpy.data.objects.get(name)
     if old:
-        for ch in list(old.children): bpy.data.objects.remove(ch)
-        bpy.data.objects.remove(old)
+        def _remove_tree(ob):
+            for ch in list(ob.children): _remove_tree(ch)
+            bpy.data.objects.remove(ob)
+        _remove_tree(old)                       # signal poles AND their head children
     o = bpy.data.objects.new(name, me); collection.objects.link(o)
     o["mrs_junction"] = meta
     return o
@@ -232,8 +234,18 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
         y0 = stop_setback; y1 = y0 + cw
         in_r = -1.0 if a["rht"] else 1.0            # incoming traffic is on the junction's left (looking out) under RHT
         half_in = a["half_l"] if in_r < 0 else a["half_r"]
+        crown_pct = road_input(a["road"], "Crown") or 0.0; lock_len = road_input(a["road"], "Lock Length") or 14.0
+        crown_h = crown_pct * 0.01 * max(a["half_l"], a["half_r"])
+        def zc(x, d):
+            """Residual camber on the road stub `d` m beyond the trimmed end (the road flattens its crown toward the junction)."""
+            half = a["half_r"] if x > 0 else a["half_l"]
+            f = min(1.0, max(0.0, d / lock_len)); f = f * f * (3 - 2 * f)
+            return crown_h * max(0.0, 1.0 - (abs(x) / max(half, 0.01)) ** 2) * f
         def stripe(x0, x1, ya, yb, mat=1, lift=Z_PAINT):
-            quad(end + a["d"] * ya + r * x0, end + a["d"] * ya + r * x1, end + a["d"] * yb + r * x1, end + a["d"] * yb + r * x0, z + lift, mat)
+            try:
+                ff = bm.faces.new((V(end + a["d"] * ya + r * x0, z + lift + zc(x0, ya)), V(end + a["d"] * ya + r * x1, z + lift + zc(x1, ya)),
+                                   V(end + a["d"] * yb + r * x1, z + lift + zc(x1, yb)), V(end + a["d"] * yb + r * x0, z + lift + zc(x0, yb)))); ff.material_index = mat
+            except ValueError: pass
         if a["cross"]:
             has_refuge = refuge and med >= 0.85
             spans = [(-a["half_l"] + 0.3, -med - 0.4), (med + 0.4, a["half_r"] - 0.3)] if has_refuge else [(-a["half_l"] + 0.3, a["half_r"] - 0.3)]
@@ -260,7 +272,7 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
                 if not a.get("bike_on_" + s): continue
                 x0, x1 = sorted((a["bike0_" + s] * sgn, a["bike1_" + s] * sgn))
                 ymax = (y1 + 1.0) if a["cross"] else 2.5
-                quad(end + r * x0, end + r * x1, end + a["d"] * ymax + r * x1, end + a["d"] * ymax + r * x0, z + 0.003, 6)
+                stripe(x0, x1, 0.0, ymax, 6, 0.003)
                 yy = 0.3
                 while yy + 0.4 <= ymax:
                     stripe(x0 - 0.1, x0 + 0.3, yy, yy + 0.4); stripe(x1 - 0.3, x1 + 0.1, yy, yy + 0.4)

@@ -93,7 +93,7 @@ try:
         paths = mrs.samples.render_all(rd)
         mrs.materials.apply_material_preset("heavy_wear")
         mrs.qa.render(os.path.join(rd, "streetblock_material_heavy.png"), (30, -1.0, 1.2), (36, 2.5, 0.0), 45, scene=sc)
-        mrs.qa.render(os.path.join(rd, "streetblock_crossing_heavy.png"), (9, -14, 3.5), (3, -9, 0.1), 40, scene=sc)
+        mrs.qa.render(os.path.join(rd, "streetblock_crossing_heavy.png"), (7, -31, 3.2), (0, -23.5, 0.1), 40, scene=sc)
         mrs.materials.apply_material_preset("light_wear")
         print("RENDERS", len(paths) + 2, "%.0fs" % (time.time() - t0))
     if "--save" in args:

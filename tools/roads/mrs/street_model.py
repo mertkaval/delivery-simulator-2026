@@ -50,28 +50,23 @@ def _paths(road, lanes, step=3.0):
     """Polylines along each lane centre (world, trimmed road), sidewalk centre lines both sides."""
     L = road_length(road)
     stations = [a for a in [k * step for k in range(int(L / step) + 1)]] + [L]
-    samples = [road_sample(road, a) for a in stations]
-    w0 = road_widths(road); w1 = road_widths(road, at_end=True)
+    samples = [(a,) + tuple(road_sample(road, a)) for a in stations]
+    w0 = road_widths(road)
     trans = road_input(road, "Transition")
     t0 = road_input(road, "Transition Start") or 0.0; tl = max(road_input(road, "Taper Length") or 1.0, 0.1)
-    def lerp(a, b, f): return a + (b - a) * f
     out = []
     for ln in lanes:
-        pts = []
-        for (a, p, t, r) in samples:
-            f = min(1.0, max(0.0, (a - t0) / tl)) if trans else 0.0
-            f = f * f * (3 - 2 * f)
-            off = ln["offset"]
-            if ln["type"] in ("drive", "bus") and trans:
-                # drive lanes keep their centre; lanes that exist only at one end fade their offset (merge)
-                pass
-            pts.append([round(c, 3) for c in (p + r * off)])
+        pts = [[round(c, 3) for c in (p + r * ln["offset"])] for (a, p, t, r) in samples]
         path = dict(ln); path["points"] = pts if ln["dir"] != "backward" else list(reversed(pts))
         out.append(path)
     ped = []
-    for side, sgn, sw, h in (("r", 1.0, w0["swr"], w0["h"]), ("l", -1.0, w0["swl"], w0["h"])):
+    for side, sgn in (("r", 1.0), ("l", -1.0)):
+        sw = w0["swr"] if side == "r" else w0["swl"]
         if sw <= 0.05: continue
-        pts = [[round(c, 3) for c in (p + r * sgn * (ww_half + w0["curb"] + sw * 0.5) + Vector((0, 0, h)))] for (a, p, t, r), ww_half in zip(samples, [road_widths(road, at_end=(a > t0 + tl / 2) if trans else False)["half_" + side] for (a, _, _, _) in samples])]
+        pts = []
+        for (a, p, t, r) in samples:
+            ww = road_widths(road, at_end=(a > t0 + tl / 2)) if trans else w0
+            pts.append([round(c, 3) for c in (p + r * sgn * (ww["half_" + side] + w0["curb"] + sw * 0.5) + Vector((0, 0, w0["h"])))])
         ped.append({"id": "%s_%sped" % (road.name, side), "side": side, "points": pts})
     return out, ped
 
@@ -135,7 +130,12 @@ def validate(model):
 def export_json(path, model):
     import os
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f: json.dump(model, f, indent=1)
+    def _plain(o):
+        if hasattr(o, "to_dict"): return o.to_dict()
+        if hasattr(o, "to_list"): return o.to_list()
+        if hasattr(o, "__iter__") and not isinstance(o, (str, bytes, dict)): return list(o)
+        return str(o)
+    with open(path, "w", encoding="utf-8") as f: json.dump(model, f, indent=1, default=_plain)
     return path
 
 

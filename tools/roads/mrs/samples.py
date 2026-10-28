@@ -148,7 +148,8 @@ def street_block(wear="light_wear"):
     except Exception as e:
         print("direction board skipped:", e)
     rep = placement.place_all(col, seed=7, style="avenue", speed_limits={"SB_AvenueW": 50, "SB_AvenueE": 50, "SB_North": 30, "SB_South": 30, "SB_SCurve": 30, "SB_TSide": 30})
-    sc["mrs_placement_report"] = {"counts": rep["counts"], "by_kind": rep["by_kind"], "skipped": [list(x) for x in rep["skipped"][:200]]}
+    import json as _json
+    sc["mrs_placement_report"] = _json.dumps({"counts": rep["counts"], "by_kind": rep["by_kind"], "skipped": [list(x) for x in rep["skipped"][:200]]})
     print("PLACEMENT", rep["counts"], rep["by_kind"])
     for x in rep["skipped"][:12]: print("  skipped", x)
     materials.apply_material_preset(wear)
@@ -172,7 +173,7 @@ def render_all(out_dir):
         "MRS_Village": [("over", (-70, -120, 110), (0, 0, 0), 35), ("entry", "road:VL_South:0.85"), ("ring", (18, -26, 6), (0, 0, 1), 32), ("bus", "road:VL_East:0.35")],
         "MRS_BridgeValley": [("over", (-120, -200, 90), (0, 0, 5), 35), ("deck", "road:BV_Bridge:0.1"), ("below", (-30, -90, 2), (0, 0, 12), 30), ("east", "road:BV_East:0.3")],
         "MRS_StreetBlock": [("overhead", (45, -40, 190), (45, 0, 0), 30), ("driver", "road:SB_South:0.75"), ("cyclist", "road:SB_AvenueW:0.78"), ("pedestrian", (-14, -16.5, 1.65), (0, -11, 1.0), 32),
-                            ("crossing", (9, -14, 3.5), (3, -9, 0.1), 40), ("curb", (-9.0, -12.5, 1.3), (-6.5, -10.0, 0.1), 45), ("tree", (-40, -14, 2.0), (-45, -9.5, 4.5), 40), ("material", (30, -1.0, 1.2), (36, 2.5, 0.0), 45),
+                            ("crossing", (7, -31, 3.2), (0, -23.5, 0.1), 40), ("curb", (-22, -21.5, 1.4), (-19.5, -17.6, 0.2), 45), ("tree", (-127, -26, 1.7), (-133.5, -17.6, 5.0), 40), ("material", (30, -1.0, 1.2), (36, 2.5, 0.0), 45),
                             ("taper", (-110, -40, 25), (-95, 0, 0), 35), ("tjunction", (95, -40, 22), (122, 0, 0), 35), ("scurve", "road:SB_SCurve:0.3")],
     }
     paths = []

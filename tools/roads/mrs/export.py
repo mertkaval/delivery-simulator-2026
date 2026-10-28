@@ -19,8 +19,54 @@ def evaluated_mesh_object(o, name, collection, realize=True, collision=False):
     return out
 
 
+TILES_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "tmp", "roads", "materials", "tiles")
+TILE_SIZE = 4.0
+
+
+def engine_material(m, tiles_dir=None):
+    """A glTF-friendly stand-in for a procedural material: baked seamless tiles for the road-surface
+    materials (UVMap is in metres, so the mapping repeats every TILE_SIZE m), a flat Principled with the
+    material's viewport colour for everything else. Lens materials and already-plain materials pass through."""
+    from . import materials as mats
+    if m is None: return None
+    name = m.name
+    if name.startswith(MRS + "Lens_") or name.endswith("_Baked") or name.endswith("_Engine"): return m
+    bsdf = next((n for n in m.node_tree.nodes if n.type == "BSDF_PRINCIPLED"), None) if m.use_nodes and m.node_tree else None
+    if bsdf is not None and not bsdf.inputs["Base Color"].is_linked: return m
+    tiles_dir = tiles_dir or TILES_DIR
+    base = name[len(MRS):] if name.startswith(MRS) else None
+    if base and os.path.exists(os.path.join(tiles_dir, "%s_albedo.png" % name)):
+        bn = name + "_Baked"
+        if bn in bpy.data.materials: return bpy.data.materials[bn]
+        paths = {k: os.path.join(tiles_dir, "%s_%s.png" % (name, k)) for k in ("albedo", "normal", "roughness", "metallic") if os.path.exists(os.path.join(tiles_dir, "%s_%s.png" % (name, k)))}
+        return mats.baked_material(bn, paths, repeat=1.0 / TILE_SIZE)
+    en = name + "_Engine"
+    if en in bpy.data.materials: return bpy.data.materials[en]
+    e = bpy.data.materials.new(en); e.use_nodes = True
+    b = next(n for n in e.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+    b.inputs["Base Color"].default_value = tuple(m.diffuse_color)
+    b.inputs["Roughness"].default_value = m.roughness; b.inputs["Metallic"].default_value = m.metallic
+    if bsdf is not None and not bsdf.inputs["Emission Strength"].is_linked and bsdf.inputs["Emission Strength"].default_value > 0.5:
+        b.inputs["Emission Color"].default_value = bsdf.inputs["Emission Color"].default_value; b.inputs["Emission Strength"].default_value = bsdf.inputs["Emission Strength"].default_value
+    e.diffuse_color = m.diffuse_color
+    return e
+
+
+def apply_engine_materials(objs, tiles_dir=None):
+    n = 0
+    for o in objs:
+        if o.type != "MESH": continue
+        for i, m in enumerate(o.data.materials):
+            em = engine_material(m, tiles_dir)
+            if em is not m: o.data.materials[i] = em; n += 1
+    return n
+
+
 def _exportable(src):
+    """Roads, junctions and structures; placed props and signals are exported separately (props / signals GLBs)."""
     for o in src.all_objects:
+        if o.get("mrs_placed") or o.get("mrs_signal_id") or (o.parent is not None and (o.parent.get("mrs_signal_id") or o.parent.get("mrs_placed"))): continue
+        if o.name.startswith(MRS + "GroundPlane"): continue                 # demo ground, not part of the asset
         if o.type == "CURVE" and "MRS_Road" in o.modifiers: yield o
         elif o.type == "MESH" and not o.hide_viewport and not o.get("mrs_terrain_source"): yield o
 
@@ -38,7 +84,7 @@ def export_ready(objs, collection):
     return out
 
 
-def export_glb(path, collection_name=MRS + "Roads", collision=True):
+def export_glb(path, collection_name=MRS + "Roads", collision=True, engine_materials=True):
     """GLB of the evaluated roads, junctions and structures (instances realized, materials kept, UVs
     in metres), plus <path>_collision.glb with only the drivable and walkable surfaces (kind 0/2/3/4)."""
     src = bpy.data.collections[collection_name]
@@ -49,6 +95,7 @@ def export_glb(path, collection_name=MRS + "Roads", collision=True):
     if tmp.name not in sc.collection.children: sc.collection.children.link(tmp)
     objs = [evaluated_mesh_object(o, o.name + "_export", tmp) for o in _exportable(src)]
     objs = [o for o in objs if len(o.data.polygons)]
+    if engine_materials: apply_engine_materials(objs)
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     if sc != bpy.context.scene:
         raise RuntimeError("export_glb: make %s the active scene first (headless: blender -b file.blend --scene %s)" % (sc.name, sc.name))
@@ -97,11 +144,12 @@ def export_block(path, collection_name, lod_trees=True):
         bpy.context.view_layer.objects.active = sel[0]
         bpy.ops.export_scene.gltf(filepath=fp, export_format="GLB", use_selection=True, export_apply=True, export_yup=True, export_extras=True, **kw)
     def _copy_tree(o, extra=None):
-        c = bpy.data.objects.new(o.name, o.data); c.matrix_world = o.matrix_world.copy(); tmp.objects.link(c)
+        data = o.data.copy() if o.type == "MESH" else o.data
+        c = bpy.data.objects.new(o.name, data); c.matrix_world = o.matrix_world.copy(); tmp.objects.link(c)
         for k, v in (extra or {}).items(): c[k] = v
         out = [c]
         for ch in o.children:
-            c2 = bpy.data.objects.new(ch.name, ch.data); c2.parent = c; c2.matrix_parent_inverse = ch.matrix_parent_inverse.copy()
+            c2 = bpy.data.objects.new(ch.name, ch.data.copy() if ch.type == "MESH" else ch.data); c2.parent = c; c2.matrix_parent_inverse = ch.matrix_parent_inverse.copy()
             c2.location = ch.location; c2.rotation_euler = ch.rotation_euler; c2.scale = ch.scale; tmp.objects.link(c2); out.append(c2)
         return out
     if placed:
@@ -110,17 +158,27 @@ def export_block(path, collection_name, lod_trees=True):
             if o.parent is not None: continue
             lib = o.get("mrs_placed", "")
             if lod_trees and lib.startswith("MRS_Tree_") and bpy.data.objects.get(lib + "_LOD1"):
-                c = bpy.data.objects.new(o.name, bpy.data.objects[lib + "_LOD1"].data); c.matrix_world = o.matrix_world.copy(); tmp.objects.link(c); c["mrs_lib"] = lib + "_LOD1"; sel.append(c)
+                me = bpy.data.objects[lib + "_LOD1"].data.copy()
+                if "leaf_card" in me.attributes:          # alpha-masked leaf cards have no texture in the engine: keep blobs and fronds only
+                    lc = me.attributes["leaf_card"].data
+                    bm = bmesh.new(); bm.from_mesh(me); bm.verts.ensure_lookup_table()
+                    bmesh.ops.delete(bm, geom=[bm.verts[i] for i in range(len(me.vertices)) if 0.5 < lc[i].value < 1.5], context="VERTS")
+                    bm.to_mesh(me); bm.free()
+                c = bpy.data.objects.new(o.name, me); c.matrix_world = o.matrix_world.copy(); tmp.objects.link(c); c["mrs_lib"] = lib + "_LOD1"; sel.append(c)
             else:
                 sel += _copy_tree(o, {"mrs_lib": lib})
         if sel:
+            apply_engine_materials(sel)
             vl.update(); _export(sel, path + "_props.glb", export_materials="EXPORT")
-            stats["props"] = len([o for o in sel if o.parent is None]); stats["props_tris"] = sum(len(p.vertices) - 2 for o in sel for p in o.data.polygons); stats["props_bytes"] = os.path.getsize(path + "_props.glb")
-        for o in list(tmp.objects): bpy.data.objects.remove(o)
+            stats["props"] = len([o for o in sel if o.parent is None]); stats["props_tris"] = sum(len(p.vertices) - 2 for o in sel if o.type == "MESH" for p in o.data.polygons); stats["props_bytes"] = os.path.getsize(path + "_props.glb")
+        for o in list(tmp.objects):
+            d = o.data; bpy.data.objects.remove(o)
+            if d is not None and d.users == 0 and isinstance(d, bpy.types.Mesh): bpy.data.meshes.remove(d)
     signals = [o for o in src.all_objects if o.get("mrs_signal_id")]
     if signals:
         sel = []
         for o in signals: sel += _copy_tree(o, {"mrs_signal_id": o["mrs_signal_id"]})
+        apply_engine_materials(sel)
         vl.update(); _export(sel, path + "_signals.glb", export_materials="EXPORT")
         stats["signals"] = len(signals); stats["signals_bytes"] = os.path.getsize(path + "_signals.glb")
         for o in list(tmp.objects): bpy.data.objects.remove(o)
@@ -130,7 +188,10 @@ def export_block(path, collection_name, lod_trees=True):
                        "lens_materials": "MRS_Lens_<Red|Amber|Green|PedRed|PedGreen>: KHR_materials_emissive_strength carries the lit state; in Blender a Value node named State (0/1) drives it",
                        "stats": stats}
     report = sc.get("mrs_placement_report")
-    if report: model["placement_report"] = {k: (dict(v) if hasattr(v, "keys") else list(v)) for k, v in dict(report).items()}
+    if report:
+        import json as _json
+        try: model["placement_report"] = _json.loads(report) if isinstance(report, str) else dict(report)
+        except Exception: model["placement_report"] = str(report)
     street_model.export_json(path + ".json", model)
     stats["json"] = path + ".json"; stats["validation"] = model["validation"]
     return stats
