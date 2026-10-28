@@ -14,8 +14,11 @@ tools/cityforge/build.sh            # terrain -> plan -> Blender build -> assets
 | Game | `world/cityforge/cityforge_world.gd` (`CityForgeWorld`) | the city in Godot: chunks, MultiMesh instances with HLOD, ground + building collision |
 | QA | `qa_render.py` (Blender renders), `tests/capture_cityforge.gd` (Godot renders), `tests/cityforge_test.gd` | evidence and contracts |
 
-Fly round it: open `world/cityforge/port_halden_preview.tscn` in Godot and press F6
-(mouse look, WASD, Q/E, Shift, N for night, F for street level).
+It is the game's city: run the game (F5) or open `app/app_root.tscn` in the editor to see it
+(Settings > "Port Halden city" switches back to the classic city). Fly round it without the game:
+open `world/cityforge/port_halden_preview.tscn` and press F6 (mouse look, WASD, Q/E, Shift, N for
+night, F for street level). Gameplay places (delivery doors, pickups, stores, start) are chosen by
+`world/cityforge/port_halden_game.gd`.
 
 ## The city spec (`port_halden_city.json`)
 

@@ -20,6 +20,8 @@ const DETAIL_END := 140.0         ## small props (hydrants, benches, stop signs)
 const STREET_END := 520.0         ## lamps, signals and shelters (not in the far mesh) fade out here
 const PART_RANGE := {"Fences": 320.0, "Walks": 1100.0, "Roads": 2600.0}
 const COLLISION_RADIUS := 300.0
+## Sidewalk centre from a lot's front line, towards the street (verge 1.6 m beyond it).
+const SIDEWALK_OFFSET := 1.5
 const TREES := ["tree_maple", "tree_cherry", "tree_column", "tree_linden", "tree_oak", "tree_fir", "tree_birch"]
 
 var city: Dictionary = {}
@@ -37,6 +39,11 @@ var _focus_timer := 0.0
 
 func _ready() -> void:
 	if city.is_empty(): build()
+
+## Collision follows whatever the active camera looks from (the courier in the game).
+func _process(delta: float) -> void:
+	var cam := get_viewport().get_camera_3d()
+	if cam != null: update_focus(cam.global_position, delta)
 
 ## Everything that does not need a focus: data, ground collision, chunk visuals, instances, labels.
 func build() -> void:
@@ -316,6 +323,124 @@ func _box_if_inside(body: StaticBody3D, pos: Array, lo: Vector2, hi: Vector2, h:
 func build_all_collision() -> void:
 	for key: Vector2i in chunks:
 		if not collided.has(key): _build_chunk_collision(key)
+
+# --- roads for game systems -----------------------------------------------------------------
+var _graph_pos: PackedVector2Array
+var _graph_links: Array = []
+
+func _build_graph() -> void:
+	var ids := {}
+	for nd: Dictionary in city.nodes:
+		ids[int(nd.id)] = _graph_pos.size()
+		var p: Array = nd.pos
+		_graph_pos.append(Vector2(float(p[0]), float(p[1])))
+		_graph_links.append([])
+	for r: Dictionary in city.roads:
+		var a: int = ids[int(r.a)]
+		var b: int = ids[int(r.b)]
+		(_graph_links[a] as Array).append(b)
+		(_graph_links[b] as Array).append(a)
+
+func _nearest_node(q: Vector2) -> int:
+	var best := -1
+	var bd := INF
+	for i in _graph_pos.size():
+		if (_graph_links[i] as Array).is_empty(): continue
+		var d := q.distance_squared_to(_graph_pos[i])
+		if d < bd:
+			bd = d
+			best = i
+	return best
+
+## A street route between two world points (A* over the road graph), for the minimap and distances.
+func route(from: Vector3, to: Vector3) -> PackedVector3Array:
+	if _graph_pos.is_empty(): _build_graph()
+	var a := _nearest_node(to_plan(from))
+	var b := _nearest_node(to_plan(to))
+	var out := PackedVector3Array([Vector3(from.x, 0, from.z)])
+	if a >= 0 and b >= 0 and a != b:
+		var came := {a: -1}
+		var cost := {a: 0.0}
+		var open: Array = [a]
+		while not open.is_empty():
+			var cur: int = open[0]
+			var best_f := INF
+			for n: int in open:
+				var f: float = float(cost[n]) + _graph_pos[n].distance_to(_graph_pos[b])
+				if f < best_f:
+					best_f = f
+					cur = n
+			if cur == b: break
+			open.erase(cur)
+			for nb: int in _graph_links[cur]:
+				var c: float = float(cost[cur]) + _graph_pos[cur].distance_to(_graph_pos[nb])
+				if not cost.has(nb) or c < float(cost[nb]):
+					cost[nb] = c
+					came[nb] = cur
+					if not open.has(nb): open.append(nb)
+		if came.has(b):
+			var chain: Array = []
+			var n := b
+			while n != -1:
+				chain.push_front(n)
+				n = came[n]
+			for i: int in chain:
+				out.append(to_world(_graph_pos[i].x, _graph_pos[i].y))
+	out.append(Vector3(to.x, 0, to.z))
+	return out
+
+var _described_at := Vector3(INF, 0, INF)
+var _description := ""
+
+## The HUD's location line: the street you are on, else the park, else the neighbourhood.
+func describe(at: Vector3) -> String:
+	if at.distance_squared_to(_described_at) < 4.0: return _description
+	_described_at = at
+	var q := to_plan(at)
+	var ids := {}
+	for nd: Dictionary in city.nodes: ids[int(nd.id)] = nd.pos
+	var best := ""
+	var best_d := INF
+	for r: Dictionary in city.roads:
+		var a: Array = ids[int(r.a)]
+		var b: Array = ids[int(r.b)]
+		var pa := Vector2(float(a[0]), float(a[1]))
+		var pb := Vector2(float(b[0]), float(b[1]))
+		var d := q.distance_to(Geometry2D.get_closest_point_to_segment(q, pa, pb)) - float(r.width) * 0.5
+		if d < best_d:
+			best_d = d
+			best = str(r.name)
+	if best_d < 6.0:
+		_description = best
+		return best
+	for pk: Dictionary in city.parks:
+		if pk.has("rect"):
+			var rc: Array = pk.rect
+			if q.x > float(rc[0]) and q.x < float(rc[2]) and q.y > float(rc[1]) and q.y < float(rc[3]):
+				_description = str(pk.name)
+				return _description
+	var near_name := "Port Halden"
+	var nd_best := INF
+	for n: Dictionary in city.neighbourhoods:
+		var d2 := q.distance_squared_to(Vector2(float((n.centre as Array)[0]), float((n.centre as Array)[1])))
+		if d2 < nd_best:
+			nd_best = d2
+			near_name = str(n.name)
+	_description = near_name
+	return near_name
+
+## Road centre lines for the minimap: [from, to, width] in world metres.
+func map_roads() -> Array:
+	var ids := {}
+	for nd: Dictionary in city.nodes: ids[int(nd.id)] = nd.pos
+	var out: Array = []
+	for r: Dictionary in city.roads:
+		var a: Array = ids[int(r.a)]
+		var b: Array = ids[int(r.b)]
+		out.append([to_world(float(a[0]), float(a[1])), to_world(float(b[0]), float(b[1])), float(r.width)])
+	for ln: Dictionary in city.lanes:
+		out.append([to_world(float((ln.a as Array)[0]), float((ln.a as Array)[1])), to_world(float((ln.b as Array)[0]), float((ln.b as Array)[1])), 5.0])
+	return out
 
 # --- queries for game systems ----------------------------------------------------------------
 ## The lot / house / address nearest to a world position (deliveries, map).

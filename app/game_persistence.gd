@@ -3,8 +3,11 @@ extends RefCounted
 ## New career, saving and loading the shift (DeliverySave), and the title menu's save summary.
 ## The save is the session snapshot plus where the courier and the vehicle stand.
 
-const START := Vector3(-8, 0.2, 23)
-const VEHICLE_START := Vector3(-8, 0, 19)
+## Where a new career starts (the city sets them: PortHaldenGame.apply).
+static var START := Vector3(-8, 0.2, 23)
+static var VEHICLE_START := Vector3(-8, 0, 19)
+## Which city the courier is in; a save from another city starts at START instead.
+static var CITY := "classic"
 
 var game: GameApp
 
@@ -52,6 +55,7 @@ func save_session() -> bool:
 	data.player.bicycle = [player.bicycle.position.x, player.bicycle.position.y, player.bicycle.position.z]
 	data.player.mounted = player.mounted
 	data.player.bicycle_yaw = player.bicycle.rotation.y
+	data.player.city = CITY
 	var success := game.saves.save_game(data)
 	if not success:
 		game.notify(game.saves.error)
@@ -71,6 +75,9 @@ func load_session() -> void:
 	player.rotation.y = data.player.yaw
 	var bike_position: Array = data.player.get("bicycle", [VEHICLE_START.x, VEHICLE_START.y, VEHICLE_START.z])
 	player.bicycle.position = Vector3(bike_position[0], bike_position[1], bike_position[2])
+	if str(data.player.get("city", "classic")) != CITY:      # saved in the other city: start here instead
+		player.position = START
+		player.bicycle.position = VEHICLE_START
 	player.bicycle.rotation.y = data.player.get("bicycle_yaw", data.player.yaw)
 	player.mounted = data.player.get("mounted", false)
 	player.riding_speed = 0

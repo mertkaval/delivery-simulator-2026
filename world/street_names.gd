@@ -72,8 +72,12 @@ static func park_at(at: Vector3) -> String:
 		if absf(at.x - centre.x) < 12.0 and absf(at.z - centre.y) < 18.0: return PARKS[centre]
 	return ""
 
+## Port Halden names its own streets, parks and neighbourhoods (CityForgeWorld.describe).
+static var describer: Callable
+
 ## Location line for the HUD: street, park, square or the district name.
 static func describe(at: Vector3) -> String:
+	if describer.is_valid(): return describer.call(at)
 	var street := name_at(at)
 	if street != "": return street
 	var park := park_at(at)

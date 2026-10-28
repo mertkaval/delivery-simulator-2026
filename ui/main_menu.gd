@@ -211,6 +211,7 @@ func show_page(which: String) -> void:
 			toggle_row("Vertical sync", "vsync")
 			toggle_row("Third-person view (V)", "third_person")
 			slider_row("Camera distance", "camera_distance", PlayerCameraRig.MIN_DISTANCE, PlayerCameraRig.MAX_DISTANCE, 0.1, false)
+			city_row()
 			menu_button("Back", func(): back())
 	for c in column.get_children():
 		var focusable := c as Control
@@ -325,6 +326,23 @@ func toggle_row(label: String, key: String) -> void:
 	c.focus_mode = Control.FOCUS_ALL
 	c.toggled.connect(func(on: bool) -> void:
 		GameSettings.set_value(key, on)
+		chosen.emit("settings_changed"))
+	row.add_child(c)
+	column.add_child(row)
+
+## Which city the game builds (CedarNeighborhood.chosen_city): Port Halden or the classic city.
+## Takes effect the next time the game starts.
+func city_row() -> void:
+	var row := HBoxContainer.new()
+	row.custom_minimum_size = Vector2(380, 40)
+	var name_label := text_label("Port Halden city (restart)", 18, Color(1, 1, 1, 0.88), 500, 0)
+	name_label.custom_minimum_size.x = 170
+	row.add_child(name_label)
+	var c := CheckButton.new()
+	c.button_pressed = str(GameSettings.get_value("city")) == "port_halden"
+	c.focus_mode = Control.FOCUS_ALL
+	c.toggled.connect(func(on: bool) -> void:
+		GameSettings.set_value("city", "port_halden" if on else "classic")
 		chosen.emit("settings_changed"))
 	row.add_child(c)
 	column.add_child(row)

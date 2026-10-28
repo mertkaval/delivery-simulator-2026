@@ -19,6 +19,13 @@ func setup(s: DeliverySession) -> void:
 	session = s
 	for id: String in ShopCatalog.LOCATIONS:
 		var at: Vector3 = ShopCatalog.LOCATIONS[id]
+		if ShopCatalog.FRAMES.has(id):
+			# Port Halden: kiosk and order shelf on the sidewalk in front of the shop
+			var frame: Transform3D = ShopCatalog.FRAMES[id]
+			place_kiosk(id, frame * Vector3(-1.3, 1.1, 1.2))
+			(get_node("Kiosk_" + id) as Node3D).basis = frame.basis
+			place_shelf(id, frame * Transform3D(Basis.IDENTITY, Vector3(1.3, 0.0, 1.0)))
+			continue
 		place_kiosk(id, at + Vector3(4.0, 1.1, 1.0))
 		place_shelf(id, Transform3D(Basis.IDENTITY, at + Vector3(4.9, 0.0, -4.5)))
 	refresh()

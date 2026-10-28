@@ -6,7 +6,7 @@ extends RefCounted
 
 const PATH := "user://settings.cfg"
 const DEFAULTS := {"master": 0.85, "ambience": 0.8, "effects": 0.9, "sensitivity": 1.0, "fov": 78.0, "fullscreen": true, "vsync": true,
-	"third_person": true, "camera_distance": 3.2}
+	"third_person": true, "camera_distance": 3.2, "city": "port_halden"}
 ## Where the options live (tests point this at a scratch file so they never touch the player's).
 static var path := PATH
 

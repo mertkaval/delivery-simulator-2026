@@ -25,8 +25,8 @@ func setup(app: GameApp) -> void:
 	main_menu.chosen.connect(on_main_menu)
 	menu_camera = Camera3D.new()
 	game.add_child(menu_camera)
-	menu_camera.position = Vector3(36, 16, 44)
-	menu_camera.look_at(CedarNeighborhood.CEDAR_HOME_ORIGIN + Vector3(0, 2, 0))
+	menu_camera.position = game.world.get_meta("menu_eye", Vector3(36, 16, 44))
+	menu_camera.look_at(game.world.get_meta("menu_target", CedarNeighborhood.CEDAR_HOME_ORIGIN + Vector3(0, 2, 0)))
 
 ## Store computers and the phone (after the player and the HUD exist).
 func setup_devices() -> void:
@@ -270,6 +270,10 @@ func consume_item(id: String) -> void:
 ## The vehicle is rolled out in front of the store you are at.
 func park_new_vehicle() -> void:
 	var shop: Vector3 = ShopCatalog.LOCATIONS[current_shop]
+	if ShopCatalog.FRAMES.has(current_shop):        # Port Halden: at the kerb in front of the shop
+		var kerb: Vector3 = (ShopCatalog.FRAMES[current_shop] as Transform3D) * Vector3(4.0, 0.0, 7.5)
+		game.player.replace_vehicle(kerb + Vector3(0, 0.3, 0))
+		return
 	game.player.replace_vehicle(Vector3(signf(shop.x) * 79, 0.06, shop.z + 12))
 
 func equip_vehicle(id: String) -> void:

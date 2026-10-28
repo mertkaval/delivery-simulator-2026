@@ -545,6 +545,14 @@ The classic city is tagged `v0.9-classic-city`. CityForge (`tools/cityforge/`) n
 whole new city, Port Halden, modelled on Vancouver / Burnaby: real topography with a lake, a river,
 a harbour and hills, a rotated downtown grid on a peninsula, Burnaby-style fenced lots with back lanes
 and garages, shop strips, towers, public buildings, parks and street furniture, with an edit-by-id
-override file. It runs as its own world (`world/cityforge/port_halden_preview.tscn`, `CityForgeWorld`)
-and is not yet the game's world; the classic city still runs the game. See `CITY_GENERATION_PLAN.md`
-section 5 and `TOOL_EVALUATION.md`.
+override file. See `CITY_GENERATION_PLAN.md` section 5 and `TOOL_EVALUATION.md`.
+
+**Port Halden is the game's city** (default; Settings > "Port Halden city" switches back to the
+classic city on the next start). `CedarNeighborhood.chosen_city()` picks it; `PortHaldenGame.apply`
+points the game at it: 36 house doors + 5 tower lobbies as delivery addresses (Port Halden names),
+21 restaurant pickup racks and the 4 stores on shop fronts near the starter neighbourhood, the start
+on 14th Avenue, routes along its road graph (minimap, distances), its street names in the HUD, and
+saves remember their city. The editor's game scene shows Port Halden too (EditorPreview). Scripted
+runs (tests, captures) keep the classic city unless they set `CedarNeighborhood.city_override`;
+`tests/port_halden_game_test.gd` covers the game in Port Halden. Not yet in Port Halden: traffic,
+townspeople, buses, shop interiors, the cedar house and the big map (M) — next steps.

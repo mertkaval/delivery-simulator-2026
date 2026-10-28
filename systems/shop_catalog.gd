@@ -30,7 +30,10 @@ const CONSUMABLES = {
 	"water": {"name": "Bottle of water", "price": 150},
 	"wc": {"name": "Public washroom", "price": 0},
 }
-const LOCATIONS = {
+## Where each store stands (Port Halden replaces them, with FRAMES: origin at the shop front,
+## +Z out towards the street).
+static var FRAMES: Dictionary = {}
+static var LOCATIONS: Dictionary = {
 	"equipment": Vector3(-92, 0, -32),
 	"bikes": Vector3(92, 0, 22),
 	"cars": Vector3(-92, 0, 22),

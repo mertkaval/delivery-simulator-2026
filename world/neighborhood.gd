@@ -69,6 +69,7 @@ func set_time(hour: float) -> void:
 	if buses != null: buses.set_night(1.0 - amount)
 	if vfx!=null: vfx.set_time(hour,amount)
 	StreetLife.set_time(self, hour, amount)
+	if port != null: port.set_night(1.0 - amount)
 	if weather != null:
 		weather.set_time(hour)
 		weather.apply_light(daylight, atmosphere, sky_material)
@@ -135,78 +136,30 @@ func label_at(words: String, at: Vector3, size: int = 48, color: Color = Color.W
 	add_child(label)
 	return label
 
+## Which city the game builds: "port_halden" (generated, tools/cityforge; the default) or
+## "classic". Set city_override before the world is added to force one. Scripted runs (tests and
+## captures: the main loop has a script) keep the classic city unless they set the override.
+static var city_override := ""
+## Port Halden, when it is the city (CityForgeWorld).
+var port: CityForgeWorld
+
+static func chosen_city() -> String:
+	if city_override != "": return city_override
+	if not ResourceLoader.exists(CityForgeWorld.DIR + "city.json"): return "classic"
+	var loop := Engine.get_main_loop()
+	if loop != null and loop.get_script() != null: return "classic"
+	GameSettings.load_settings()
+	return str(GameSettings.get_value("city"))
+
 func _ready() -> void:
+	if chosen_city() == "port_halden":
+		_build_port_halden()
+		return
 	placer = PropPlacer.new()
 	landscape = CityLandscape.new()
 	landscape.placer = placer
 	add_child(landscape)
-	var environment := WorldEnvironment.new()
-	var env := Environment.new()
-	atmosphere = env
-	env.background_mode = Environment.BG_SKY
-	sky_material = ShaderMaterial.new()
-	sky_material.shader = preload("res://world/sky.gdshader")
-	var cloud_texture := NoiseTexture2D.new()
-	cloud_texture.width=512
-	cloud_texture.height=512
-	cloud_texture.seamless=true
-	var cloud_noise := FastNoiseLite.new()
-	cloud_noise.seed=8026
-	cloud_noise.noise_type=FastNoiseLite.TYPE_SIMPLEX_SMOOTH
-	cloud_noise.frequency=.013
-	cloud_noise.fractal_octaves=5
-	cloud_texture.noise=cloud_noise
-	sky_material.set_shader_parameter("cloud_noise",cloud_texture)
-	var sky := Sky.new()
-	sky.sky_material = sky_material
-	sky.radiance_size = Sky.RADIANCE_SIZE_256
-	sky.process_mode = Sky.PROCESS_MODE_INCREMENTAL
-	env.sky = sky
-	env.background_color = Color("a8bac1")
-	# Image-based lighting from the sky: soft blue fill in shade, sky reflections on glass/paint.
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	env.ambient_light_sky_contribution = 1.0
-	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
-	env.ambient_light_color = Color("c3d1d6")
-	env.ambient_light_energy = 1.0
-	env.tonemap_mode = Environment.TONE_MAPPER_AGX
-	env.tonemap_exposure = 1.05
-	env.ssao_enabled = true
-	env.ssao_intensity = 1.6
-	env.ssao_radius = 1.2
-	env.ssao_detail = 0.6
-	# Screen-space indirect light: sunlit walls bounce colour into streets and porches.
-	env.ssil_enabled = true
-	env.ssil_intensity = 0.8
-	env.ssil_radius = 4.0
-	env.glow_enabled = true
-	env.glow_intensity = 0.35
-	env.glow_bloom = 0.04
-	env.glow_hdr_threshold = 1.2
-	env.fog_enabled = true
-	env.fog_density = 0.0007
-	env.fog_aerial_perspective = 0.55
-	env.fog_sky_affect = 0.12
-	env.adjustment_enabled = true
-	env.adjustment_contrast = 1.06
-	env.adjustment_saturation = 1.08
-	environment.environment = env
-	add_child(environment)
-	var sun := DirectionalLight3D.new()
-	daylight = sun
-	sun.rotation_degrees = Vector3(-42, -28, 0)
-	sun.light_color = Color("fff0d2")
-	sun.light_energy = 1.7
-	sun.shadow_enabled = true
-	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
-	sun.directional_shadow_max_distance = 130.0   # was 170: fewer shadow-cascade draws, no visible loss at street level
-	sun.directional_shadow_split_1 = 0.08
-	sun.directional_shadow_split_2 = 0.22
-	sun.directional_shadow_split_3 = 0.5
-	sun.directional_shadow_blend_splits = true
-	sun.shadow_blur = 1.4
-	sun.light_angular_distance = 0.5
-	add_child(sun)
+	build_sky()
 	# The grass plane is drawn 2 cm under y 0 (its collision stays at 0): every slab, path, plinth,
 	# deck and post foot that rests on the ground used to share its plane with the grass.
 	var ground := box(Vector3(0, -0.3 - GROUND_DROP, -320), Vector3(240, 0.6, 780), '66765e')
@@ -342,6 +295,97 @@ func _ready() -> void:
 	StreetLife.attach(self)
 	# Planting last, so every tree, shrub and bed keeps clear of the props placed above.
 	landscape.plant_city()
+
+## Sky, fog and the sun (both cities).
+func build_sky() -> void:
+	var environment := WorldEnvironment.new()
+	var env := Environment.new()
+	atmosphere = env
+	env.background_mode = Environment.BG_SKY
+	sky_material = ShaderMaterial.new()
+	sky_material.shader = preload("res://world/sky.gdshader")
+	var cloud_texture := NoiseTexture2D.new()
+	cloud_texture.width=512
+	cloud_texture.height=512
+	cloud_texture.seamless=true
+	var cloud_noise := FastNoiseLite.new()
+	cloud_noise.seed=8026
+	cloud_noise.noise_type=FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	cloud_noise.frequency=.013
+	cloud_noise.fractal_octaves=5
+	cloud_texture.noise=cloud_noise
+	sky_material.set_shader_parameter("cloud_noise",cloud_texture)
+	var sky := Sky.new()
+	sky.sky_material = sky_material
+	sky.radiance_size = Sky.RADIANCE_SIZE_256
+	sky.process_mode = Sky.PROCESS_MODE_INCREMENTAL
+	env.sky = sky
+	env.background_color = Color("a8bac1")
+	# Image-based lighting from the sky: soft blue fill in shade, sky reflections on glass/paint.
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	env.ambient_light_sky_contribution = 1.0
+	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
+	env.ambient_light_color = Color("c3d1d6")
+	env.ambient_light_energy = 1.0
+	env.tonemap_mode = Environment.TONE_MAPPER_AGX
+	env.tonemap_exposure = 1.05
+	env.ssao_enabled = true
+	env.ssao_intensity = 1.6
+	env.ssao_radius = 1.2
+	env.ssao_detail = 0.6
+	# Screen-space indirect light: sunlit walls bounce colour into streets and porches.
+	env.ssil_enabled = true
+	env.ssil_intensity = 0.8
+	env.ssil_radius = 4.0
+	env.glow_enabled = true
+	env.glow_intensity = 0.35
+	env.glow_bloom = 0.04
+	env.glow_hdr_threshold = 1.2
+	env.fog_enabled = true
+	env.fog_density = 0.0007
+	env.fog_aerial_perspective = 0.55
+	env.fog_sky_affect = 0.12
+	env.adjustment_enabled = true
+	env.adjustment_contrast = 1.06
+	env.adjustment_saturation = 1.08
+	environment.environment = env
+	add_child(environment)
+	var sun := DirectionalLight3D.new()
+	daylight = sun
+	sun.rotation_degrees = Vector3(-42, -28, 0)
+	sun.light_color = Color("fff0d2")
+	sun.light_energy = 1.7
+	sun.shadow_enabled = true
+	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+	sun.directional_shadow_max_distance = 130.0   # was 170: fewer shadow-cascade draws, no visible loss at street level
+	sun.directional_shadow_split_1 = 0.08
+	sun.directional_shadow_split_2 = 0.22
+	sun.directional_shadow_split_3 = 0.5
+	sun.directional_shadow_blend_splits = true
+	sun.shadow_blur = 1.4
+	sun.light_angular_distance = 0.5
+	add_child(sun)
+
+## Port Halden as the game's city: the generated world, its delivery doors, pickups, stores and
+## start (PortHaldenGame), the minimap's roads, weather. Traffic, townspeople and buses come next.
+func _build_port_halden() -> void:
+	build_sky()
+	daylight.directional_shadow_max_distance = 160.0
+	port = CityForgeWorld.new()
+	port.name = "PortHalden"
+	add_child(port)
+	var layout := PortHaldenGame.apply(port)
+	doors.assign(layout.doors)
+	for hs: Dictionary in port.city.houses:
+		var p := port.to_world(float((hs.pos as Array)[0]), float((hs.pos as Array)[1]))
+		scenery_houses.append(Vector2(p.x, p.z))
+	set_meta("map_roads", port.map_roads())
+	set_meta("pickup_frames", layout.pickup_frames)
+	set_meta("menu_eye", layout.menu_eye)
+	set_meta("menu_target", layout.menu_target)
+	weather = WeatherSystem.new()
+	weather.name = "Weather"
+	add_child(weather)
 
 func batch_imported_assets() -> void:
 	var groups := {}

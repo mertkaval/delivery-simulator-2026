@@ -29,6 +29,9 @@ func near(p: Vector3, margin: float = 0.0) -> bool:
 	return absf(p.x - player.position.x) < r and absf(p.z - player.position.z) < r
 func static_roads() -> Array:
 	if not _roads.is_empty(): return _roads
+	if world.has_meta("map_roads"):              # Port Halden: its own road graph
+		_roads = world.get_meta("map_roads")
+		return _roads
 	_roads.append([Vector3(0, 0, -690), Vector3(0, 0, 50), 12.0])
 	for x in [-64, 64]: _roads.append([Vector3(x, 0, -678), Vector3(x, 0, -258), 10.0])
 	for z in CityCatalog.CROSS_STREETS + [48]: _roads.append([Vector3(-69, 0, z), Vector3(69, 0, z), 10.0])

@@ -45,16 +45,24 @@ static func near_estate_road(p: Vector3, margin: float = 7.5) -> bool:
 static func restaurant_index(id: String) -> int:
 	return RESTAURANTS.find(id)
 
+## Port Halden (PortHaldenGame.apply) replaces the classic doors, their facing and the router.
+static var override_doors: Array[Vector3] = []
+static var override_facing: Array[Vector3] = []
+static var override_router: Callable
+
 static func address_position(index: int) -> Vector3:
+	if not override_doors.is_empty(): return override_doors[index]
 	if index>=36: return DowntownCatalog.DESTINATIONS[index-36]
 	# Street-facing houses of the residential district (ResidentialLayout).
 	return ResidentialLayout.door_point(ResidentialLayout.delivery_lot(index))
 
 ## Unit vector pointing out of the delivery door towards the street (horizontal).
 static func address_facing(index: int) -> Vector3:
+	if not override_facing.is_empty(): return override_facing[index]
 	if index>=36: return Vector3.BACK
 	return ResidentialLayout.delivery_lot(index).facing
 static func route(from: Vector3, destination: Vector3, pickup: bool) -> PackedVector3Array:
+	if override_router.is_valid(): return override_router.call(from, destination)
 	if from.x>120 or destination.x>120: return UrbanNavigation.route(from,destination,pickup)
 	var start := Vector3(from.x, 0, from.z)
 	var end := Vector3(destination.x, 0, destination.z)

@@ -44,6 +44,9 @@ static var _tag_font: FontVariation
 
 func setup(world: Node, s: DeliverySession) -> void:
 	session = s
+	if world.has_meta("pickup_frames"):
+		_setup_racks(world.get_meta("pickup_frames") as Array)
+		return
 	# Avenue restaurants 0-2: the pickup counter (top at 1.1 m), customers on the +Z side.
 	for i in range(3):
 		var p: Vector3 = CityCatalog.PICKUPS[i] - Vector3.UP
@@ -75,6 +78,21 @@ func setup(world: Node, s: DeliverySession) -> void:
 		board.transform = frame * Transform3D(Basis.IDENTITY, Vector3(1.25, 1.5, -0.1))
 		add_child(board)
 	# Every shelf starts with a few other couriers' orders on it.
+	for id in shelves: restock(id, "")
+
+## Port Halden: every restaurant's courier rack stands on the sidewalk in front of its shop.
+func _setup_racks(frames: Array) -> void:
+	var rack_scene: PackedScene = load("res://world/citykit/restaurants/rs_pickup_shelf.glb") if ResourceLoader.exists("res://world/citykit/restaurants/rs_pickup_shelf.glb") else null
+	for i in mini(frames.size(), CityCatalog.RESTAURANTS.size()):
+		var frame: Transform3D = frames[i]
+		if rack_scene:
+			var rack: Node3D = rack_scene.instantiate()
+			rack.transform = frame
+			add_child(rack)
+		shelves[CityCatalog.RESTAURANTS[i]] = {"frame": frame, "lanes": RACK_LANES, "kind": "rack"}
+		var board := MenuBoard.build(CityCatalog.RESTAURANTS[i], Vector2(1.0, 1.3), Color("2f6f8a"))
+		board.transform = frame * Transform3D(Basis.IDENTITY, Vector3(1.25, 1.5, -0.1))
+		add_child(board)
 	for id in shelves: restock(id, "")
 
 func scene_for(kind: String) -> PackedScene:
