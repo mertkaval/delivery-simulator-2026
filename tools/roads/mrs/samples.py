@@ -3,14 +3,14 @@ overpass, roundabout village, cable-stayed bridge over a valley. `render_all()` 
 renders for docs/roads/v2/."""
 import bpy, math, os
 from mathutils import Vector
-from .nodes import MRS
+from .nodes import depsgraph, set_scene, MRS
 from . import roads, junction, structures, terrain, qa
 
 
 def _scene(name):
     sc = bpy.data.scenes.get(name)
     if sc is None: sc = bpy.data.scenes.new(name)
-    bpy.context.window.scene = sc
+    set_scene(sc)
     col = bpy.data.collections.get(name + "_Roads")
     if col is None:
         col = bpy.data.collections.new(name + "_Roads"); sc.collection.children.link(col)
@@ -21,7 +21,8 @@ def _scene(name):
 
 def _ground(col, size=600.0, z=-0.02):
     me = bpy.data.meshes.new("MRS_Ground"); me.from_pydata([(-size, -size, z), (size, -size, z), (size, size, z), (-size, size, z)], [], [(0, 1, 2, 3)])
-    me.materials.append(bpy.data.materials[MRS + "Ground"]); o = bpy.data.objects.new("MRS_GroundPlane", me); col.objects.link(o); return o
+    from .props import mat
+    me.materials.append(mat(MRS + "Ground", (0.16, 0.24, 0.09), 0.95)); o = bpy.data.objects.new("MRS_GroundPlane", me); col.objects.link(o); return o
 
 
 def city_block():
@@ -134,10 +135,12 @@ def render_all(out_dir):
         "MRS_BridgeValley": [("over", (-120, -200, 90), (0, 0, 5), 35), ("deck", "road:BV_Bridge:0.1"), ("below", (0, -80, -2), (0, 0, 8), 30), ("east", "road:BV_East:0.3")],
     }
     paths = []
+    headless = getattr(bpy.context, "window", None) is None
     for scene_name, views in shots.items():
         sc = bpy.data.scenes.get(scene_name)
         if sc is None: continue
-        bpy.context.window.scene = sc
+        if headless and sc != bpy.context.scene: continue       # background: only the --scene passed on the command line
+        set_scene(sc)
         for v in views:
             name = v[0]; path = os.path.join(out_dir, "%s_%s.png" % (scene_name[4:].lower(), name))
             if isinstance(v[1], str):

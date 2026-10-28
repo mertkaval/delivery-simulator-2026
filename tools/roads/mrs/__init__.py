@@ -28,12 +28,11 @@ def build_all():
     materials.build_materials()
     materials.extra_materials()
     props.build_prop_collections()
-    road.build_road_group()
+    a = globals().get("assets")
+    if a and hasattr(a, "build_assets"): a.build_assets()        # the detailed library replaces the placeholders
+    road.build_road_group()                                       # after the collections exist: pick indices follow sorted names
     terrain.build_terrain_conform_group()
     roads.refresh_all()
-    for m in ("junction", "structures", "assets"):
-        mod = globals().get(m)
-        if mod and hasattr(mod, "build_groups"): mod.build_groups()
 
 
 def register():

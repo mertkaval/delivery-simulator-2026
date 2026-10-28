@@ -1,93 +1,128 @@
-# Mert Road Studio
+# Mert Road Studio v2
 
-A curve-driven road and street generator for Blender 5.2, built for the Godot delivery simulator.
-Everything is generated: an editable Geometry Nodes group, three editable shader groups, explicit
-junction meshes, placeholder props, a small N-panel, and a Godot export with separate collision.
+A procedural road-and-street generator for Blender 5.2, written as a Python package that builds
+its own Geometry Nodes groups, shader groups, prop library, junction builder, structures, N-panel,
+export and five sample scenes. Nothing is hand-modelled; `build_mrs.py` regenerates the whole
+deliverable `.blend` from source.
 
 ```
-exec(open("tools/roads/mert_road_studio.py").read())    # Blender text editor, or through Blender MCP
-mrs.build_groups(); mrs.register()                       # node groups, materials, props, the panel
-mrs.demo_scene()                                         # the validation scene (collection MRS_Demo)
-mrs.export_glb("assets/roads/mrs_demo.glb")              # + assets/roads/mrs_demo_collision.glb
+# in Blender (Python console / text editor) or through Blender MCP
+import sys; sys.path.insert(0, r"C:/GodotProjects/delivery-simulator-2026/tools/roads")
+import mrs; mrs.build_all(); mrs.register()          # groups, materials, props, panel
+mrs.samples.city_block()                             # one of five sample scenes
 ```
-Re-running the build replaces its own node groups, materials, placeholder props and the demo
-collection; other scene content is untouched. Generation is deterministic (seeds are inputs).
+Headless deliverable + smoke test + validation renders:
+`blender --background --factory-startup --python tools/roads/build_mrs.py -- tools/roads/mert_road_studio_v2.blend`
 
-Files: `tools/roads/mert_road_studio.py` (the source), `tmp/roads/mert_road_studio.blend` (demo
-scene with the groups), `assets/roads/mrs_demo.glb` + `mrs_demo_collision.glb` (export).
+Open `tools/roads/mert_road_studio_v2.blend` and the sidebar tab **Road Studio** (N panel) has
+everything; the modifier panel of a road shows all inputs grouped in panels.
 
-## How a road is made (`MRS_Road` node group, framed sections)
-- **Road_Profile** - half carriageway = lanes x lane width / 2 + shoulder + median / 2; curb and
-  sidewalk outer edges from the inputs.
-- **Road_Rail** - Trim Curve (Trim Start / End, in metres, set by the junction manager), Resample
-  by length (Resolution), Z-up normals, `along` (spline length) stored on the points.
-- **Road_Surface + Sidewalks_Curbs** - each strip is a Curve Line profile (x = lateral, z = up)
-  swept with Curve to Mesh: asphalt, curb face and top (both sides), sidewalk slab and outer
-  edge (switched by Sidewalk Left / Right), raised median (when Median > 0). The profile's
-  lateral position is stored as `lat`.
-- **Road_Markings** - thin strips at lateral offsets, 4 mm above the asphalt: centre line (0 none,
-  1 solid, 2 dashed, 3 double; none when there is a median), lane lines between lanes, edge
-  lines. Dashes are cut with `along mod (dash + gap) > dash` on the face domain.
-- **Roadside_Instances** - Curve to Points (Prop Spacing) on a rail shortened by Prop Clear at both
-  ends, moved sideways with `tangent x up`, alternating sides (Prop Side 0 / 1 / 2), a collection
-  pick by seeded random index, rotation aligned so the prop's +Y faces the road. Manholes the same
-  way on the carriageway. Realize Instances is for export.
-- **Road_Materials** - Asphalt / Marking / Concrete material inputs; `UVMap` = (lateral metres,
-  along metres) so texture scale is stable on any road length; Collision Only drops markings and
-  props for the collision export.
+## Package (`tools/roads/mrs/`)
+| module | what it builds |
+|---|---|
+| `nodes.py` | node-tree builder `T`, interface panels, menu switches, modifier input access |
+| `road.py` | **`MRS_Road`** Geometry Nodes group (~1800 nodes, 80 inputs in 10 panels) |
+| `terrain.py` | demo terrain, **`MRS_TerrainConform`** (pull terrain to roads), `conform_terrain()` |
+| `roads.py` | road objects, 6 presets, remembered inputs, `refresh_all()` |
+| `junction.py` | n-way junctions, roundabouts, dead ends, rebuild + auto-update handler |
+| `structures.py` | gantry signs with text, custom text signs, cable-stayed pylons + stays, tunnels, bus stops |
+| `materials.py` | shader groups `MRS_AsphaltShader` / `PaintShader` / `ConcreteShader`, presets, tile baking |
+| `props.py` / `assets.py` | prop collections the group instances from (placeholders / generated library) |
+| `ui.py` | N-panel and operators |
+| `export.py` | GLB export (+ collision GLB), export-ready mesh copies |
+| `samples.py` | city block, mountain road, highway + overpass, roundabout village, cable-stayed bridge |
+| `qa.py` | EEVEE validation renders, street-level camera on the evaluated road |
 
-Exposed inputs (all live): Lanes, Lane Width, Shoulder, Median, Sidewalk Left/Right, Sidewalk
-Width Left/Right, Sidewalk Height, Curb Width, Resolution, Centre Line, Lane Lines, Edge Lines,
-Marking Width, Dash Length, Dash Gap, the three materials, Trim Start/End, Props (collection), Prop
-Spacing / Offset / Side / Seed / Clear, Manholes (collection), Manhole Spacing, Realize Instances,
-Collision Only.
+## The road group (`MRS_Road`, one modifier on any curve)
+**Output** - Viewport / Render quality menus (Preview = 2.5x coarser sampling via *Is Viewport*),
+Realize Instances, Collision Only.
+**Terrain** - Terrain object / collection, Conform (raycast every rail point onto the terrain,
++Height Offset), Smoothing (Blur Attribute on the heights and on the banking), Embankment with
+Width and Softness (smoothstep slope to the terrain height sampled at every slope vertex; works for
+fill *and* cut), Retaining Wall above a cut-depth threshold.
+**Profile** - Lanes Forward / Backward (asymmetric), Lane Width, Shoulder, Bike Lane L/R, Parking
+L/R, Median + height, Curb width/height/bevel, Sidewalk L/R + widths, **Crown** (parabolic camber in
+%), **Superelevation** (banking from the signed turning angle between neighbouring tangents, blurred,
+capped in degrees, applied as curve tilt), Resolution.
+**Markings** - Centre Line menu (None / Solid / Dashed / Double), Lane Lines, Edge Lines, bike-lane
+and parking lines, Parking Ticks (instanced across the bay every Bay Length), **Lane Arrows** per lane
+before a junction (inner lane straight+left, outer straight+right, single lane straight), dash
+length/gap, marking width.
+**Structure** - Mode Ground / **Elevated** (deck of Deck Thickness under the surface, pillars from a
+collection every Pillar Spacing, each scaled to the raycast ground height), Barrier Left / Right menus
+(None / Guardrail / Jersey / Parapet / Railing), instanced 2 m segments.
+**Roadside** - Props (random pick, facing the road, on the sidewalk or the verge), Streetlights with
+Side menu (None / Left / Right / Both / Alternate), Trees with offset and jitter, Manholes, Drains.
+**Scatter** - grass / rocks distributed on embankment faces only.
+**Materials** - six material slots. **Junction** - Trim Start/End, Clear Start/End, height Locks
+(set by the junction builder so terrain-conformed roads meet a flat junction).
 
-Presets (`mrs.PRESETS`, panel buttons): **residential** (2 x 3.2 m, sidewalks 2 m, dashed centre),
-**urban** (4 x 3.5 m, 1.2 m median, shoulders, sidewalks 3 m, edge lines), **service** (one 4.5 m
-lane, shoulders, no sidewalks, edge lines).
+Mesh attributes: `lat`, `along` (metres), `side`, `kind` (0 asphalt 1 marking 2 concrete 3 structure
+4 embankment 5 bike), `UVMap` = (lateral m, along m).
 
-## Junctions (`mrs.build_junction`, panel "Connect Roads at Cursor")
-Explicit: the road ends within 0.6 m of the junction point are connected. For each pair of
-neighbouring approaches the asphalt, curb and sidewalk edge lines are intersected to get the
-corner points; each road is trimmed to just past its furthest corner (Trim Start / End) and its
-Prop Clear is set so no prop stands within 7 m of the junction. The junction object holds the
-asphalt polygon through the trimmed road corners, raised curb/sidewalk corner pieces between
-neighbouring approaches, a zebra crosswalk on every approach (0.6-3.1 m from the junction) and a
-stop line on the incoming half (right-hand traffic).
+Important Blender 5.2 facts learned the hard way: Curve to Mesh maps the profile's X to the lateral
+side, **profile Y to world *down*** (Z-up normals) and profile Z along the tangent; a menu socket's
+items only resolve when it feeds exactly one Menu Switch; fields evaluate in the context of the node
+that uses them (capture heights as attributes before moving points); a road that reads the terrain
+and a terrain that reads the roads is a dependency cycle - the conformed terrain is a second object
+sharing the mesh, the roads raycast the hidden source.
 
-Supported: 2, 3 or 4 roads meeting at one point, angles between neighbours >= 50 degrees,
-straight-through pairs (parallel edges), road ends within 0.05 m in height. Unsupported layouts
-raise an error naming the problem (too many roads, acute angle, height mismatch) instead of
-producing a fake junction. Not supported yet: roundabouts, slip lanes, roads joining mid-curve,
-junctions on slopes, different lane counts meeting with lane tapers.
+## Junctions (`mrs.junction`)
+`build_junction(name, at, roads, collection, crosswalks, stop_lines, corner_radius, traffic_lights,
+terrain)` - any number of approaches (neighbours >= 25 degrees). For each pair of neighbouring
+approaches the asphalt edge, curb line and sidewalk line are filleted with concentric arcs
+(radius adapts on sharp angles); roads are trimmed past the furthest tangent point, their roadside
+instances cleared, their heights locked to the junction level. The junction mesh carries the asphalt
+polygon, curb faces/tops, sidewalk slabs, zebra crosswalks, stop lines; traffic-light poles are placed
+on each corner facing the arriving traffic when the collection exists. Straight-through pairs make a
+continuous sidewalk. `build_roundabout` (island, ring, entry stubs, splitter islands, yield lines,
+outer sidewalk ring), `build_dead_end` (turning circle with sidewalk ring and the road trimmed at the
+circle). `rebuild_all()` recomputes every junction from the roads' current curves;
+`enable_auto_update()` does it when a road curve is edited.
 
-## Materials (shader groups `MRS_AsphaltShader`, `MRS_PaintShader`, `MRS_ConcreteShader`)
-Object-space coordinates in metres (same texel scale on every road). Asphalt: broad tone noise
-(Color Variation), Voronoi aggregate + fine grain (bump), repair patches (Voronoi cells gated by
-noise, Patch Amount: darker and smoother), Wetness darkens the colour and lowers roughness with
-puddles in the low areas of the broad noise. Paint: Paint Wear from a noise mask plus the asphalt
-aggregate showing through (colour, roughness and bump together). Concrete: variation, pores,
-slab joints every Slab Size metres, Wetness. Exposed: Asphalt Scale, Asphalt Roughness, Color
-Variation, Patch Amount, Wetness, Paint Wear, Concrete Variation, Bump Strength. Presets: dry / wet
-(panel buttons, `mrs.apply_material_preset`).
+## Asset library (`mrs.assets`, 95 generated objects)
+`build_assets()` fills the collections the road group instances from, all procedural bmesh with
+node materials, UVs and bevels, marked as assets with catalogs (`mark_assets`): Props 17 (bollards,
+benches, bins, hydrant, bike rack, planter, bus shelter, mailbox, kiosk, newspaper box, picnic table,
+fence post, utility pole), Streetlights 6 (emissive heads), Trees 9 species, **Signs 22 with real
+extruded text** (STOP, YIELD, 30/50/70/90, no entry, one way, parking, bus, taxi, crossing, children,
+roundabout, dead end, curves, roadworks, street-name blades) + `custom_sign(text)`, TrafficLights 4,
+Barriers 6 (guardrail, Jersey, parapet, railing, hedge, fence), Pillars 3, Scatter 9, Manholes 3,
+Drains 2, Markings 6, Structures 8 (gantry parts, pylon, abutment, tunnel portal, shelter, signal).
+Catalogue renders: `tmp/roads/assets/catalogue_*.png`; test: `tools/roads/tests/assets_test.py`.
 
-## Godot export (`mrs.export_glb`)
-Evaluated meshes (instances realized, materials and the metre UVs kept), GLB in metres with +Y up,
-and `<name>_collision.glb` with only the asphalt and concrete surfaces (no markings, no props).
-The procedural shaders do not transfer: in the game `CityForgeMaterials` maps `MRS_Asphalt`,
-`MRS_Paint` and `MRS_Concrete` to its own materials (scanned asphalt with the road shader, paint,
-baked paving). Baking the Blender asphalt to a tile is not done yet.
+## Structures (`mrs.structures`)
+`gantry_sign(road, along, texts)`, `text_sign(text, pos, shape, color)`, `cable_stays(road)`,
+`tunnel(road, a0, a1)` (horseshoe lining + portal frames), `bus_stop(road, along, side)`.
 
-## Validation (tmp/roads/*.png)
-Demo scene: straight urban avenue, residential streets, service road, S-curve with one sidewalk,
-tight bend without sidewalks, a 4-way and a T junction, dry and wet close-ups. Checked: parameter
-changes update the mesh (lanes, sidewalks, presets), no overlapping road strips at junctions
-(roads are trimmed), props clear of junctions and roads, markings 4 mm above the asphalt.
+## Terrain workflow
+1. `mrs.terrain.demo_terrain()` or your own mesh -> panel *Use Active as Terrain*.
+2. Roads conform to it (Conform on); embankments fill and cut.
+3. *Pull Terrain to Roads* makes `<terrain>_Conformed` with `MRS_TerrainConform` (subdivides near the
+   roads, lowers terrain under the surfaces, blends within Reach; never raises terrain, ignores decks).
+
+## Export
+`mrs.export.export_glb(path, collection)` - evaluated meshes, metre UVs, +Y up; `<path>_collision.glb`
+with kinds 0/2/3/4 only. `export_ready(objs)` converts to plain meshes. Procedural shaders need the
+baked tiles (`materials.bake_tiles`) in an engine.
+
+## Validation
+`tools/roads/build_mrs.py` is the test: it rebuilds everything headless, asserts >= 25 roads and
+>= 12 junctions evaluate to meshes with UVs, exports the city block and renders 20 views to
+`tmp/roads/v2/samples/`. Contact sheets of the validation renders are in `docs/roads/v2/`.
+
+## Reference research
+MRoadGen v1.1.0 (CC0, github.com/MaartenNauta-Pathtrace/MRoadGen) was downloaded to
+`tmp/reference/mroadgen/` and inspected headless: a 385-node generator over a mesh-edge network with
+raycast placement, outline expansion + merge-by-distance junctions, Delaunay embankments, overpass
+pillars, viewport/render quality menus and panelled inputs. Ideas taken: terrain raycast + smoothing,
+embankments, quality menus, input panels. Nothing was copied. City Road Maker 2.1 (Superhive) was only
+seen through its product page / docs page: junction "tongues", Extension Path/Square/Round, Pull
+Terrain, Export-Ready flags, 22 setups / 100+ assets - those feature categories guided the scope.
 
 ## Known limitations
-- Junction corners are straight chamfers (no rounded curb radius) and the junction surface is flat.
-- No lane tapers where a wide road meets a narrow one; no turn arrows; no traffic signals yet.
-- Props are placeholders (streetlight, bollard, barrier, tree, sign, bench, manhole): swap the
-  objects in the `MRS_Props` / `MRS_Manholes` collections for real assets.
-- Engine side: the demo GLB imports into Godot with the game's materials; traffic lanes for the AI
-  are not derived from these roads yet.
+- Roads must *end* at a junction (no joining mid-curve); junction surfaces are flat.
+- Retaining walls are per-station slabs (visible steps on steep cuts); the tunnel does not remove
+  the terrain above it (the conformed terrain is lowered under the road instead).
+- Lane tapers, turn pockets, slip lanes, pedestrian refuges and signal timing are not modelled.
+- Traffic lights / detailed props depend on the generated asset library (`assets.py`).

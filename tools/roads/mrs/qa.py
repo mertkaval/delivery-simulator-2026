@@ -1,7 +1,7 @@
 """QA renders (EEVEE) and contact sheets for validation."""
 import bpy, math, os
 from mathutils import Vector
-from .nodes import MRS
+from .nodes import depsgraph, set_scene, MRS, scene as _scene
 
 
 def ensure_camera_and_sun(scene):
@@ -31,7 +31,7 @@ def look(cam, eye, target, lens=35.0):
 def road_frame(road, t):
     """Position and unit tangent of the road's curve at parameter t (0..1), from the evaluated mesh
     centre line (lat ~ 0), so the camera follows the terrain-conformed height."""
-    dg = bpy.context.evaluated_depsgraph_get()
+    dg = depsgraph()
     me = road.evaluated_get(dg).to_mesh()
     lat = me.attributes["lat"].data; along = me.attributes["along"].data
     seen = {}
@@ -57,7 +57,7 @@ def road_view(path, road, t=0.3, lateral=2.0, height=1.7, ahead=40.0, lens=30.0,
 
 
 def render(path, eye, target, lens=35.0, res=(1280, 720), samples=24, scene=None):
-    scene = scene or bpy.context.scene
+    scene = scene or _scene()
     cam, _ = ensure_camera_and_sun(scene)
     look(cam, eye, target, lens)
     r = scene.render
@@ -67,7 +67,7 @@ def render(path, eye, target, lens=35.0, res=(1280, 720), samples=24, scene=None
     r.resolution_x, r.resolution_y = res; r.resolution_percentage = 100
     r.image_settings.file_format = "PNG"; r.filepath = os.path.abspath(path)
     os.makedirs(os.path.dirname(r.filepath), exist_ok=True)
-    bpy.ops.render.render(write_still=True)
+    bpy.ops.render.render(write_still=True, scene=scene.name)
     return r.filepath
 
 

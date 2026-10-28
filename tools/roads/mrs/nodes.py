@@ -174,3 +174,30 @@ def mod_input_get(mod, name):
         if entry is not None: return entry.value
     v = mod.get(item.identifier)
     return v if v is not None else getattr(item, "default_value", None)
+
+
+# ------------------------------------------------------------------ scene / depsgraph (works headless too)
+_SCENE = {"name": None}
+
+
+def set_scene(sc):
+    """Make `sc` the working scene: the window scene in the UI, a remembered scene headless
+    (background Blender has no window, so bpy.context.scene cannot be assigned)."""
+    _SCENE["name"] = sc.name
+    win = getattr(bpy.context, "window", None)
+    if win is not None:
+        try: win.scene = sc
+        except Exception: pass
+
+
+def scene():
+    sc = bpy.data.scenes.get(_SCENE["name"]) if _SCENE["name"] else None
+    return sc or bpy.context.scene
+
+
+def depsgraph():
+    """Evaluated depsgraph of the working scene (updated first when it is not the context scene)."""
+    sc = scene()
+    if sc == bpy.context.scene: return bpy.context.evaluated_depsgraph_get()
+    vl = sc.view_layers[0]; vl.update()
+    return vl.depsgraph

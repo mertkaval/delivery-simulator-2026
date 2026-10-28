@@ -41,7 +41,10 @@ def conform_terrain(source, roads_collection, sink=0.03, reach=3.0, subdivide=2,
     o = bpy.data.objects.get(name)
     if o is None:
         o = bpy.data.objects.new(name, source.data)
-        for c in source.users_collection: c.objects.link(o)
+    # never inside the roads collection it reads (that is a dependency cycle): link to the scene root
+    for c in list(o.users_collection): c.objects.unlink(o)
+    scenes = [sc for sc in bpy.data.scenes if source.name in sc.objects] or [bpy.context.scene]
+    for sc in scenes: sc.collection.objects.link(o)
     o.data = source.data; o.matrix_world = source.matrix_world.copy()
     mod = o.modifiers.get("MRS_TerrainConform") or o.modifiers.new("MRS_TerrainConform", "NODES")
     mod.node_group = bpy.data.node_groups[MRS + "TerrainConform"]

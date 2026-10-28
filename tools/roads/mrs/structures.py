@@ -3,14 +3,14 @@ stays, tunnel portals, bus stops, custom text signs. They are plain objects pare
 positioned with the road's evaluated centre line (so they follow the terrain-conformed height)."""
 import bpy, bmesh, math
 from mathutils import Vector
-from .nodes import MRS
+from .nodes import depsgraph, set_scene, MRS
 from .roads import road_widths
 
 
 def road_sample(road, along):
     """World position, unit tangent and right vector of the evaluated road centre line at `along`
     metres from its (trimmed) start."""
-    dg = bpy.context.evaluated_depsgraph_get()
+    dg = depsgraph()
     me = road.evaluated_get(dg).to_mesh()
     lat = me.attributes["lat"].data; al = me.attributes["along"].data
     seen = {}
@@ -30,7 +30,7 @@ def road_sample(road, along):
 
 
 def road_length(road):
-    dg = bpy.context.evaluated_depsgraph_get()
+    dg = depsgraph()
     me = road.evaluated_get(dg).to_mesh()
     al = me.attributes["along"].data; L = max(al[i].value for i in range(len(me.vertices))) if len(me.vertices) else 0.0
     road.evaluated_get(dg).to_mesh_clear(); return L
@@ -48,8 +48,8 @@ def _text_mesh(text, size, depth=0.004, align="CENTER"):
     cu = bpy.data.curves.new("mrs_txt", "FONT"); cu.body = text; cu.size = size; cu.extrude = depth; cu.align_x = align; cu.align_y = "CENTER"
     cu.resolution_u = 4
     tmp = bpy.data.objects.new("mrs_txt", cu)
-    dg = bpy.context.evaluated_depsgraph_get()
-    bpy.context.scene.collection.objects.link(tmp); dg = bpy.context.evaluated_depsgraph_get()
+    dg = depsgraph()
+    bpy.context.scene.collection.objects.link(tmp); dg = depsgraph()
     me = bpy.data.meshes.new_from_object(tmp.evaluated_get(dg))
     bpy.data.objects.remove(tmp); bpy.data.curves.remove(cu)
     return me

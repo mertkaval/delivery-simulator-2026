@@ -11,7 +11,7 @@ run along local Y (road side -X), pillars / pylon are 1 m tall units scaled in Z
 import math, os, random
 import bpy, bmesh
 from mathutils import Vector, Matrix, noise
-from .nodes import MRS
+from .nodes import depsgraph, set_scene, MRS
 from .props import collection, _poly, make
 
 TAU = math.pi * 2.0
@@ -158,14 +158,18 @@ def _prism(bm, pts, a0, a1, mi=0, axis="y"):
     for i in range(n): bm.faces.new((v0[i], v0[(i + 1) % n], v1[(i + 1) % n], v1[i])).material_index = mi
 
 
-def _band(bm, outer, inner, a0, a1, mi=0, axis="y"):
-    """Ring between two same-length polygons (border of a sign plate), extruded like _prism."""
+def _band(bm, outer, inner, a0, a1, mi=0, axis="y", closed=True):
+    """Ring between two same-length polygons (border of a sign plate), extruded like _prism.
+    closed=False makes an open strip (arch) with end caps."""
     def P(p, a):
         return (p[0], a, p[1]) if axis == "y" else ((p[0], p[1], a) if axis == "z" else (a, p[0], p[1]))
     n = len(outer)
     o0 = [bm.verts.new(P(p, a0)) for p in outer]; o1 = [bm.verts.new(P(p, a1)) for p in outer]
     i0 = [bm.verts.new(P(p, a0)) for p in inner]; i1 = [bm.verts.new(P(p, a1)) for p in inner]
-    for k in range(n):
+    if not closed:
+        bm.faces.new((o0[0], i0[0], i1[0], o1[0])).material_index = mi
+        bm.faces.new((o0[-1], o1[-1], i1[-1], i0[-1])).material_index = mi
+    for k in range(n if closed else n - 1):
         j = (k + 1) % n
         bm.faces.new((o1[k], o1[j], i1[j], i1[k])).material_index = mi
         bm.faces.new((o0[j], o0[k], i0[k], i0[j])).material_index = mi
@@ -284,7 +288,7 @@ def _text_mesh(text, size, depth):
     cu = bpy.data.curves.new("MRS_tmp_text", type="FONT")
     cu.body = text; cu.size = size; cu.extrude = depth / 2; cu.resolution_u = 3; cu.align_x = "CENTER"; cu.fill_mode = "BOTH"
     ob = bpy.data.objects.new("MRS_tmp_text", cu); bpy.context.scene.collection.objects.link(ob)
-    bpy.context.view_layer.update(); dg = bpy.context.evaluated_depsgraph_get()
+    bpy.context.view_layer.update(); dg = depsgraph()
     me = bpy.data.meshes.new_from_object(ob.evaluated_get(dg))
     bpy.data.objects.remove(ob); bpy.data.curves.remove(cu)
     return me
@@ -402,7 +406,7 @@ def _props():
     def hydrant(bm):
         _lathe(bm, [(0.14, 0), (0.14, 0.06), (0.1, 0.08), (0.1, 0.5), (0.13, 0.52), (0.13, 0.56), (0.1, 0.58), (0.1, 0.72), (0.12, 0.74), (0.08, 0.84), (0.0, 0.86)], 14, 0)
         _cyl(bm, 0, 0, 0.86, 0.92, 0.035, 0.035, 6, 1, smooth=False)
-        for sx in (-1, 1): _tube(bm, [(sx * 0.09, 0, 0.42), (sx * 0.2, 0, 0.42)], 0.05, 10, 0); _cyl(bm, sx * 0.2, 0, 0.42, 0.42, 0.055, 0.055, 10, 1)
+        for sx in (-1, 1): _tube(bm, [(sx * 0.09, 0, 0.42), (sx * 0.2, 0, 0.42)], 0.05, 10, 0); _tube(bm, [(sx * 0.2, 0, 0.42), (sx * 0.24, 0, 0.42)], 0.056, 10, 1)
         _tube(bm, [(0, 0.09, 0.36), (0, 0.19, 0.36)], 0.065, 10, 0); _tube(bm, [(0, 0.19, 0.36), (0, 0.22, 0.36)], 0.07, 10, 1)
     make2(col, "MRS_Hydrant", hydrant, [m["red"], m["iron"]], 0.006)
 
@@ -620,7 +624,7 @@ def _plate(bm, pts, zc, mi, post=True, y=0.045, x_post=0.0):
     """Post + clamp + plate (3 mm) centred at height zc facing +Y. Returns the front y of the plate."""
     top = zc + max(z for _, z in pts)
     if post:
-        _cyl(bm, x_post, 0, 0, top - 0.04, 0.035, 0.035, 10, S_POST); _cyl(bm, x_post, 0, top - 0.04, top - 0.03, 0.038, 0.0, 10, S_POST, caps=False)
+        _cyl(bm, x_post, 0, 0, top - 0.04, 0.035, 0.035, 10, S_POST); _lathe(bm, [(0.038, top - 0.04), (0.0, top - 0.03)], 10, S_POST, x=x_post)
     _box(bm, x_post - 0.055, 0.0, zc - 0.03, x_post + 0.055, y - 0.001, zc + 0.03, S_POST)
     _prism(bm, [(x, z + zc) for x, z in pts], y - 0.004, y - 0.001, S_BACK)
     _prism(bm, [(x, z + zc) for x, z in pts], y - 0.001, y + 0.002, mi)
@@ -660,7 +664,7 @@ def _signs():
 
     def one_way(bm):
         pts = _shape("rect", 0.3, 1.0); yf = _plate(bm, pts, Z, S_BLUE)
-        _prism(bm, _xf(_arrow_pts(0.8, 0.08, 0.22, 0.2), -math.pi / 2, -0.4, Z + 0.06), yf, yf + 0.002, S_WHITE)
+        _prism(bm, _xf(_arrow_pts(0.8, 0.08, 0.18, 0.2), -math.pi / 2, -0.4, Z + 0.05), yf, yf + 0.002, S_WHITE)
         _text(bm, "ONE WAY", 0.07, (0, yf, Z - 0.08), mi=S_WHITE)
     sign("OneWay", one_way)
 
@@ -737,7 +741,7 @@ def _signs():
 
     for nm, (a, b) in (("StreetName_A", ("MAPLE AVE", "3RD ST")), ("StreetName_B", ("HARBOUR RD", "KING ST"))):
         def blades(bm, a=a, b=b):
-            _cyl(bm, 0, 0, 0, 2.75, 0.035, 0.035, 10, S_POST); _cyl(bm, 0, 0, 2.75, 2.77, 0.04, 0.0, 10, S_POST, caps=False)
+            _cyl(bm, 0, 0, 0, 2.75, 0.035, 0.035, 10, S_POST); _lathe(bm, [(0.04, 2.75), (0.0, 2.77)], 10, S_POST)
             r = [(-0.42, -0.1), (0.42, -0.1), (0.42, 0.1), (-0.42, 0.1)]
             _prism(bm, [(x, z + 2.62) for x, z in r], 0.035, 0.041, S_GREEN); _prism(bm, [(x, z + 2.62) for x, z in _inset(r, 0.012)], 0.041, 0.042, S_WHITE)
             _prism(bm, [(x, z + 2.62) for x, z in _inset(r, 0.016)], 0.042, 0.043, S_GREEN); _text(bm, a, 0.1, (0, 0.043, 2.62), mi=S_WHITE, max_width=0.72)
@@ -813,8 +817,8 @@ def _traffic_lights():
     def mast_arm(bm):
         _cyl(bm, 0, 0, 0, 0.05, 0.28, 0.28, 14, 0); _cyl(bm, 0, 0, 0.05, 6.4, 0.16, 0.1, 14, 0)
         _tube(bm, [(0, 0, 6.2), (0, 0.3, 6.25), (0, 5.0, 6.05)], 0.08, 10, 0)
-        _tube(bm, [(0, 0.1, 5.0), (0, 2.2, 6.0)], 0.035, 8, 0)
-        for y in (2.4, 4.6): _cyl(bm, 0, y, 5.0, 6.0, 0.03, 0.03, 8, 0); _signal_head(bm, 0.0, y, 4.0, 1, (2, 3, 4))
+        _tube(bm, [(0, 0.1, 5.0), (0, 2.2, 6.15)], 0.035, 8, 0)
+        for y in (2.4, 4.6): _cyl(bm, 0, y, 4.9, 6.3, 0.03, 0.03, 8, 0); _signal_head(bm, 0.0, y, 4.0, 1, (2, 3, 4))
         _signal_head(bm, 0.0, 0.0, 3.0, 1, (2, 3, 4), w=0.26, d=0.2); _cyl(bm, 0, 0, 2.9, 3.0, 0.05, 0.05, 10, 0)
     make2(col, "MRS_Signal_MastArm", mast_arm, mats, 0.008)
 
@@ -822,7 +826,7 @@ def _traffic_lights():
         _cyl(bm, 0, 0, 0, 0.03, 0.12, 0.12, 12, 0); _cyl(bm, 0, 0, 0.03, 1.25, 0.05, 0.045, 12, 0)
         _box(bm, -0.06, -0.08, 0.95, 0.07, 0.08, 1.15, 1); _tube(bm, [(-0.06, 0, 1.05), (-0.09, 0, 1.05)], 0.03, 10, 5)
         _box(bm, -0.05, -0.1, 1.25, 0.05, 0.1, 1.4, 5); _box(bm, -0.051, -0.08, 1.28, -0.05, 0.08, 1.37, 1)
-        _cyl(bm, 0, 0, 1.4, 1.42, 0.055, 0.0, 12, 0, caps=False)
+        _lathe(bm, [(0.055, 1.4), (0.0, 1.42)], 12, 0)
     make2(col, "MRS_Signal_PushButton", push_button, mats, 0.004)
     return col
 
@@ -831,10 +835,7 @@ def _traffic_lights():
 def _offset_polyline(pts, d):
     out = []
     for i, (x, z) in enumerate(pts):
-        nx = nz = 0.0
-        for a, b in ((pts[i - 1], pts[i]) if i > 0 else None, (pts[i], pts[i + 1]) if i < len(pts) - 1 else None):
-            if a is None: continue
-        segs = []
+        nx = nz = 0.0; segs = []
         if i > 0: segs.append((pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]))
         if i < len(pts) - 1: segs.append((pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]))
         for dx, dz in segs:
@@ -851,8 +852,8 @@ def _barriers():
         back = _offset_polyline(front, 0.004)
         _prism(bm, front + back[::-1], -1.0, 1.0, 0)
         _box(bm, 0.0, -0.05, 0.0, 0.09, 0.05, 0.74, 1); _box(bm, -0.04, -0.06, 0.47, 0.0, 0.06, 0.745, 1)
-        for z in (0.51, 0.7): _tube(bm, [(-0.047, 0, z), (-0.06, 0, z)], 0.014, 8, 0)
-        _box(bm, -0.11, -0.03, 0.597, -0.1, 0.03, 0.618, 2)
+        _tube(bm, [(-0.047, 0, 0.607), (-0.062, 0, 0.607)], 0.014, 8, 0)
+        _box(bm, -0.108, -0.03, 0.688, -0.1, 0.03, 0.722, 2)
     make2(col, "MRS_Guardrail", guardrail, [m["steel"], m["metal"], m["white"]], 0.004)
 
     def jersey(bm):
@@ -877,7 +878,7 @@ def _barriers():
     make2(col, "MRS_Railing", railing, [m["steel"]])
 
     def hedge(bm):
-        _ico(bm, (0, 0, 0.5), 1.0, 4, (1.02, 0.32, 0.52), 0.07, 3.0, 21, 0, zmin=0.0)
+        _ico(bm, (0, 0, 0.5), 1.0, 4, (0.32, 1.02, 0.52), 0.07, 3.0, 21, 0, zmin=0.0)
     make2(col, "MRS_Hedge", hedge, [m["leaf_bush"]])
 
     def fence(bm):
@@ -895,21 +896,23 @@ def _barriers():
 def _pillars():
     col = collection(MRS + "Pillars"); c = M["concrete"]; r = M["rubber"]
 
+    def pads(bm, xs):
+        for x in xs: _box(bm, x - 0.2, -0.2, 0.96, x + 0.2, 0.2, 1.0, 1)
+
     def rect_pier(bm):
-        _box(bm, -1.6, -0.9, 0.0, 1.6, 0.9, 0.06, 0); _box(bm, -0.8, -0.5, 0.06, 0.8, 0.5, 0.86, 0)
-        _prism(bm, [(-1.7, 0.86), (1.7, 0.86), (1.7, 0.98), (1.55, 1.0), (-1.55, 1.0), (-1.7, 0.98)], -0.6, 0.6, 0)
-        for x in (-1.2, 1.2): _box(bm, x - 0.2, -0.2, 1.0, x + 0.2, 0.2, 1.0 + 1e-9, 1)
-    make2(col, "MRS_Pier_Rect", lambda bm: (rect_pier(bm)), [c, r], 0.02)
+        _box(bm, -1.6, -0.9, 0.0, 1.6, 0.9, 0.06, 0); _box(bm, -0.8, -0.5, 0.06, 0.8, 0.5, 0.84, 0)
+        _prism(bm, [(-1.7, 0.84), (1.7, 0.84), (1.7, 0.94), (1.55, 0.96), (-1.55, 0.96), (-1.7, 0.94)], -0.6, 0.6, 0); pads(bm, (-1.2, 1.2))
+    make2(col, "MRS_Pier_Rect", rect_pier, [c, r], 0.02)
 
     def twin_round(bm):
-        for x in (-1.0, 1.0): _cyl(bm, x, 0, 0, 0.05, 0.6, 0.6, 16, 0); _cyl(bm, x, 0, 0.05, 0.85, 0.45, 0.45, 16, 0)
-        _prism(bm, [(-1.7, 0.85), (1.7, 0.85), (1.7, 1.0), (-1.7, 1.0)], -0.6, 0.6, 0)
-        _box(bm, -0.3, -0.35, 0.3, 0.3, 0.35, 0.5, 0)
+        for x in (-1.0, 1.0): _cyl(bm, x, 0, 0, 0.05, 0.6, 0.6, 16, 0); _cyl(bm, x, 0, 0.05, 0.82, 0.45, 0.45, 16, 0)
+        _prism(bm, [(-1.7, 0.82), (1.7, 0.82), (1.7, 0.96), (-1.7, 0.96)], -0.6, 0.6, 0)
+        _box(bm, -0.3, -0.35, 0.3, 0.3, 0.35, 0.5, 0); pads(bm, (-1.0, 1.0))
     make2(col, "MRS_Pier_TwinRound", twin_round, [c, r], 0.02)
 
     def hammerhead(bm):
         _box(bm, -1.0, -0.8, 0.0, 1.0, 0.8, 0.06, 0); _box(bm, -0.6, -0.45, 0.06, 0.6, 0.45, 0.72, 0)
-        _prism(bm, [(-0.75, 0.72), (0.75, 0.72), (1.9, 0.9), (1.9, 1.0), (-1.9, 1.0), (-1.9, 0.9)], -0.5, 0.5, 0)
+        _prism(bm, [(-0.75, 0.72), (0.75, 0.72), (1.9, 0.88), (1.9, 0.96), (-1.9, 0.96), (-1.9, 0.88)], -0.5, 0.5, 0); pads(bm, (-1.3, 1.3))
     make2(col, "MRS_Pier_Hammerhead", hammerhead, [c, r], 0.02)
     return col
 
@@ -949,7 +952,7 @@ def _manholes():
     col = collection(MRS + "Manholes"); m = M; T = 0.015
 
     def round1(bm):
-        _cyl(bm, 0, 0, 0, T, 0.33, 0.33, 28, 0); _lathe(bm, [(0.3, T), (0.3, T + 0.003), (0.28, T + 0.003), (0.28, T)], 28, 0, caps=False)
+        _cyl(bm, 0, 0, 0, T, 0.33, 0.33, 28, 0); _lathe(bm, [(0.3, T), (0.3, T + 0.003), (0.28, T + 0.003), (0.28, T), (0.3, T)], 28, 0, caps=False)
         for k in range(8):
             a = TAU * k / 8; _prism(bm, _xf([(-0.015, 0.06), (0.015, 0.06), (0.015, 0.26), (-0.015, 0.26)], a), T, T + 0.004, 1, "z")
     make2(col, "MRS_Manhole_Round1", round1, [m["iron"], m["metal"]])
@@ -984,10 +987,9 @@ def _drains():
         _band(bm, [(-0.25, -0.2), (0.25, -0.2), (0.25, 0.2), (-0.25, 0.2)], [(-0.22, -0.17), (0.22, -0.17), (0.22, 0.17), (-0.22, 0.17)], 0.0, 0.01, 0, "z")
         _prism(bm, [(-0.22, -0.17), (0.22, -0.17), (0.22, 0.17), (-0.22, 0.17)], 0.0, 0.002, 1, "z")
         _box(bm, -0.22, -0.012, 0.0, 0.22, 0.012, 0.01, 0)
-        for i in range(8):
-            y0 = -0.17 + i * 0.045
-            _prism(bm, _xf([(-0.011, -0.075), (0.011, -0.075), (0.011, 0.075), (-0.011, 0.075)], 0.5, -0.11, y0 + 0.02), 0.0, 0.01, 0, "z")
-            _prism(bm, _xf([(-0.011, -0.075), (0.011, -0.075), (0.011, 0.075), (-0.011, 0.075)], -0.5, 0.11, y0 + 0.02), 0.0, 0.01, 0, "z")
+        for i in range(7):
+            y0 = -0.135 + i * 0.045; bar = [(-0.011, -0.05), (0.011, -0.05), (0.011, 0.05), (-0.011, 0.05)]
+            _prism(bm, _xf(bar, 0.5, -0.11, y0), 0.0, 0.01, 0, "z"); _prism(bm, _xf(bar, -0.5, 0.11, y0), 0.0, 0.01, 0, "z")
     make2(col, "MRS_Gully2", gully2, [m["iron"], m["black"]])
     return col
 
@@ -1056,7 +1058,7 @@ def _structures():
     def abutment(bm):
         _box(bm, -5.0, -1.2, 0.0, 5.0, 0.0, 4.0, 0); _box(bm, -5.0, 0.0, 0.0, 5.0, 0.7, 3.2, 0)
         _box(bm, -5.6, -1.6, 0.0, 5.6, 0.2, 0.3, 0)
-        for s in (-1, 1): _prism(bm, [(-1.2, 0.0), (-1.2, 4.3), (-4.2, 4.3), (-4.2, 1.5), (-1.2, 0.0)][:4], s * 5.0, s * 5.0 + s * 0.6, 0, "x")
+        for s in (-1, 1): _prism(bm, [(-1.2, 0.0), (-1.2, 4.0), (-4.2, 1.5), (-4.2, 0.0)], s * 5.0, s * 5.0 + s * 0.6, 0, "x")
         for x in (-3.0, 0.0, 3.0): _box(bm, x - 0.4, 0.1, 3.2, x + 0.4, 0.6, 3.3, 1)
     make2(col, "MRS_Abutment", abutment, [m["concrete"], m["rubber"]], 0.03)
 
@@ -1066,10 +1068,9 @@ def _structures():
         for x, z in inner:
             kx = 6.8 / abs(x) if abs(x) > 1e-6 else 1e9; kz = 7.2 / z if z > 1e-6 else 1e9; k = min(kx, kz)
             outer.append((x * k, z * k))
-        inner = [(-6.8, 0.0)] + inner + [(6.8, 0.0)]; outer = [(-6.8, 0.0)] + outer + [(6.8, 0.0)]
-        _band(bm, outer, inner, 0.0, 1.0, 0); _box(bm, -6.9, -0.1, 7.2, 6.9, 1.0, 7.6, 0)
-        for s in (-1, 1): _box(bm, s * 6.8 - (0.5 if s < 0 else 0), -0.05, 0.0, s * 6.8 + (0.5 if s > 0 else 0), 1.0, 7.2, 0)
-        _band(bm, [(x * 1.0, z * 1.0) for x, z in inner], [(x * 0.96, z * 0.96 - (0.0 if z > 0.01 else 0.0)) for x, z in inner], -0.06, 0.0, 1)
+        _band(bm, outer, inner, 0.0, 1.0, 0, closed=False); _box(bm, -6.9, -0.12, 7.2, 6.9, 1.0, 7.6, 0)
+        for s in (-1, 1): _box(bm, s * 6.5 - 0.3, -0.2, 0.0, s * 6.5 + 0.3, 0.0, 7.2, 0)
+        _band(bm, inner, [(x * 0.95, z * 0.95) for x, z in inner], -0.06, 0.0, 1, closed=False)
     make2(col, "MRS_TunnelPortal", tunnel_portal, [m["concrete"], m["grey"]], 0.0)
 
     def bus_stop_shelter(bm):
@@ -1093,7 +1094,7 @@ def _structures():
         _prism(bm, [(x, z + 3.3) for x, z in pts], 1.38, 1.4, 7); _prism(bm, [(x, z + 3.3) for x, z in pts], 1.4, 1.403, 5)
         _band(bm, [(x, z + 3.3) for x, z in pts], [(x, z + 3.3) for x, z in _inset(pts, 0.02)], 1.403, 1.405, 2)
         _figure(bm, 0.0, 3.08, 0.36, 1.403, 1.405, 2, 0.25)
-        for s in (-1, 1): _cyl(bm, s * 0.3, 1.5, 4.12, 4.2, 0.08, 0.08, 10, 6); _cyl(bm, s * 0.3, 1.5, 4.2, 4.21, 0.09, 0.0, 10, 0, caps=False)
+        for s in (-1, 1): _cyl(bm, s * 0.3, 1.5, 4.12, 4.2, 0.08, 0.08, 10, 6); _lathe(bm, [(0.09, 4.2), (0.0, 4.22)], 10, 0, x=s * 0.3, y=1.5)
         _ped_unit(bm, 0.0, 0.0, 2.2, 1, 3, 4)
         _box(bm, -0.06, -0.08, 1.05, 0.08, 0.08, 1.25, 1); _tube(bm, [(-0.06, 0, 1.15), (-0.09, 0, 1.15)], 0.03, 10, 5)
     make2(col, "MRS_Crosswalk_Signal", crosswalk_signal, [m["metal"], m["black"], m["black"], m["lens_red"], m["lens_green"], m["sign_yellow"], m["lens_amber"], m["grey"]], 0.006)

@@ -105,7 +105,15 @@ INPUTS = [
     ]),
 ]
 KIND = dict(asphalt=0, marking=1, concrete=2, structure=3, embankment=4, bike=5)
-BARRIERS = ["None", "Guardrail", "Jersey", "Parapet", "Railing"]
+BARRIERS = ["None", "Guardrail", "Jersey", "Parapet", "Railing", "Hedge", "Fence"]
+
+
+def _coll_index(coll_name, obj_name):
+    """Collection Info lists children sorted by object name: the pick index of `obj_name` in the
+    collection as it exists at build time (-1 when missing)."""
+    col = bpy.data.collections.get(coll_name)
+    names = sorted(o.name for o in col.objects) if col else []
+    return names.index(obj_name) if obj_name in names else -1
 SIDES = ["None", "Left", "Right", "Both", "Alternate"]
 
 
@@ -309,7 +317,7 @@ def build_road_group():
     bcoll = tb.n("GeometryNodeCollectionInfo", transform_space="RELATIVE"); tb.inp(bcoll, "Collection", I("Barriers")); tb.inp(bcoll, "Separate Children", True); tb.inp(bcoll, "Reset Children", True)
     barriers = []
     for sgn, sw, menu in ((1.0, sw_r, I("Barrier Right")), (-1.0, sw_l, I("Barrier Left"))):
-        bidx = tb.menu_switch(menu, [(nm, i - 1) for i, nm in enumerate(BARRIERS)], "INT", "barrier")
+        bidx = tb.menu_switch(menu, [(nm, -1 if nm == "None" else _coll_index(MRS + "Barriers", MRS + nm)) for nm in BARRIERS], "INT", "barrier")
         bp, bside = points_along(2.0, I("Clear Start"), I("Clear End"))
         moved = tb.n("GeometryNodeSetPosition"); tb.inp(moved, "Geometry", bp.outputs["Points"])
         tb.inp(moved, "Offset", tb.vmath("ADD", tb.vmath("SCALE", bside, scale=tb.math("MULTIPLY", tb.math("SUBTRACT", sw, 0.25), sgn)), tb.combine(0.0, 0.0, H)))
@@ -400,7 +408,7 @@ def build_road_group():
         tb.inp(mv, "Offset", tb.vmath("ADD", tb.vmath("SCALE", tside, scale=tb.math("MULTIPLY", xc, sgn)), tb.combine(0.0, 0.0, tb.math("ADD", camber(xc), 0.004))))
         al = tb.n("FunctionNodeAlignRotationToVector", axis="Y", pivot_axis="Z"); tb.inp(al, "Vector", tp.outputs["Tangent"])
         io = tb.n("GeometryNodeInstanceOnPoints"); tb.inp(io, "Points", mv.outputs[0]); tb.inp(io, "Instance", mcoll.outputs[0]); tb.inp(io, "Pick Instance", True)
-        tb.inp(io, "Instance Index", 5); tb.inp(io, "Rotation", al.outputs[0]); tb.inp(io, "Scale", tb.combine(tb.math("SUBTRACT", pw, 0.1), mw, 1.0))
+        tb.inp(io, "Instance Index", _coll_index(MRS + "Markings", MRS + "MarkTick")); tb.inp(io, "Rotation", al.outputs[0]); tb.inp(io, "Scale", tb.combine(tb.math("SUBTRACT", pw, 0.1), mw, 1.0))
         ticks.append(tb.switch(tb.boolean("AND", I("Parking Ticks"), tb.compare("GREATER_THAN", pw, 0.05)), tb.empty(), io.outputs[0], "GEOMETRY"))
     # lane arrows before a junction: forward lanes at the end, backward lanes at the start
     arrows = []
@@ -414,9 +422,10 @@ def build_road_group():
         xl = tb.math("MULTIPLY", tb.math("ADD", med_half, tb.math("MULTIPLY", tb.math("ADD", pidx, 0.5), lw)), sgn)
         tb.inp(pts, "Position", tb.vmath("ADD", samp.outputs["Position"], tb.vmath("ADD", tb.vmath("SCALE", s_side, scale=xl), tb.combine(0.0, 0.0, tb.math("ADD", camber(xl), 0.004)))))
         al = tb.n("FunctionNodeAlignRotationToVector", axis="Y", pivot_axis="Z"); tb.inp(al, "Vector", tb.vmath("SCALE", samp.outputs["Tangent"], scale=sgn))
-        # 0 straight, 1 left, 2 right, 3 straight+left, 4 straight+right: inner lane turns left, outer right, single lane straight
+        # inner lane straight+left, outer lane straight+right, middle / single lane straight (indices by sorted name)
+        A = lambda nm: _coll_index(MRS + "Markings", MRS + nm)
         is_inner = tb.compare("EQUAL", pidx, 0, "INT"); is_outer = tb.compare("EQUAL", pidx, tb.math("SUBTRACT", n_l, 1.0), "INT")
-        aidx = tb.switch(tb.compare("EQUAL", n_l, 1, "INT"), tb.switch(is_inner, tb.switch(is_outer, 0, 4, "INT"), 3, "INT"), 0, "INT")
+        aidx = tb.switch(tb.compare("EQUAL", n_l, 1, "INT"), tb.switch(is_inner, tb.switch(is_outer, A("ArrowStraight"), A("ArrowStraightRight"), "INT"), A("ArrowStraightLeft"), "INT"), A("ArrowStraight"), "INT")
         io = tb.n("GeometryNodeInstanceOnPoints"); tb.inp(io, "Points", pts.outputs[0]); tb.inp(io, "Instance", mcoll.outputs[0]); tb.inp(io, "Pick Instance", True)
         tb.inp(io, "Instance Index", aidx); tb.inp(io, "Rotation", al.outputs[0])
         trim_here = I("Trim End") if at_end else I("Trim Start")
@@ -493,7 +502,7 @@ def build_road_group():
     scoll = tb.n("GeometryNodeCollectionInfo", transform_space="RELATIVE"); tb.inp(scoll, "Collection", I("Scatter")); tb.inp(scoll, "Separate Children", True); tb.inp(scoll, "Reset Children", True)
     srnd = tb.n("FunctionNodeRandomValue", data_type="INT"); tb.inp(srnd, "Min", 0); tb.inp(srnd, "Max", 100); tb.inp(srnd, "Seed", I("Scatter Seed"))
     srot = tb.n("FunctionNodeRandomValue", data_type="FLOAT"); tb.inp(srot, "Min", 0.0); tb.inp(srot, "Max", 6.283); tb.inp(srot, "Seed", tb.math("ADD", I("Scatter Seed"), 5.0))
-    sscl = tb.n("FunctionNodeRandomValue", data_type="FLOAT"); tb.inp(sscl, "Min", 0.6); tb.inp(sscl, "Max", 1.4); tb.inp(sscl, "Seed", tb.math("ADD", I("Scatter Seed"), 9.0))
+    sscl = tb.n("FunctionNodeRandomValue", data_type="FLOAT"); tb.inp(sscl, "Min", 0.5); tb.inp(sscl, "Max", 1.0); tb.inp(sscl, "Seed", tb.math("ADD", I("Scatter Seed"), 9.0))
     sio = tb.n("GeometryNodeInstanceOnPoints"); tb.inp(sio, "Points", dist.outputs["Points"]); tb.inp(sio, "Instance", scoll.outputs[0]); tb.inp(sio, "Pick Instance", True)
     tb.inp(sio, "Instance Index", R(srnd)); tb.inp(sio, "Rotation", tb.combine(0.0, 0.0, R(srot))); tb.inp(sio, "Scale", tb.combine(R(sscl), R(sscl), R(sscl)))
     scatter = tb.switch(tb.compare("GREATER_THAN", I("Scatter Density"), 0.001), tb.empty(), sio.outputs[0], "GEOMETRY")
