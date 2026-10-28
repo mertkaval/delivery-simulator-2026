@@ -287,7 +287,14 @@ def build_road_group():
     try: res.inputs["Mode"].default_value = "Length"
     except Exception: res.mode = "LENGTH"
     tb.inp(res, "Length", I("Resolution"))
-    normal_mode = tb.n("GeometryNodeSetCurveNormal", mode="Z_UP"); tb.inp(normal_mode, "Curve", res.outputs[0])
+    normal_mode = tb.n("GeometryNodeSetCurveNormal"); tb.inp(normal_mode, "Curve", res.outputs[0])
+    for attempt in ("Z Up", "Z_UP", "ZUp"):
+        try:
+            if "Mode" in normal_mode.inputs: normal_mode.inputs["Mode"].default_value = attempt
+            elif hasattr(normal_mode, "mode"): normal_mode.mode = attempt
+            break
+        except Exception:
+            continue
     sp = tb.n("GeometryNodeSplineParameter")
     along = tb.n("GeometryNodeStoreNamedAttribute", data_type="FLOAT", domain="POINT"); tb.inp(along, "Geometry", normal_mode.outputs[0]); tb.inp(along, "Name", "along"); tb.inp(along, "Value", sp.outputs["Length"])
     rail = along.outputs[0]
@@ -383,8 +390,9 @@ def build_road_group():
     sgn_sel = tb.switch(tb.compare("EQUAL", I("Prop Side"), 2, "INT"), tb.switch(tb.compare("EQUAL", I("Prop Side"), 0, "INT"), 1.0, -1.0), tb.math("SUBTRACT", tb.math("MULTIPLY", alt, 2.0), 1.0))
     off_l = tb.math("ADD", sw_l_out, I("Prop Offset")); off_r = tb.math("ADD", sw_r_out, I("Prop Offset"))
     # props stand on the sidewalk when there is one, else on the verge beyond the curb
-    dist_l = tb.switch(I("Sidewalk Left"), tb.math("ADD", curb_out, I("Prop Offset")), tb.math("SUBTRACT", sw_l_out, 0.6), "FLOAT")
-    dist_r = tb.switch(I("Sidewalk Right"), tb.math("ADD", curb_out, I("Prop Offset")), tb.math("SUBTRACT", sw_r_out, 0.6), "FLOAT")
+    # with a sidewalk: Prop Offset behind the curb on the slab; without: on the verge, 0.6 m further out
+    dist_l = tb.switch(I("Sidewalk Left"), tb.math("ADD", curb_out, tb.math("ADD", I("Prop Offset"), 0.6)), tb.math("ADD", curb_out, I("Prop Offset")), "FLOAT")
+    dist_r = tb.switch(I("Sidewalk Right"), tb.math("ADD", curb_out, tb.math("ADD", I("Prop Offset"), 0.6)), tb.math("ADD", curb_out, I("Prop Offset")), "FLOAT")
     dist = tb.switch(tb.compare("LESS_THAN", sgn_sel, 0.0), dist_r, dist_l, "FLOAT")
     up_l = tb.switch(I("Sidewalk Left"), 0.0, H, "FLOAT"); up_r = tb.switch(I("Sidewalk Right"), 0.0, H, "FLOAT")
     up = tb.switch(tb.compare("LESS_THAN", sgn_sel, 0.0), up_r, up_l, "FLOAT")
@@ -501,10 +509,23 @@ def add_road_modifier(o, preset="residential", **overrides):
     return mod
 
 
+def _item(mod, name):
+    return next(i for i in mod.node_group.interface.items_tree if getattr(i, "in_out", "") == "INPUT" and i.name == name)
+
+
 def _set_input(mod, name, value):
-    g = mod.node_group
-    item = next(i for i in g.interface.items_tree if getattr(i, "in_out", "") == "INPUT" and i.name == name)
-    mod[item.identifier] = value
+    """Modifier input by socket name. Blender 5.x: mod.properties.inputs.<identifier>.value;
+    older: the id-property mod[identifier]."""
+    ident = _item(mod, name).identifier
+    props = getattr(mod, "properties", None)
+    if props is not None and hasattr(props, "inputs"):
+        entry = getattr(props.inputs, ident, None)
+        if entry is None:
+            try: entry = props.inputs[ident]
+            except Exception: entry = None
+        if entry is not None:
+            entry.value = value; return
+    mod[ident] = value
 
 
 def set_road(o, preset=None, **overrides):
@@ -526,7 +547,11 @@ def set_road(o, preset=None, **overrides):
 
 def road_input(o, name):
     mod = o.modifiers["MRS_Road"]
-    item = next(i for i in mod.node_group.interface.items_tree if getattr(i, "in_out", "") == "INPUT" and i.name == name)
+    item = _item(mod, name)
+    props = getattr(mod, "properties", None)
+    if props is not None and hasattr(props, "inputs"):
+        entry = getattr(props.inputs, item.identifier, None)
+        if entry is not None: return entry.value
     v = mod.get(item.identifier)
     return v if v is not None else item.default_value
 
@@ -591,11 +616,14 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
         a, b = approaches[i], approaches[(i + 1) % n]
         la = a["d"].cross(up).normalized(); lb = b["d"].cross(up).normalized()      # right-hand side vectors of each outgoing direction
         # a's left edge (looking out) is at -la ... counter-clockwise order: a's left edge meets b's right edge
-        C = _line_x(at - la * a["half"], a["d"], at + lb * b["half"], b["d"])
-        Ck = _line_x(at - la * (a["half"] + a["curb"]), a["d"], at + lb * (b["half"] + b["curb"]), b["d"])
-        swa = a["swl"] if True else 0.0; swb = b["swr"]
-        Cs = _line_x(at - la * (a["half"] + a["curb"] + swa), a["d"], at + lb * (b["half"] + b["curb"] + swb), b["d"])
-        if C is None: raise ValueError("%s: parallel approaches" % name)
+        swa, swb = a["swl"], b["swr"]
+        def corner(offa, offb):
+            c = _line_x(at - la * offa, a["d"], at + lb * offb, b["d"])
+            # a straight-through pair (parallel edges): the corner is the edge point at the junction centre
+            return c if c is not None else at - la * max(offa, offb)
+        C = corner(a["half"], b["half"])
+        Ck = corner(a["half"] + a["curb"], b["half"] + b["curb"])
+        Cs = corner(a["half"] + a["curb"] + swa, b["half"] + b["curb"] + swb)
         corners.append(dict(C=C, Ck=Ck, Cs=Cs, a=a, b=b, la=la, lb=lb))
     # trim each approach to just past the furthest corner it touches
     for i, a in enumerate(approaches):

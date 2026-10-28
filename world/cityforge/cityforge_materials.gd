@@ -26,6 +26,7 @@ const SURFACES := {
 	"CF_SignPlate": [8, "ffffff"], "CF_SignEdge": [0, "f2f2ee"], "CF_VendGlow": [0, "e8f2ff", 1.2], "CF_PostRed": [8, "b0140f"],
 	"CF_Posters": [0, "e6d8b8"], "CF_Brass": [8, "b8903a"], "CF_Plaque": [0, "efe8d4"], "CF_Parasol": [0, "efe6d2"],
 	"CF_RoofSeamV": [8, "ffffff"],
+	"MRS_Paint": [0, "e6e4da"], "MRS_Concrete": [2, "ffffff"], "MRS_Asphalt": [1, "ffffff"],
 	"CF_LampGlow": [0, "fff1c8", 2.5], "CF_SignalRed": [0, "e0281c", 1.6], "CF_SignalAmber": [0, "ffaa1a", 0.25],
 	"CF_SignalGreen": [0, "2fe08a", 0.25], "CF_SignalWalk": [0, "f5f2e6", 0.8],
 }
@@ -38,7 +39,7 @@ const TEXTURED := {
 	"CF_RoofV": "shingle_asphalt", "CF_RoofSlate": "slate", "CF_RoofTerracotta": "terracotta", "CF_RoofKawara": "kawara",
 	"CF_RoofSeam": "standing_seam", "CF_RoofSeamV": "standing_seam", "CF_Plaster": "stucco", "CF_Concrete": "concrete", "CF_Curb": "concrete", "CF_Sidewalk": "paving",
 	"CF_Path": "paving", "CF_Cobbles": "cobbles", "CF_Hedge": "hedge", "CF_Tatami": "tatami", "CF_FloorTiles": "floor_tiles",
-	"CF_Parquet": "parquet", "CF_RoofFlat": "concrete",
+	"CF_Parquet": "parquet", "CF_RoofFlat": "concrete", "MRS_Concrete": "paving", "MRS_Asphalt": "asphalt",
 }
 const MAT_DIR := "res://assets/cityforge/materials/"
 
@@ -52,6 +53,16 @@ static func get_material(name: String) -> Material:
 	var key := name.get_slice(".", 0)          # Blender duplicates: CF_Glass.001
 	if cache.has(key): return cache[key]
 	var material: Material
+	if key == "MRS_Asphalt" and not ResourceLoader.exists(MAT_DIR + "asphalt_albedo.jpg"):
+		key = "MRS_AsphaltTex"                   # no baked asphalt tile yet: the game's scanned asphalt
+		var road := ShaderMaterial.new()
+		road.shader = preload("res://world/roads/road_surface.gdshader")
+		road.set_shader_parameter("asphalt", load(TEX + "asphalt_03_Diffuse.jpg"))
+		road.set_shader_parameter("asphalt_normal", load(TEX + "asphalt_03_nor_gl.jpg"))
+		road.set_shader_parameter("asphalt_rough", load(TEX + "asphalt_03_Rough.jpg"))
+		road.set_shader_parameter("lane_centre", -1.0)
+		cache[name.get_slice(".", 0)] = road
+		return road
 	if key == "CF_Asphalt":
 		var road := ShaderMaterial.new()
 		road.shader = preload("res://world/cityforge/cityforge_road.gdshader")
@@ -96,7 +107,7 @@ static func apply(mesh: Mesh) -> void:
 	for s in mesh.get_surface_count():
 		var m := mesh.surface_get_material(s)
 		var key: String = m.resource_name if m != null else ""
-		if key.begins_with("CF_"):
+		if key.begins_with("CF_") or key.begins_with("MRS_"):
 			mesh.surface_set_material(s, get_material(key))
 
 ## Lit windows and lamps follow the time of day (0 by day, 1 at night).
