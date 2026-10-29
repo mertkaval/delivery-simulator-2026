@@ -121,7 +121,9 @@ def _end_section(road, start):
     rx = (n * slx - sl * sx) / den; ry = (n * sly - sl * sy) / den
     E = Vector(((sx - rx * sl) / n, (sy - ry * sl) / n, 0.0)); R = Vector((rx, ry, 0.0))
     if R.length < 0.5: return None
-    return E, R.normalized()
+    # R keeps its fitted length: a banked end (tilted junction plane) is narrower in plan by cos(bank), and the
+    # junction's edge points E + R * lat then land on the road's own edges
+    return E, (R.normalized() if abs(R.length - 1.0) < 1e-4 else R)
 
 
 def _actual_ends(approaches, at, setback, cw):
@@ -148,7 +150,7 @@ def _actual_ends(approaches, at, setback, cw):
             # the cached centre line left a 0.7 m wedge at the curved S-curve end
             E, Rr = sec
             a["E"] = E; a["R"] = Rr * (1.0 if a["start"] else -1.0)
-            t = UP.cross(Rr).normalized(); a["D"] = t * (1.0 if a["start"] else -1.0)
+            t = UP.cross(Rr.normalized()).normalized(); a["D"] = t * (1.0 if a["start"] else -1.0)
         else:
             a["end_fit"] = "centre_line"
             print("junction: end section of %s not found; centre-line end used" % road.name)
@@ -165,11 +167,15 @@ def _actual_ends(approaches, at, setback, cw):
             a["ramp_f"] = 1.0
 
 
-def _set_end(a, trim, clear, lock_z, ramp=False):
+def _set_end(a, trim, clear, lock_z, ramp=False, bank=0.0):
     mod = a["road"].modifiers["MRS_Road"]
     s = a["start"]
     values = {("Trim Start" if s else "Trim End"): trim, ("Clear Start" if s else "Clear End"): clear, ("Lock Start" if s else "Lock End"): True,
               ("Lock Start Z" if s else "Lock End Z"): lock_z, ("Ramp Start" if s else "Ramp End"): bool(ramp)}
+    try:
+        if mod.node_group.interface.items_tree.get("Bank Start") is not None: values["Bank Start" if s else "Bank End"] = float(bank)
+    except Exception:
+        pass
     for k, v in values.items(): mod_input_set(mod, k, v)
     inputs = dict(a["road"].get("mrs_inputs", {})); inputs.update(values); a["road"]["mrs_inputs"] = inputs
     a["road"].update_tag()
@@ -218,7 +224,7 @@ CONTROLS = ("none", "signals", "stop", "yield", "priority")
 
 def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True, corner_radius=6.0, traffic_lights=False,
                    snap=0.8, terrain=None, lights_collection=None, crossing="zebra", stop_setback=0.6, refuge=True, control=None,
-                   main_roads=None, bike_crossings=True, crossing_width=2.5):
+                   main_roads=None, bike_crossings=True, crossing_width=2.5, edge_depth=0.0, plane=None, z=None):
     """Connect the road ends within `snap` of `at`. Any number (>= 2) of approaches; neighbours must be at
     least 25 degrees apart. Builds the asphalt surface with filleted corners, curb / paving corner pieces,
     crossings (zebra or parallel lines) with ramps on the roads, stop lines set back from the crossing,
@@ -235,7 +241,11 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
         if n > 2 and ang < 25.0: raise ValueError("%s: roads %s and %s meet at %.0f degrees (min 25)" % (name, a["road"].name, b["road"].name, ang))
     zs = [a["p"].z for a in approaches]
     if max(zs) - min(zs) > 1.5: raise ValueError("%s: road ends differ in height by %.1f m (max 1.5 for a flat junction)" % (name, max(zs) - min(zs)))
-    z = _ground_z(at, terrain) if terrain is not None else sum(zs) / len(zs)
+    if z is None: z = _ground_z(at, terrain) if terrain is not None else sum(zs) / len(zs)
+    # plane = (gx, gy): the junction surface is the tilted plane z + g . (p - at) (a junction on a slope); every vertex,
+    # the road locks and the road ends' cross-fall follow it
+    gx, gy = (float(plane[0]), float(plane[1])) if plane else (0.0, 0.0)
+    def dz(p): return gx * (p.x - at.x) + gy * (p.y - at.y)
     if control is None: control = "signals" if traffic_lights else ("priority" if n >= 3 else "none")
     traffic_lights = control == "signals"
     main_roads = set(main_roads or [])
@@ -276,12 +286,15 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
         a["trim"] = max(reach + 0.3, a["half"] + 1.0)
         a["cross"] = crosswalks and (a["swl"] > 0 or a["swr"] > 0)
         clear = a["trim"] + (stop_setback + cw + 5.0 if a["cross"] else 3.0)
-        _set_end(a, a["trim"], clear, z, ramp=a["cross"])
+        E0 = at + a["d"] * a["trim"]
+        # the road's own right vector at this end: along d at a start, against d at an end
+        rv = Vector((a["d"].y, -a["d"].x, 0.0)) if a["start"] else Vector((-a["d"].y, a["d"].x, 0.0))
+        _set_end(a, a["trim"], clear, z + dz(E0), ramp=a["cross"], bank=math.atan(gx * rv.x + gy * rv.y))
         mod = a["road"].modifiers["MRS_Road"]
         mod_input_set(mod, "Ramp Offset", stop_setback); mod_input_set(mod, "Ramp Width", cw)
     _actual_ends(approaches, at, stop_setback, cw)
     bm = bmesh.new()
-    def V(p, zz): return bm.verts.new((p.x, p.y, zz))
+    def V(p, zz): return bm.verts.new((p.x, p.y, zz + dz(p)))
     def quad(p0, p1, p2, p3, zz, mat):
         try:
             ff = bm.faces.new([V(p, zz) for p in (p0, p1, p2, p3)]); ff.material_index = mat; return ff
@@ -334,10 +347,10 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
             tt = k / (mm - 1) * (len(ring) - 1); i0 = int(tt); i1 = min(len(ring) - 1, i0 + 1); f_ = tt - i0
             return ring[i0] * (1 - f_) + ring[i1] * f_
         corner_paths.append({"a": approaches.index(a), "b": approaches.index(b),
-                             "points": [[round(c, 3) for c in ((_sp(r1, k) + _sp(r2, k)) * 0.5).to_2d()] + [round(top(k / (mm - 1)), 3)] for k in range(mm)]})
+                             "points": [[round(c, 3) for c in ((_sp(r1, k) + _sp(r2, k)) * 0.5).to_2d()] + [round(top(k / (mm - 1)) + dz((_sp(r1, k) + _sp(r2, k)) * 0.5), 3)] for k in range(mm)]})
         loft(r0, r0, z, top, 2); loft(r0, r1, top, top, 2)
         if a["swl"] > 0 or b["swr"] > 0:
-            loft(r1, r2, top, top, 3); loft(r2, r2, top, z, 2)
+            loft(r1, r2, top, top, 3); loft(r2, r2, top, z - edge_depth, 2)
     crossings_meta = []
     for ai, a in enumerate(approaches):
         r = a["R"]; end = a["E"]
@@ -406,17 +419,17 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
                 quad(end + r * med, end - r * med, base - r * med, base + r * med, z + 0.02, 5)
     meta = {"at": list(at), "roads": [a["road"].name for a in approaches], "crosswalks": crosswalks, "stop_lines": stop_lines, "corner_radius": corner_radius,
             "traffic_lights": traffic_lights, "control": control, "main_roads": sorted(main_roads), "terrain": terrain.name if terrain else "", "z": z, "type": "junction",
-            "crossing": crossing, "stop_setback": stop_setback, "refuge": refuge, "crossings": crossings_meta, "corner_paths": corner_paths,
+            "crossing": crossing, "stop_setback": stop_setback, "refuge": refuge, "crossings": crossings_meta, "corner_paths": corner_paths, "plane": [gx, gy],
             "approaches": [{"road": a["road"].name, "end": "start" if a["start"] else "end", "heading": [a["d"].x, a["d"].y], "trim": a["trim"],
                             "lanes_in": a["lanes_in"], "lanes_out": a["lanes_out"],
                             "half_l": a["half_l"], "half_r": a["half_r"], "main": a["road"].name in main_roads} for a in approaches]}
     o = _mesh_object(name, bm, collection, _mats(), meta)
     if traffic_lights and n >= 3:
-        _place_signals(name, o, at, z, approaches, corners, collection)
+        _place_signals(name, o, at, z, approaches, corners, collection, dz)
     return o
 
 
-def _place_signals(name, jobj, at, z, approaches, corners, collection):
+def _place_signals(name, jobj, at, z, approaches, corners, collection, dz=None):
     """Signal poles on the corners: the pole at corner (a, b) stands on a's left sidewalk corner and faces
     the cars arriving on a (looking out along a); combined vehicle + pedestrian head. IDs link heads to
     approaches and crossings; phases pair opposite approaches (no conflicting greens)."""
@@ -437,6 +450,7 @@ def _place_signals(name, jobj, at, z, approaches, corners, collection):
         mid = ring[len(ring) // 2]
         out_v = (mid - at); out_v.z = 0; out_v.normalize()
         pos = Vector((mid.x, mid.y, z + max(a["h"], b["h"]))) + out_v * 0.7
+        if dz is not None: pos.z += dz(pos)
         d = a["d"]
         sid = "%s_S%d" % (name, i)
         if signage is not None:

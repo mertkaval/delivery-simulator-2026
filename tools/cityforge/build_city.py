@@ -486,7 +486,9 @@ def build_public(pb, m):
     d = min(pb["size"][1], 30.0)
     H = st["floors"] * 3.8 + 0.6
     sub = Mesh()
-    sub.box(-w / 2 - 3, -d / 2 - 3, -0.5, w / 2 + 3, d / 2 + 8, 0.2, "CF_Sidewalk")
+    # the forecourt reaches over CityForge's own verge and sidewalk; Mert Road Studio streets have their own, so it
+    # stops at the lot line there (3 m in front of the building) instead of lying 1 cm over the new paving
+    sub.box(-w / 2 - 3, -d / 2 - 3, -0.5, w / 2 + 3, d / 2 + (3.0 if CITY.get("streets") == "mrs" else 8.0), 0.2, "CF_Sidewalk")
     sub.box(-w / 2, -d / 2, -0.8, w / 2, d / 2, H, st["mat"], col=st["col"], top=False, zb=0.0)
     flat_band = Mesh()
     sub.box(-w / 2, -d / 2, H, w / 2, d / 2, H + 0.2, "CF_RoofFlat")
@@ -643,17 +645,20 @@ def collect():
     parts = {}
     def M(c, part):
         return parts.setdefault(c, {}).setdefault(part, Mesh())
-    for r in CITY["roads"]:
+    # streets = "mrs": Mert Road Studio built the roads, junctions, sidewalks, lanes and bridges
+    # (tools/cityforge/mrs_streets.py -> assets/cityforge/mrs); CityForge keeps lots, buildings, ground
+    own_streets = CITY.get("streets", "cityforge") != "mrs"
+    for r in CITY["roads"] if own_streets else ():
         a, b = NODES[r["a"]]["pos"], NODES[r["b"]]["pos"]
         c = chunk_of((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
         build_road(r, M(c, "Roads"), M(c, "Walks"))
-    for nid, poly in PATCHES.items():
+    for nid, poly in PATCHES.items() if own_streets else ():
         c = chunk_of(*NODES[nid]["pos"])
         build_patch(nid, M(c, "Roads"))
-    for nid, quad in CORNERS:
+    for nid, quad in CORNERS if own_streets else ():
         c = chunk_of(*NODES[nid]["pos"])
         build_corner(quad, M(c, "Walks"))
-    for ln in CITY["lanes"]:
+    for ln in CITY["lanes"] if own_streets else ():
         c = chunk_of((ln["a"][0] + ln["b"][0]) / 2, ln["a"][1])
         build_lane(ln, M(c, "Roads"))
     houses = {h["lot"]: h for h in CITY["houses"]}

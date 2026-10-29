@@ -35,6 +35,10 @@ var far_nodes: Dictionary = {}           ## Vector2i -> GeometryInstance3D
 var collided: Dictionary = {}            ## Vector2i -> true once its collision exists
 var lots_by_chunk: Dictionary = {}
 var stats: Dictionary = {}
+## Mert Road Studio streets (plan streets = "mrs"): roads, junctions, sidewalks, lanes, bridges and street assets.
+var mrs: MrsCityStreets = null
+## CityForge street props the Mert Road Studio placement replaces (not drawn when mrs is set).
+const MRS_REPLACED := ["lamp", "traffic_light", "bus_stop", "hydrant", "bench", "stop_sign", "street_sign"]
 var _focus_timer := 0.0
 
 func _ready() -> void:
@@ -54,12 +58,19 @@ func build() -> void:
 	grid = int(city.grid)
 	cell = float(city.cell_m)
 	heights = FileAccess.get_file_as_bytes(DIR + "heights.f32").to_float32_array()
+	if str(city.get("streets", "cityforge")) == "mrs" and MrsCityStreets.available():
+		mrs = MrsCityStreets.new(self)
 	_build_ground_collision()
 	_load_kit()
 	_load_chunks()
+	if mrs != null:
+		mrs.attach_chunks()
+		mrs.plant_trees()
+		stats["mrs"] = mrs.stats
 	_place_instances()
 	_place_labels()
-	_place_sign_labels()
+	if mrs != null: mrs.place_labels()
+	else: _place_sign_labels()
 	stats["build_ms"] = Time.get_ticks_msec() - t0
 
 ## City plan metres (x east, y north) and a height -> Godot position.
@@ -113,6 +124,7 @@ func _build_ground_collision() -> void:
 func _load_kit() -> void:
 	_load_kit_file(DIR + "kit.glb")
 	if ResourceLoader.exists(DIR + "houses.glb"): _load_kit_file(DIR + "houses.glb")      # the house catalogue (houses.py)
+	if mrs != null: mrs.load_kit(kit)
 
 func _load_kit_file(path: String) -> void:
 	var scene := (load(path) as PackedScene).instantiate()
@@ -203,11 +215,13 @@ func _place_instances() -> void:
 		_add(groups, TREES[int(t[4])], [t[0], t[1]], float(t[2]), float(t[3]), Vector3.ONE * s, Color(str(choices[(k * 7919) % choices.size()])), Color.WHITE)
 	for kind: String in ["lamp", "traffic_light", "bus_stop", "hydrant", "bench", "stop_sign", "utility_pole", "vending_machine",
 			"post_box", "phone_box", "ad_column", "cesme", "cafe_set"]:
+		if mrs != null and kind in MRS_REPLACED: continue
 		for p: Array in props.get(kind, []):
 			_add(groups, kind, [p[0], p[1]], float(p[2]), float(p[3]), Vector3.ONE, Color.WHITE, Color.WHITE)
 	# street-name boards: a pole and two blades in the district's colours (the names are Label3Ds)
 	var cultures: Dictionary = city.get("cultures", {})
-	for p: Array in props.get("street_sign", []):
+	if mrs != null: mrs.add_instances(groups)
+	for p: Array in (props.get("street_sign", []) if mrs == null else []):
 		var sign_col := Color(str((cultures.get(str(p[7]), {"sign": "1f6b3a"}) as Dictionary).sign))
 		_add(groups, "sign_pole", [p[0], p[1]], float(p[2]), 0.0, Vector3.ONE, Color.WHITE, Color.WHITE)
 		_add(groups, "sign_blade", [p[0], p[1]], float(p[2]) + 2.95, float(p[3]), Vector3.ONE, sign_col, Color.WHITE)
@@ -222,7 +236,7 @@ func _place_instances() -> void:
 		var items: Array = groups[key]
 		count += items.size()
 		var detail := name_ in ["hydrant", "bench", "stop_sign", "sign_pole", "sign_blade", "vending_machine", "post_box", "phone_box",
-			"ad_column", "cesme", "cafe_set"]
+			"ad_column", "cesme", "cafe_set"] or (name_.begins_with("MRS_") and not MrsCityStreets.is_street_kind(name_))
 		var in_far := name_.begins_with("house_") or name_.begins_with("H_") or name_ == "garage" or name_.begins_with("tree_")
 		var mi := _multimesh(kit[name_][0] as Mesh, items)
 		mi.name = "%s_%d_%d" % [name_, cell_key.x, cell_key.y]
@@ -320,8 +334,18 @@ func _place_labels() -> void:
 		add_child(label)
 
 # --- collision near the focus ----------------------------------------------------------------
-## Call with the player's position (cheap; does real work only every half second and per new chunk).
+## Call with the player's position (cheap; does real work only every half second and per new chunk). In play
+## (small delta) a new chunk's collision is queued as jobs, one per frame (its street, walk, building and fence
+## trimeshes, then its boxes), so entering an area does not stall a frame; delta >= 1 builds at once.
 func update_focus(p: Vector3, delta: float = 1.0) -> void:
+	if not _jobs.is_empty():
+		var t := Time.get_ticks_usec()
+		var job := _jobs.pop_front() as Callable
+		job.call()
+		var ms := (Time.get_ticks_usec() - t) / 1000.0
+		if ms > float(stats.get("collision_job_max_ms", 0.0)):
+			stats["collision_job_max_ms"] = snappedf(ms, 0.1)
+			stats["collision_job_max"] = str(job.get_bound_arguments()[1].name) if job.get_bound_arguments_count() > 1 and job.get_bound_arguments()[1] is Node else "boxes"
 	_focus_timer -= delta
 	if _focus_timer > 0.0: return
 	_focus_timer = 0.5
@@ -330,24 +354,46 @@ func update_focus(p: Vector3, delta: float = 1.0) -> void:
 		if collided.has(key): continue
 		var centre := Vector2((key.x + 0.5) * CHUNK, (key.y + 0.5) * CHUNK)
 		if q.distance_to(centre) < COLLISION_RADIUS + CHUNK * 0.71:
-			_build_chunk_collision(key)
+			if delta >= 1.0: _build_chunk_collision(key)
+			else:
+				_queue_chunk_collision(key)
+				return
+
+var _jobs: Array[Callable] = []
 
 func _build_chunk_collision(key: Vector2i) -> void:
+	var jobs := _chunk_collision_jobs(key)
+	for job: Callable in jobs: job.call()
+
+func _queue_chunk_collision(key: Vector2i) -> void:
+	_jobs.append_array(_chunk_collision_jobs(key))
+
+func _chunk_collision_jobs(key: Vector2i) -> Array[Callable]:
 	collided[key] = true
 	var chunk: Node3D = chunks[key]
 	var body := StaticBody3D.new()
 	body.name = "Collision"
 	chunk.add_child(body)
+	var jobs: Array[Callable] = []
 	for node in chunk.find_children("*", "MeshInstance3D", true, false):
 		var mi := node as MeshInstance3D
 		var part := str(mi.name).get_slice("_", 0)
-		if part in ["Roads", "Walks", "Buildings", "Fences"]:
-			var shape := mi.mesh.create_trimesh_shape()
-			var col := CollisionShape3D.new()
-			col.shape = shape
-			col.transform = mi.transform
-			body.add_child(col)
-	# repeated models: boxes (houses, garages) and thin posts
+		if part in ["Roads", "Walks", "Buildings", "Fences", "MrsCol"]:
+			jobs.append(_trimesh_job.bind(body, mi))
+	jobs.append(_box_job.bind(body, key))
+	return jobs
+
+func _trimesh_job(body: StaticBody3D, mi: MeshInstance3D) -> void:
+	if not is_instance_valid(body) or not is_instance_valid(mi): return
+	var col := CollisionShape3D.new()
+	col.name = str(mi.name)            # <part>_*: tests and debugging tell street, walk and building surfaces apart
+	col.shape = mi.mesh.create_trimesh_shape()
+	col.transform = mi.transform
+	body.add_child(col)
+
+## Repeated models: boxes (houses, garages), thin posts, the MRS street assets.
+func _box_job(body: StaticBody3D, key: Vector2i) -> void:
+	if not is_instance_valid(body): return
 	var lo := Vector2(key.x * CHUNK, key.y * CHUNK)
 	var hi := lo + Vector2(CHUNK, CHUNK)
 	for hs: Dictionary in city.houses:
@@ -355,7 +401,8 @@ func _build_chunk_collision(key: Vector2i) -> void:
 	for g: Dictionary in city.garages:
 		_box_if_inside(body, g.pos, lo, hi, float(g.h), float(g.yaw), Vector3(6.4, 3.4, 6.4))
 	var props: Dictionary = city.props
-	for kind: String in ["lamp", "traffic_light", "tree"]:
+	if mrs != null: mrs.add_item_colliders(body, lo, hi)
+	for kind: String in (["lamp", "traffic_light", "tree"] if mrs == null else ["tree"]):
 		for p: Array in props[kind]:
 			_box_if_inside(body, [p[0], p[1]], lo, hi, float(p[2]), 0.0, Vector3(0.45, 4.0, 0.45))
 
@@ -520,3 +567,4 @@ func house_door(hs: Dictionary) -> Vector3:
 
 func set_night(amount: float) -> void:
 	CityForgeMaterials.set_night(amount)
+	MrsCityStreets.set_night(amount)

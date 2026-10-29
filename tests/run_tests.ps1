@@ -28,6 +28,17 @@ foreach ($testFile in @('city_conflict_test.gd')) {
     }
 }
 
+# Port Halden's Mert Road Studio streets: loaded in place of CityForge's, solid on every street and sidewalk
+# (trimesh collision from imported meshes needs a renderer).
+foreach ($testFile in @('port_halden_streets_test.gd')) {
+    $result = & $Godot --path $projectPath --quit-after 6000 --script "res://tests/$testFile" 2>&1
+    $status = $LASTEXITCODE
+    $result | Write-Output
+    if ($status -ne 0 -or ($result -match 'SCRIPT ERROR|FAIL:') -or -not ($result -match 'PORT_HALDEN_STREETS: [0-9]+ checks, 0 failures')) {
+        throw "Test failed: $testFile"
+    }
+}
+
 # Frame-time / boot / video-memory budgets of the real game on the reference machine (rendered).
 foreach ($testFile in @('perf_budget_test.gd')) {
     $result = & $Godot --path $projectPath --quit-after 6000 --script "res://tests/$testFile" 2>&1

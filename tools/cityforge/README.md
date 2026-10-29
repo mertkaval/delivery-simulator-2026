@@ -1,15 +1,17 @@
 # CityForge: the generated city (Port Halden)
 
-The whole city is generated from two spec files, in about a minute, by one command:
+The whole city is generated from two spec files by one command (about 35 minutes, almost all of it the
+streets; `--cf-streets` builds CityForge's own simple street ribbons instead, in about a minute):
 
 ```
-tools/cityforge/build.sh            # terrain -> plan -> Blender build -> assets/cityforge -> Godot import -> test
+tools/cityforge/build.sh            # terrain -> plan -> MRS streets -> Blender build -> assets/cityforge -> Godot import -> test
 ```
 
 | Step | Script | Output |
 |---|---|---|
 | Terrain | `tools/terrain/city_terrain.py` + `port_halden_terrain.json` | relief, hills, lake, river, sea, harbour inlet (`terrain.npz`) |
 | Plan | `plan_city.py` + `port_halden_city.json` (+ `overrides.json`) | `city.json`: every road, lot, house, fence, shop, tower, park, lamp, sign, tree, name and address; the ground graded under roads and lots |
+| Streets | `mrs_streets.py` (Blender, headless): Mert Road Studio (`tools/roads/mrs/citynet.py`, `city.py`) | `mrs/`: roads, junctions, crossings, sidewalks, back lanes, bridges per chunk + collision, the street-asset kit, `mrs_city.json` (instances, signals, labels, trees); the plan without CityForge's street props, ground fitted under the streets. Details: `docs/roads/CITY.md` |
 | Build | `build_city.py` (Blender, headless) with `geo.py`, `kit.py` | `kit.glb` (repeated models, LOD0 + LOD1), `chunks/c_i_j.glb` (64 × 256 m), `outskirts.glb`, a preview `.blend` |
 | Game | `world/cityforge/cityforge_world.gd` (`CityForgeWorld`) | the city in Godot: chunks, MultiMesh instances with HLOD, ground + building collision |
 | QA | `qa_render.py` (Blender renders), `tests/capture_cityforge.gd` (Godot renders), `tests/cityforge_test.gd` | evidence and contracts |

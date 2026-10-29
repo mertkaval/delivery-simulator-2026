@@ -773,7 +773,8 @@ def _lights(ctx, m):
                 lit.append(ok)
                 lg = pr.get("_lighting")
                 if lg is not None:
-                    try: lg.add_light_sources(ok, pr)
+                    try:
+                        if RULES.get("light_sources", True): lg.add_light_sources(ok, pr)
                     except Exception as e: _skip(ctx, m, "light_source", a, "lighting error %s" % e)
         a += spacing; k += 1
     ctx.setdefault("lights", {})[m.name] = lit
@@ -814,6 +815,7 @@ def _utilities(ctx, m):
         if not R["cabinets"]: continue
         for end, ap in ctx["ends"][m.name].items():
             if ap.get("type") == "dead_end": continue
+            if R.get("cabinet_controls") and ap.get("control", "none") not in R["cabinet_controls"]: continue     # e.g. signal controllers only
             a_end, dirn = _end_span(m, end)
             base = a_end + dirn * (ap.get("setback", 0.6) + 2.5 + R["crossing_landing"] + R["corner_extra"] + R["sightline"] + 1.5)
             if not (m.A0 < base < m.A1): continue
@@ -926,7 +928,7 @@ def _trees(ctx, m):
     """Street trees in planting strips (or tree pits with grates in a furniture zone >= 1.3 m), species
     from the street style; each candidate tries species / scales until the crown clears traffic (crown
     base over the carriageway), cycleways, streetlight heads, sign and signal sightlines and footbridges."""
-    R = RULES; rng = ctx["rng"]; pool = STYLE_TREES.get(ctx["style"], STYLE_TREES["avenue"])
+    R = RULES; rng = ctx["rng"]; pool = STYLE_TREES.get(R.get("road_styles", {}).get(m.name, ctx["style"]), STYLE_TREES["avenue"])
     lights = ctx.get("lights", {}).get(m.name, [])
     heads = []
     for lo in lights:

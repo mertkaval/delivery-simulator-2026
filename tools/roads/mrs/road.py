@@ -22,6 +22,8 @@ half widths at the station), `side` (normal vector), `upv`, `drain` (0..1 gutter
 import bpy, math
 from .nodes import T, MRS, new_tree, sock, add_inputs
 
+BANK_SIGN = -1.0         # curve tilt sign for "right side up" (tools/roads/tests/road_bank_test.py measures it)
+
 INPUTS = [
     ("Output", [
         ("Viewport Quality", "NodeSocketMenu", "Preview", None, None, "Mesh density in the viewport"),
@@ -65,6 +67,7 @@ INPUTS = [
         ("Sidewalk Width Left", "NodeSocketFloat", 2.0, 0.5, 8.0, "Total width incl. the planting strip"), ("Sidewalk Width Right", "NodeSocketFloat", 2.0, 0.5, 8.0, ""),
         ("Planting Strip Left", "NodeSocketFloat", 0.0, 0.0, 3.0, "Grass / furniture strip between curb and paving (m)"),
         ("Planting Strip Right", "NodeSocketFloat", 0.0, 0.0, 3.0, ""),
+        ("Edge Depth", "NodeSocketFloat", 0.0, 0.0, 3.0, "The sidewalk's back edge (the kerb back without a sidewalk) reaches this far below the road level (hides the ground under city streets)"),
         ("Crown", "NodeSocketFloat", 2.0, 0.0, 6.0, "Cross-fall from the centre to the edges (%)"),
         ("Superelevation", "NodeSocketFloat", 4.0, 0.0, 12.0, "Maximum banking in bends (degrees, 0 = flat)"),
         ("Resolution", "NodeSocketFloat", 1.0, 0.2, 10.0, "Sampling step along the road (m)"),
@@ -132,6 +135,8 @@ INPUTS = [
         ("Lock End", "NodeSocketBool", False, None, None, "Blend the end height to Lock End Z (junction level)"),
         ("Lock End Z", "NodeSocketFloat", 0.0, -1000.0, 1000.0, ""),
         ("Lock Length", "NodeSocketFloat", 14.0, 1.0, 80.0, "Blend distance from the trimmed end (m)"),
+        ("Bank Start", "NodeSocketFloat", 0.0, -0.6, 0.6, "Cross-fall (rad, right side up) the locked start blends to: a tilted junction plane"),
+        ("Bank End", "NodeSocketFloat", 0.0, -0.6, 0.6, "Cross-fall (rad, right side up) the locked end blends to: a tilted junction plane"),
         ("Ramp Start", "NodeSocketBool", False, None, None, "Curb ramp + tactile paving at the start crossing"),
         ("Ramp End", "NodeSocketBool", False, None, None, "Curb ramp + tactile paving at the end crossing"),
         ("Ramp Offset", "NodeSocketFloat", 0.6, 0.0, 10.0, "Crossing starts this far from the trimmed end (m)"),
@@ -355,7 +360,13 @@ def build_road_group():
     fs_t = smooth01(tb.map_range(sp_t.outputs["Length"], 0.0, I("Lock Length"), 0.0, 1.0))
     fe_t = smooth01(tb.map_range(tb.math("SUBTRACT", sl_t.outputs["Length"], sp_t.outputs["Length"]), 0.0, I("Lock Length"), 0.0, 1.0))
     fade_t = tb.math("MULTIPLY", tb.switch(I("Lock Start"), 1.0, fs_t, "FLOAT"), tb.switch(I("Lock End"), 1.0, fe_t, "FLOAT"))
-    tilt = tb.n("GeometryNodeSetCurveTilt"); tb.inp(tilt, "Curve", normal_mode.outputs[0]); tb.inp(tilt, "Tilt", tb.math("MULTIPLY", blur_b.outputs[0], fade_t))
+    # a junction on a slope is a tilted plane: the locked ends bank to its cross-fall over the lock length (Bank Start /
+    # End, set by the junction builder), so the road edges meet the plane's edges at the same height
+    bs_w = tb.switch(I("Lock Start"), 0.0, smooth01(tb.map_range(sp_t.outputs["Length"], 0.0, I("Lock Length"), 1.0, 0.0)), "FLOAT")
+    be_w = tb.switch(I("Lock End"), 0.0, smooth01(tb.map_range(tb.math("SUBTRACT", sl_t.outputs["Length"], sp_t.outputs["Length"]), 0.0, I("Lock Length"), 1.0, 0.0)), "FLOAT")
+    tilt_v = tb.math("ADD", tb.math("MULTIPLY", blur_b.outputs[0], fade_t),
+                     tb.math("ADD", tb.math("MULTIPLY", I("Bank Start"), bs_w), tb.math("MULTIPLY", I("Bank End"), be_w)))
+    tilt = tb.n("GeometryNodeSetCurveTilt"); tb.inp(tilt, "Curve", normal_mode.outputs[0]); tb.inp(tilt, "Tilt", tb.math("MULTIPLY", tilt_v, BANK_SIGN))
     sp = tb.n("GeometryNodeSplineParameter")
     tang2 = tb.n("GeometryNodeInputTangent").outputs[0]
     side_v = tb.vmath("NORMALIZE", tb.vmath("CROSS_PRODUCT", tang2, up))
@@ -458,10 +469,10 @@ def build_road_group():
             sel, m_, k_ = tactile_sel(along, lat)
             return tb.boolean("AND", sel, tb.compare("LESS_THAN", pstrip_s, 0.05)), m_, k_
         slab = apron(sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["plant_" + s], sgn), tb.math("MULTIPLY", w["sw_" + s], sgn), H, H), I("Paving Material"), "paving", "sidewalk " + s, samples=3, zscale_fn=rf, mat_sel=slab_sel), sgn)
-        edge = sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["sw_" + s], sgn), tb.math("MULTIPLY", w["sw_" + s], sgn), H, 0.0), I("Concrete Material"), "concrete", "sidewalk edge " + s, orient="out", zscale_fn=rf)
+        edge = sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["sw_" + s], sgn), tb.math("MULTIPLY", w["sw_" + s], sgn), H, neg(I("Edge Depth"))), I("Concrete Material"), "concrete", "sidewalk edge " + s, orient="out", zscale_fn=rf)
         pstrip = I("Planting Strip Right") if s == "r" else I("Planting Strip Left")
         surf.append(tb.switch(on, tb.empty(), tb.join(tb.switch(tb.compare("GREATER_THAN", pstrip, 0.05), tb.empty(), plant, "GEOMETRY"), slab, edge), "GEOMETRY"))
-        surf.append(tb.switch(on, sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["curb_" + s], sgn), tb.math("MULTIPLY", w["curb_" + s], sgn), H, 0.0), I("Concrete Material"), "concrete", "curb back " + s, orient="out", zscale_fn=rf), tb.empty(), "GEOMETRY"))
+        surf.append(tb.switch(on, sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["curb_" + s], sgn), tb.math("MULTIPLY", w["curb_" + s], sgn), H, neg(I("Edge Depth"))), I("Concrete Material"), "concrete", "curb back " + s, orient="out", zscale_fn=rf), tb.empty(), "GEOMETRY"))
         sep = tb.join(sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["buf0_" + s], sgn), tb.math("MULTIPLY", w["buf0_" + s], sgn), 0.0, 0.1), I("Concrete Material"), "concrete", "separator face " + s, orient="in", zscale_fn=rf),
                       sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["buf0_" + s], sgn), tb.math("MULTIPLY", w["bike0_" + s], sgn), 0.1, 0.1), I("Concrete Material"), "concrete", "separator top " + s, zscale_fn=rf),
                       sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["bike0_" + s], sgn), tb.math("MULTIPLY", w["bike0_" + s], sgn), 0.1, 0.0), I("Concrete Material"), "concrete", "separator back " + s, orient="out", zscale_fn=rf))

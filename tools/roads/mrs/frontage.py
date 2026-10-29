@@ -409,25 +409,30 @@ def sync_driveways(roads_col):
         structures._CENTRE.pop(r.name, None)
         a = _project(RoadModel(r), o.location)
         per[r.name].append((round(a, 3), o.get("mrs_side", "r"), float(o.get("mrs_width", 5.0))))
-    lib = bpy.data.collections.get(MRS + "DrivewayPoints") or bpy.data.collections.new(MRS + "DrivewayPoints")
-    for name, lst in per.items():
-        r = roads[name]; mod = r.modifiers["MRS_Road"]
-        on = MRS + "Driveways_" + name
-        if not lst:
-            mod_input_set(mod, "Driveways", None)
-            if bpy.data.objects.get(on): bpy.data.objects.remove(bpy.data.objects[on])
-            if r.get("mrs_driveways"): del r["mrs_driveways"]
-            r.update_tag(); continue
-        me = bpy.data.meshes.get(on) or bpy.data.meshes.new(on)
-        me.clear_geometry()
-        me.from_pydata([(a, 100.0 if s == "r" else -100.0, 0.0) for a, s, w in lst], [], [])
-        at = me.attributes.get("width") or me.attributes.new("width", "FLOAT", "POINT")
-        at.data.foreach_set("value", [w for a, s, w in lst]); me.update()
-        o = bpy.data.objects.get(on) or bpy.data.objects.new(on, me)
-        if o.name not in lib.objects: lib.objects.link(o)
-        o.hide_viewport = True; o.hide_render = True; o["mrs_debug"] = True
-        mod_input_set(mod, "Driveways", o)
-        r["mrs_driveways"] = json.dumps(lst)
-        structures._CENTRE.pop(r.name, None)
-        r.update_tag()
+    for name, lst in per.items(): apply_driveways(roads[name], lst)
     return {k: v for k, v in per.items() if v}
+
+
+def apply_driveways(r, lst):
+    """Set road r's driveway point cloud 'MRS_Driveways_<road>' from [(along, side 'l'/'r', width)] (empty: none)."""
+    from . import structures
+    lib = bpy.data.collections.get(MRS + "DrivewayPoints") or bpy.data.collections.new(MRS + "DrivewayPoints")
+    mod = r.modifiers["MRS_Road"]; name = r.name
+    on = MRS + "Driveways_" + name
+    if not lst:
+        mod_input_set(mod, "Driveways", None)
+        if bpy.data.objects.get(on): bpy.data.objects.remove(bpy.data.objects[on])
+        if r.get("mrs_driveways"): del r["mrs_driveways"]
+        r.update_tag(); return
+    me = bpy.data.meshes.get(on) or bpy.data.meshes.new(on)
+    me.clear_geometry()
+    me.from_pydata([(a, 100.0 if s == "r" else -100.0, 0.0) for a, s, w in lst], [], [])
+    at = me.attributes.get("width") or me.attributes.new("width", "FLOAT", "POINT")
+    at.data.foreach_set("value", [w for a, s, w in lst]); me.update()
+    o = bpy.data.objects.get(on) or bpy.data.objects.new(on, me)
+    if o.name not in lib.objects: lib.objects.link(o)
+    o.hide_viewport = True; o.hide_render = True; o["mrs_debug"] = True
+    mod_input_set(mod, "Driveways", o)
+    r["mrs_driveways"] = json.dumps(lst)
+    structures._CENTRE.pop(r.name, None)
+    r.update_tag()

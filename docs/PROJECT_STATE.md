@@ -565,3 +565,18 @@ PBR library (`tools/cityforge/materials.py`), pioneer street names in each cultu
 name boards at every corner, district street furniture, and a street-by-street audit that passes
 on every street. Details: `CITY_GENERATION_PLAN.md` section 6. Blender review files:
 `tmp/cityforge/house_catalogue.blend`, `tmp/cityforge/material_library.blend`.
+
+## Port Halden's streets by Mert Road Studio (2026-10-29)
+
+Port Halden's streets now come from Mert Road Studio instead of CityForge's own flat ribbons:
+roads, tilted junctions with kerbs, ramps, zebra / parallel crossings and signals, sidewalks with
+planting strips, buffered cycle lanes on the arterials, medians on the boulevards, back lanes that
+cross the sidewalks on dropped kerbs, elevated bridges, and the studio's rule-placed street assets
+(lights, signal poles with GPU phase cycles, signs, bus shelters, benches, bins, racks, hydrants,
+cabinets, drains, MRS street trees). CityForge keeps the ground, lots, buildings, parks and its
+culture furniture. `tools/cityforge/build.sh` runs it (`--cf-streets` for the old ribbons); the
+conversion rules, profiles, export contract and game integration are in `docs/roads/CITY.md`.
+Tests: `tests/port_halden_streets_test.gd` (rendered: every MRS street and sidewalk is solid and above
+the fitted ground), `tools/roads/tests/road_bank_test.py` (tilted junction seams), and the existing
+CityForge / Port Halden game tests. Fixed on the way: corner shops on arterial street ends had their
+size unswapped and overhung their sidewalks by ~5 m (`plan_city.py`).

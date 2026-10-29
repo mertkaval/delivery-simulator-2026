@@ -82,6 +82,38 @@ func run() -> void:
 				var c := w.to_world(1010, 1215, 0)
 				c.y = w.ground_height(c) + 6
 				await shot(out, v, c, w.to_world(1000, 1200, 0) + Vector3(0, w.ground_height(w.to_world(1000, 1200)) , 0), 60)
+			"junction", "junction_close", "sidewalk", "busstop":
+				# street-level views of the Mert Road Studio streets (assets/cityforge/mrs): the signalised junction
+				# nearest the starter neighbourhood, its corner, a sidewalk next to a tree, a bus stop
+				if w.mrs == null: continue
+				var md: Dictionary = w.mrs.data
+				var near := w.to_world(1100, 1300)
+				var best: Vector3 = near
+				var bd := INF
+				for j: Dictionary in md.get("junctions", []):
+					var p := MrsCityStreets.g(j.at as Array)
+					if p.distance_to(near) < bd:
+						bd = p.distance_to(near)
+						best = p
+				if v == "junction": await shot(out, v, best + Vector3(-26, 14, 30), best, 55)
+				elif v == "junction_close": await shot(out, v, best + Vector3(-13, 1.7, 9), best + Vector3(4, 1.0, -6), 62)
+				elif v == "sidewalk":
+					var t0 := best
+					for t: Dictionary in md.get("trees", []):
+						var q := MrsCityStreets.g(t.pos as Array)
+						if q.distance_to(near) < 220.0 and q.distance_to(best) > 40.0:
+							t0 = q
+							break
+					await shot(out, v, t0 + Vector3(3.5, 1.7, 9.0), t0 + Vector3(-1.0, 1.4, -6.0), 62)
+				else:
+					var stops: Array = (md.get("instances", {}) as Dictionary).get("MRS_F_BusShelter", [])
+					if stops.is_empty(): continue
+					var bs: Array = stops[0]
+					for r: Array in stops:
+						if MrsCityStreets.g(r).distance_to(near) < MrsCityStreets.g(bs).distance_to(near): bs = r
+					var q2 := MrsCityStreets.g(bs)
+					var fwd := Vector3(0, 0, -1).rotated(Vector3.UP, float(bs[3]))
+					await shot(out, v, q2 + fwd * 9.0 + fwd.cross(Vector3.UP) * 6.0 + Vector3(0, 1.8, 0), q2 + Vector3(0, 1.2, 0), 60)
 			"night":
 				sun.light_energy = 0.05
 				env.background_energy_multiplier = 0.05

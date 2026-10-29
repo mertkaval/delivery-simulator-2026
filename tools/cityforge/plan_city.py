@@ -507,7 +507,8 @@ for b in blocks:
                 cxs = lx0 + cw / 2 if ae == x0 else lx1 - cw / 2
                 cys = (front_y + back_y) / 2
                 if not wet(cxs, cys) and slope_at(cxs, cys) < 9:
-                    items["shops"].append({"id": "shop_%04d" % len(items["shops"]), "pos": [cxs, cys], "size": [cw - 1, abs(back_y - front_y) - 3, 0],
+                    # turned a quarter to face the arterial: the facade (size[0], local x) runs along y, the depth along x
+                    items["shops"].append({"id": "shop_%04d" % len(items["shops"]), "pos": [cxs, cys], "size": [abs(back_y - front_y) - 3, cw - 1, 0],
                                            "floors": 2 + int(rnd(b["id"] + half, 90) * 2), "yaw": (math.pi / 2 if ae == x0 else -math.pi / 2),
                                            "palette": int(rnd(b["id"] + half, 91) * 8), "address": "%d %s" % (int((cys - ys[0]) / 2) * 2 + 100, street_names[ae])})
             if x0 in G["arterials_x"]: lx0 += 24.0
