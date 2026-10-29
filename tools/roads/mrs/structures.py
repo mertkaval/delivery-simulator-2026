@@ -7,33 +7,101 @@ from .nodes import depsgraph, set_scene, MRS
 from .roads import road_widths
 
 
-def road_sample(road, along):
-    """World position, unit tangent and right vector of the evaluated road centre line at `along`
-    metres from its (trimmed) start."""
+_CENTRE = {}
+_FROZEN = set()
+
+
+def freeze(names=None):
+    """Trust the cached centre lines of these roads (None = clear) while a placement / route pass runs."""
+    _FROZEN.clear()
+    if names: _FROZEN.update(names)
+
+
+def _road_key(road):
+    sp = road.data.splines[0]
+    pts = tuple(round(c, 3) for bp in (sp.bezier_points if sp.type == "BEZIER" else sp.points) for c in bp.co[:3])
+    return (road.name, pts, tuple(round(c, 3) for row in road.matrix_world for c in row), str(road.get("mrs_inputs", "")))
+
+
+def centre_line(road):
+    """[(along, world point)] of the evaluated road centre line (cached per road state). Each station's
+    point is interpolated to lat = 0 from the two vertices nearest the centre, so roads with a median
+    (no vertex near lat 0) are sampled over their whole length; z = the highest asphalt point there."""
+    hit = _CENTRE.get(road.name)
+    if hit and road.name in _FROZEN: return hit[1]
+    key = _road_key(road)
+    if hit and hit[0] == key: return hit[1]
     dg = depsgraph()
     me = road.evaluated_get(dg).to_mesh()
     lat = me.attributes["lat"].data; al = me.attributes["along"].data
-    seen = {}
+    st = {}; prof = {}
     for i in range(len(me.vertices)):
-        if abs(lat[i].value) < 0.3:
-            key = round(al[i].value, 2)
-            if key not in seen: seen[key] = me.vertices[i].co.copy()       # one sample per station (strips share 'along')
-    pts = sorted(seen.items())
+        la = lat[i].value; key = round(al[i].value, 2); co = me.vertices[i].co
+        pk = prof.setdefault(key, {}); lk = round(la, 2)
+        if lk not in pk or co.z > pk[lk]: pk[lk] = co.z
+        if abs(la) > 12.0: continue
+        st.setdefault(key, []).append((abs(la), la, co.copy()))
+    pts = []
+    for a, vs in sorted(st.items()):
+        vs.sort(key=lambda x: x[0])
+        p0 = vs[0]; p1 = next((v for v in vs[1:] if abs(v[1] - p0[1]) > 0.05), None)
+        if p1 is None:
+            c = p0[2].copy()
+        else:
+            f = (0.0 - p0[1]) / (p1[1] - p0[1]); c = p0[2].lerp(p1[2], f)
+            c.z = max(v[2].z for v in vs if v[0] < 4.0) if any(v[0] < 4.0 for v in vs) else c.z
+        pts.append((a, road.matrix_world @ c))
     road.evaluated_get(dg).to_mesh_clear()
-    if len(pts) < 2: raise ValueError("road %s has no centre line" % road.name)
+    # drop stations that are only instanced decorations far from the sweep (keep monotone, >= 0.25 m apart)
+    clean = []
+    for a, p in pts:
+        if not clean or a - clean[-1][0] >= 0.25: clean.append((a, p))
+    if len(clean) < 2: raise ValueError("road %s has no centre line" % road.name)
+    profiles = [(a, sorted(prof[a].items())) for a, _ in clean if a in prof]
+    _CENTRE[road.name] = (key, clean, profiles)
+    return clean
+
+
+def surface_z(road, along, lat):
+    """Top-surface height (world z, object at identity rotation/scale assumed for z) of the evaluated
+    road cross-section at station `along` and lateral offset `lat` (right +): asphalt, kerb, sidewalk."""
+    centre_line(road)
+    profiles = _CENTRE[road.name][2]
+    lo, hi = 0, len(profiles) - 1
+    while hi - lo > 1:
+        m = (lo + hi) // 2
+        if profiles[m][0] < along: lo = m
+        else: hi = m
+    best = min((profiles[lo], profiles[hi]), key=lambda pr: abs(pr[0] - along))
+    pr = best[1]
+    if lat <= pr[0][0]: z = pr[0][1]
+    elif lat >= pr[-1][0]: z = pr[-1][1]
+    else:
+        k = next(i for i in range(1, len(pr)) if pr[i][0] >= lat)
+        (l0, z0), (l1, z1) = pr[k - 1], pr[k]
+        z = z0 if l1 == l0 else z0 + (z1 - z0) * (lat - l0) / (l1 - l0)
+    return z + road.matrix_world.translation.z
+
+
+def road_sample(road, along):
+    """World position, unit tangent and right vector of the evaluated road centre line at `along`
+    metres from its (trimmed) start."""
+    pts = centre_line(road)
     along = max(pts[0][0], min(pts[-1][0], along))
-    i = next((k for k in range(1, len(pts)) if pts[k][0] >= along), len(pts) - 1)
-    a0, p0 = pts[i - 1]; a1, p1 = pts[i]
+    lo, hi = 0, len(pts) - 1
+    while hi - lo > 1:
+        m = (lo + hi) // 2
+        if pts[m][0] < along: lo = m
+        else: hi = m
+    a0, p0 = pts[lo]; a1, p1 = pts[hi]
     f = 0.0 if a1 == a0 else (along - a0) / (a1 - a0)
-    p = road.matrix_world @ (p0.lerp(p1, f)); t = (road.matrix_world @ p1 - road.matrix_world @ p0); t.z = 0; t.normalize()
+    p = p0.lerp(p1, f); t = (p1 - p0); t.z = 0; t.normalize()
     return p, t, t.cross(Vector((0, 0, 1))).normalized()
 
 
 def road_length(road):
-    dg = depsgraph()
-    me = road.evaluated_get(dg).to_mesh()
-    al = me.attributes["along"].data; L = max(al[i].value for i in range(len(me.vertices))) if len(me.vertices) else 0.0
-    road.evaluated_get(dg).to_mesh_clear(); return L
+    pts = centre_line(road)
+    return pts[-1][0]
 
 
 def _obj(name, me, collection, pos, yaw):

@@ -496,13 +496,23 @@ def _cobra(bm, y0, y1, z, mi_house, mi_lamp, w=0.14):
     _box(bm, -w * 0.6, y1 - 0.45, z - 0.23, w * 0.6, y1 - 0.05, z - 0.22, mi_lamp)
 
 
+def _anchors(o, heads):
+    """Fixture anchors for mrs.lighting (custom property mrs_fixtures, JSON, on the object and its mesh so placed
+    copies sharing the mesh keep them): one {"pos", "dir"} per lamp head in local metres, pos = head centre just
+    below / in front of the emitter faces (MRS_PropLamp), dir = unit aim before the preset's tilt."""
+    import json
+    fx = [{"pos": [round(c, 4) for c in p], "dir": [round(c, 4) for c in Vector(d).normalized()]} for p, d in heads]
+    o["mrs_fixtures"] = o.data["mrs_fixtures"] = json.dumps(fx)
+    return o
+
+
 def _streetlights():
     col = collection(MRS + "Streetlights"); m = M
 
     def highway(bm):
         _pole(bm, 9.4, 0.09, 0.055, 0); _tube(bm, _arc((0, 0, 9.3), (0, 2.4, 10.0), (0, 0.05, 10.0), 8), 0.045, 10, 0)
         _cobra(bm, 1.7, 2.7, 10.05, 0, 1)
-    make2(col, "MRS_Light_Highway", highway, [m["steel"], m["lamp"]], 0.01)
+    _anchors(make2(col, "MRS_Light_Highway", highway, [m["steel"], m["lamp"]], 0.01), [((0, 2.45, 9.80), (0, 0, -1))])
 
     def double(bm):
         _pole(bm, 9.4, 0.1, 0.06, 0)
@@ -513,7 +523,7 @@ def _streetlights():
                 _box(bm, -0.14, -2.2, 9.91, 0.14, -1.2, 10.05, 0)
                 _prism(bm, [(-0.14, 9.91), (0.14, 9.91), (0.1, 9.83), (-0.1, 9.83)], -2.2, -1.7, 0)
                 _box(bm, -0.08, -2.15, 9.82, 0.08, -1.75, 9.83, 1)
-    make2(col, "MRS_Light_Double", double, [m["steel"], m["lamp"]], 0.01)
+    _anchors(make2(col, "MRS_Light_Double", double, [m["steel"], m["lamp"]], 0.01), [((0, 1.95, 9.80), (0, 0, -1)), ((0, -1.95, 9.80), (0, 0, -1))])
 
     def lantern(bm):
         _lathe(bm, [(0.2, 0), (0.2, 0.05), (0.16, 0.08), (0.15, 0.35), (0.11, 0.42), (0.07, 0.5), (0.06, 1.0), (0.075, 1.05), (0.06, 1.1), (0.05, 3.25), (0.08, 3.3), (0.08, 3.38), (0.05, 3.42), (0.0, 3.42)], 14, 0)
@@ -523,24 +533,24 @@ def _streetlights():
             a = TAU * k / 4; _tube(bm, [(0.17 * math.cos(a), 0.17 * math.sin(a), 3.5), (0.21 * math.cos(a), 0.21 * math.sin(a), 4.0)], 0.012, 6, 0)
         _lathe(bm, [(0.25, 4.0), (0.25, 4.04), (0.08, 4.28), (0.08, 4.32), (0.0, 4.36)], 4, 0, smooth=False); _ico(bm, (0, 0, 4.4), 0.05, 2, mi=0)
         _ico(bm, (0, 0, 3.75), 0.09, 2, mi=2)
-    make2(col, "MRS_Light_Lantern", lantern, [m["iron"], m["glass"], m["lamp"]], 0.006)
+    _anchors(make2(col, "MRS_Light_Lantern", lantern, [m["iron"], m["glass"], m["lamp"]], 0.006), [((0, 0, 3.64), (0, 0, -1))])
 
     def led(bm):
         _pole(bm, 7.0, 0.07, 0.05, 0); _tube(bm, [(0, 0, 6.95), (0, 0.9, 7.0)], 0.035, 8, 0)
         _prism(bm, [(-0.12, 7.03), (0.12, 7.03), (0.12, 6.97), (-0.12, 6.97)], 0.45, 1.15, 0)
         _box(bm, -0.1, 0.5, 6.965, 0.1, 1.1, 6.97, 1)
-    make2(col, "MRS_Light_LED", led, [m["steel"], m["lamp"]], 0.008)
+    _anchors(make2(col, "MRS_Light_LED", led, [m["steel"], m["lamp"]], 0.008), [((0, 0.8, 6.945), (0, 0, -1))])
 
     def bollard_light(bm):
         _lathe(bm, [(0.1, 0), (0.1, 0.72), (0.09, 0.72)], 14, 0); _cyl(bm, 0, 0, 0.72, 0.9, 0.088, 0.088, 14, 1)
         _lathe(bm, [(0.1, 0.9), (0.1, 0.96), (0.06, 1.0), (0.0, 1.0)], 14, 0)
-    make2(col, "MRS_Light_Bollard", bollard_light, [m["metal"], m["lamp"]], 0.006)
+    _anchors(make2(col, "MRS_Light_Bollard", bollard_light, [m["metal"], m["lamp"]], 0.006), [((0, 0, 0.81), (0, 0, -1))])
 
     def wall_pack(bm):
         _box(bm, -0.06, -0.06, 0.0, 0.06, 0.06, 3.5, 0); _box(bm, -0.15, -0.15, 0.0, 0.15, 0.15, 0.04, 0)
         _box(bm, -0.16, 0.06, 3.1, 0.16, 0.3, 3.35, 0)
         _prism(bm, [(-0.16, 3.1), (0.16, 3.1), (0.16, 3.35), (-0.16, 3.35)][::-1], 0.3, 0.32, 1)
-    make2(col, "MRS_Light_WallPack", wall_pack, [m["metal"], m["lamp"]], 0.008)
+    _anchors(make2(col, "MRS_Light_WallPack", wall_pack, [m["metal"], m["lamp"]], 0.008), [((0, 0.34, 3.22), (0, 0.6, -0.8))])
     return col
 
 

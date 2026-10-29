@@ -17,6 +17,29 @@ Headless deliverable + smoke test + validation renders:
 Open `tools/roads/mert_road_studio_v2.blend` and the sidebar tab **Road Studio** (N panel) has
 everything; the modifier panel of a road shows all inputs grouped in panels.
 
+## v4 additions (complete street environment)
+Full rebuild + validation of the demonstration block (build, regeneration scenarios, roundabout /
+dead-end networks, export, day / night / traversal renders, save + reopen):
+`blender --background --factory-startup --python tools/roads/tests/street_block_v4_test.py` (add
+`-- --base` to reuse the cached node-group build in `tmp/roads/v4/base_built.blend`, `--no-render`,
+`--quick`). Godot check: `godot --path . --script res://tests/capture_street_block_v4.gd -- <export dir> <out dir> <cameras.json>`.
+- **Footbridge** (`footbridge.py`, `Footbridge` group, `docs/roads/FOOTBRIDGE.md`): anchor-driven solver
+  (clearance, span supports in allowed regions, stairs / 1:12 ramps folded into switchbacks to fit the
+  footprint or reported as impossible, foot paths, columns, lights) + editable GN geometry and collision.
+- **Furniture** (`furniture.py`, `docs/roads/FURNITURE.md`): 20 assets on one baked texture atlas, each with
+  footprint / access / zone properties.
+- **Street trees and plants** (`game_trees.py`): the game's landscape-kit species (LOD0 / LOD1 / impostor in
+  Godot through `CityLandscape`) instead of the generated canopies.
+- **Lighting** (`lighting.py`, `docs/roads/LIGHTING.md`): road-class presets, real spot lights per fixture,
+  night setup; `world/roads/mrs_street_lights.gd` in Godot.
+- **Placement v4** (`placement.py`, `docs/roads/PLACEMENT_RULES.md`): sidewalk zones, footprints + access
+  envelopes on a spatial hash, reservations first, bus stops, utilities, landscape regions, parks.
+- **Routes** (`routes.py`): pedestrian + bicycle graphs with connectivity, step-free and clear-width checks.
+- **Roundabouts / dead ends** now have crossings with ramps, continuous corner sidewalks, a shared foot /
+  cycle ring, and a filtered through path with a dropped kerb.
+- **Godot**: `world/roads/mrs_street_block.gd` (loader), `world/roads/mrs_road.gdshader` (wheel tracks, curb
+  dirt, gutter wetness from exported masks).
+
 ## v3 additions (street generator brief)
 - **Shared street model** (`street_model.py`): every road's lanes, directions, widths, offsets, cycleways,
   sidewalks, trims, ramps, lane / pedestrian paths and every junction's approaches, crossings, signals and

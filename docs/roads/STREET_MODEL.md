@@ -35,7 +35,33 @@ Lane identities through a transition: lanes are numbered from the centre (`index
 adds or removes the *outermost* lane of a side, inner lanes keep their id and offset; the merge arrow is
 placed on the dropped lane.
 
-Godot: `tests/capture_street_block.gd` loads the four GLBs + JSON, checks scale / collision, toggles the
+## v4 additions to the JSON
+```
+godot_axes      "Blender (x, y, z) -> Godot (x, z, -y); yaw_godot = yaw_blender"
+trees[]         name, species (assets/landscape/<species>.glb), pos, yaw, scale, source, road
+plants[]        id (garden / yard kit node: grass_a/b, shrub_a/b/c, boxwood_ball, hedge_section, ...), pos, yaw, scale, region
+lights[]        mrs.lighting.light_records(): id, parent, library, class, type (spot|omni), position, direction,
+                color, energy (Godot), range, spot_angle, shadow, fade_begin, fade_length, ...
+night           night sky / moon parameters matching lighting.night_setup()
+footbridges[]   footbridge plans (status, messages, deck_z, rise, span, clearance, supports, footprint, ped_edges, lights)
+routes          {ped: {nodes, edges}, bike: {nodes, edges}, validation[], stats}
+                ped edge kinds: sidewalk (width = measured usable clear width), corner, crossing, ramp (kerb ramp,
+                tactile), boarding, path, park_path, path_join, entrance_path, footbridge_stairs / _ramp / _deck,
+                ring_sector, bulb_ring, through_path; bike: cycleway, bike_crossing, bike_turn, mixed_traffic,
+                shared_path, through_path, footbridge_ramp, footbridge_deck, dismount_link
+items[]         every placed item: name, kind, lib, road, side, along, pos, yaw, scale, foot (corners), access, flush
+```
+Roads in `<name>.glb` carry engine masks for `world/roads/mrs_road.gdshader`: `COLOR_0` = (inside a traffic
+lane, curb-dirt band, gutter / drain wetness, 1) and `UV2` = (lane width, half median); `UV` stays
+(lat, along) in metres. COLOR_0 is data, not colour: the loader sets `vertex_color_use_as_albedo = false`
+on the imported road materials.
+
+Godot (v4): `world/roads/mrs_street_block.gd` (`MrsStreetBlock.build(dir, "street_block")`) loads everything:
+road shader, trimesh collision (double-sided), props, per-signal lens control (`set_phase`, `set_signal`),
+trees / plants through `CityLandscape` (MultiMesh LOD0 / LOD1 / impostor, the shared wind + alpha-scissor
+foliage shader), street lights through `MrsStreetLights`. `tests/capture_street_block_v4.gd` verifies it.
+
+Godot (v3): `tests/capture_street_block.gd` loads the four GLBs + JSON, checks scale / collision, toggles the
 green lens emission and captures views (`godot --path . --script res://tests/capture_street_block.gd -- <export_dir> <out_dir>`).
 Signal control in the game = set `emission_enabled` / `emission_energy_multiplier` on the lens materials
 of a signal node per `signal_phases`; that is the engine's job, not a Blender animation.

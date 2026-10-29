@@ -44,7 +44,8 @@ class T:
         self.inp(node, node.inputs[0].identifier, a)
         if b is not None: self.inp(node, node.inputs[1].identifier, b)
         if scale is not None: self.inp(node, "Scale", scale)
-        return node.outputs[0]
+        # DOT_PRODUCT / LENGTH / DISTANCE write their result to the "Value" output (outputs[1])
+        return node.outputs["Value"] if op in ("DOT_PRODUCT", "LENGTH", "DISTANCE") else node.outputs[0]
 
     def combine(self, x=0.0, y=0.0, z=0.0):
         node = self.n("ShaderNodeCombineXYZ")

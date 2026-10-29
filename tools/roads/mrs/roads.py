@@ -137,7 +137,8 @@ def road_widths(o, at_end=None):
     rht = (road_input(o, "Driving Side") or "Right") == "Right"
     lf, lb = road_input(o, "Lanes Forward"), road_input(o, "Lanes Backward")
     if at_end and road_input(o, "Transition"): lf, lb = road_input(o, "Lanes Forward End"), road_input(o, "Lanes Backward End")
-    lanes_r, lanes_l = (lb, lf) if rht else (lf, lb)
+    # same rule as Road_Profile: under right-hand traffic the forward lanes are on the curve's right side
+    lanes_r, lanes_l = (lf, lb) if rht else (lb, lf)
     out = dict(lw=lw, median=med * 2, curb=road_input(o, "Curb Width"), h=road_input(o, "Curb Height"), lanes_f=lf, lanes_b=lb, rht=rht)
     for s, lanes, pk in (("r", lanes_r, road_input(o, "Parking Right")), ("l", lanes_l, road_input(o, "Parking Left"))):
         buf, bw, prot, on = bike_layout(o, s)

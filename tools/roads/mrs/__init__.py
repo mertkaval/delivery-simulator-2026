@@ -9,7 +9,8 @@ import bpy
 
 from . import nodes, materials, props, road, terrain
 
-MODULES = ("nodes", "materials", "props", "road", "terrain", "roads", "qa", "junction", "structures", "assets", "trees", "signage", "placement", "street_model", "ui", "export", "samples")
+MODULES = ("nodes", "materials", "props", "road", "terrain", "roads", "qa", "junction", "structures", "assets", "trees", "signage", "furniture", "game_trees", "lighting",
+           "footbridge", "placement", "routes", "street_model", "ui", "export", "samples")
 
 
 def reload():
@@ -38,6 +39,14 @@ def build_all(verbose=True):
     if tr and hasattr(tr, "build_trees"): step("trees", tr.build_trees)      # after assets: refills MRS_Trees with the generated variants
     sg = globals().get("signage")
     if sg and hasattr(sg, "build_signage"): step("signage", sg.build_signage)
+    fu = globals().get("furniture")
+    if fu and hasattr(fu, "build_furniture"): step("furniture", fu.build_furniture)            # sidewalk furniture on one baked atlas
+    gt = globals().get("game_trees")
+    if gt and hasattr(gt, "build_game_trees"): step("game trees", gt.build_game_trees)        # the game's landscape-kit trees / plants
+    fb = globals().get("footbridge")
+    if fb and hasattr(fb, "build_footbridge_group"): step("footbridge", fb.build_footbridge_group)
+    pl = globals().get("placement")
+    if pl and hasattr(pl, "ensure_scatter_group"): step("scatter", pl.ensure_scatter_group)
     step("road group", road.build_road_group)                                  # after the collections exist: pick indices follow sorted names
     step("terrain", terrain.build_terrain_conform_group)
     step("refresh", roads.refresh_all)
@@ -49,6 +58,7 @@ def register():
 
 
 from .nodes import MRS, mod_input_set, mod_input_get  # noqa: E402
-for _m in ("roads", "qa", "junction", "structures", "assets", "trees", "signage", "placement", "street_model", "ui", "export", "samples"):
+for _m in ("roads", "qa", "junction", "structures", "assets", "trees", "signage", "furniture", "game_trees", "lighting", "footbridge", "placement", "routes",
+           "street_model", "ui", "export", "samples"):
     try: globals()[_m] = importlib.import_module(__name__ + "." + _m)
     except ModuleNotFoundError: pass

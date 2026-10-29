@@ -94,7 +94,7 @@ def roundabout_village():
     _ground(col)
     R = lambda n, pts, preset, **kw: roads.make_road(n, pts, col, preset, Conform=False, Embankment=False, **kw)
     e = R("VL_East", [(0, 0, 0), (60, 5, 0), (130, 0, 0)], "residential", Tree_Side="Alternate", Tree_Spacing=16.0)
-    w = R("VL_West", [(0, 0, 0), (-60, -5, 0), (-130, 0, 0)], "urban", Parking_Left=0.0, Parking_Right=0.0, Bike_Lane_Left=0.0, Bike_Lane_Right=0.0, Median=0.0, Lanes_Forward=1, Lanes_Backward=1, Lane_Width=3.5)
+    w = R("VL_West", [(0, 0, 0), (-60, -5, 0), (-130, 0, 0)], "urban", Parking_Left=0.0, Parking_Right=0.0, Bike_Left="None", Bike_Right="None", Median=0.0, Lanes_Forward=1, Lanes_Backward=1, Lane_Width=3.5)
     n = R("VL_North", [(0, 0, 0), (5, 60, 0), (0, 130, 0)], "residential"); s = R("VL_South", [(0, 0, 0), (-5, -60, 0), (0, -130, 0)], "rural", Tree_Side="Both")
     junction.build_roundabout("VL_Roundabout", (0, 0, 0), [e, w, n, s], col, island_radius=10.0)
     structures.bus_stop(e, 60.0, 1, col); structures.bus_stop(e, 70.0, -1, col)
@@ -139,7 +139,6 @@ def street_block(wear="light_wear"):
     for o in r.values(): o["mrs_street_name"] = names[o.name]
     junction.build_junction("SB_J4", (0, 0, 0), [r["avW"], r["avE"], r["n"], r["s"]], col, control="signals", corner_radius=5.0, main_roads=["SB_AvenueW", "SB_AvenueE"])
     junction.build_junction("SB_JT", (120, 0, 0), [r["avE"], r["scurve"], r["t"]], col, control="priority", corner_radius=5.0, main_roads=["SB_AvenueE", "SB_SCurve"], crossing="parallel")
-    structures.bus_stop(r["avE"], 40.0, 1, col)
     try:
         from . import signage
         board = signage.make_direction_board("SB_Board", [("CITY CENTRE", "ahead"), ("HARBOUR", "right"), ("STATION", "left")], collection=col)
@@ -147,13 +146,124 @@ def street_block(wear="light_wear"):
         board.location = p + rr * (w["half_r"] + w["curb"] + 1.0); board.rotation_euler = (0, 0, math.atan2(t.y, t.x) + math.pi / 2)
     except Exception as e:
         print("direction board skipped:", e)
-    rep = placement.place_all(col, seed=7, style="avenue", speed_limits={"SB_AvenueW": 50, "SB_AvenueE": 50, "SB_North": 30, "SB_South": 30, "SB_SCurve": 30, "SB_TSide": 30})
-    import json as _json
-    sc["mrs_placement_report"] = _json.dumps({"counts": rep["counts"], "by_kind": rep["by_kind"], "skipped": [list(x) for x in rep["skipped"][:200]]})
-    print("PLACEMENT", rep["counts"], rep["by_kind"])
-    for x in rep["skipped"][:12]: print("  skipped", x)
+    sc["mrs_block_version"] = 4
+    block_v4_features(sc, col, r)
     materials.apply_material_preset(wear)
     return sc
+
+
+SB_SPEEDS = {"SB_AvenueW": 50, "SB_AvenueE": 50, "SB_North": 30, "SB_South": 30, "SB_SCurve": 30, "SB_TSide": 30}
+SB_BUS = [{"id": "S1", "road": "SB_South", "along": 52.0, "side": "r"}]
+SB_PARK = [(-140.0, -27.0), (-17.0, -27.0), (-17.0, -88.0), (-140.0, -88.0)]
+
+
+def _pavilion(name, centre, size, yaw, col, door_side=-1):
+    """Simple single-storey cafe pavilion (context for the entrance rule): rendered walls, glazed front,
+    flat roof with an overhang, a door recess on the street side. Floor at sidewalk height."""
+    import bmesh
+    from .props import mat
+    from .assets import _box
+    bm = bmesh.new()
+    w, d, h = size
+    _box(bm, -w / 2, -d / 2, -0.3, w / 2, d / 2, 0.15, 2)                       # plinth
+    _box(bm, -w / 2 + 0.1, -d / 2 + 0.1, 0.15, w / 2 - 0.1, d / 2 - 0.1, h, 0)  # walls
+    _box(bm, -w / 2 - 0.6, -d / 2 - 0.6, h, w / 2 + 0.6, d / 2 + 0.6, h + 0.35, 2)  # roof slab
+    fx = door_side * (w / 2 - 0.08)
+    _box(bm, min(fx, fx + door_side * 0.06), -d / 2 + 0.6, 0.45, max(fx, fx + door_side * 0.06), d / 2 - 0.6, h - 0.4, 1)   # glazing band
+    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+    for m_ in (mat(MRS + "PavilionRender", (0.78, 0.74, 0.66), 0.85), mat(MRS + "PavilionGlass", (0.12, 0.16, 0.18), 0.08, 0.2), mat(MRS + "PavilionTrim", (0.22, 0.22, 0.23), 0.6, 0.4)):
+        me.materials.append(m_)
+    o = bpy.data.objects.new(name, me); col.objects.link(o); o.location = centre; o.rotation_euler = (0, 0, yaw)
+    return o
+
+
+def _lawn(o):
+    """Lawn material for the demo ground: patchy greens, dry patches, fine bump (no flat green plane)."""
+    from .props import mat
+    m = mat(MRS + "Lawn", (0.16, 0.24, 0.09), 0.92)
+    nt = m.node_tree; b = next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED")
+    if not any(n.type == "TEX_NOISE" for n in nt.nodes):
+        tc = nt.nodes.new("ShaderNodeTexCoord")
+        n1 = nt.nodes.new("ShaderNodeTexNoise"); n1.inputs["Scale"].default_value = 0.08; n1.inputs["Detail"].default_value = 4.0
+        n2 = nt.nodes.new("ShaderNodeTexNoise"); n2.inputs["Scale"].default_value = 3.0; n2.inputs["Detail"].default_value = 8.0
+        for n_ in (n1, n2): nt.links.new(tc.outputs["Object"], n_.inputs["Vector"])
+        rp = nt.nodes.new("ShaderNodeValToRGB")
+        rp.color_ramp.elements[0].position = 0.35; rp.color_ramp.elements[0].color = (0.10, 0.17, 0.05, 1)
+        rp.color_ramp.elements[1].position = 0.75; rp.color_ramp.elements[1].color = (0.24, 0.27, 0.11, 1)
+        mix = nt.nodes.new("ShaderNodeMix"); mix.data_type = "FLOAT"; mix.inputs["Factor"].default_value = 0.35
+        nt.links.new(n1.outputs["Fac"], mix.inputs[2]); nt.links.new(n2.outputs["Fac"], mix.inputs[3])
+        nt.links.new(mix.outputs[0], rp.inputs["Fac"]); nt.links.new(rp.outputs["Color"], b.inputs["Base Color"])
+        bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.35; bp.inputs["Distance"].default_value = 0.02
+        nt.links.new(n2.outputs["Fac"], bp.inputs["Height"]); nt.links.new(bp.outputs[0], b.inputs["Normal"])
+    o.data.materials.clear(); o.data.materials.append(m)
+
+
+def block_v4_features(sc, col, r, seed=7, footbridge_along=100.0, bus_stops=None):
+    """v4 additions to the street block: footbridge on the avenue (anchor), furnished bus stop on the
+    south street, a park in the south-west quadrant with paths to the bus stop / avenue / kiosk, a cafe
+    pavilion with an entrance anchor, rule-based placement v4, park planting, entrance paths, route
+    graphs (stored on the scene as JSON) and real street-light sources."""
+    from . import placement, footbridge, routes
+    import json as _json
+    ground = next((o for o in col.objects if o.name.startswith(MRS + "GroundPlane")), None)
+    if ground is not None: _lawn(ground)
+    roads.set_road(r["s"], Sidewalk_Width_Right=4.6)
+    for o in r.values(): roads.set_road(o, Scatter_Density=0.0)       # planting strips belong to the landscape regions (placement v4)
+    junction.rebuild_all()
+    footbridge.ensure_group()
+    fb_obj, plan = footbridge.make("SB_Footbridge", r["avW"], footbridge_along, col)
+    print("FOOTBRIDGE", plan["status"], "; ".join(plan["messages"]))
+    try:
+        from . import lighting
+        lighting.day_setup(sc)
+    except Exception as e:
+        print("lighting day setup skipped:", e)
+    bcol = bpy.data.collections.get(col.name + "_Buildings") or bpy.data.collections.new(col.name + "_Buildings")
+    if bcol.name not in [c.name for c in col.children]: col.children.link(bcol)
+    for o in list(bcol.objects): bpy.data.objects.remove(o)
+    _pavilion("SB_Cafe", Vector((16.5, 52.0, 0.0)), (8.0, 11.0, 3.6), 0.0, bcol, door_side=-1)
+    ent = bpy.data.objects.get("MRS_Entrance_Cafe") or bpy.data.objects.new("MRS_Entrance_Cafe", None)
+    if ent.name not in col.objects: col.objects.link(ent)
+    ent.location = (12.4, 52.0, 0.15); ent["mrs_road"] = "SB_North"; ent["mrs_side"] = "r"; ent.empty_display_size = 1.0
+    kiosk_src = bpy.data.objects.get(MRS + "Kiosk")
+    if kiosk_src is not None:
+        k = bpy.data.objects.new("SB_ParkKiosk", kiosk_src.data); bcol.objects.link(k); k.location = (-72.0, -66.0, -0.12)
+    placement.RULES["landscape"] = {"SB_AvenueW:r": "park", "SB_South:r": "park"}
+    sc["mrs_block_seed"] = seed
+    return regenerate_block(sc, col, seed=seed, bus_stops=bus_stops)
+
+
+def regenerate_block(sc, col, seed=None, bus_stops=None, rebuild_junctions=False):
+    """Everything downstream of the roads, in dependency order: (junctions) -> footbridges (re-solved from
+    their anchors) -> placement v4 -> entrance paths -> park -> route graphs -> scene JSON. Re-running it
+    replaces the previous results (stable names, no multiplying)."""
+    from . import placement, footbridge, routes
+    import json as _json
+    seed = sc.get("mrs_block_seed", 7) if seed is None else seed
+    if rebuild_junctions: junction.rebuild_all()
+    footbridge.rebuild_all(col)
+    r_ = {k: bpy.data.objects[n] for k, n in (("avW", "SB_AvenueW"), ("s", "SB_South"))}
+    rep = placement.place_all(col, seed=seed, style="avenue", speed_limits=SB_SPEEDS, bus_stops=bus_stops if bus_stops is not None else SB_BUS)
+    placement.entrance_paths(col, rep)
+    # park paths start on the back edge of the sidewalks (computed from the road stations, not fixed points)
+    bs = (rep.get("bus_stops") or [None])[0]
+    ms = placement.RoadModel(r_["s"]); mw = placement.RoadModel(r_["avW"])
+    a_bus = (bs["along"] + 4.0) if bs else ms.A0 + 40.0
+    q_bus = ms.point(a_bus, "r", ms.sw["r"] - 0.05)[0]
+    q_ave = mw.point(90.0, "r", mw.sw["r"] - 0.05)[0]
+    hub = Vector((-42.0, -64.0, 0.0))
+    paths = [{"pts": [(q_bus.x, q_bus.y), (q_bus.x - 12.0, q_bus.y), (hub.x, hub.y)], "z_top": q_bus.z},                     # bus stop -> park hub
+             {"pts": [(q_ave.x, q_ave.y), (q_ave.x, q_ave.y - 9.0), (-50.0, -45.0), (hub.x, hub.y)], "z_top": q_ave.z},          # avenue sidewalk -> hub
+             {"pts": [(hub.x, hub.y), (-58.0, -66.0), (-70.4, -65.2)], "z_top": -0.09, "ramp": 0.01, "dest": "kiosk"}]           # hub -> kiosk
+    park = placement.place_park(col, rep, "SB_Park", SB_PARK, paths=paths, seed=seed)
+    print("PLACEMENT", rep["counts"], rep["by_kind"], "park", park)
+    rt = routes.build(col, rep)
+    print("ROUTES", rt["stats"], "validation", len(rt["validation"]))
+    for v in rt["validation"][:10]: print("   ", v)
+    sc["mrs_placement_report"] = _json.dumps({k: v for k, v in rep.items() if not k.startswith("_") and k != "items"}, default=str)
+    sc["mrs_placement_items"] = _json.dumps(rep["items"], default=str)
+    sc["mrs_routes"] = _json.dumps(rt, default=str)
+    return rep, rt
 
 
 ALL = {"street_block": street_block, "city_block": city_block, "mountain_road": mountain_road, "highway": highway, "roundabout_village": roundabout_village, "bridge_valley": bridge_valley}

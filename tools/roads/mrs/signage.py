@@ -161,13 +161,19 @@ def _col(name, clear=False, hidden=False):
     col = bpy.data.collections.get(name) or bpy.data.collections.new(name)
     if col.name not in bpy.context.scene.collection.children: bpy.context.scene.collection.children.link(col)
     if clear:
-        for o in list(col.objects): _remove_tree(o)
+        for name in [o.name for o in col.objects]:          # by name: removing a parent also removes its children
+            o = bpy.data.objects.get(name)
+            if o is not None: _remove_tree(o)
     col.hide_render = hidden
     return col
 
 
 def _remove_tree(o):
-    for c in list(o.children): _remove_tree(c)
+    try: kids = [c.name for c in o.children]
+    except ReferenceError: return
+    for n in kids:
+        c = bpy.data.objects.get(n)
+        if c is not None: _remove_tree(c)
     data = o.data
     try: bpy.data.objects.remove(o)
     except ReferenceError: return
