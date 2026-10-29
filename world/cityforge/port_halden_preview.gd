@@ -1,6 +1,7 @@
 extends Node3D
 ## Fly round Port Halden (the generated city) without the game: open
-## world/cityforge/port_halden_preview.tscn and press F6.
+## world/cityforge/port_halden_preview.tscn (the classic city) or port_halden_roads_preview.tscn (the roads-only
+## city: assets/cityforge_roads) and press F6.
 ## Mouse: look (click to capture, Esc to release) - WASD: fly - Q/E: down/up - Shift: fast
 ## N: day / night - F: drop to street level - Wheel: speed.
 
@@ -13,6 +14,8 @@ var yaw := 0.0
 var pitch := -0.35
 var night := false
 var hud: Label
+## The city build to show (empty: the classic city in assets/cityforge).
+@export var city_dir := ""
 
 func _ready() -> void:
 	env = Environment.new()
@@ -36,6 +39,7 @@ func _ready() -> void:
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 350.0
 	add_child(sun)
+	CityForgeWorld.use_city(city_dir if city_dir != "" else CityForgeWorld.CLASSIC_DIR)
 	world = CityForgeWorld.new()
 	add_child(world)
 	camera = Camera3D.new()

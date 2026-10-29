@@ -11,7 +11,7 @@ extends RefCounted
 ##   mrs_city.json         instances, signals (phase per pole), street-name labels, trees, item footprints
 ## Records are Blender world coordinates (plan - 1024); Godot = (x, z, -y), yaw unchanged.
 
-const DIR := "res://assets/cityforge/mrs/"
+static var DIR := "res://assets/cityforge/mrs/"          ## follows CityForgeWorld.use_city()
 const ROAD_SHADER := preload("res://world/roads/mrs_road.gdshader")
 const LENS_SHADER := preload("res://world/cityforge/mrs_signal_lens.gdshader")
 const KIT_SIGNAL := "MRS_PH_Signal"
@@ -166,6 +166,10 @@ static func kit_key(node_name: String) -> String:
 	var m := rx.search(k)
 	return m.get_string(1) if m != null and not k.begins_with("MRS_PH_") else k
 
+## Kit model of a signal record: the corner post, or its mast-arm variant (arm length / heads follow the lanes).
+static func signal_kit(s: Dictionary) -> String:
+	return str(s.get("kit", KIT_SIGNAL))
+
 static func is_street_kind(name_: String) -> bool:
 	for k: String in STREET_KINDS:
 		if name_.contains(k): return true
@@ -186,7 +190,7 @@ func add_instances(groups: Dictionary) -> int:
 	for s: Dictionary in data.get("signals", []):
 		var jid := str(s.junction)
 		var offset := float(hash(jid) % 4600) / 100.0 / 100.0
-		world._add(groups, KIT_SIGNAL, plan_of(s.pos), float((s.pos as Array)[2]), float(s.yaw), Vector3.ONE, Color.WHITE,
+		world._add(groups, signal_kit(s), plan_of(s.pos), float((s.pos as Array)[2]), float(s.yaw), Vector3.ONE, Color.WHITE,
 			Color(float(s.phase), float(phases.get(jid, 2)), offset, 1.0))
 		n += 1
 	for r: Array in data.get("street_name_signs", []):
@@ -307,7 +311,7 @@ static func editor_props(kit_scene: Node, holder: Node3D) -> int:
 		for r: Array in inst[lib]:
 			_editor_add(groups, lib, Transform3D(Basis(Vector3.UP, float(r[3])).scaled(Vector3.ONE * float(r[4])), g(r)))
 	for s: Dictionary in data.get("signals", []):
-		_editor_add(groups, KIT_SIGNAL, Transform3D(Basis(Vector3.UP, float(s.yaw)), g(s.pos as Array)))
+		_editor_add(groups, signal_kit(s), Transform3D(Basis(Vector3.UP, float(s.yaw)), g(s.pos as Array)))
 	for r: Array in data.get("street_name_signs", []):
 		_editor_add(groups, KIT_STREETNAME, Transform3D(Basis(Vector3.UP, float(r[3])), g(r)))
 	var n := 0

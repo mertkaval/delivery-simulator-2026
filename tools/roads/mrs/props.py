@@ -82,7 +82,8 @@ def build_prop_collections():
     col = collection(MRS + "Drains")
     def gully(bm): _box(bm, -0.25, -0.2, 0.0, 0.25, 0.2, 0.012)
     make(col, "MRS_Gully", gully, metal)
-    # markings: arrows (0 straight, 1 left, 2 right, 3 straight+left, 4 straight+right), 5 unit tick
+    # markings: arrows for every movement set (straight, left, right, straight+left, straight+right, left+right, all), unit tick
+    # (the road group picks them by name: tools/roads/mrs/road.py arrow_index)
     col = collection(MRS + "Markings")
     def shaft(bm, L=3.0): _poly(bm, [(-0.1, 0), (0.1, 0), (0.1, L), (-0.1, L)], 0.0)
     def head(bm, y=3.0): _poly(bm, [(-0.45, y), (0.45, y), (0.0, y + 1.0)], 0.0)
@@ -95,6 +96,8 @@ def build_prop_collections():
     make(col, "MRS_ArrowRight", lambda bm: (shaft(bm, 1.4), turn(bm, 1)), paint)
     make(col, "MRS_ArrowStraightLeft", lambda bm: (shaft(bm), head(bm), turn(bm, -1)), paint)
     make(col, "MRS_ArrowStraightRight", lambda bm: (shaft(bm), head(bm), turn(bm, 1)), paint)
+    make(col, "MRS_ArrowLeftRight", lambda bm: (shaft(bm, 1.4), turn(bm, -1), turn(bm, 1)), paint)
+    make(col, "MRS_ArrowAll", lambda bm: (shaft(bm), head(bm), turn(bm, -1), turn(bm, 1)), paint)
     make(col, "MRS_MarkTick", lambda bm: _poly(bm, [(-0.5, -0.5), (0.5, -0.5), (0.5, 0.5), (-0.5, 0.5)], 0.0), paint)
     # merge arrows (lane ends): a bent shaft toward the remaining lane
     def merge(bm, sgn):
@@ -120,6 +123,8 @@ def build_prop_collections():
     # separator post (flexible bollard) and planter for protected cycleways (instanced from the markings collection)
     make(col, "MRS_SepPost", lambda bm: (_cyl(bm, 0, 0, 0, 0.9, 0.05, 0.045, 8), _cyl(bm, 0, 0, 0.0, 0.05, 0.12, 0.12, 8)), mat(MRS + "PropWhite", (0.9, 0.9, 0.9), 0.5))
     make(col, "MRS_SepPlanter", lambda bm: (_box(bm, -0.3, -0.6, 0.0, 0.3, 0.6, 0.5), _box(bm, -0.25, -0.55, 0.5, 0.25, 0.55, 0.62)), concrete)
+    for word in ("BUS", "TAXI", "ONLY"):        # lane words (placeholder quads; assets.py paints the letters)
+        make(col, "MRS_Text" + word, lambda bm: _poly(bm, [(-0.7, -1.2), (0.7, -1.2), (0.7, 1.2), (-0.7, 1.2)], 0.0), paint)
     # pillars: 1 m tall, scaled in z (and x with the road width)
     col = collection(MRS + "Pillars")
     def pillar(bm): _box(bm, -1.2, -0.6, 0.0, 1.2, 0.6, 1.0); _box(bm, -1.6, -0.9, 0.0, 1.6, 0.9, 0.06)

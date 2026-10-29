@@ -54,6 +54,9 @@ PROFILES = {
                                       "Crown": 1.0, "Edge Depth": 0.8}),
 }
 SPEED = {"local": 30, "downtown": 40, "arterial": 50, "boulevard": 50, "lane": 20}
+MAX_GRADE = {"local": 0.16, "downtown": 0.12, "arterial": 0.12, "boulevard": 0.10, "lane": 0.18, "bridge": 0.06}   # vertical alignment (rise / run)
+SMOOTH = {"local": 30.0, "downtown": 40.0, "arterial": 50.0, "boulevard": 60.0, "lane": 20.0}   # ground averaged over this length (m)
+BRIDGE_CLEARANCE = 4.0                # deck height over the water level (m)
 STYLE = {"local": "residential", "downtown": "avenue", "arterial": "avenue", "boulevard": "boulevard", "lane": "residential"}
 
 
@@ -103,14 +106,14 @@ MIN_RADIUS = 3.0      # corner radius floor when a short link needs room
 GAP = 2.0             # road left between two junction trims (m)
 
 
-def build(city, heights, region=None):
+def build(city, heights, region=None, natural=None, profiles=None):
     """-> dict(junctions, roads, lanes, report). Iterates: build the network, estimate every junction's trims
     exactly like junction.build_junction does, and where a road is shorter than its two trims first tighten
     the corner radii at its ends (down to MIN_RADIUS), then merge its two junctions. `region` =
     (x0, y0, x1, y1) plan metres keeps only roads with a point inside (a quick partial build)."""
     forced, radius = set(), {}
     for it in range(8):
-        net = _build_once(city, heights, region, forced, radius)
+        net = _build_once(city, heights, region, forced, radius, natural, profiles)
         short = _short_roads(net)
         net["report"]["iterations"] = it + 1
         if not short: break
@@ -215,7 +218,7 @@ def _adopt_classes(city, N, rep, short=45.0):
     return roads
 
 
-def _build_once(city, heights, region, forced, radius_override):
+def _build_once(city, heights, region, forced, radius_override, natural=None, profiles=None):
     rep = {"clusters": [], "absorbed": [], "duplicates": [], "angle_drops": [], "bends": [], "bend_junctions": [], "loops": [], "lanes": [], "notes": []}
     N = {n["id"]: n for n in city["nodes"]}
     roads_in = _adopt_classes(city, N, rep)
@@ -346,7 +349,17 @@ def _build_once(city, heights, region, forced, radius_override):
         poly = _fillet_poly(pts, hw + WALK + 2.0, rep, seq_j)
         if region is not None and not any(region[0] <= p[0] <= region[2] and region[1] <= p[1] <= region[3] for p in poly): continue
         dense = _densify(poly, 6.0)
-        if bridge:
+        name = "PH_" + seq_r[0].replace("road_", "R")
+        own = (profiles or {}).get(name)
+        if own is not None and len(own) == len(dense):
+            z = [float(v) + ASPH for v in own]            # the road's own vertical alignment (design_heights)
+        elif bridge and natural is not None:
+            # the deck spans bank to bank at the clearance over the water, ramps at the bridge grade (mrs.grading)
+            from . import grading
+            ja, jb = jid[seq_j[0]], jid[seq_j[-1]]
+            z = [float(v) + ASPH for v in grading.profile(natural, dense, heights(*ja["pos"]), heights(*jb["pos"]), MAX_GRADE["bridge"], 0.0,
+                                                          clearance=BRIDGE_CLEARANCE, bridge=True)]
+        elif bridge:
             ja, jb = jid[seq_j[0]], jid[seq_j[-1]]
             ha = heights(*ja["pos"]); hb = heights(*jb["pos"]); Ltot = sum(_d(p, q) for p, q in zip(dense, dense[1:])); s = 0.0
             z = []
@@ -391,16 +404,22 @@ def _build_once(city, heights, region, forced, radius_override):
         if region is not None and not any(region[0] <= p[0] <= region[2] and region[1] <= p[1] <= region[3] for p in (a, b)): continue
         ends = []
         for p, sgn in ((a, 1.0), (b, -1.0)):
-            st = _street_at(out_roads, p)
+            out = (-d[0] * sgn, -d[1] * sgn)                                 # leaving the lane through this end
+            st = _lane_mouth(out_roads, p, out)
             if st is None:
                 ends.append({"pos": p, "street": None}); rep["notes"].append("lane %s: no street at %s" % (ln["id"], [round(c, 1) for c in p])); continue
-            rd, along, side, dist = st
-            q = (p[0] + d[0] * sgn * WALK, p[1] + d[1] * sgn * WALK)          # from the street's lot line, not its carriageway edge
-            ends.append({"pos": q, "street": rd["id"], "along_pos": p, "side": side, "dist": round(dist, 2)})
+            rd, along, side, c, t = st
+            # the lane ends at the street's lot line (back of its sidewalk); city.build refines `back` from the built
+            # street's own cross-section
+            back = rd["width"] / 2.0 + WALK
+            q = (c[0] - out[0] * back, c[1] - out[1] * back)
+            ends.append({"pos": q, "street": rd["id"], "along_pos": c, "out": out, "side": side, "dist": round(t, 2)})
         p0, p1 = ends[0]["pos"], ends[1]["pos"]
         dense = _densify([p0, p1], 6.0)
-        out_lanes.append({"id": "PH_" + ln["id"].replace("lane_", "L_"), "cf_lane": ln["id"], "cls": "lane", "width": ln.get("width", 6),
-                          "pts": [(p[0], p[1], heights(*p) + ASPH) for p in dense], "ends": ends, "length": round(_d(p0, p1), 2)})
+        lid = "PH_" + ln["id"].replace("lane_", "L_"); own = (profiles or {}).get(lid)
+        zs_ = [float(v) + ASPH for v in own] if own is not None and len(own) == len(dense) else [heights(*p) + ASPH for p in dense]
+        out_lanes.append({"id": lid, "cf_lane": ln["id"], "cls": "lane", "width": ln.get("width", 6),
+                          "pts": [(p[0], p[1], z_) for p, z_ in zip(dense, zs_)], "ends": ends, "length": round(_d(p0, p1), 2)})
         rep["lanes"].append(ln["id"])
     rep["summary"] = {"cf_nodes": len([n for n in city["nodes"] if n["edges"]]), "cf_roads": len(roads_in), "mrs_roads": len(out_roads),
                       "junctions": len([j for j in out_j if j["kind"] == "junction"]), "dead_ends": len([j for j in out_j if j["kind"] == "dead_end"]),
@@ -410,8 +429,68 @@ def _build_once(city, heights, region, forced, radius_override):
     return {"junctions": out_j, "roads": out_roads, "lanes": out_lanes, "report": rep}
 
 
+def bridge_gaps(city, natural, max_span=160.0, aligned=0.95, probe=40.0):
+    """Join dead-end streets that face each other across water with a bridge road (in place; returns the new
+    roads). A dead end qualifies when water lies ahead of it within `probe` m; a pair qualifies when each points at
+    the other (cosine >= `aligned`), they are at most `max_span` m apart and the line between them crosses water.
+    The bridge takes the lower class of the two streets and the first one's name."""
+    nodes = {n["id"]: n for n in city["nodes"]}; roads = {r["id"]: r for r in city["roads"]}
+    ends = []
+    for nid, n in nodes.items():
+        if len(n["edges"]) != 1: continue
+        r = roads.get(n["edges"][0])
+        if r is None: continue
+        other = nodes[r["b"] if r["a"] == nid else r["a"]]["pos"]; p = n["pos"]
+        d = _unit((p[0] - other[0], p[1] - other[1]))
+        if any(natural.wet(p[0] + d[0] * k, p[1] + d[1] * k) for k in range(2, int(probe) + 1, 2)): ends.append((nid, p, d, r))
+    added = []; used = set()
+    for i, (n1, p1, d1, r1) in enumerate(ends):
+        for n2, p2, d2, r2 in ends[i + 1:]:
+            if n1 in used or n2 in used: continue
+            L = _d(p1, p2)
+            if L > max_span or L < 1.0: continue
+            u = _unit((p2[0] - p1[0], p2[1] - p1[1]))
+            if u[0] * d1[0] + u[1] * d1[1] < aligned or -(u[0] * d2[0] + u[1] * d2[1]) < aligned: continue
+            wet = sum(natural.wet(p1[0] + u[0] * L * k / 20, p1[1] + u[1] * L * k / 20) for k in range(21))
+            if wet < 3: continue
+            weak = min((r1, r2), key=lambda r: (RANK[r["cls"]], r["width"]))
+            rid = "road_br%02d" % len(added)
+            br = dict(weak, id=rid, a=n1, b=n2, bridge=True, name=r1.get("name") or r2.get("name", ""), profile=[], heights=[])
+            city["roads"].append(br); nodes[n1]["edges"].append(rid); nodes[n2]["edges"].append(rid)
+            used.update((n1, n2)); added.append({"id": rid, "a": n1, "b": n2, "span": round(L, 1), "cls": br["cls"], "name": br["name"]})
+    return added
+
+
+def design_heights(net, natural, feather=10.0):
+    """(Heights, report, {road / lane id: z per point}) for the network built on the NATURAL terrain (roads integrated by the tool, not by a city's grading):
+    every road's vertical alignment from mrs.grading.network_profiles (natural ground averaged, grade limited, node
+    heights shared, decks over water), the corridors written into the natural field, then the back lanes pinned to
+    the streets they open onto. Feed the result back to build() for the final road and junction heights."""
+    from . import grading
+    nodes = {}; edges = []
+    for j in net["junctions"]: nodes[j["id"][3:]] = tuple(j["pos"])
+    for rd in net["roads"]:
+        for key, p in ((rd["start"], rd["pts"][0]), (rd["end"], rd["pts"][-1])): nodes.setdefault(key, (p[0], p[1]))
+        edges.append({"a": rd["start"], "b": rd["end"], "pts": [(p[0], p[1]) for p in rd["pts"]], "bridge": bool(rd["bridge"]),
+                      "max_grade": MAX_GRADE["bridge" if rd["bridge"] else rd["cls"]], "smooth": SMOOTH.get(rd["cls"], 30.0), "clearance": BRIDGE_CLEARANCE})
+    zn, zs = grading.network_profiles(natural, nodes, edges)
+    profiles = {rd["id"]: [round(float(v), 3) for v in z] for rd, z in zip(net["roads"], zs)}
+    streets = [{"pts": e["pts"], "z": z, "half": rd["width"] / 2.0 + WALK + 0.5} for e, z, rd in zip(edges, zs, net["roads"]) if not rd["bridge"]]
+    f1 = grading.Field(grading.corridor_field(natural, streets, feather), natural.cell, (natural.ox, natural.oy), natural.water, natural.wl)
+    lanes = []
+    for ln in net["lanes"]:
+        pts = [(p[0], p[1]) for p in ln["pts"]]
+        z = grading.profile(f1, pts, f1(*pts[0]), f1(*pts[-1]), MAX_GRADE["lane"], SMOOTH["lane"])
+        lanes.append({"pts": pts, "z": z, "half": float(ln.get("width", 6)) / 2.0 + 1.0})
+        profiles[ln["id"]] = [round(float(v), 3) for v in z]
+    h = grading.corridor_field(f1, lanes, feather * 0.5)
+    rep = {"nodes": len(zn), "edges": len(edges), "max_edge_grade": round(max((float(np.max(np.abs(np.diff(z) / np.maximum(np.diff(grading._stations(e["pts"])), 1e-6))))
+                                                                           for e, z in zip(edges, zs) if len(z) > 1), default=0.0), 4)}
+    return Heights(h, natural.cell), rep, profiles
+
+
 def junction_plane(heights, at, approaches, reach=22.0):
-    """(z at the centre, (gx, gy)): least-squares plane through the graded road profiles (+ asphalt) of the approaches,
+    """(z at the centre, (gx, gy)): least-squares plane through the road profiles (pts z, else the heights + asphalt) of the approaches,
     0-`reach` m out from the junction, so the locked road ends blend into it; the grade is capped at MAX_PLANE_GRADE
     (a steeper junction is levelled that much)."""
     xs, ys, zs = [0.0], [0.0], [heights(*at) + ASPH]
@@ -421,7 +500,9 @@ def junction_plane(heights, at, approaches, reach=22.0):
             L = _d(a, b)
             while nxt <= s + L and nxt <= reach:
                 f = (nxt - s) / L; x, y = a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f
-                xs.append(x - at[0]); ys.append(y - at[1]); zs.append(heights(x, y) + ASPH); nxt += 2.0
+                # the approach's own profile when it has one (a bridge deck is not the river bed under it)
+                z = a[2] + (b[2] - a[2]) * f if len(a) > 2 and len(b) > 2 else heights(x, y) + ASPH
+                xs.append(x - at[0]); ys.append(y - at[1]); zs.append(z); nxt += 2.0
             s += L
             if nxt > reach: break
     A = np.column_stack([np.ones(len(xs)), xs, ys]); c = np.linalg.lstsq(A, np.array(zs), rcond=None)[0]
@@ -481,14 +562,25 @@ def _project_poly(pts, p):
     return best
 
 
-def _street_at(roads, p, tol=1.5):
-    """The road whose carriageway edge passes through p (a lane mouth): (road, along, side, |d - half|)."""
+def _lane_mouth(roads, p, out, back=3.0, reach=30.0):
+    """Where a back lane leaving through p (unit direction `out`) meets a street: the nearest crossing of the ray
+    p + out * t (-back <= t <= reach) with a road centre line -> (road, along, side of the street the lane is on,
+    crossing point, t). Geometric, so it holds whatever the street's width or a shifted (filleted) centre line."""
     best = None
+    inner = (p[0] - out[0] * 5.0, p[1] - out[1] * 5.0)
     for rd in roads:
-        pr = _project_poly(rd["pts"], p)
-        if pr is None: continue
-        dd = abs(pr[0] - rd["width"] / 2.0)
-        if dd < tol and (best is None or dd < best[3]): best = (rd, pr[1], pr[2], dd)
+        s = 0.0; pts = rd["pts"]
+        for a, b in zip(pts, pts[1:]):
+            ex, ey = b[0] - a[0], b[1] - a[1]; L = math.hypot(ex, ey)
+            if L < 1e-9: continue
+            den = out[0] * ey - out[1] * ex
+            if abs(den) > 1e-9 * L:
+                wx, wy = a[0] - p[0], a[1] - p[1]
+                t = (wx * ey - wy * ex) / den; u = (wx * out[1] - wy * out[0]) / den
+                if 0.0 <= u <= 1.0 and -back <= t <= reach and (best is None or t < best[4]):
+                    side = "l" if ex * (inner[1] - a[1]) - ey * (inner[0] - a[0]) > 0 else "r"
+                    best = (rd, s + L * u, side, (p[0] + out[0] * t, p[1] + out[1] * t), t)
+            s += L
     return best
 
 

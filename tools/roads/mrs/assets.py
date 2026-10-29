@@ -60,6 +60,14 @@ def pmat(name, rgb, rough=0.6, metal=0.0, var=0.12, scale=6.0, emit=None, emit_s
     return m
 
 
+def materials_alive():
+    """The material registry exists and its materials are still in this file (another .blend opened since frees them)."""
+    try:
+        return bool(M) and all(m.name is not None for m in M.values() if hasattr(m, "name"))
+    except ReferenceError:
+        return False
+
+
 def _materials():
     P = MRS + "Prop"
     M.clear()
@@ -810,8 +818,40 @@ def _border(bm, pts, zc, width, yf, mi):
     return yf + 0.002
 
 
+SPEED_SIGNS = (20, 30, 40, 50, 60, 70, 80, 90, 100, 120)     # prebuilt; any other limit is made on demand by speed_sign()
+SIGN_Z = 2.4                                                   # plate centre height of the post-mounted signs
+
+
+def _keep_collection(name):
+    """The library collection `name` WITHOUT clearing it (props.collection empties it: for a full rebuild only)."""
+    col = bpy.data.collections.get(name)
+    return col if col is not None else collection(name)
+
+
+def _fresh(name):
+    """Remove the library object `name` (and its mesh) so a remake keeps the exact name (no .001 copy)."""
+    o = bpy.data.objects.get(name)
+    if o is not None:
+        me = o.data; bpy.data.objects.remove(o)
+        if me is not None and getattr(me, "users", 1) == 0: bpy.data.meshes.remove(me)
+
+
+def speed_sign(v):
+    """The speed-limit sign object for `v` km/h (MRS_Sign_Speed<v>), built into MRS_Signs the first time a road
+    asks for that limit: a red ring and the number, sized to its digit count."""
+    v = int(round(v)); name = "MRS_Sign_Speed%d" % v
+    o = bpy.data.objects.get(name)
+    if o is not None: return o
+    if not materials_alive(): _materials()
+    col = _keep_collection(MRS + "Signs"); Z = SIGN_Z
+    def speed(bm):
+        pts = _shape("circle", 0.75); yf = _plate(bm, pts, Z, S_WHITE); yf = _border(bm, pts, Z, 0.085, yf, S_RED)
+        _text(bm, str(v), 0.36 if v < 100 else 0.28, (0, yf, Z), mi=S_BLACK, max_width=0.5)
+    return make2(col, name, speed, _sign_mats())
+
+
 def _signs():
-    col = collection(MRS + "Signs"); mats = _sign_mats(); Z = 2.4
+    col = collection(MRS + "Signs"); mats = _sign_mats(); Z = SIGN_Z
     out = []
 
     def sign(name, fn):
@@ -826,11 +866,7 @@ def _signs():
         pts = _shape("triangle", 0.9); yf = _plate(bm, pts, Z, S_WHITE); _border(bm, pts, Z, 0.1, yf, S_RED)
     sign("Yield", yield_)
 
-    for v in (30, 50, 70, 90):
-        def speed(bm, v=v):
-            pts = _shape("circle", 0.75); yf = _plate(bm, pts, Z, S_WHITE); yf = _border(bm, pts, Z, 0.085, yf, S_RED)
-            _text(bm, str(v), 0.36, (0, yf, Z), mi=S_BLACK)
-        sign("Speed%d" % v, speed)
+    for v in SPEED_SIGNS: out.append(speed_sign(v))
 
     def no_entry(bm):
         pts = _shape("circle", 0.75); yf = _plate(bm, pts, Z, S_RED); _prism(bm, [(-0.27, Z - 0.06), (0.27, Z - 0.06), (0.27, Z + 0.06), (-0.27, Z + 0.06)], yf, yf + 0.002, S_WHITE)
@@ -927,7 +963,7 @@ def _signs():
 
 def custom_sign(text, shape="rect", color=(0.05, 0.3, 0.1), size=0.9, name="MRS_Sign_Custom"):
     """A new sign object (post + plate + white text) linked to the scene collection, visible."""
-    if not M: _materials()
+    if not materials_alive(): _materials()
     key = "%02x%02x%02x" % tuple(int(max(0.0, min(1.0, c)) * 255) for c in color[:3])
     face = pmat(MRS + "PropSignCustom_" + key, tuple(color[:3]), 0.35, var=0.04)
     mats = _sign_mats() + [face]; lines = [l for l in str(text).split("\n") if l.strip()] or [" "]
@@ -1243,11 +1279,19 @@ def _drains():
     return col
 
 
-# ============================================================================== markings (identical to props.py: order matters)
+# ============================================================================== markings (detailed arrows over props.py's placeholders)
+TEXT_SIZE = (1.6, 4.0)          # painted lane words: width across the lane x length along it (m)
+
+
 def _markings():
     paint = M["paint"]
-    # markings: arrows (0 straight, 1 left, 2 right, 3 straight+left, 4 straight+right), 5 unit tick
-    col = collection(MRS + "Markings")
+    # markings: arrows for every movement set (straight, left, right, straight+left, straight+right, left+right, all), unit tick
+    # (the road group picks them by name: tools/roads/mrs/road.py arrow_index). The collection is NOT cleared: it also
+    # holds props.py's merge arrows, bicycle symbol and separator posts (clearing it left the cycle lanes' symbol
+    # index pointing past the end, and the lanes showed a row of turn arrows); these models replace their placeholders
+    col = _keep_collection(MRS + "Markings")
+    for nm in ("ArrowStraight", "ArrowLeft", "ArrowRight", "ArrowStraightLeft", "ArrowStraightRight", "ArrowLeftRight", "ArrowAll", "MarkTick",
+               "TextBUS", "TextTAXI", "TextONLY"): _fresh("MRS_" + nm)
     def shaft(bm, L=3.0): _poly(bm, [(-0.1, 0), (0.1, 0), (0.1, L), (-0.1, L)], 0.0)
     def head(bm, y=3.0): _poly(bm, [(-0.45, y), (0.45, y), (0.0, y + 1.0)], 0.0)
     def turn(bm, sgn):
@@ -1259,7 +1303,21 @@ def _markings():
     make(col, "MRS_ArrowRight", lambda bm: (shaft(bm, 1.4), turn(bm, 1)), paint)
     make(col, "MRS_ArrowStraightLeft", lambda bm: (shaft(bm), head(bm), turn(bm, -1)), paint)
     make(col, "MRS_ArrowStraightRight", lambda bm: (shaft(bm), head(bm), turn(bm, 1)), paint)
+    make(col, "MRS_ArrowLeftRight", lambda bm: (shaft(bm, 1.4), turn(bm, -1), turn(bm, 1)), paint)
+    make(col, "MRS_ArrowAll", lambda bm: (shaft(bm), head(bm), turn(bm, -1), turn(bm, 1)), paint)
     make(col, "MRS_MarkTick", lambda bm: _poly(bm, [(-0.5, -0.5), (0.5, -0.5), (0.5, 0.5), (-0.5, 0.5)], 0.0), paint)
+    # lane words: the letters elongated along the lane (TEXT_SIZE: width x length, m), reading direction +X, tops +Y
+    from .junction import glyph
+    def word(text):
+        tris = glyph(text)
+        xs = [p[0] for t in tris for p in t]; ys = [p[1] for t in tris for p in t]
+        w, l = TEXT_SIZE; sx = w / max(max(xs) - min(xs), 1e-6); sy = l / max(max(ys) - min(ys), 1e-6); cx = (min(xs) + max(xs)) / 2; cy = (min(ys) + max(ys)) / 2
+        def build(bm):
+            for t in tris:
+                try: bm.faces.new([bm.verts.new(((x - cx) * sx, (y - cy) * sy, 0.0)) for x, y in t])
+                except ValueError: pass
+        return build
+    for text in ("BUS", "TAXI", "ONLY"): make(col, "MRS_Text" + text, word(text), paint)
     for o in col.objects:  # markings are flat quads: give them the UV map the other assets have
         me = o.data
         if not me.uv_layers:

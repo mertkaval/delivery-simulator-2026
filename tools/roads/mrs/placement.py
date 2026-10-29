@@ -610,9 +610,10 @@ def _signs(ctx, m, speed_limits):
                         ctx["rep"]["placed"].append((m.name, "sign_street_name", arriving, round(a_sign, 1), "street_name"))
                 except Exception as e:
                     _skip(ctx, m, "sign_street_name", a_sign, "signage error: %s" % e)
-    sp = speed_limits.get(m.name)
+    sp = speed_limits.get(m.name) or road_input(m.road, "Speed Limit")       # the road's own posted speed
     if sp:
-        lib = "MRS_Sign_Speed%d" % sp if bpy.data.objects.get("MRS_Sign_Speed%d" % sp) else "MRS_Sign_Speed50"
+        from .assets import speed_sign
+        lib = speed_sign(sp).name                       # the sign shows the road's own limit, whatever it is
         for side, a in (("r" if m.rht else "l", m.A0 + R["speed_sign_from_start"] + 8.0), ("l" if m.rht else "r", m.A1 - R["speed_sign_from_start"] - 8.0)):
             for k in range(4):
                 if _put(ctx, m, side, a + (k * 3.0 if side == ("r" if m.rht else "l") else -k * 3.0), R["sign_setback"], "sign_speed", lib, "traffic", cat="sign", quiet=k < 3): break

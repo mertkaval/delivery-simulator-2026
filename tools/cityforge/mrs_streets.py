@@ -4,7 +4,11 @@ plan for build_city.py with CityForge's own streets and street furniture taken o
 
     blender --background --factory-startup --python tools/cityforge/mrs_streets.py -- <plan_dir> <out_dir>
             [--region x0,y0,x1,y1] [--no-place] [--no-export] [--blend <file.blend>] [--from-blend <saved build>] [--plan-only] [--profile]
+            [--terrain <terrain.npz>] [--with-buildings]
 
+Roads only (the default): the plan keeps the road network; buildings, lots, fences, parks and their props go, the
+roads take their vertical alignment from the natural terrain (mrs.grading) and the ground is graded to them with
+cut / fill batters; frontage plots along the streets stand in for the addresses. --with-buildings keeps CityForge's.
 The MRS base library (node groups, materials, asset collections) is built once into tmp/roads/city/base.blend
 (~6 min); later runs open it."""
 import bpy, json, os, sys, time, traceback
@@ -26,6 +30,8 @@ try:
     from mrs import city
     mrs = city.ensure_base(BASE, rebuild="--rebuild-base" in opts)
     region = tuple(float(v) for v in opt("--region").split(",")) if opt("--region") else None
+    if opt("--terrain"): city.STATE["terrain"] = os.path.abspath(opt("--terrain"))     # natural terrain.npz (default: <plan>/../terrain)
+    if "--with-buildings" in opts: city.ROADS_ONLY = False       # keep CityForge's buildings and graded lots (the roads adapt the plan)
     prof = None
     if "--profile" in opts:
         import cProfile; prof = cProfile.Profile(); prof.enable()

@@ -48,6 +48,8 @@ const TINTED := ["CF_Siding", "CF_Leaves", "CF_SidingV", "CF_RoofV", "CF_LeavesV
 	"CF_MetalSiding", "CF_Awning", "CF_SignBoard", "CF_BrickFacade", "CF_Stucco", "CF_BrickPainted", "CF_RoofSeamV", "CF_Hedge",
 	"CF_Plaster", "CF_SignPlate"]
 static var cache: Dictionary = {}
+## The water's seamless noise textures (ripple normal map, plain noise), shared by its materials.
+static var water_textures: Array[NoiseTexture2D] = []
 
 static func get_material(name: String) -> Material:
 	var key := name.get_slice(".", 0)          # Blender duplicates: CF_Glass.001
@@ -66,9 +68,16 @@ static func get_material(name: String) -> Material:
 		ground.set_shader_parameter("grass_normal", load(TEX + "leafy_grass_nor_gl.jpg"))
 		if key == "CF_Verge": ground.set_shader_parameter("grass_rough", load(TEX + "leafy_grass_Rough.jpg"))
 		material = ground
-	elif key == "CF_Water":
+	elif key == "CF_Water" or key == "CF_WaterBasin":
 		var water := ShaderMaterial.new()
 		water.shader = preload("res://world/cityforge/cityforge_water.gdshader")
+		if water_textures.is_empty():
+			water_textures = [water_noise(2026, 512, 0.016, true), water_noise(611, 256, 0.025, false)]
+		water.set_shader_parameter("ripple_normal", water_textures[0])
+		water.set_shader_parameter("ripple_noise", water_textures[1])
+		if key == "CF_WaterBasin":      # a fountain's shallow sheet on its basin: calm, no shore foam
+			water.set_shader_parameter("foam_amount", 0.0)
+			water.set_shader_parameter("ripple_strength", 0.35)
 		material = water
 	else:
 		var spec: Array = SURFACES.get(key, [0, "8a8f8c"])
@@ -92,12 +101,33 @@ static func get_material(name: String) -> Material:
 	cache[key] = material
 	return material
 
+## Seamless procedural noise for the water shader: the ripple normal map, or plain noise (foam, wind patches).
+static func water_noise(seed_: int, size_: int, frequency: float, normal_map: bool) -> NoiseTexture2D:
+	var noise := FastNoiseLite.new()
+	noise.seed = seed_
+	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	noise.frequency = frequency
+	noise.fractal_type = FastNoiseLite.FRACTAL_FBM
+	noise.fractal_octaves = 3
+	var tex := NoiseTexture2D.new()
+	tex.width = size_
+	tex.height = size_
+	tex.seamless = true
+	tex.generate_mipmaps = true
+	tex.noise = noise
+	if normal_map:
+		tex.as_normal_map = true
+		tex.bump_strength = 5.0
+	return tex
+
 ## Every surface of the mesh gets its CityForge material (by the imported material's name).
 static func apply(mesh: Mesh) -> void:
 	for s in mesh.get_surface_count():
 		var m := mesh.surface_get_material(s)
 		var key: String = m.resource_name if m != null else ""
 		if key.begins_with("CF_") or key.begins_with("MRS_"):
+			# water as one surface among others (a plaza fountain, a cesme) is a shallow basin, not a shore
+			if key.get_slice(".", 0) == "CF_Water" and mesh.get_surface_count() > 1: key = "CF_WaterBasin"
 			mesh.surface_set_material(s, get_material(key))
 
 ## Lit windows and lamps follow the time of day (0 by day, 1 at night).

@@ -45,6 +45,7 @@ INPUTS = [
     ]),
     ("Profile", [
         ("Driving Side", "NodeSocketMenu", "Right", None, None, "Right-hand or left-hand traffic (which side the forward lanes use)"),
+        ("Speed Limit", "NodeSocketInt", 50, 5, 130, "Posted speed (km/h): the speed-limit signs show it"),
         ("Lanes Forward", "NodeSocketInt", 1, 0, 6, "Lanes in the curve direction (0 = one-way against the curve)"),
         ("Lanes Backward", "NodeSocketInt", 1, 0, 6, "Lanes against the curve direction (0 = one-way)"),
         ("Lane Width", "NodeSocketFloat", 3.2, 2.0, 6.0, "Width of one lane (m)"),
@@ -56,6 +57,8 @@ INPUTS = [
         ("Shoulder", "NodeSocketFloat", 0.0, 0.0, 3.0, "Paved shoulder each side (m)"),
         ("Bus Lane Forward", "NodeSocketBool", False, None, None, "Outer forward lane is a coloured bus lane"),
         ("Bus Lane Backward", "NodeSocketBool", False, None, None, "Outer backward lane is a coloured bus lane"),
+        ("Bus Lane Text", "NodeSocketMenu", "BUS", None, None, "Painted in the bus lanes: None, BUS, TAXI, ONLY"),
+        ("Text Spacing", "NodeSocketFloat", 60.0, 10.0, 400.0, "Distance between the painted words along a bus lane (m)"),
         ("Parking Left", "NodeSocketFloat", 0.0, 0.0, 3.0, "Parallel parking width (0 = none)"),
         ("Parking Right", "NodeSocketFloat", 0.0, 0.0, 3.0, "Parallel parking width (0 = none)"),
         ("Median", "NodeSocketFloat", 0.0, 0.0, 8.0, "Raised median width (0 = none)"),
@@ -86,15 +89,23 @@ INPUTS = [
         ("Centre Line", "NodeSocketMenu", "Dashed", None, None, ""),
         ("Lane Lines", "NodeSocketBool", True, None, None, "Dashed lines between lanes"),
         ("Edge Lines", "NodeSocketBool", False, None, None, "Solid lines at the carriageway edge"),
+        ("Centre Colour", "NodeSocketMenu", "White", None, None, "Centre line paint: White or Yellow"),
+        ("Edge Colour", "NodeSocketMenu", "White", None, None, "Edge line paint: White or Yellow"),
+        ("Centre Line Width", "NodeSocketFloat", 0.12, 0.05, 0.4, "Centre line width (m; a double line keeps one width between its lines)"),
+        ("Edge Line Width", "NodeSocketFloat", 0.15, 0.05, 0.4, "Edge line width (m)"),
         ("Parking Ticks", "NodeSocketBool", True, None, None, "Bay dividers in the parking strip"),
         ("Bay Length", "NodeSocketFloat", 5.5, 3.0, 12.0, ""),
         ("Lane Arrows", "NodeSocketBool", True, None, None, "Turn arrows in each lane before a junction"),
-        ("Arrow Distance", "NodeSocketFloat", 9.0, 3.0, 40.0, "Arrow centre before the trimmed end (m)"),
-        ("Marking Width", "NodeSocketFloat", 0.12, 0.05, 0.4, ""), ("Dash Length", "NodeSocketFloat", 3.0, 0.3, 12.0, ""), ("Dash Gap", "NodeSocketFloat", 6.0, 0.3, 20.0, ""),
+        ("Arrow Distance", "NodeSocketFloat", 9.0, 3.0, 40.0, "Arrow centre before the stop line (m, from the end of the junction's clear zone)"),
+        ("Arrow Min Lanes", "NodeSocketInt", 2, 1, 6, "Approaches with fewer arriving lanes get no arrows (1 = every approach)"),
+        ("Marking Width", "NodeSocketFloat", 0.12, 0.05, 0.4, ""), ("Dash Length", "NodeSocketFloat", 3.0, 0.3, 12.0, "Lane line dash (m)"), ("Dash Gap", "NodeSocketFloat", 6.0, 0.3, 20.0, "Lane line gap (m)"),
+        ("Centre Dash Length", "NodeSocketFloat", 3.0, 0.3, 12.0, "Dashed centre line: dash (m)"), ("Centre Dash Gap", "NodeSocketFloat", 6.0, 0.3, 20.0, "Dashed centre line: gap (m)"),
         ("Markings Collection", "NodeSocketCollection", None, None, None, "Arrow / tick / symbol meshes (MRS_Markings)"),
     ]),
     ("Structure", [
         ("Mode", "NodeSocketMenu", "Ground", None, None, "Ground: on the terrain. Elevated: deck on pillars"),
+        ("Tunnel Start", "NodeSocketFloat", 0.0, 0.0, 100000.0, "A tunnel from this distance along the road (m; Tunnel End > Tunnel Start): the terrain over it is kept"),
+        ("Tunnel End", "NodeSocketFloat", 0.0, 0.0, 100000.0, "... to this distance (m)"),
         ("Deck Thickness", "NodeSocketFloat", 1.2, 0.3, 4.0, ""),
         ("Pillar Spacing", "NodeSocketFloat", 24.0, 4.0, 120.0, ""),
         ("Pillars", "NodeSocketCollection", None, None, None, "Pillar meshes, 1 m tall, scaled to the ground"),
@@ -120,6 +131,7 @@ INPUTS = [
     ]),
     ("Materials", [
         ("Asphalt Material", "NodeSocketMaterial", None, None, None, ""), ("Marking Material", "NodeSocketMaterial", None, None, None, ""),
+        ("Yellow Marking Material", "NodeSocketMaterial", None, None, None, "Paint of the lines set to Yellow"),
         ("Concrete Material", "NodeSocketMaterial", None, None, None, "Curbs, median, edges"), ("Paving Material", "NodeSocketMaterial", None, None, None, "Sidewalk slabs"),
         ("Tactile Material", "NodeSocketMaterial", None, None, None, "Ramps at crossings"), ("Cycleway Material", "NodeSocketMaterial", None, None, None, ""),
         ("Bus Lane Material", "NodeSocketMaterial", None, None, None, ""), ("Structure Material", "NodeSocketMaterial", None, None, None, ""),
@@ -139,8 +151,14 @@ INPUTS = [
         ("Bank End", "NodeSocketFloat", 0.0, -0.6, 0.6, "Cross-fall (rad, right side up) the locked end blends to: a tilted junction plane"),
         ("Ramp Start", "NodeSocketBool", False, None, None, "Curb ramp + tactile paving at the start crossing"),
         ("Ramp End", "NodeSocketBool", False, None, None, "Curb ramp + tactile paving at the end crossing"),
+        ("Mark Clear Start", "NodeSocketFloat", 0.0, 0.0, 60.0, "No lane / centre / edge / bike paint this close to the start: the junction's crossing and stop line (set by the junction)"),
+        ("Mark Clear End", "NodeSocketFloat", 0.0, 0.0, 60.0, "No lane / centre / edge / bike paint this close to the end (set by the junction)"),
+        ("Turns Start", "NodeSocketInt", 7, 0, 7, "Movements open to the lanes arriving at the start junction: 1 left + 2 straight + 4 right (set by the junction)"),
+        ("Turns End", "NodeSocketInt", 7, 0, 7, "Movements open to the lanes arriving at the end junction (set by the junction)"),
         ("Ramp Offset", "NodeSocketFloat", 0.6, 0.0, 10.0, "Crossing starts this far from the trimmed end (m)"),
         ("Ramp Width", "NodeSocketFloat", 2.5, 1.0, 6.0, "Crossing width along the road (m)"),
+        ("Ramp Depth", "NodeSocketFloat", 1.5, 0.3, 6.0, "A crossing ramp drops the kerb to the road and rises back to the sidewalk over this width (m): the back of the sidewalk stays level"),
+        ("Tactile Depth", "NodeSocketFloat", 0.8, 0.0, 3.0, "Tactile paving at a crossing, from the kerb (m)"),
         ("Driveways", "NodeSocketObject", None, None, None, "Vehicle accesses: mesh points (station, +/-100 for right / left, 0) with a 'width' attribute "
          "(written by frontage.sync_driveways from MRS_Driveway_* anchors): dropped kerb, concrete apron across the sidewalk"),
     ]),
@@ -149,6 +167,7 @@ KIND = dict(asphalt=0, marking=1, concrete=2, structure=3, embankment=4, bike=5,
 BARRIERS = ["None", "Guardrail", "Jersey", "Parapet", "Railing", "Hedge", "Fence"]
 SIDES = ["None", "Left", "Right", "Both", "Alternate"]
 BIKE = ["None", "Painted", "Buffered", "Protected", "Two-Way"]
+LANE_TEXTS = ["BUS", "TAXI", "ONLY"]          # road text markings (MRS_Text<word> in MRS_Markings)
 
 
 def _coll_index(coll_name, obj_name):
@@ -324,32 +343,61 @@ def build_road_group():
     clen = tb.n("GeometryNodeCurveLength"); tb.inp(clen, "Curve", I("Geometry"))
     trim = tb.n("GeometryNodeTrimCurve", mode="LENGTH"); tb.inp(trim, "Curve", I("Geometry"))
     tb.inp(trim, "Start_001", I("Trim Start")); tb.inp(trim, "End_001", tb.math("SUBTRACT", clen.outputs[0], I("Trim End")))
-    res = tb.n("GeometryNodeResampleCurve"); tb.inp(res, "Curve", trim.outputs[0])
-    try: res.inputs["Mode"].default_value = "Length"
-    except Exception: res.mode = "LENGTH"
-    tb.inp(res, "Length", step)
+    def resampled(length):
+        r_ = tb.n("GeometryNodeResampleCurve"); tb.inp(r_, "Curve", trim.outputs[0])
+        try: r_.inputs["Mode"].default_value = "Length"
+        except Exception: r_.mode = "LENGTH"
+        tb.inp(r_, "Length", length)
+        return r_.outputs[0]
+    # The vertical profile and the banking are worked out on a fixed resampling (every Resolution m: Final quality) and
+    # sampled onto this evaluation's stations, so Preview and Final are the same road: the smoothing and the bank blur
+    # count points, and on 2.5 x coarser preview stations they used to bend the profile by up to 1.4 m (the viewport
+    # showed another road than the export)
+    ref = resampled(I("Resolution"))
     pos = tb.n("GeometryNodeInputPosition").outputs[0]
     px, py, pz = tb.separate(pos)
     hit, hz = ray_down(pos)
     conform = tb.boolean("AND", I("Conform"), tb.boolean("AND", hit, grounded))
     z_target = tb.switch(conform, pz, tb.math("ADD", hz, I("Height Offset")), "FLOAT")
     blur_z = tb.n("GeometryNodeBlurAttribute", data_type="FLOAT"); tb.inp(blur_z, "Value", z_target); tb.inp(blur_z, "Iterations", I("Smoothing"))
-    sp0 = tb.n("GeometryNodeSplineParameter"); rlen0 = tb.n("GeometryNodeCurveLength"); tb.inp(rlen0, "Curve", res.outputs[0])
+    sp0 = tb.n("GeometryNodeSplineParameter"); rlen0 = tb.n("GeometryNodeCurveLength"); tb.inp(rlen0, "Curve", ref)
     w_s = smooth01(tb.map_range(sp0.outputs["Length"], 0.0, I("Lock Length"), 1.0, 0.0))
     w_e = smooth01(tb.map_range(tb.math("SUBTRACT", rlen0.outputs[0], sp0.outputs["Length"]), 0.0, I("Lock Length"), 1.0, 0.0))
     z1 = tb.switch(I("Lock Start"), blur_z.outputs[0], tb.math("ADD", blur_z.outputs[0], tb.math("MULTIPLY", tb.math("SUBTRACT", I("Lock Start Z"), blur_z.outputs[0]), w_s)), "FLOAT")
     z2 = tb.switch(I("Lock End"), z1, tb.math("ADD", z1, tb.math("MULTIPLY", tb.math("SUBTRACT", I("Lock End Z"), z1), w_e)), "FLOAT")
-    conformed = tb.n("GeometryNodeSetPosition"); tb.inp(conformed, "Geometry", res.outputs[0]); tb.inp(conformed, "Position", tb.combine(px, py, z2))
+    ref_z = tb.n("GeometryNodeSetPosition"); tb.inp(ref_z, "Geometry", ref); tb.inp(ref_z, "Position", tb.combine(px, py, z2))
+    # banking from the curvature of the reference stations (a step of Resolution m)
     tang = tb.n("GeometryNodeInputTangent").outputs[0]
     idx = tb.n("GeometryNodeInputIndex").outputs[0]
-    dsize = tb.n("GeometryNodeAttributeDomainSize", component="CURVE"); tb.inp(dsize, "Geometry", conformed.outputs[0])
-    nxt = tb.n("GeometryNodeSampleIndex", data_type="FLOAT_VECTOR", domain="POINT"); tb.inp(nxt, "Geometry", conformed.outputs[0]); tb.inp(nxt, "Value", tang)
+    dsize = tb.n("GeometryNodeAttributeDomainSize", component="CURVE"); tb.inp(dsize, "Geometry", ref_z.outputs[0])
+    nxt = tb.n("GeometryNodeSampleIndex", data_type="FLOAT_VECTOR", domain="POINT"); tb.inp(nxt, "Geometry", ref_z.outputs[0]); tb.inp(nxt, "Value", tang)
     tb.inp(nxt, "Index", tb.math("MINIMUM", tb.math("ADD", idx, 1.0), tb.math("SUBTRACT", dsize.outputs["Point Count"], 1.0)))
     ang = tb.math("ARCTAN2", tb.separate(tb.vmath("CROSS_PRODUCT", tang, nxt.outputs[0]))[2], tb.vmath("DOT_PRODUCT", tang, nxt.outputs[0]))
-    curv = tb.math("DIVIDE", ang, step)
+    curv = tb.math("DIVIDE", ang, I("Resolution"))
     max_bank = tb.math("RADIANS", I("Superelevation"))
     bank = tb.math("MULTIPLY", tb.math("MINIMUM", tb.math("MAXIMUM", tb.math("MULTIPLY", curv, 7.0), neg(max_bank)), max_bank), -1.0)
     blur_b = tb.n("GeometryNodeBlurAttribute", data_type="FLOAT"); tb.inp(blur_b, "Value", bank); tb.inp(blur_b, "Iterations", tb.math("ADD", I("Smoothing"), 2.0))
+    ref_b = tb.store(ref_z.outputs[0], "mrs_bank_ref", blur_b.outputs[0])
+    # this evaluation's stations take the profile and the bank of the reference at their own distance along
+    res = resampled(step)
+    smp = tb.n("GeometryNodeSampleCurve", mode="LENGTH", data_type="FLOAT"); smp.use_all_curves = True
+    tb.inp(smp, "Curves", ref_b); tb.inp(smp, "Length", tb.n("GeometryNodeSplineParameter").outputs["Length"]); tb.inp(smp, "Value", tb.named("mrs_bank_ref"))
+    conformed0 = tb.n("GeometryNodeSetPosition"); tb.inp(conformed0, "Geometry", res); tb.inp(conformed0, "Position", tb.combine(px, py, tb.separate(smp.outputs["Position"])[2]))
+    rail_b = tb.store(conformed0.outputs[0], "mrs_bank", smp.outputs["Value"])
+    # a tunnel (Tunnel Start < Tunnel End): between its portals the road runs at a straight grade from one portal height
+    # to the other instead of following the ground over it, so the hill stays above the road
+    has_tun = tb.compare("GREATER_THAN", I("Tunnel End"), I("Tunnel Start"))
+    def z_at(d):
+        sc_ = tb.n("GeometryNodeSampleCurve", mode="LENGTH", data_type="FLOAT"); sc_.use_all_curves = True
+        tb.inp(sc_, "Curves", rail_b); tb.inp(sc_, "Length", d)
+        return tb.separate(sc_.outputs["Position"])[2]
+    s_t = tb.n("GeometryNodeSplineParameter").outputs["Length"]
+    t_t = tb.math("DIVIDE", tb.math("SUBTRACT", s_t, I("Tunnel Start")), tb.math("MAXIMUM", tb.math("SUBTRACT", I("Tunnel End"), I("Tunnel Start")), 0.01))
+    z_lin = tb.math("ADD", z_at(I("Tunnel Start")), tb.math("MULTIPLY", tb.math("SUBTRACT", z_at(I("Tunnel End")), z_at(I("Tunnel Start"))), t_t))
+    in_tun = tb.boolean("AND", has_tun, tb.boolean("AND", tb.compare("GREATER_THAN", s_t, I("Tunnel Start")), tb.compare("LESS_THAN", s_t, I("Tunnel End"))))
+    pxt, pyt, pzt = tb.separate(tb.n("GeometryNodeInputPosition").outputs[0])
+    conformed = tb.n("GeometryNodeSetPosition"); tb.inp(conformed, "Geometry", rail_b); tb.inp(conformed, "Selection", in_tun)
+    tb.inp(conformed, "Position", tb.combine(pxt, pyt, z_lin))
     normal_mode = tb.n("GeometryNodeSetCurveNormal"); tb.inp(normal_mode, "Curve", conformed.outputs[0])
     for attempt in ("Z Up", "Z_UP"):
         try: normal_mode.inputs["Mode"].default_value = attempt; break
@@ -364,7 +412,7 @@ def build_road_group():
     # End, set by the junction builder), so the road edges meet the plane's edges at the same height
     bs_w = tb.switch(I("Lock Start"), 0.0, smooth01(tb.map_range(sp_t.outputs["Length"], 0.0, I("Lock Length"), 1.0, 0.0)), "FLOAT")
     be_w = tb.switch(I("Lock End"), 0.0, smooth01(tb.map_range(tb.math("SUBTRACT", sl_t.outputs["Length"], sp_t.outputs["Length"]), 0.0, I("Lock Length"), 1.0, 0.0)), "FLOAT")
-    tilt_v = tb.math("ADD", tb.math("MULTIPLY", blur_b.outputs[0], fade_t),
+    tilt_v = tb.math("ADD", tb.math("MULTIPLY", tb.named("mrs_bank"), fade_t),
                      tb.math("ADD", tb.math("MULTIPLY", I("Bank Start"), bs_w), tb.math("MULTIPLY", I("Bank End"), be_w)))
     tilt = tb.n("GeometryNodeSetCurveTilt"); tb.inp(tilt, "Curve", normal_mode.outputs[0]); tb.inp(tilt, "Tilt", tb.math("MULTIPLY", tilt_v, BANK_SIGN))
     sp = tb.n("GeometryNodeSplineParameter")
@@ -390,7 +438,7 @@ def build_road_group():
                   Material=material)
         kw["Half L"] = w["half_l"]; kw["Half R"] = w["half_r"]
         if zf is not None: kw["Z Extra"] = zf(lat, along, w)
-        if zscale_fn is not None: kw["Z Scale"] = zscale_fn(along)
+        if zscale_fn is not None: kw["Z Scale"] = zscale_fn(along, lat)
         if mat_sel is not None:
             sel, mat2, kind2 = mat_sel(along, lat)
             kw["Alt Selection"] = sel; kw["Alt Material"] = mat2; kw["Alt Kind"] = float(KIND[kind2])
@@ -415,8 +463,12 @@ def build_road_group():
             return smooth01(tb.map_range(tb.math("ABSOLUTE", tb.math("SUBTRACT", d, centre)), hw, tb.math("ADD", hw, 1.0), 1.0, 0.0))
         f = tb.math("MAXIMUM", tb.switch(I("Ramp Start"), 0.0, dip(along), "FLOAT"), tb.switch(I("Ramp End"), 0.0, dip(tb.math("SUBTRACT", L, along)), "FLOAT"))
         return tb.math("SUBTRACT", 1.0, tb.math("MULTIPLY", f, 0.96))
-    def tactile_sel(along, lat):
-        return tb.compare("LESS_THAN", ramp_factor(along), 0.5), I("Tactile Material"), "tactile"
+    def tactile_sel(along, lat, s=None):
+        """Tactile paving over a crossing ramp, within Tactile Depth of the kerb (on side s)."""
+        sel = tb.compare("LESS_THAN", ramp_factor(along), 0.5)
+        if s is not None:
+            sel = tb.boolean("AND", sel, tb.compare("LESS_THAN", tb.math("SUBTRACT", tb.math("ABSOLUTE", lat), W(along)["curb_" + s]), I("Tactile Depth")))
+        return sel, I("Tactile Material"), "tactile"
 
     # vehicle accesses (frontage.sync_driveways): nearest driveway point on this side -> dropped kerb factor
     dw_info = tb.n("GeometryNodeObjectInfo", transform_space="ORIGINAL"); tb.inp(dw_info, "Object", I("Driveways"))
@@ -436,9 +488,16 @@ def build_road_group():
         f = smooth01(tb.map_range(tb.math("ABSOLUTE", tb.math("SUBTRACT", along, px)), hw, tb.math("ADD", hw, tb.math("MAXIMUM", step, 1.0)), 1.0, 0.0))
         valid = tb.boolean("AND", tb.compare("GREATER_THAN", tb.math("MULTIPLY", py, sgn), 0.0), tb.compare("GREATER_THAN", sw_.outputs[0], 0.4))
         return tb.switch(valid, 0.0, f, "FLOAT")
-    def side_factor(sgn):
-        """Sidewalk / kerb height factor on one side: crossing ramps (both sides) and this side's driveways."""
-        return lambda a: tb.math("MINIMUM", ramp_factor(a), tb.math("SUBTRACT", 1.0, tb.math("MULTIPLY", drive_dip(a, sgn), 0.96)))
+    def side_factor(sgn, s):
+        """Sidewalk / kerb height factor on one side at (along, lat): a crossing ramp drops the kerb and rises back to the
+        full height over Ramp Depth beyond it (the back of the sidewalk stays level: it used to drop with the whole
+        width, a wavy back edge at every crossing); a driveway drops the whole width (vehicles cross it)."""
+        def f(a, lat):
+            beyond = tb.math("SUBTRACT", tb.math("ABSOLUTE", lat), W(a)["curb_" + s])
+            back = smooth01(tb.map_range(beyond, 0.0, I("Ramp Depth"), 0.0, 1.0))
+            ramp = tb.math("SUBTRACT", 1.0, tb.math("MULTIPLY", tb.math("SUBTRACT", 1.0, ramp_factor(a)), tb.math("SUBTRACT", 1.0, back)))
+            return tb.math("MINIMUM", ramp, tb.math("SUBTRACT", 1.0, tb.math("MULTIPLY", drive_dip(a, sgn), 0.96)))
+        return f
     def apron(geo, sgn):
         """Fully dropped faces over a driveway become the concrete apron (kind 11: walked and driven)."""
         sel = tb.compare("GREATER_THAN", drive_dip(tb.named("along"), sgn), 0.98)
@@ -448,27 +507,34 @@ def build_road_group():
     surf = []
     surf.append(sweep(lambda a, w: (neg(w["half_l"]), w["half_r"], 0.0, 0.0), I("Asphalt Material"), "asphalt", "asphalt", samples=11, zf=camber))
     tb.frame_("Cycleway + bus lanes: coloured surfacing on the asphalt")
+    def mark_clear(along):
+        """True inside a junction end's clear zone (its crossing and stop line): no lane paint there."""
+        return tb.boolean("OR", tb.compare("LESS_THAN", along, I("Mark Clear Start")), tb.compare("GREATER_THAN", along, tb.math("SUBTRACT", L, I("Mark Clear End"))))
     for s, sgn, on in (("r", 1.0, br_on), ("l", -1.0, bl_on)):
         geo = sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["bike0_" + s], sgn), tb.math("MULTIPLY", w["bike1_" + s], sgn), 0.003, 0.003), I("Cycleway Material"), "bike", "cycleway " + s, samples=3, zf=camber)
+        cut = tb.n("GeometryNodeDeleteGeometry", domain="FACE", mode="ALL"); tb.inp(cut, "Geometry", geo); tb.inp(cut, "Selection", mark_clear(tb.named("along")))
+        geo = cut.outputs[0]
         surf.append(tb.switch(on, tb.empty(), geo, "GEOMETRY"))
     for s, sgn, on in (("r", 1.0, tb.switch(rht, I("Bus Lane Backward"), I("Bus Lane Forward"), "BOOLEAN")), ("l", -1.0, tb.switch(rht, I("Bus Lane Forward"), I("Bus Lane Backward"), "BOOLEAN"))):
         geo = sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", tb.math("SUBTRACT", w["carr_" + s], lw), sgn), tb.math("MULTIPLY", w["carr_" + s], sgn), 0.003, 0.003), I("Bus Lane Material"), "bus", "bus lane " + s, samples=3, zf=camber)
+        cut = tb.n("GeometryNodeDeleteGeometry", domain="FACE", mode="ALL"); tb.inp(cut, "Geometry", geo); tb.inp(cut, "Selection", mark_clear(tb.named("along")))
+        geo = cut.outputs[0]                     # the bus lane colour stops at the junction's clear zone, like the cycle lanes'
         surf.append(tb.switch(tb.boolean("AND", on, tb.compare("GREATER_THAN", W(ZERO)["lanes_" + s], 0.5)), tb.empty(), geo, "GEOMETRY"))
     tb.frame_("Sidewalk_Curb + Pedestrian_Ramps: curb face / bevel / top, planting strip, paving, edge; heights scaled by the ramps")
     for s, sgn, on in (("r", 1.0, I("Sidewalk Right")), ("l", -1.0, I("Sidewalk Left"))):
-        rf = side_factor(sgn)
+        rf = side_factor(sgn, s)
         surf.append(apron(sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["half_" + s], sgn), tb.math("MULTIPLY", w["half_" + s], sgn), 0.0, tb.math("SUBTRACT", H, bev)), I("Concrete Material"), "concrete", "curb face " + s, orient="in", zscale_fn=rf), sgn))
         surf.append(apron(sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["half_" + s], sgn), tb.math("MULTIPLY", tb.math("ADD", w["half_" + s], bev), sgn), tb.math("SUBTRACT", H, bev), H), I("Concrete Material"), "concrete", "curb bevel " + s, zscale_fn=rf), sgn))
         surf.append(apron(sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", tb.math("ADD", w["half_" + s], bev), sgn), tb.math("MULTIPLY", w["curb_" + s], sgn), H, H), I("Concrete Material"), "concrete", "curb top " + s, zscale_fn=rf), sgn))
         # at a crossing the planting strip becomes tactile paving at the kerb (no grass between the ramp and the crossing);
         # without a strip the tactile surface is the sidewalk slab itself
         plant = apron(sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["curb_" + s], sgn), tb.math("MULTIPLY", w["plant_" + s], sgn), H, H), I("Embankment Material"), "embankment", "planting strip " + s,
-                      zscale_fn=rf, mat_sel=tactile_sel), sgn)
+                      zscale_fn=rf, mat_sel=lambda al, lt, s=s: tactile_sel(al, lt, s)), sgn)
         pstrip_s = I("Planting Strip Right") if s == "r" else I("Planting Strip Left")
-        def slab_sel(along, lat, pstrip_s=pstrip_s):
-            sel, m_, k_ = tactile_sel(along, lat)
+        def slab_sel(along, lat, pstrip_s=pstrip_s, s=s):
+            sel, m_, k_ = tactile_sel(along, lat, s)
             return tb.boolean("AND", sel, tb.compare("LESS_THAN", pstrip_s, 0.05)), m_, k_
-        slab = apron(sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["plant_" + s], sgn), tb.math("MULTIPLY", w["sw_" + s], sgn), H, H), I("Paving Material"), "paving", "sidewalk " + s, samples=3, zscale_fn=rf, mat_sel=slab_sel), sgn)
+        slab = apron(sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["plant_" + s], sgn), tb.math("MULTIPLY", w["sw_" + s], sgn), H, H), I("Paving Material"), "paving", "sidewalk " + s, samples=5, zscale_fn=rf, mat_sel=slab_sel), sgn)
         edge = sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["sw_" + s], sgn), tb.math("MULTIPLY", w["sw_" + s], sgn), H, neg(I("Edge Depth"))), I("Concrete Material"), "concrete", "sidewalk edge " + s, orient="out", zscale_fn=rf)
         pstrip = I("Planting Strip Right") if s == "r" else I("Planting Strip Left")
         surf.append(tb.switch(on, tb.empty(), tb.join(tb.switch(tb.compare("GREATER_THAN", pstrip, 0.05), tb.empty(), plant, "GEOMETRY"), slab, edge), "GEOMETRY"))
@@ -566,12 +632,20 @@ def build_road_group():
     # ---------------------------------------------------------------- Lane_Markings
     tb.frame_("Lane_Markings: thin sweeps at lateral functions of the station, dashes cut by 'along'")
     mw = I("Marking Width"); mw2 = tb.math("MULTIPLY", mw, 0.5)
-    def marking(xc_fn, dashed, label, on_fn=None, zlift=0.004):
-        geo = sweep(lambda a, w: (tb.math("SUBTRACT", xc_fn(a, w), mw2), tb.math("ADD", xc_fn(a, w), mw2), zlift, zlift), I("Marking Material"), "marking", label, zf=camber)
-        sel = None
+    def paint_of(menu, label):
+        """The marking material a colour menu (White / Yellow) asks for."""
+        yellow = tb.menu_switch(menu, [("White", False), ("Yellow", True)], "BOOLEAN", label)
+        return tb.switch(yellow, I("Marking Material"), I("Yellow Marking Material"), "MATERIAL")
+    def marking(xc_fn, dashed, label, on_fn=None, zlift=0.004, half=None, material=None, dash=None):
+        hw_ = mw2 if half is None else half
+        geo = sweep(lambda a, w: (tb.math("SUBTRACT", xc_fn(a, w), hw_), tb.math("ADD", xc_fn(a, w), hw_), zlift, zlift), material or I("Marking Material"), "marking", label, zf=camber)
+        sel = mark_clear(tb.named("along"))
         if dashed is not None:
-            period = tb.math("ADD", I("Dash Length"), I("Dash Gap"))
-            sel = tb.boolean("AND", tb.compare("GREATER_THAN", tb.math("MODULO", tb.named("along"), period), I("Dash Length")), dashed)
+            d_len, d_gap = dash or (I("Dash Length"), I("Dash Gap"))
+            period = tb.math("ADD", d_len, d_gap)
+            # dashes are phased from the end of the start clear zone, so a whole dash begins at the stop line
+            phase = tb.math("MODULO", tb.math("SUBTRACT", tb.named("along"), I("Mark Clear Start")), period)
+            sel = tb.boolean("OR", sel, tb.boolean("AND", tb.compare("GREATER_THAN", phase, d_len), dashed))
         if on_fn is not None:
             off = tb.boolean("NOT", on_fn(tb.named("along"), W(tb.named("along"))))
             sel = off if sel is None else tb.boolean("OR", sel, off)
@@ -579,8 +653,10 @@ def build_road_group():
         delete = tb.n("GeometryNodeDeleteGeometry", domain="FACE", mode="ALL"); tb.inp(delete, "Geometry", geo); tb.inp(delete, "Selection", sel)
         return delete.outputs[0]
     marks = []
-    c_single = marking(lambda a, w: ZERO, tb.compare("EQUAL", c_idx, 2, "INT"), "centre line")
-    dbl = tb.join(marking(lambda a, w: neg(tb.math("ADD", med_half, mw)), None, "double L"), marking(lambda a, w: tb.math("ADD", med_half, mw), None, "double R"))
+    cw_ = I("Centre Line Width"); cw2 = tb.math("MULTIPLY", cw_, 0.5); c_mat = paint_of(I("Centre Colour"), "centre colour")
+    c_single = marking(lambda a, w: ZERO, tb.compare("EQUAL", c_idx, 2, "INT"), "centre line", half=cw2, material=c_mat, dash=(I("Centre Dash Length"), I("Centre Dash Gap")))
+    dbl = tb.join(marking(lambda a, w: neg(tb.math("ADD", med_half, cw_)), None, "double L", half=cw2, material=c_mat),
+                  marking(lambda a, w: tb.math("ADD", med_half, cw_), None, "double R", half=cw2, material=c_mat))
     centre_geo = tb.switch(tb.compare("EQUAL", c_idx, 0, "INT"), tb.switch(tb.compare("EQUAL", c_idx, 3, "INT"), c_single, dbl, "GEOMETRY"), tb.empty(), "GEOMETRY")
     w0 = W(ZERO)
     two_way = tb.boolean("AND", tb.compare("GREATER_THAN", w0["lanes_r"], 0.5), tb.compare("GREATER_THAN", w0["lanes_l"], 0.5))
@@ -589,14 +665,17 @@ def build_road_group():
         for s, sgn in (("r", 1.0), ("l", -1.0)):
             marks.append(marking(lambda a, w, k=k, sgn=sgn: tb.math("MULTIPLY", tb.math("ADD", med_half, tb.math("MULTIPLY", lw, float(k))), sgn), tb.boolean("OR", True, True), "lane line %d%s" % (k, s),
                                  on_fn=lambda a, w, k=k, s=s: tb.boolean("AND", I("Lane Lines"), tb.compare("LESS_THAN", float(k) + 0.5, w["lanes_" + s]))))
+    e_mat = paint_of(I("Edge Colour"), "edge colour"); ew2 = tb.math("MULTIPLY", I("Edge Line Width"), 0.5)
     for s, sgn in (("r", 1.0), ("l", -1.0)):
-        marks.append(tb.switch(I("Edge Lines"), tb.empty(), marking(lambda a, w, s=s, sgn=sgn: tb.math("MULTIPLY", tb.math("SUBTRACT", w["carr_" + s], tb.math("ADD", mw, 0.05)), sgn), None, "edge line " + s), "GEOMETRY"))
+        marks.append(tb.switch(I("Edge Lines"), tb.empty(), marking(lambda a, w, s=s, sgn=sgn: tb.math("MULTIPLY", tb.math("SUBTRACT", w["carr_" + s], tb.math("ADD", ew2, 0.11)), sgn), None, "edge line " + s,
+                                                                    half=ew2, material=e_mat), "GEOMETRY"))
         on = br_on if s == "r" else bl_on
         marks.append(tb.switch(on, tb.empty(), marking(lambda a, w, s=s, sgn=sgn: tb.math("MULTIPLY", tb.math("ADD", w["bike0_" + s], mw), sgn), None, "bike line in " + s), "GEOMETRY"))
         marks.append(tb.switch(on, tb.empty(), marking(lambda a, w, s=s, sgn=sgn: tb.math("MULTIPLY", tb.math("SUBTRACT", w["bike1_" + s], mw), sgn), None, "bike line out " + s), "GEOMETRY"))
         buf_on = tb.boolean("AND", on, tb.compare("GREATER_THAN", (br_buf if s == "r" else bl_buf), 0.05))
         hatch = sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", tb.math("ADD", w["buf0_" + s], 0.05), sgn), tb.math("MULTIPLY", tb.math("SUBTRACT", w["bike0_" + s], 0.05), sgn), 0.004, 0.004), I("Marking Material"), "marking", "buffer hatch " + s, zf=camber)
-        hd = tb.n("GeometryNodeDeleteGeometry", domain="FACE", mode="ALL"); tb.inp(hd, "Geometry", hatch); tb.inp(hd, "Selection", tb.compare("GREATER_THAN", tb.math("MODULO", tb.named("along"), 1.0), 0.15))
+        hd = tb.n("GeometryNodeDeleteGeometry", domain="FACE", mode="ALL"); tb.inp(hd, "Geometry", hatch)
+        tb.inp(hd, "Selection", tb.boolean("OR", tb.compare("GREATER_THAN", tb.math("MODULO", tb.named("along"), 1.0), 0.15), mark_clear(tb.named("along"))))
         marks.append(tb.switch(buf_on, tb.empty(), hd.outputs[0], "GEOMETRY"))
         pk = I("Parking Right") if s == "r" else I("Parking Left")
         marks.append(tb.switch(tb.compare("GREATER_THAN", pk, 0.05), tb.empty(), marking(lambda a, w, s=s, sgn=sgn: tb.math("MULTIPLY", tb.math("ADD", w["park0_" + s], mw), sgn), None, "parking line " + s), "GEOMETRY"))
@@ -606,14 +685,22 @@ def build_road_group():
 
     tb.frame_("Lane_Markings: instanced symbols (ticks, bicycle symbols, separator posts, arrows)")
     mcoll = tb.n("GeometryNodeCollectionInfo", transform_space="RELATIVE"); tb.inp(mcoll, "Collection", I("Markings Collection")); tb.inp(mcoll, "Separate Children", True); tb.inp(mcoll, "Reset Children", True)
-    A = lambda nm: _coll_index(MRS + "Markings", MRS + nm)
+    def pick(i):
+        """A constant pick index as a linked field: an unlinked Instance Index socket is ignored (its implicit field,
+        the point index, wins), which drew a row of different markings models where one was meant."""
+        return tb.math("ADD", float(i), 0.0) if isinstance(i, (int, float)) else i
+    def A(nm):
+        """Pick index of a markings model; a missing model is a library bug (it used to fall back to the point index)."""
+        i = _coll_index(MRS + "Markings", MRS + nm)
+        if i < 0: raise RuntimeError("MRS_Markings has no %s%s: rebuild the asset library" % (MRS, nm))
+        return i
     def instance_marks(points, lat_fn, index, rot_sign=1.0, scale=None, z_lift=0.004):
         w = W(tb.named("along")); xc = lat_fn(w)
         mv = tb.n("GeometryNodeSetPosition"); tb.inp(mv, "Geometry", points)
         tb.inp(mv, "Offset", tb.vmath("ADD", tb.vmath("SCALE", tb.named("side", "FLOAT_VECTOR"), scale=xc), tb.combine(0.0, 0.0, tb.math("ADD", camber(xc, tb.named("along"), w), z_lift))))
         al = tb.n("FunctionNodeAlignRotationToVector", axis="Y", pivot_axis="Z"); tb.inp(al, "Vector", tb.vmath("SCALE", tb.named("tangent", "FLOAT_VECTOR"), scale=rot_sign))
         io = tb.n("GeometryNodeInstanceOnPoints"); tb.inp(io, "Points", mv.outputs[0]); tb.inp(io, "Instance", mcoll.outputs[0]); tb.inp(io, "Pick Instance", True)
-        tb.inp(io, "Instance Index", index); tb.inp(io, "Rotation", al.outputs[0])
+        tb.inp(io, "Instance Index", pick(index)); tb.inp(io, "Rotation", al.outputs[0])
         if scale is not None: tb.inp(io, "Scale", scale)
         return io.outputs[0]
     inst_marks = []
@@ -624,7 +711,7 @@ def build_road_group():
         inst_marks.append(tb.switch(tb.boolean("AND", I("Parking Ticks"), tb.compare("GREATER_THAN", pk, 0.05)), tb.empty(), ticks, "GEOMETRY"))
         on = br_on if s == "r" else bl_on
         idx_ = bike_r if s == "r" else bike_l
-        bp = points_along(I("Bike Symbol Spacing"), I("Bike Setback"), I("Bike Setback"))
+        bp = points_along(I("Bike Symbol Spacing"), tb.math("ADD", I("Bike Setback"), I("Mark Clear Start")), tb.math("ADD", I("Bike Setback"), I("Mark Clear End")))
         fwd = tb.switch(rht, -sgn, sgn, "FLOAT")              # RHT: the right side flows with the curve direction
         sym = instance_marks(bp, lambda w, s=s, sgn=sgn: tb.math("MULTIPLY", tb.math("MULTIPLY", tb.math("ADD", w["bike0_" + s], w["bike1_" + s]), 0.5), sgn), A("BikeSymbol"), rot_sign=fwd)
         two = tb.compare("EQUAL", idx_, 4, "INT")
@@ -635,9 +722,22 @@ def build_road_group():
         sp_ = points_along(I("Separator Spacing"), I("Clear Start"), I("Clear End"))
         posts = instance_marks(sp_, lambda w, s=s, sgn=sgn: tb.math("MULTIPLY", tb.math("MULTIPLY", tb.math("ADD", w["buf0_" + s], w["bike0_" + s]), 0.5), sgn), tb.switch(tb.compare("EQUAL", sep_kind, 1, "INT"), A("SepPlanter"), A("SepPost"), "INT"), z_lift=0.0)
         inst_marks.append(tb.switch(tb.boolean("AND", prot, tb.compare("GREATER_THAN", sep_kind, 0, "INT")), tb.empty(), posts, "GEOMETRY"))
-    # lane arrows before a junction: the lanes that ARRIVE at that end (RHT: right side arrives at the end)
+    # lane arrows before a junction: the lanes that ARRIVE at that end (RHT: right side arrives at the end). The arrow of
+    # each lane follows the movements the junction offers there (Turns Start / End, set by the junction builder): the
+    # lane nearest the centre takes the turn toward the centre side (left under right-hand traffic), the outermost lane
+    # the turn away from it, the lanes between go straight; a missing movement hands its lane the next one.
+    def arrow_index(code):
+        """Markings index of the arrow for a movement set (1 left + 2 straight + 4 right)."""
+        idx = A("ArrowStraight")
+        for k, nm in ((1, "ArrowLeft"), (3, "ArrowStraightLeft"), (4, "ArrowRight"), (5, "ArrowLeftRight"), (6, "ArrowStraightRight"), (7, "ArrowAll")):
+            idx = tb.switch(tb.compare("EQUAL", code, k, "INT"), idx, A(nm), "INT")
+        return idx
+    def bit(v, k): return tb.math("FLOOR", tb.math("MODULO", tb.math("FLOOR", tb.math("DIVIDE", v, float(k))), 2.0))
     for at_end in (True, False):
-        dist = tb.math("SUBTRACT", L, I("Arrow Distance")) if at_end else I("Arrow Distance")
+        turns = I("Turns End") if at_end else I("Turns Start")
+        clear_here = I("Mark Clear End") if at_end else I("Mark Clear Start")
+        d_end = tb.math("ADD", clear_here, I("Arrow Distance"))
+        dist = tb.math("SUBTRACT", L, d_end) if at_end else d_end
         w = W(dist)
         arriving_right = rht if at_end else tb.boolean("NOT", rht)
         n_l = tb.switch(arriving_right, w["lanes_l"], w["lanes_r"], "FLOAT")
@@ -649,17 +749,40 @@ def build_road_group():
         xl = tb.math("MULTIPLY", tb.math("ADD", med_half, tb.math("MULTIPLY", tb.math("ADD", pidx, 0.5), lw)), sgn)
         tb.inp(pts, "Position", tb.vmath("ADD", samp.outputs["Position"], tb.vmath("ADD", tb.vmath("SCALE", s_side, scale=xl), tb.combine(0.0, 0.0, tb.math("ADD", camber(xl, dist, w), 0.004)))))
         al = tb.n("FunctionNodeAlignRotationToVector", axis="Y", pivot_axis="Z"); tb.inp(al, "Vector", tb.vmath("SCALE", samp.outputs["Tangent"], scale=1.0 if at_end else -1.0))
-        is_inner = tb.compare("EQUAL", pidx, 0, "INT"); is_outer = tb.compare("EQUAL", pidx, tb.math("SUBTRACT", tb.math("ROUND", n_l), 1.0), "INT")
-        # the inner lane turns toward the centre side (left in RHT), the outer lane away from it
-        inner_arrow = tb.switch(arriving_right, A("ArrowStraightRight"), A("ArrowStraightLeft"), "INT"); outer_arrow = tb.switch(arriving_right, A("ArrowStraightLeft"), A("ArrowStraightRight"), "INT")
-        aidx = tb.switch(tb.compare("EQUAL", tb.math("ROUND", n_l), 1, "INT"), tb.switch(is_inner, tb.switch(is_outer, A("ArrowStraight"), outer_arrow, "INT"), inner_arrow, "INT"), A("ArrowStraight"), "INT")
+        lb, sb, rb = bit(turns, 1), bit(turns, 2), bit(turns, 4)
+        cb = tb.switch(rht, rb, lb, "FLOAT"); ob = tb.switch(rht, lb, rb, "FLOAT")          # toward the centre side / away from it
+        n_r = tb.math("ROUND", n_l)
+        is_inner = tb.compare("EQUAL", pidx, 0, "INT"); is_outer = tb.compare("EQUAL", pidx, tb.math("SUBTRACT", n_r, 1.0), "INT")
+        single = tb.compare("LESS_THAN", n_r, 1.5)
+        # per lane: (centre turn, straight, away turn) open to it
+        i_c = cb; i_s = tb.math("MAXIMUM", sb, tb.math("MULTIPLY", tb.math("SUBTRACT", 1.0, cb), tb.math("SUBTRACT", 1.0, ob)))
+        i_o = tb.math("MULTIPLY", tb.math("MULTIPLY", tb.math("SUBTRACT", 1.0, cb), tb.math("SUBTRACT", 1.0, sb)), ob)
+        o_o = ob; o_s = tb.math("MAXIMUM", sb, tb.math("MULTIPLY", tb.math("SUBTRACT", 1.0, ob), tb.math("SUBTRACT", 1.0, cb)))
+        o_c = tb.math("MULTIPLY", tb.math("MULTIPLY", tb.math("SUBTRACT", 1.0, ob), tb.math("SUBTRACT", 1.0, sb)), cb)
+        m_s = tb.math("MAXIMUM", sb, tb.math("MULTIPLY", tb.math("SUBTRACT", 1.0, cb), tb.math("SUBTRACT", 1.0, ob)))
+        m_c = tb.math("MULTIPLY", tb.math("SUBTRACT", 1.0, sb), cb); m_o = tb.math("MULTIPLY", tb.math("MULTIPLY", tb.math("SUBTRACT", 1.0, sb), tb.math("SUBTRACT", 1.0, cb)), ob)
+        def lane_pick(single_v, inner_v, outer_v, mid_v):
+            return tb.switch(single, tb.switch(is_inner, tb.switch(is_outer, mid_v, outer_v, "FLOAT"), inner_v, "FLOAT"), single_v, "FLOAT")
+        c_on = lane_pick(cb, i_c, o_c, m_c); s_on = lane_pick(sb, i_s, o_s, m_s); o_on = lane_pick(ob, i_o, o_o, m_o)
+        l_on = tb.switch(rht, o_on, c_on, "FLOAT"); r_on = tb.switch(rht, c_on, o_on, "FLOAT")
+        code = tb.math("ADD", tb.math("ADD", l_on, tb.math("MULTIPLY", s_on, 2.0)), tb.math("MULTIPLY", r_on, 4.0))
         io = tb.n("GeometryNodeInstanceOnPoints"); tb.inp(io, "Points", pts.outputs[0]); tb.inp(io, "Instance", mcoll.outputs[0]); tb.inp(io, "Pick Instance", True)
-        tb.inp(io, "Instance Index", aidx); tb.inp(io, "Rotation", al.outputs[0])
+        tb.inp(io, "Instance Index", arrow_index(code)); tb.inp(io, "Rotation", al.outputs[0])
         trim_here = I("Trim End") if at_end else I("Trim Start")
-        # single-lane approaches get no arrow (every movement is allowed there: mrs.movements lane-use rules)
-        on = tb.boolean("AND", tb.boolean("AND", I("Lane Arrows"), tb.compare("GREATER_THAN", n_l, 1.5)),
-                        tb.boolean("AND", tb.compare("GREATER_THAN", trim_here, 0.5), tb.compare("GREATER_THAN", L, tb.math("MULTIPLY", I("Arrow Distance"), 2.0))))
+        # no arrows without a junction (untrimmed end), into a dead end (no movement), or on a stub too short for them
+        on = tb.boolean("AND", tb.boolean("AND", I("Lane Arrows"), tb.compare("GREATER_THAN", tb.math("ADD", n_l, 0.5), I("Arrow Min Lanes"))),
+                        tb.boolean("AND", tb.boolean("AND", tb.compare("GREATER_THAN", trim_here, 0.5), tb.compare("GREATER_THAN", turns, 0, "INT")),
+                                   tb.compare("GREATER_THAN", L, tb.math("MULTIPLY", d_end, 2.0))))
         inst_marks.append(tb.switch(on, tb.empty(), io.outputs[0], "GEOMETRY"))
+    # words painted in the bus lanes (Bus Lane Text), every Text Spacing m clear of the junction zones, read by the
+    # lane's own drivers
+    t_idx = tb.menu_switch(I("Bus Lane Text"), [("None", -1)] + [(nm, A("Text" + nm)) for nm in LANE_TEXTS], "INT", "bus lane text")
+    for s, sgn, on in (("r", 1.0, tb.switch(rht, I("Bus Lane Backward"), I("Bus Lane Forward"), "BOOLEAN")), ("l", -1.0, tb.switch(rht, I("Bus Lane Forward"), I("Bus Lane Backward"), "BOOLEAN"))):
+        tp = points_along(I("Text Spacing"), tb.math("ADD", I("Mark Clear Start"), 12.0), tb.math("ADD", I("Mark Clear End"), 12.0))
+        fwd = tb.switch(rht, -sgn, sgn, "FLOAT")
+        words = instance_marks(tp, lambda w, s=s, sgn=sgn: tb.math("MULTIPLY", tb.math("SUBTRACT", w["carr_" + s], tb.math("MULTIPLY", lw, 0.5)), sgn), t_idx, rot_sign=fwd)
+        show = tb.boolean("AND", tb.boolean("AND", on, tb.compare("GREATER_THAN", t_idx, -1, "INT")), tb.compare("GREATER_THAN", W(ZERO)["lanes_" + s], 0.5))
+        inst_marks.append(tb.switch(show, tb.empty(), words, "GEOMETRY"))
     # merge arrows where a lane ends: right side traffic flows toward the end (RHT) -> arrow 8 m before the taper; left side after it
     for right_side in (True, False):
         sgn = 1.0 if right_side else -1.0
@@ -678,7 +801,7 @@ def build_road_group():
         al = tb.n("FunctionNodeAlignRotationToVector", axis="Y", pivot_axis="Z"); tb.inp(al, "Vector", tb.vmath("SCALE", samp.outputs["Tangent"], scale=tb.switch(flows_to_end, -1.0, 1.0, "FLOAT")))
         # merge toward the centre: a right-side lane merges left (seen in its driving direction)
         io = tb.n("GeometryNodeInstanceOnPoints"); tb.inp(io, "Points", pts.outputs[0]); tb.inp(io, "Instance", mcoll.outputs[0]); tb.inp(io, "Pick Instance", True)
-        tb.inp(io, "Instance Index", A("ArrowMergeLeft") if right_side else A("ArrowMergeRight")); tb.inp(io, "Rotation", al.outputs[0])
+        tb.inp(io, "Instance Index", pick(A("ArrowMergeLeft") if right_side else A("ArrowMergeRight"))); tb.inp(io, "Rotation", al.outputs[0])
         inst_marks.append(tb.switch(tb.boolean("AND", I("Transition"), drops), tb.empty(), io.outputs[0], "GEOMETRY"))
 
     # ---------------------------------------------------------------- Roadside
@@ -711,7 +834,7 @@ def build_road_group():
             rot = rz2.outputs[0]
         rnd = tb.n("FunctionNodeRandomValue", data_type="INT"); tb.inp(rnd, "Min", 0); tb.inp(rnd, "Max", 100); tb.inp(rnd, "Seed", seed)
         io = tb.n("GeometryNodeInstanceOnPoints"); tb.inp(io, "Points", points); tb.inp(io, "Instance", coll.outputs[0]); tb.inp(io, "Pick Instance", True)
-        tb.inp(io, "Instance Index", R(rnd) if random_pick else 0); tb.inp(io, "Rotation", rot)
+        tb.inp(io, "Instance Index", R(rnd) if random_pick else pick(0)); tb.inp(io, "Rotation", rot)
         if scale_jitter > 0:
             sj = tb.n("FunctionNodeRandomValue", data_type="FLOAT"); tb.inp(sj, "Min", 1.0 - scale_jitter); tb.inp(sj, "Max", 1.0 + scale_jitter); tb.inp(sj, "Seed", tb.math("ADD", seed, 11.0))
             tb.inp(io, "Scale", tb.combine(R(sj), R(sj), R(sj)))
@@ -762,6 +885,12 @@ def build_road_group():
     half_here = tb.switch(tb.compare("LESS_THAN", lat_a, 0.0), hr, hl, "FLOAT")
     drain = tb.map_range(tb.math("SUBTRACT", half_here, tb.math("ABSOLUTE", lat_a)), 0.0, 1.2, 1.0, 0.0)
     mesh = tb.store(mesh, "drain", drain)
+    # ground_surface = 1 on the surfaces of a road on the ground (a terrain grades to them: MRS_TerrainConform); 0 on an
+    # elevated deck and in a tunnel (the terrain over it stays); instances (props, trees) do not carry it
+    tun = tb.boolean("AND", tb.compare("GREATER_THAN", I("Tunnel End"), I("Tunnel Start")),
+                     tb.boolean("AND", tb.compare("GREATER_THAN", tb.named("along"), I("Tunnel Start")), tb.compare("LESS_THAN", tb.named("along"), I("Tunnel End"))))
+    mesh = tb.store(mesh, "ground_surface", tb.switch(tb.boolean("OR", elevated, tun), 1.0, 0.0, "FLOAT"), "FLOAT", "FACE")
+    mesh = tb.store(mesh, "tunnel_surface", tb.switch(tun, 0.0, 1.0, "FLOAT"), "FLOAT", "FACE")       # a graded terrain clears the tunnel over it
     uv = tb.store(mesh, "UVMap", tb.combine(lat_a, tb.named("along"), 0.0), "FLOAT2", "CORNER")
     smooth = tb.n("GeometryNodeSetShadeSmooth"); tb.inp(smooth, "Geometry", uv); tb.inp(smooth, "Shade Smooth", tb.compare("EQUAL", tb.named("kind"), float(KIND["embankment"])))
     inst = tb.join(*inst_marks, props, lights, trees, miop.outputs[0], *drains, *barriers, pillars, scatter)

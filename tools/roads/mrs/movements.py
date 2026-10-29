@@ -25,6 +25,7 @@ from mathutils.bvhtree import BVHTree
 from .roads import all_roads, road_input, road_ends
 from .structures import centre_line, surface_z
 from . import placement as PL
+from . import junction as J
 
 DRIVE = {0, 1, 8, 9}            # asphalt, marking, crossing, bus lane (road kinds)
 CYCLE = DRIVE | {5}             # + cycleway
@@ -234,7 +235,7 @@ def _build(roads_col, routes):
             d = Vector((ap["heading"][0], ap["heading"][1], 0)).normalized()
             arriving_side = ("l" if m.rht else "r") if start else ("r" if m.rht else "l")
             leaving_side = "r" if arriving_side == "l" else "l"
-            setback = meta.get("stop_setback", 0.6) + 2.5 + 0.6
+            setback = ap.get("mark_clear") or (meta.get("stop_setback", 0.6) + meta.get("crossing_width", 2.5) + 0.6)   # the stop line
             a_edge = m.A0 if start else m.A1
             a_stop = a_edge + (setback if start else -setback)
             arr = sorted([l for l in lanes if l["road"] == m.name and l["side"] == arriving_side and (l["a0"] <= a_edge + 1 if start else l["a1"] >= a_edge - 1)], key=lambda l: l["index"])
@@ -243,19 +244,18 @@ def _build(roads_col, routes):
         for A in info:
             if A is None or not A["arr"]: continue
             n_in = len(A["arr"])
+            # the junction's movement code for this leg (what its arrows show) and the lane-use rule shared with them
+            code = A["ap"].get("turns")
+            if code is None: code = sum(J.TURN_BIT[t] for B in info if B is not None and B is not A and B["lev"] for t in [J.turn_of(-A["d"], B["d"])] if t)
+            use = J.lane_use(code, n_in, A["m"].rht)
             for B in info:
                 if B is None or B is A or not B["lev"]: continue
-                travel_in = -A["d"]; travel_out = B["d"]
-                ang = math.degrees(math.atan2(travel_in.x * travel_out.y - travel_in.y * travel_out.x, travel_in.dot(travel_out)))
-                if abs(ang) > 160: continue                                      # U-turn
-                turn = "straight" if abs(ang) < 35 else ("left" if ang > 0 else "right")
-                if not A["m"].rht: turn = {"left": "right", "right": "left"}.get(turn, turn)
+                turn = J.turn_of(-A["d"], B["d"])
+                if turn is None: continue                                          # U-turn
                 centre_turn = "left" if A["m"].rht else "right"                  # the turn towards the road centre
                 for lane in A["arr"]:
                     k = lane["index"]
-                    if n_in > 1:
-                        if turn == centre_turn and k != 0: continue
-                        if turn != centre_turn and turn != "straight" and k != n_in - 1: continue
+                    if k >= len(use) or not use[k] & J.TURN_BIT[turn]: continue
                     n_out = len(B["lev"])
                     tk = 0 if turn == centre_turn else (n_out - 1 if turn != "straight" else min(k, n_out - 1))
                     tgt = B["lev"][tk]
@@ -292,10 +292,8 @@ def _build(roads_col, routes):
             T0 = -A["d"]
             for B in info:
                 if B is None or B is A: continue
-                travel_out = B["d"]; ang = math.degrees(math.atan2(T0.x * travel_out.y - T0.y * travel_out.x, T0.dot(travel_out)))
-                turn = "straight" if abs(ang) < 35 else ("left" if ang > 0 else "right")
-                if not m.rht: turn = {"left": "right", "right": "left"}.get(turn, turn)
-                if turn == ("left" if m.rht else "right") or abs(ang) > 160: continue   # left turns: two-stage via the crossings (not generated)
+                travel_out = B["d"]; turn = J.turn_of(T0, travel_out)
+                if turn is None or turn == ("left" if m.rht else "right"): continue   # turns toward the centre: two-stage via the crossings (not generated)
                 mb = B["m"]; bside = ("r" if mb.rht else "l") if B["start"] else ("l" if mb.rht else "r")
                 wb = mb.w_at(B["a_edge"])
                 if mb.w0.get("bike_on_" + bside):

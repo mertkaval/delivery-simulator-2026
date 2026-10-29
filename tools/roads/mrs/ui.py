@@ -1,6 +1,6 @@
 """N-panel 'Road Studio' (View3D > sidebar): roads, presets, terrain, junctions, structures, materials,
 export. Every button maps to a function in the package so the API and the UI stay the same."""
-import bpy, os
+import bpy, os, json
 from .nodes import MRS, mod_input_set, mod_input_get
 from . import roads, junction, structures, materials, terrain, export as export_mod
 
@@ -141,6 +141,79 @@ class MRS_OT_auto_update(bpy.types.Operator):
         self.report({"INFO"}, "auto-update " + ("on" if on else "off")); return {"FINISHED"}
 
 
+class MRS_OT_junction_settings(bpy.types.Operator):
+    """Settings of the active junction (its build parameters); tweak them in the Adjust Last Operation panel and the
+    junction rebuilds from its roads each time"""
+    bl_idname = "mrs.junction_settings"; bl_label = "Junction Settings"; bl_options = {"REGISTER", "UNDO"}
+    control: bpy.props.EnumProperty(items=[(k, k.title(), "") for k in junction.CONTROLS], name="Control")
+    crossing: bpy.props.EnumProperty(items=[("zebra", "Zebra", ""), ("parallel", "Parallel lines", "")], name="Crossing")
+    crosswalks: bpy.props.BoolProperty(name="Crossings", default=True)
+    stop_lines: bpy.props.BoolProperty(name="End markings", default=True, description="Stop line / STOP / give way by control")
+    bike_crossings: bpy.props.BoolProperty(name="Cycle crossings", default=True)
+    refuge: bpy.props.BoolProperty(name="Median refuges", default=True)
+    box: bpy.props.BoolProperty(name="Yellow box", default=False)
+    corner_radius: bpy.props.FloatProperty(name="Corner radius", default=6.0, min=1.0, max=40.0, unit="LENGTH")
+    crossing_width: bpy.props.FloatProperty(name="Crossing width", default=2.5, min=1.0, max=8.0, unit="LENGTH")
+    stop_setback: bpy.props.FloatProperty(name="Crossing setback", default=0.6, min=0.0, max=10.0, unit="LENGTH")
+    KEYS = ("control", "crossing", "crosswalks", "stop_lines", "bike_crossings", "refuge", "box", "corner_radius", "crossing_width", "stop_setback")
+
+    @classmethod
+    def poll(cls, ctx):
+        o = ctx.active_object
+        return o is not None and o.get("mrs_junction") is not None and dict(o["mrs_junction"]).get("type", "junction") == "junction"
+
+    def invoke(self, ctx, event):
+        m = ctx.active_object["mrs_junction"]; m = m.to_dict() if hasattr(m, "to_dict") else dict(m)
+        p = dict(m.get("params") or {}); p.setdefault("control", m.get("control", "none"))
+        for k in self.KEYS:
+            if p.get(k) is not None:
+                try: setattr(self, k, p[k])
+                except Exception: pass
+        return self.execute(ctx)
+
+    def execute(self, ctx):
+        o = junction.configure(ctx.active_object, **{k: getattr(self, k) for k in self.KEYS})
+        if o is not None: o.select_set(True); ctx.view_layer.objects.active = o
+        return {"FINISHED"}
+
+
+class MRS_OT_place(bpy.types.Operator):
+    """Place the street assets (lights, signals' cabinets, signs by control and speed, bus stops, benches, bins,
+    hydrants, drains, trees) on every road of the collection by the placement rules"""
+    bl_idname = "mrs.place"; bl_label = "Place Street Assets"; bl_options = {"REGISTER", "UNDO"}
+    seed: bpy.props.IntProperty(name="Seed", default=0)
+
+    def execute(self, ctx):
+        from . import placement
+        rep = placement.place_all(_roads_collection(ctx), seed=self.seed); ctx.scene["mrs_place_seed"] = self.seed
+        self.report({"INFO"}, "%d placed, %d skipped" % (len(rep["placed"]), len(rep["skipped"]))); return {"FINISHED"}
+
+
+class MRS_OT_auto_place(bpy.types.Operator):
+    """Toggle re-placing the street assets after every automatic junction rebuild"""
+    bl_idname = "mrs.auto_place"; bl_label = "Auto-place Street Assets"
+
+    def execute(self, ctx):
+        ctx.scene["mrs_auto_place"] = not ctx.scene.get("mrs_auto_place", False); return {"FINISHED"}
+
+
+class MRS_OT_validate(bpy.types.Operator):
+    """Check every road, junction and sign against the rules the tool derives them from (paint clear zones, arrows,
+    end markings, cycle crossings, signal heads, speed signs); selects the objects with problems"""
+    bl_idname = "mrs.validate"; bl_label = "Validate"
+
+    def execute(self, ctx):
+        from . import validate
+        col = _roads_collection(ctx)
+        rep = validate.validate(col, bpy.data.collections.get(col.name + "_Placed"))
+        ctx.scene["mrs_validation"] = json.dumps({"counts": rep["counts"], "problems": rep["problems"][:40]})
+        bad = {p["object"] for p in rep["problems"]}
+        for o in ctx.selected_objects: o.select_set(False)
+        for n in bad:
+            if n in bpy.data.objects and bpy.data.objects[n].name in ctx.view_layer.objects: bpy.data.objects[n].select_set(True)
+        self.report({"INFO"} if not bad else {"WARNING"}, "%d problems on %d objects" % (len(rep["problems"]), len(bad))); return {"FINISHED"}
+
+
 class MRS_OT_structure(bpy.types.Operator):
     """Add a structure on the active road at the 3D cursor's distance along it"""
     bl_idname = "mrs.structure"; bl_label = "Add Structure"; bl_options = {"REGISTER", "UNDO"}
@@ -227,6 +300,15 @@ class MRS_PT_panel(bpy.types.Panel):
         box.operator("mrs.add_junction"); box.operator("mrs.add_roundabout"); box.operator("mrs.add_dead_end")
         row = box.row(align=True); row.operator("mrs.rebuild_junctions")
         row.operator("mrs.auto_update", text="Auto: " + ("on" if ctx.scene.get("mrs_auto") else "off"), depress=bool(ctx.scene.get("mrs_auto")))
+        box.operator("mrs.junction_settings", icon="PREFERENCES")
+        box = L.box(); box.label(text="Street assets + checks", icon="CHECKMARK")
+        row = box.row(align=True); row.operator("mrs.place")
+        row.operator("mrs.auto_place", text="Auto: " + ("on" if ctx.scene.get("mrs_auto_place") else "off"), depress=bool(ctx.scene.get("mrs_auto_place")))
+        box.operator("mrs.validate")
+        if ctx.scene.get("mrs_validation"):
+            v = json.loads(ctx.scene["mrs_validation"])
+            box.label(text="ok" if not v["problems"] else ", ".join("%s %d" % kv for kv in v["counts"].items()), icon="INFO" if not v["problems"] else "ERROR")
+            for p in v["problems"][:6]: box.label(text="%s: %s" % (p["object"], p["message"])[:70])
         box = L.box(); box.label(text="Structures", icon="MOD_BUILD")
         row = box.row(align=True)
         for k, t in (("gantry", "Gantry"), ("bus", "Bus Stop"), ("stays", "Stays"), ("tunnel", "Tunnel")): row.operator("mrs.structure", text=t).kind = k
@@ -245,7 +327,7 @@ class MRS_PT_panel(bpy.types.Panel):
 
 
 CLASSES = (MRS_OT_add_road, MRS_OT_apply_preset, MRS_OT_set_terrain, MRS_OT_conform_terrain, MRS_OT_demo_terrain, MRS_OT_add_junction, MRS_OT_add_roundabout,
-           MRS_OT_add_dead_end, MRS_OT_rebuild_junctions, MRS_OT_auto_update, MRS_OT_structure, MRS_OT_custom_sign, MRS_OT_material_preset, MRS_OT_export,
+           MRS_OT_add_dead_end, MRS_OT_rebuild_junctions, MRS_OT_auto_update, MRS_OT_junction_settings, MRS_OT_place, MRS_OT_auto_place, MRS_OT_validate, MRS_OT_structure, MRS_OT_custom_sign, MRS_OT_material_preset, MRS_OT_export,
            MRS_OT_export_ready, MRS_PT_panel)
 
 

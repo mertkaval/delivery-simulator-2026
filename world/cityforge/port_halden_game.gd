@@ -8,25 +8,34 @@ extends RefCounted
 ##   doors 36-40  downtown tower lobbies (the classic downtown destinations)
 ##   pickups 0-20 shop fronts on the nearest commercial strip, a courier rack on the sidewalk
 ##   stores       the four stores (equipment, bikes, cars, scooters) in north-facing shops
+## A roads-only plan (no buildings yet) uses the frontage plots along the streets instead (CityForgeWorld.sites):
+## houses -> the nearest plots, towers -> plots nearest downtown, shops -> plots on the main streets.
 ## Everything is chosen from the plan deterministically, so saves and tests see the same city.
 
 const STARTER := Vector2(1100.0, 1300.0)     ## plan metres: the starter neighbourhood
 const DOORS := 36
 const DOWNTOWN_DOORS := 5
+const DOWNTOWN := Vector2(560, 1640)          ## plan metres: downtown's centre
+const PLOT_WALK := 2.5                        ## a plot's door -> the sidewalk in front of it (m)
+const MAIN_STREETS := ["arterial", "downtown", "boulevard"]
 
 ## Applies the layout to the game's catalogs; returns what the world keeps.
 static func apply(w: CityForgeWorld) -> Dictionary:
 	var city := w.city
-	var houses: Array = city.houses
+	var houses: Array = w.sites()
 	# Start: the house nearest the starter point; the courier stands on its front sidewalk.
 	var by_distance := houses.duplicate()
 	by_distance.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return _plan(a).distance_squared_to(STARTER) < _plan(b).distance_squared_to(STARTER))
 	var home: Dictionary = by_distance[0]
-	var home_lot := _lot(city, str(home.lot))
+	var home_lot := _lot(city, str(home.get("lot", "")))
 	var front := _front(home)
-	var walk_y := float(home_lot.front_y) + float(home_lot.front) * CityForgeWorld.SIDEWALK_OFFSET
-	var start := w.to_world(float((home.pos as Array)[0]), walk_y, 0.0)
+	var start: Vector3
+	if home_lot.is_empty():          # a plot: the sidewalk in front of it
+		start = w.house_door(home) + front * PLOT_WALK
+	else:
+		var walk_y := float(home_lot.front_y) + float(home_lot.front) * CityForgeWorld.SIDEWALK_OFFSET
+		start = w.to_world(float((home.pos as Array)[0]), walk_y, 0.0)
 	start.y = w.ground_height(start) + 0.4
 	var vehicle := start + Vector3(2.5, 0.0, 0.0)
 	vehicle.y = w.ground_height(vehicle) + 0.2
@@ -40,11 +49,23 @@ static func apply(w: CityForgeWorld) -> Dictionary:
 		facing.append(_front(hs))
 		names.append(str(hs.address))
 	var towers: Array = city.towers
+	var used := {}
+	for k in DOORS + 1: used[str(by_distance[k].id)] = true
+	if towers.is_empty():            # roads only: the plots nearest downtown are its addresses
+		var near := houses.filter(func(p: Dictionary) -> bool: return not used.has(str(p.id)))
+		near.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			return _plan(a).distance_squared_to(DOWNTOWN) < _plan(b).distance_squared_to(DOWNTOWN))
+		for k in DOWNTOWN_DOORS:
+			var p: Dictionary = near[k]
+			used[str(p.id)] = true
+			doors.append(w.house_door(p) + Vector3(0, 0.92, 0))
+			facing.append(_front(p))
+			names.append(str(p.address))
 	var dt := towers.duplicate()
-	var centre := Vector2(560, 1640)
+	var centre := DOWNTOWN
 	dt.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return _plan(a).distance_squared_to(centre) < _plan(b).distance_squared_to(centre))
-	for k in DOWNTOWN_DOORS:
+	for k in (DOWNTOWN_DOORS if not towers.is_empty() else 0):
 		var t: Dictionary = dt[k % dt.size()]
 		var ang := deg_to_rad(float(t.angle))
 		var out := Vector3(0, 0, -1).rotated(Vector3.UP, ang)
@@ -56,6 +77,8 @@ static func apply(w: CityForgeWorld) -> Dictionary:
 		names.append(str(t.address))
 	# Pickups and stores: shop fronts nearest the start.
 	var shops: Array = (city.shops as Array).duplicate()
+	if shops.is_empty():             # roads only: plots on the main streets stand in for the shop fronts
+		shops = houses.filter(func(p: Dictionary) -> bool: return not used.has(str(p.id)) and MAIN_STREETS.has(str(p.get("cls", ""))))
 	shops.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return _plan(a).distance_squared_to(STARTER) < _plan(b).distance_squared_to(STARTER))
 	var stores := {}

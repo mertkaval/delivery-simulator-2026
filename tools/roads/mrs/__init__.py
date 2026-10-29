@@ -10,7 +10,7 @@ import bpy
 from . import nodes, materials, props, road, terrain
 
 MODULES = ("nodes", "materials", "props", "road", "terrain", "roads", "qa", "junction", "structures", "assets", "trees", "signage", "furniture", "game_trees", "lighting",
-           "footbridge", "placement", "routes", "movements", "street_model", "ui", "export", "samples", "citynet", "city")
+           "footbridge", "placement", "routes", "movements", "street_model", "ui", "export", "samples", "citynet", "city", "validate")
 
 
 def reload():

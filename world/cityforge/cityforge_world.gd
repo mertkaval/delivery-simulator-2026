@@ -11,7 +11,11 @@ extends Node3D
 ## Collision: one heightmap for the ground; road/sidewalk trimeshes and building boxes are made
 ## per chunk on demand near the focus (update_focus), so start-up stays cheap.
 
-const DIR := "res://assets/cityforge/"
+## The city's data folder: the classic Port Halden (with buildings) here; another build, e.g. the roads-only city in
+## assets/cityforge_roads, through use_city() before the world is created.
+const CLASSIC_DIR := "res://assets/cityforge/"
+const ROADS_DIR := "res://assets/cityforge_roads/"
+static var DIR := CLASSIC_DIR
 const CHUNK := 256.0
 const CELL_LOD0 := 128.0
 const FAR_BEGIN := 230.0          ## a chunk's Far mesh hides inside this distance (from its centre) ...
@@ -177,6 +181,11 @@ func _load_chunks() -> void:
 			if str(mi.name).begins_with("Sea"): mi.position.y = -0.06     # under the city's own water
 	stats["chunks"] = chunks.size()
 	stats["chunk_tris"] = tris
+
+## Point the next CityForgeWorld (and its Mert Road Studio streets) at another city build's folder.
+static func use_city(dir: String) -> void:
+	DIR = dir if dir.ends_with("/") else dir + "/"
+	MrsCityStreets.DIR = DIR + "mrs/"
 
 static func triangles(mesh: Mesh) -> int:
 	var am := mesh as ArrayMesh
@@ -541,12 +550,26 @@ func map_roads() -> Array:
 	return out
 
 # --- queries for game systems ----------------------------------------------------------------
+var _plot_sites: Array = []
+
+## Addressable sites: the houses, or - in a roads-only plan (no buildings placed yet) - the frontage plots along the
+## streets, shaped like houses (pos, yaw, h, size, address), so doors, deliveries and the map read them the same way.
+func sites() -> Array:
+	if not (city.get("houses", []) as Array).is_empty(): return city.houses
+	if _plot_sites.is_empty():
+		for p: Dictionary in city.get("plots", []):
+			var s := p.duplicate()
+			s["size"] = [10.0, 0.0]
+			s["lot"] = ""
+			_plot_sites.append(s)
+	return _plot_sites
+
 ## The lot / house / address nearest to a world position (deliveries, map).
 func nearest_house(p: Vector3) -> Dictionary:
 	var q := to_plan(p)
 	var best: Dictionary = {}
 	var bd := INF
-	for hs: Dictionary in city.houses:
+	for hs: Dictionary in sites():
 		var pos: Array = hs.pos
 		var d := q.distance_squared_to(Vector2(float(pos[0]), float(pos[1])))
 		if d < bd:

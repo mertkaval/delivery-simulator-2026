@@ -225,9 +225,42 @@ def cable_stays(road, collection=None, pylon_spacing=90.0, pylon_height=28.0, st
     return out
 
 
+def auto_tunnel(road, terrain, min_cover=8.0, min_len=40.0, max_len=320.0, step=4.0, collection=None):
+    """Find where a hill stands over the road and tunnel through it: the span [a, b] whose straight grade between the
+    portals (the ground heights at a and b) passes deepest under the ground in between, at least `min_cover` m under
+    it; builds the tunnel (lining, portals, the road's Tunnel Start / End) and returns (a, b, cover) or None."""
+    from mathutils.bvhtree import BVHTree
+    dg = depsgraph(); ev = terrain.evaluated_get(dg); me = ev.to_mesh()
+    bvh = BVHTree.FromPolygons([terrain.matrix_world @ v.co for v in me.vertices], [tuple(p.vertices) for p in me.polygons]); ev.to_mesh_clear()
+    cl = centre_line(road); a0, a1 = cl[0][0] + 10.0, cl[-1][0] - 10.0
+    st, g = [], []
+    a = a0
+    while a <= a1:
+        p, t, r = road_sample(road, a); hit = bvh.ray_cast(Vector((p.x, p.y, p.z + 500.0)), Vector((0, 0, -1)), 2000.0)
+        st.append(a); g.append(hit[0].z if hit[0] is not None else p.z); a += step
+    best = None
+    for i in range(len(st)):
+        for j in range(i + 2, len(st)):
+            L = st[j] - st[i]
+            if L < min_len: continue
+            if L > max_len: break
+            cover = max(g[k] - (g[i] + (g[j] - g[i]) * (st[k] - st[i]) / L) for k in range(i + 1, j))
+            if cover >= min_cover and (best is None or cover > best[2]): best = (st[i], st[j], cover)
+    if best is None: return None
+    tunnel(road, best[0], best[1], collection)
+    return best
+
+
 def tunnel(road, along_start, along_end, collection=None, name=None):
-    """Tunnel lining (horseshoe arch) between two distances along a road, with portals at both ends."""
+    """Tunnel lining (horseshoe arch) between two distances along a road, with portals at both ends. The road's
+    Tunnel Start / End inputs take the span, so a graded terrain keeps the hill over it."""
     from .props import mat
+    from .nodes import mod_input_set
+    mod = road.modifiers["MRS_Road"]
+    if mod.node_group.interface.items_tree.get("Tunnel Start") is not None:
+        mod_input_set(mod, "Tunnel Start", float(along_start)); mod_input_set(mod, "Tunnel End", float(along_end)); road.update_tag()
+        _CENTRE.pop(road.name, None)                 # the road now runs at a straight grade through the span: sample it anew
+        for sc in getattr(road, "users_scene", ()): sc.view_layers[0].update()
     w = road_widths(road)
     half = w["half_l"] + w["half_r"] + 2 * w["curb"] + w["swl"] + w["swr"]
     R = half / 2 + 1.0; wall_h = 2.5

@@ -57,7 +57,7 @@ def _merge(base, over):
 
 
 MATERIAL_PRESETS = {name: _merge(_BASE, p) for name, p in _PRESETS.items()}
-MATERIAL_NAMES = ("Asphalt", "Paint", "Concrete", "BikeLane", "Structure", "Embankment", "Paving", "Tactile", "Cycleway", "PoleMetal")
+MATERIAL_NAMES = ("Asphalt", "Paint", "PaintYellow", "Concrete", "BikeLane", "Structure", "Embankment", "Paving", "Tactile", "Cycleway", "PoleMetal")
 WINDOW_INPUTS = (("Wear Along Start", "NodeSocketFloat", -FAR), ("Wear Along End", "NodeSocketFloat", FAR))
 UV_INPUTS = (("Use UV", "NodeSocketFloat", 0.0), ("Tile Size", "NodeSocketFloat", 4.0))
 
@@ -796,6 +796,7 @@ def build_materials():
     for name, grp in (("Asphalt", "AsphaltShader"), ("Paint", "PaintShader"), ("Concrete", "ConcreteShader")):
         mats[name] = _group_material(name, grp)
     mats["Asphalt"].diffuse_color = (0.12, 0.12, 0.13, 1); mats["Paint"].diffuse_color = (0.85, 0.85, 0.8, 1); mats["Concrete"].diffuse_color = (0.5, 0.5, 0.48, 1)
+    mats["PaintYellow"] = _group_material("PaintYellow", "PaintShader", Yellow=1.0); mats["PaintYellow"].diffuse_color = (0.82, 0.58, 0.08, 1)
     street_materials()
     return mats
 

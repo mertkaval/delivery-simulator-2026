@@ -3,8 +3,22 @@
 Port Halden (the generated city, `tools/cityforge`) no longer draws its own streets. Mert Road Studio builds
 them from the city plan: every road, junction, crossing, kerb, sidewalk, back lane and bridge, and the street
 assets placed on them by the studio's rules (lights, signals, signs, bus stops, benches, bins, racks,
-hydrants, cabinets, drains and street trees). CityForge keeps the ground, lots, houses, shops, towers, parks
-and its culture furniture (vending machines, post boxes, phone boxes, ad columns, çeşme, café sets, poles).
+hydrants, cabinets, drains and street trees). Since the 2026-10-29 rework the new city is a road layout only:
+CityForge keeps the terrain and water; its lots, houses, shops, towers, public buildings, parks and furniture are
+left out of the plan (the classic city and every asset file stay; buildings will be placed on the frontage plots
+later). `mrs_streets.py --with-buildings` builds the earlier variant.
+
+Two cities side by side: the classic city (buildings, the game's default) stays in `assets/cityforge`; the
+roads-only city is installed in `assets/cityforge_roads` (`tools/cityforge/build.sh`, default) and opens with
+`world/cityforge/port_halden_roads_preview.tscn` (F6). `CityForgeWorld.use_city(dir)` points the world (and its
+streets) at either; `tests/cityforge_test.gd -- res://assets/cityforge_roads/` and `tests/capture_cityforge.gd ...
+city=res://assets/cityforge_roads/` test / capture the new one. `build.sh --with-buildings` rebuilds the classic.
+
+Blender first: `build.sh` assembles the whole map in Blender (`tmp/cityforge/port_halden_map.blend`: streets,
+junctions, signals, signs, markings, street assets, graded terrain and water; open it to check anything), validates
+every road, junction, sign and lane mouth there (`mrs_junction_atlas.py`, with a render of every junction:
+`tmp/cityforge/atlas/junctions_*.jpg`) and installs into Godot only when the validation is clean (`--force`
+overrides).
 
 ```
 tools/cityforge/build.sh            # terrain -> plan -> MRS streets -> CityForge build -> install -> import -> test
@@ -23,6 +37,36 @@ tools/cityforge/build.sh --cf-streets   # the old CityForge street ribbons inste
 The MRS base library (node groups, materials, asset collections) is built once into
 `tmp/roads/city/base.blend` (~6 min, versioned by `city.BASE_VERSION`); a city build then takes ~13 min and the
 export ~10 min.
+
+## Rework (2026-10-29): roads only, every rule derived in the tool
+
+The city is now a road layout only, and the tool derives everything from the roads' own parameters instead of
+fitting the city:
+
+| Rule | Where | Derived from |
+|---|---|---|
+| Paint clear zone: lane, centre, edge and cycle paint, cycle colour, buffer hatching and bicycle symbols stop at the junction's stop line / crossing | road inputs `Mark Clear Start / End` (set by `junction.end_zone`) | crossing setback + width + stop line gap / width |
+| Turn arrows: each arriving lane shows the movements it may make | road inputs `Turns Start / End` (`junction.movements`: 1 left + 2 straight + 4 right per leg with outgoing lanes), `junction.lane_use`; arrows `Straight / Left / Right / StraightLeft / StraightRight / LeftRight / All` | the junction's legs and their lanes (U-turns excluded); the vehicle movement paths (`movements.py`) use the same `lane_use` |
+| Arrow position | `Arrow Distance` measured from the stop line; `Arrow Min Lanes` (default 2) | the clear zone |
+| Cycle crossings | junction: coloured bands with elephant feet joining the cycle lanes of opposite legs through the junction, never on a zebra; a band leaving the asphalt is not drawn | the legs' cycle lane offsets |
+| Signals | a mast arm at the stop line with one head over each arriving lane (`ARM_LANES` = 2+), plus the corner post (vehicle + pedestrian heads) | lane count, lane width, median, kerb (`signage.make_signal(arm_side, head_x)`); one kit model per variant in the game |
+| Speed signs | road input `Speed Limit`; `assets.speed_sign(v)` builds any value on demand | the road's speed |
+| Back-lane dropped kerbs | `citynet._lane_mouth` (the lane's ray meets the street centre line), lot line from the built street's cross-section, station on the street as built (after the junction trims) | street geometry |
+| Vertical alignment | `mrs/grading.py` `network_profiles`: natural ground averaged per class (`SMOOTH`), node heights shared, grade limited per class (`MAX_GRADE`: local 16 %, downtown / arterial 12 %, boulevard 10 %, lane 18 %, bridge 6 %) | the natural terrain (`terrain.npz`), not CityForge's graded lots |
+| Bridges | decks span bank to bank at `BRIDGE_CLEARANCE` (4 m) over the water level, their end nodes lifted so the deck reaches it at the bridge grade; `citynet.bridge_gaps` joins dead-end streets facing each other across water | water mask + level |
+| Ground | `grading.grade`: under a surface 0.3 m below it; beyond, the natural ground clipped by cut (1:1) / fill (1:2) batters from the surfaces; the first cell keeps the per-street plane cap | the built road and junction surfaces |
+| Addresses | `city.frontage_plots`: a plot every 20 m on both sides of every street, behind the sidewalk, clear of junctions, other corridors and water, facing the street, unique addresses | the streets |
+
+Bugs found on the way (all in the tool, all fixed): the asset library's markings step cleared the collection, so
+the bicycle symbol (and merge arrows, separator posts) had no model; and an unlinked constant `Instance Index` is
+ignored by Instance on Points (its implicit field is the point index): bicycle symbols, parking ticks and merge
+arrows drew a row of different arrow models (the "wedge" in the cycle lane). Driveway stations were taken on the
+untrimmed street, so a lane's dropped kerb landed metres away whenever a junction trimmed the street.
+
+Checks: `mrs/validate.py` (road paint in clear zones, arrow kind / direction / count, junction inputs, cycle bands
+on zebras, signal heads over lanes, speed signs, lane-mouth kerbs) - on a test scene
+(`tools/roads/tests/junction_rules_test.py`) and on the whole city (`tools/cityforge/mrs_junction_atlas.py`, with a
+render of every junction).
 
 ## The network (citynet)
 

@@ -63,9 +63,11 @@ def mountain_road(seed=3):
     main2 = roads.make_road("MT_Main2", [(60, 20, 0), (120, 90, 0), (200, 150, 0)], col, "rural", terrain=ter, Superelevation=7.0)
     br = roads.make_road("MT_Branch", [(60, 20, 0), (90, -40, 0), (140, -90, 0)], col, "service", terrain=ter, Tree_Side="Both")
     junction.build_junction("MT_J1", (60, 20, 0), [main, main2, br], col, crosswalks=False, stop_lines=False, terrain=ter, snap=1.0)
-    terrain.conform_terrain(ter, col, subdivide=2, reach=3.0)
+    terrain.conform_terrain(ter, col, subdivide=2)
     L = structures.road_length(main2)
-    structures.tunnel(main2, L * 0.45, L * 0.62, col)
+    # a tunnel where a hill stands over the road (the straight grade between its portals runs under the ground)
+    if structures.auto_tunnel(main2, ter, min_cover=6.0, collection=col) is None:
+        structures.tunnel(main2, L * 0.45, L * 0.62, col)
     sc["mrs_terrain"] = ter.name
     return sc
 
@@ -81,7 +83,7 @@ def highway():
     ramp_n = roads.make_road("HW_RampN", [(20, 140, 0), (20, 200, 0), (20, 260, 0)], col, "rural", terrain=ter, Tree_Side="None")
     junction.build_junction("HW_JS", (20, -140, 0), [over, ramp_s], col, crosswalks=False, stop_lines=False, terrain=ter)
     junction.build_junction("HW_JN", (20, 140, 0), [over, ramp_n], col, crosswalks=False, stop_lines=False, terrain=ter)
-    terrain.conform_terrain(ter, col, subdivide=1, reach=4.0)
+    terrain.conform_terrain(ter, col, subdivide=2)
     structures.gantry_sign(hw, 120.0, ("E4 NORTH", "EXIT 7  AIRPORT"), col)
     structures.gantry_sign(hw, 330.0, ("E4 NORTH",), col)
     sc["mrs_terrain"] = ter.name
@@ -111,7 +113,7 @@ def bridge_valley():
     east = roads.make_road("BV_East", [(90, 0, 0), (150, 30, 0), (230, 60, 0)], col, "rural", terrain=ter)
     junction.build_junction("BV_J1", (-90, 0, 0), [west, bridge], col, crosswalks=False, stop_lines=False, terrain=ter)
     junction.build_junction("BV_J2", (90, 0, 0), [bridge, east], col, crosswalks=False, stop_lines=False, terrain=ter)
-    terrain.conform_terrain(ter, col, subdivide=1, reach=3.0)
+    terrain.conform_terrain(ter, col, subdivide=2)
     structures.cable_stays(bridge, col, pylon_spacing=90.0, pylon_height=30.0)
     sc["mrs_terrain"] = ter.name
     return sc

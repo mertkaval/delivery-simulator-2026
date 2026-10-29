@@ -32,6 +32,9 @@ func surface_hit(space: PhysicsDirectSpaceState3D, p: Vector3) -> Dictionary:
 	return {}
 
 func run() -> void:
+	# a city build's folder as the first argument (-- res://assets/cityforge_roads/); default: the classic city
+	var city_args := OS.get_cmdline_user_args()
+	if city_args.size() > 0 and str(city_args[0]).begins_with("res://"): CityForgeWorld.use_city(str(city_args[0]))
 	var t0 := Time.get_ticks_msec()
 	var w := CityForgeWorld.new()
 	root.add_child(w)

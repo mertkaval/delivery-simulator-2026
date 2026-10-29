@@ -21,7 +21,7 @@ CF_REPLACED = ("lamp", "traffic_light", "bus_stop", "hydrant", "bench", "stop_si
 CF_KEPT = {"vending_machine": 0.7, "post_box": 0.5, "phone_box": 0.8, "ad_column": 0.8, "cesme": 1.0, "cafe_set": 1.6, "utility_pole": 0.5}
 
 
-BASE_VERSION = 4          # bump when tools/roads/mrs changes the node groups or the asset library
+BASE_VERSION = 15          # bump when tools/roads/mrs changes the node groups or the asset library
 
 
 def ensure_base(path, rebuild=False, log=print):
@@ -67,6 +67,23 @@ def clear():
     for cu in [c for c in bpy.data.curves if c.users == 0]: bpy.data.curves.remove(cu)
 
 
+ROADS_ONLY = True       # the plan keeps the road network only: every building, lot, fence, park and non-street prop goes
+BATTER = 0.5            # cut / fill slope (rise / run) between the roads and the natural terrain
+PLOT_SPACING = 20.0     # frontage plots (future building sites, delivery addresses) along each street side (m)
+
+
+def load_natural(plan_dir, terrain=None):
+    """The natural terrain (tools/terrain: terrain.npz next to the plan's directory, or `terrain`) as an
+    mrs.grading.Field with its water; None when it is not there (the CityForge-graded heights are used then)."""
+    import numpy as np
+    from . import grading
+    path = terrain or os.path.join(os.path.dirname(os.path.abspath(plan_dir)), "terrain", "terrain.npz")
+    if not os.path.exists(path): return None
+    T = np.load(path)
+    city = json.load(open(os.path.join(plan_dir, "city.json"), encoding="utf-8"))
+    return grading.Field(T["height"], float(city["cell_m"]), (0.0, 0.0), T["water"], T["water_level"])
+
+
 def load_plan(plan_dir):
     city = json.load(open(os.path.join(plan_dir, "city.json"), encoding="utf-8"))
     hp = os.path.join(plan_dir, "graded.npz")
@@ -98,6 +115,7 @@ def _road_object(rd, col, probe=None):
     # the rule placement puts drain grates and access covers on every street as kit instances
     mod = o.modifiers["MRS_Road"]
     for k in ("Manholes", "Drains"): mod_input_set(mod, k, None)
+    mod_input_set(mod, "Speed Limit", int(citynet.SPEED.get(rd["cls"], 30)))
     o["mrs_street_name"] = rd.get("street", "") or rd["id"]
     o["ph_cls"] = rd["cls"]; o["ph_cf_roads"] = json.dumps(rd.get("cf_roads", [rd.get("cf_lane", "")]))
     o["ph_culture"] = rd.get("culture", "")
@@ -128,11 +146,41 @@ def _main_roads(j, objs, net_by):
     return main
 
 
+LANE_OVERLAP = 0.1      # a lane's asphalt runs this far under the driveway apron (no crack at the lot line)
+
+
+def apply_lane_driveways(net, objs):
+    """Driveway points on every street a back lane opens onto: the lane mouth projected onto the street's evaluated
+    centre line, with the lane's width + 1 m. Returns the number of driveways."""
+    from . import frontage, structures
+    from .placement import _project, RoadModel
+    drives = {}
+    for ln in net["lanes"]:
+        for e in ln["ends"]:
+            if not (e.get("street") and e["street"] in objs): continue
+            o = objs[e["street"]]; structures._CENTRE.pop(o.name, None)
+            a = _project(RoadModel(o), B(e["along_pos"][0], e["along_pos"][1], 0.0))      # plan -> Blender coordinates
+            drives.setdefault(e["street"], []).append((round(a, 3), e["side"], float(ln["width"]) + 1.0))
+    for rid, lst in drives.items(): frontage.apply_driveways(objs[rid], sorted(lst))
+    return sum(len(v) for v in drives.values())
+
+
 def build(plan_dir, region=None, seed=7, place=True, log=print):
     """Build the city's MRS streets in the context scene. Returns the network dict (citynet) + stats."""
     t0 = time.time(); tm = {}
     city, H = load_plan(plan_dir)
-    net = citynet.build(city, H, region)
+    nat = load_natural(plan_dir, STATE.get("terrain")) if ROADS_ONLY else None
+    if nat is not None:
+        tm["bridges_added"] = citynet.bridge_gaps(city, nat)          # streets cut by water on both banks get a bridge
+        log("BRIDGES", json.dumps(tm["bridges_added"]))
+        # the roads' own vertical alignment on the natural terrain (the city's graded lot pads play no part)
+        net0 = citynet.build(city, citynet.Heights(nat.h, nat.cell), region, natural=nat)
+        H, tm["profiles"], prof = citynet.design_heights(net0, nat)
+        log("PROFILES", json.dumps(tm["profiles"]))
+    else:
+        prof = None
+    net = citynet.build(city, H, region, natural=nat, profiles=prof)
+    STATE["natural"] = nat; STATE["design"] = H
     tm["network"] = round(time.time() - t0, 1)
     log("NETWORK", json.dumps(net["report"]["summary"]))
     sc = bpy.context.scene; set_scene(sc)
@@ -143,19 +191,17 @@ def build(plan_dir, region=None, seed=7, place=True, log=print):
     t = time.time()
     objs = {}
     for rd in net["roads"]: objs[rd["id"]] = _road_object(rd, col, probe)
+    # a back lane ends at its street's lot line: the street's own half width + kerb + sidewalk on the lane's side
+    for ln in net["lanes"]:
+        for k, e in ((0, ln["ends"][0]), (-1, ln["ends"][1])):
+            if not (e.get("street") and e["street"] in objs and e.get("out")): continue
+            w = roads.road_widths(objs[e["street"]]); s_ = e["side"]
+            back = w["half_" + s_] + w["curb"] + w["sw" + s_] - LANE_OVERLAP
+            c, out = e["along_pos"], e["out"]
+            e["pos"] = (c[0] - out[0] * back, c[1] - out[1] * back)
+            p_ = ln["pts"][k]; ln["pts"][k] = (e["pos"][0], e["pos"][1], p_[2])
     for ln in net["lanes"]: objs[ln["id"]] = _road_object(ln, col)
     tm["roads"] = round(time.time() - t, 1)
-    # back lanes cross the street sidewalks on a dropped kerb with a concrete apron (MRS driveways)
-    drives = {}
-    for ln in net["lanes"]:
-        for e in ln["ends"]:
-            if e.get("street") and e["street"] in objs:
-                rd = next(r for r in net["roads"] if r["id"] == e["street"])
-                pr = citynet._project_poly(rd["pts"], e["along_pos"])
-                drives.setdefault(e["street"], []).append((round(pr[1], 3), e["side"], float(ln["width"]) + 1.0))
-    from . import frontage
-    for rid, lst in drives.items(): frontage.apply_driveways(objs[rid], sorted(lst))
-    tm["driveways"] = sum(len(v) for v in drives.values())
     # junctions
     t = time.time(); net_by = {r["id"]: r for r in net["roads"]}; fails = []; built = 0
     for j in net["junctions"]:
@@ -174,6 +220,9 @@ def build(plan_dir, region=None, seed=7, place=True, log=print):
             fails.append((j["id"], str(e))); log("JUNCTION FAILED", j["id"], e)
     tm["junctions"] = round(time.time() - t, 1); tm["junctions_built"] = built; tm["junction_failures"] = fails
     log("JUNCTIONS", built, "built,", len(fails), "failed in", tm["junctions"], "s")
+    # back lanes cross the street sidewalks on a dropped kerb with a concrete apron (MRS driveways). Stations are taken
+    # on the street as built (after the junction trims: the road group measures `along` from its trimmed start)
+    tm["driveways"] = apply_lane_driveways(net, objs)
     STATE.update(city=city, H=H, net=net, objs=objs, plan_dir=plan_dir, region=region, timings=tm)
     if place:
         anchors(city, net, objs)
@@ -186,7 +235,15 @@ def load_state(plan_dir, region=None):
     """STATE for a saved build (.blend from mrs_streets.py --blend): plan, heights and the (deterministic) network,
     so export() / write_plan() can rerun without rebuilding the streets."""
     city, H = load_plan(plan_dir)
-    net = citynet.build(city, H, region)
+    nat = load_natural(plan_dir, STATE.get("terrain")) if ROADS_ONLY else None
+    if nat is not None:
+        citynet.bridge_gaps(city, nat)
+        net0 = citynet.build(city, citynet.Heights(nat.h, nat.cell), region, natural=nat)
+        H, _rep, prof = citynet.design_heights(net0, nat)
+    else:
+        prof = None
+    net = citynet.build(city, H, region, natural=nat, profiles=prof)
+    STATE["natural"] = nat; STATE["design"] = H
     objs = {o.name: o for o in roads.all_roads(bpy.data.collections.get(COL))} if bpy.data.collections.get(COL) else {}
     STATE.update(city=city, H=H, net=net, objs=objs, plan_dir=plan_dir, region=region, timings=STATE.get("timings", {}))
     saved = bpy.context.scene.get("ph_placement")
@@ -226,8 +283,9 @@ def anchors(city, net, objs):
         e = bpy.data.objects.new("MRS_Entrance_" + name, None); ac.objects.link(e)
         e.location = B(p[0], p[1], 0.0); e["mrs_road"] = rd["id"]; e["mrs_side"] = side; e["mrs_on_sidewalk"] = True; e["ph_kind"] = kind
         e.empty_display_size = 0.6; n_ent += 1
-    for hs in city["houses"]: entrance(hs["id"], _door(hs), "house")
-    for kind in ("shops", "towers", "public", "warehouses"):
+    # roads only: no building stands, so no doorway keeps a sidewalk clear and no culture furniture stays
+    for hs in ([] if ROADS_ONLY else city["houses"]): entrance(hs["id"], _door(hs), "house")
+    for kind in (() if ROADS_ONLY else ("shops", "towers", "public", "warehouses")):
         for b in city.get(kind, []):
             p = b["pos"]
             nr = citynet.nearest_road(net["roads"], p, 80.0, idx)
@@ -238,7 +296,7 @@ def anchors(city, net, objs):
             v = citynet._unit((p[0] - q[0], p[1] - q[1])); off = rd["width"] / 2.0 + citynet.WALK + 0.3
             entrance(b["id"], (q[0] + v[0] * off, q[1] + v[1] * off), kind[:-1])
     n_ex = 0
-    for kind, size in CF_KEPT.items():
+    for kind, size in ({} if ROADS_ONLY else CF_KEPT).items():
         for k, pr in enumerate(city["props"].get(kind, [])):
             if not inside(pr): continue
             e = bpy.data.objects.new("MRS_Exclude_%s_%d" % (kind, k), None); ac.objects.link(e)
@@ -288,6 +346,11 @@ def place_assets(seed=7, log=print):
 # ---------------------------------------------------------------------------------------------- export
 CHUNK = 256.0
 KIT_SIGNAL = "MRS_PH_Signal"
+
+
+def signal_kit(variant):
+    """Kit model name of a signal variant ("" = the corner post)."""
+    return KIT_SIGNAL + ("_" + variant.replace(".", "p") if variant else "")
 KIT_STREETNAME = "MRS_PH_StreetName"
 KIT_PREFIX = "KIT__"         # kit node names: KIT__<library object>; the game strips it to match the instance records
 BATCH = 40                   # roads evaluated per depsgraph pass (memory)
@@ -342,6 +405,32 @@ def _split(me, out, overlap=0.0):
     TRASH.append(me)
 
 
+def _kept_stations(me, angle):
+    """Stations that must keep their edge: walking along the road, a station is kept once the centre line's 3D
+    direction or the cross-section's tilt has turned more than `angle` degrees since the last kept one. Local
+    coplanarity alone let a long gentle vertical curve merge into one chord face (up to 1.4 m off the road on a
+    crest, and the ground was fitted to the chord)."""
+    lat = me.attributes.get("lat"); al = me.attributes.get("along")
+    if lat is None or al is None: return set()
+    lv = [d.value for d in lat.data]; av = [d.value for d in al.data]
+    centre, side = {}, {}
+    for i, v in enumerate(me.vertices):
+        k = round(av[i], 2); l_ = lv[i]
+        if k not in centre or abs(l_) < abs(centre[k][0]): centre[k] = (l_, v.co.copy())
+        if l_ > 0.5 and (k not in side or l_ < side[k][0]): side[k] = (l_, v.co.copy())
+    st = sorted(k for k in centre if k in side)
+    keep = set(); lim = math.radians(angle)
+    ref_d = ref_n = None
+    for k0, k1 in zip(st, st[1:]):
+        d = centre[k1][1] - centre[k0][1]
+        if d.length < 1e-6: continue
+        d.normalize(); n = (side[k1][1] - centre[k1][1]).normalized()
+        if ref_d is None: ref_d, ref_n = d, n; continue
+        if d.angle(ref_d, 0.0) > lim or n.angle(ref_n, 0.0) > lim:
+            keep.add(k0); ref_d, ref_n = d, n
+    return keep
+
+
 def merge_along(me, angle=0.35):
     """Fewer triangles without touching the cross-section: the edges between consecutive stations (both ends at
     the same `along`) are dissolved where the faces either side are coplanar within `angle` degrees and share a
@@ -354,6 +443,7 @@ def merge_along(me, angle=0.35):
     if al is None:
         bm.free(); return 0
     lim = math.cos(math.radians(angle)); n0 = len(bm.faces)
+    keep = _kept_stations(me, angle)
 
     def along_nb(v, f):
         """The vertex next to v in face f along the strip (not on v's station)."""
@@ -374,6 +464,7 @@ def merge_along(me, angle=0.35):
         if len(e.link_faces) != 2: continue
         a, b = e.verts
         if abs(a[al] - b[al]) > 1e-3: continue
+        if round(a[al], 2) in keep: continue                 # the profile or the cross-fall has turned since the last kept station
         f1, f2 = e.link_faces
         if f1.material_index != f2.material_index or f1.normal.dot(f2.normal) < lim: continue
         # only where both long edges run straight through: a bend stays faceted (merged faces stay convex)
@@ -704,7 +795,7 @@ def export(out_dir, log=print):
         for s in sigs:
             so = bpy.data.objects.get(s["id"])
             if so is None: continue
-            rec["signals"].append({"id": s["id"], "junction": o.name, "phase": s["phase"], "approach": s["approach"],
+            rec["signals"].append({"id": s["id"], "junction": o.name, "phase": s["phase"], "approach": s["approach"], "kit": signal_kit(s.get("variant", "")),
                                    "pos": [round(c, 3) for c in so.matrix_world.translation], "yaw": round(so.matrix_world.to_euler().z, 4)})
     for st in STATE.get("bus_stops", []):
         rec["bus_stops"].append({"id": st["id"], "road": st["road"], "side": st["side"], "name": st.get("name", "")})
@@ -716,9 +807,10 @@ def export(out_dir, log=print):
     for lib in sorted(libs):
         k_ = _local_copy(bpy.data.objects[lib], tmp, KIT_PREFIX + lib)      # (the library object holds the plain name)
         if k_ is not None: kit.append(k_)
-    sig0 = next((bpy.data.objects.get(s["id"]) for s in rec["signals"] if bpy.data.objects.get(s["id"])), None)
-    if sig0 is not None:
-        k_ = _local_copy(sig0, tmp, KIT_SIGNAL)
+    # one kit model per signal variant (corner post; mast arm per lane count / arm length / head positions)
+    for kit_name in sorted({s["kit"] for s in rec["signals"]}):
+        src = next((bpy.data.objects.get(s["id"]) for s in rec["signals"] if s["kit"] == kit_name and bpy.data.objects.get(s["id"])), None)
+        k_ = _local_copy(src, tmp, kit_name) if src is not None else None
         if k_ is not None: kit.append(k_)
     try:
         from . import signage
@@ -868,6 +960,59 @@ def _plane_cap(np, pts):
     return float(min(t for _, _, t in pts))
 
 
+ROADS_ONLY_REMOVE = ("lots", "houses", "garages", "fences", "shops", "towers", "warehouses", "public", "parks", "plazas")
+
+
+def frontage_plots(net, gh, cell, water=None, spacing=PLOT_SPACING, end_clear=25.0, setback=1.5):
+    """Future building sites along both sides of every street (not bridges): every `spacing` m, `setback` m behind
+    the back of the sidewalk, clear of the junction ends, of every other road's corridor and of water, facing the
+    street, with a unique address (numbers run on along a street name, odd on the left, even on the right) and the
+    graded ground height. The game delivers to them while no buildings stand."""
+    idx = citynet.RoadIndex(net["roads"] + net["lanes"])
+    def ground(x, y):
+        i = min(max(x / cell, 0.0), gh.shape[1] - 1.001); j = min(max(y / cell, 0.0), gh.shape[0] - 1.001)
+        i0, j0 = int(i), int(j); u, v = i - i0, j - j0
+        return float(gh[j0, i0] * (1 - u) * (1 - v) + gh[j0, i0 + 1] * u * (1 - v) + gh[j0 + 1, i0] * (1 - u) * v + gh[j0 + 1, i0 + 1] * u * v)
+    def wet(x, y):
+        if water is None: return False
+        i, j = int(round(x / cell)), int(round(y / cell))
+        return 0 <= j < water.shape[0] and 0 <= i < water.shape[1] and bool(water[j, i])
+    plots = []; numbers = {}
+    for rd in net["roads"]:
+        if rd["bridge"]: continue
+        pts = [(p[0], p[1]) for p in rd["pts"]]
+        segs = []; s0 = 0.0
+        for a, b in zip(pts, pts[1:]):
+            L = math.hypot(b[0] - a[0], b[1] - a[1])
+            if L > 1e-6: segs.append((s0, a, b, L)); s0 += L
+        street = rd.get("street") or rd["id"]; base = numbers.get(street, 0)
+        off = rd["width"] / 2.0 + citynet.WALK + setback
+        k = 0; st = end_clear
+        while st <= s0 - end_clear:
+            s_, a, b, L = next(sg for sg in segs if sg[0] <= st <= sg[0] + sg[3] + 1e-6)
+            t = (st - s_) / L; c = (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
+            d = ((b[0] - a[0]) / L, (b[1] - a[1]) / L); right = (d[1], -d[0])
+            for side, sgn in (("r", 1.0), ("l", -1.0)):
+                p = (c[0] + right[0] * sgn * off, c[1] + right[1] * sgn * off)
+                deep = (p[0] + right[0] * sgn * 8.0, p[1] + right[1] * sgn * 8.0)
+                if wet(*p) or wet(*deep): continue
+                clash = False
+                for o in idx.near(p) + idx.near(deep):
+                    for q in (p, deep):
+                        pr = citynet._project_poly(o["pts"], q)
+                        if pr is not None and pr[0] < o["width"] / 2.0 + (citynet.WALK if o["cls"] != "lane" else 0.5) + 0.5: clash = True; break
+                    if clash: break
+                if clash: continue
+                front = (-right[0] * sgn, -right[1] * sgn)
+                num = base + 2 * k + (2 if side == "r" else 1)
+                plots.append({"id": "plot_%05d" % len(plots), "pos": [round(p[0], 2), round(p[1], 2)], "yaw": round(math.atan2(-front[0], front[1]), 4),
+                              "h": round(ground(*p), 2), "street": street, "road": rd["id"], "side": side, "cls": rd["cls"],
+                              "address": "%d %s" % (num, street)})
+            k += 1; st += spacing
+        numbers[street] = base + 2 * k + 10
+    return plots
+
+
 def write_plan(plan_out, ground_meshes, log=print):
     """city.json for CityForge's build with its own street ribbons and street furniture taken out (the MRS export
     replaces them) and graded heights fitted under the MRS surfaces (0.15 m below their top, raised or lowered:
@@ -884,6 +1029,14 @@ def write_plan(plan_out, ground_meshes, log=print):
     out = {"street_trees_removed": len(trees) - len(keep)}
     city["props"]["tree"] = keep
     city["mrs_replaced"] = {k: len(city["props"].get(k, [])) for k in CF_REPLACED}
+    if ROADS_ONLY:
+        # the road network only: every building, lot, fence, garage, park, plaza and prop goes (buildings are placed
+        # later, on the frontage plots); the keys stay, as empty lists, for readers of the plan
+        out["removed"] = {k: len(city.get(k, [])) for k in ROADS_ONLY_REMOVE}
+        for k in ROADS_ONLY_REMOVE: city[k] = []
+        out["props_removed"] = {k: len(v) for k, v in city["props"].items()}
+        for k in list(city["props"]): city["props"][k] = []
+        city["roads_only"] = True
     # the street layout wins: a house a street runs through goes, with its lot, fence and garage
     gone = intruded(city, net, "houses")
     lots = {g["lot"] for g in gone}; hids = {g["id"] for g in gone}
@@ -904,7 +1057,9 @@ def write_plan(plan_out, ground_meshes, log=print):
     out["roads_removed"] = len(dropped)
     out["houses_removed"] = len(gone); out["shops_removed"] = len(shops)
     G = np.load(os.path.join(plan_dir, "graded.npz"))
-    gh = G["height"].astype(np.float64).copy(); cell = float(city["cell_m"]); n = gh.shape[0]
+    nat = STATE.get("natural") if ROADS_ONLY else None
+    # roads only: the ground starts from the natural terrain (no lot pads) and is graded to the roads here
+    gh = (nat.h if nat is not None else G["height"]).astype(np.float64).copy(); cell = float(city["cell_m"]); n = gh.shape[0]
     import bisect
     verts, polys, starts = [], [], []
     for me in ground_meshes:
@@ -930,7 +1085,14 @@ def write_plan(plan_out, ground_meshes, log=print):
         # fitted to the street points round it and extended to this point, so the ground between grid points (the
         # terrain mesh and the height-map collider are both bilinear) cannot rise through a sidewalk's back edge, and
         # a steep street does not drag its neighbours down by the grade. Points inside a building keep their height.
-        own = np.isfinite(T); new_gh = np.where(own, T, gh)
+        own = np.isfinite(T)
+        if nat is not None:
+            # cut / fill batters from every road surface back to the natural ground (mrs.grading)
+            from . import grading
+            new_gh = grading.grade(gh, own, np.where(own, T + SINK, 0.0), cell, slope=BATTER, sink=SINK, water=nat.water)
+        else:
+            new_gh = np.where(own, T, gh)
+        base_gh = new_gh.copy()
         keep = _building_mask(city, gh.shape, cell)
         js, is_ = np.nonzero(~own[j0:j1 + 1, i0:i1 + 1])
         for jj, ii in zip(js + j0, is_ + i0):
@@ -943,12 +1105,15 @@ def write_plan(plan_out, ground_meshes, log=print):
             if not groups: continue
             # one plane per street surface round the point (never one plane through a road and a higher cross
             # street), the lowest of them caps it
-            new_gh[jj, ii] = min(gh[jj, ii], min(_plane_cap(np, pts) for pts in groups.values()) - NEAR_MARGIN)
+            new_gh[jj, ii] = min(base_gh[jj, ii], min(_plane_cap(np, pts) for pts in groups.values()) - NEAR_MARGIN)
         diff = new_gh - gh
         changed = int(np.count_nonzero(np.abs(diff) > 0.01)); lowered = int(np.count_nonzero(diff < -0.01)); raised = int(np.count_nonzero(diff > 0.01))
         out["max_lowered"] = round(float(-diff.min()), 2); out["max_raised"] = round(float(diff.max()), 2)
         gh = new_gh
     out.update(ground_points=changed, lowered=lowered, raised=raised)
+    if ROADS_ONLY:
+        city["plots"] = frontage_plots(net, gh, cell, nat.water if nat is not None else None)
+        out["plots"] = len(city["plots"])
     np.savez_compressed(os.path.join(plan_out, "graded.npz"), height=gh, water=G["water"], water_level=G["water_level"])
     gh.astype(np.float32).tofile(os.path.join(plan_out, "heights.f32"))
     for f in os.listdir(plan_dir):

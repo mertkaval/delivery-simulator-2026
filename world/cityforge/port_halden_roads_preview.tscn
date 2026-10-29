@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://world/cityforge/port_halden_preview.gd" id="1"]
+
+[node name="PortHaldenRoadsPreview" type="Node3D"]
+script = ExtResource("1")
+city_dir = "res://assets/cityforge_roads/"

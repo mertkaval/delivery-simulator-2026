@@ -35,7 +35,7 @@ PRESETS = {
 }
 COLLECTION_INPUTS = {"Props": "Props", "Streetlights": "Streetlights", "Trees": "Trees", "Manholes": "Manholes", "Drains": "Drains", "Markings Collection": "Markings",
                      "Pillars": "Pillars", "Barriers": "Barriers", "Scatter": "Scatter"}
-MATERIAL_INPUTS = {"Asphalt Material": ("Asphalt",), "Marking Material": ("Paint",), "Concrete Material": ("Concrete",), "Paving Material": ("Paving", "Concrete"),
+MATERIAL_INPUTS = {"Asphalt Material": ("Asphalt",), "Marking Material": ("Paint",), "Yellow Marking Material": ("PaintYellow", "Paint"), "Concrete Material": ("Concrete",), "Paving Material": ("Paving", "Concrete"),
                    "Tactile Material": ("Tactile", "Paint"), "Cycleway Material": ("Cycleway", "BikeLane"), "Bus Lane Material": ("BusLane", "Cycleway", "BikeLane"),
                    "Structure Material": ("Structure",), "Embankment Material": ("Embankment",)}
 

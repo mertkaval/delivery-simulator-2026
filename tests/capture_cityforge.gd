@@ -20,9 +20,13 @@ func shot(out: String, name: String, eye: Vector3, target: Vector3, fov: float =
 	print("CAPTURED ", name)
 
 func run() -> void:
-	var args := OS.get_cmdline_user_args()
+	var args := Array(OS.get_cmdline_user_args())
+	for a: String in args.duplicate():          # city=res://assets/cityforge_roads/ : capture another city build
+		if a.begins_with("city="):
+			CityForgeWorld.use_city(a.substr(5))
+			args.erase(a)
 	var out: String = args[0] if args.size() > 0 else "res://tmp"
-	var views: Array = Array(args.slice(1)) if args.size() > 1 else ["aerial", "street", "downtown", "harbour", "lake", "night"]
+	var views: Array = args.slice(1) if args.size() > 1 else ["aerial", "street", "downtown", "harbour", "lake", "night"]
 	root.size = Vector2i(1600, 900)
 	env = Environment.new()
 	env.background_mode = Environment.BG_SKY

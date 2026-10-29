@@ -173,8 +173,17 @@ def face_material(colour):
     return m
 
 
+def _sm_alive():
+    """The signage material registry exists and its materials are still in this file (opening another .blend frees
+    them: a registry filled before the open pointed at removed materials and the street-name kit sign failed)."""
+    try:
+        return bool(SM) and all(m.name is not None for m in SM["face"].values()) and SM["housing"].name is not None
+    except (ReferenceError, KeyError):
+        return False
+
+
 def _materials():
-    if not M: A._materials()
+    if not A.materials_alive(): A._materials()
     atlas = HW.mat(HW.ATLAS)
     SM.clear()
     SM.update(pole=atlas, steel=atlas, back=atlas, housing=_housing_material((0.08, 0.08, 0.08)), atlas=atlas,
@@ -500,16 +509,19 @@ def _make_head(name, kind, lens_size, mats_house, col, parent, at):
 
 # ============================================================================== signals
 def make_signal(name, style="post", pole_height=4.0, arm_length=0.0, heads=("vehicle",), setback=0.0, lens_size=0.2,
-                housing_color=(0.08, 0.08, 0.08), collection=None):
+                housing_color=(0.08, 0.08, 0.08), collection=None, arm_side=1.0, head_x=None):
     """Signal pole `name` (origin at the base, +Z up, heads facing -Y) with child head objects `<name>_head<i>`.
-    style: post | mast_arm (arm along +X, `arm_length`) | pedestrian | bicycle | combined (vehicle + pedestrian head).
-    `setback` shifts the pole +Y behind the origin (kerb reference point). Returns the pole object."""
+    style: post | mast_arm (arm along +X, or -X with arm_side = -1; `arm_length`) | pedestrian | bicycle | combined
+    (vehicle + pedestrian head). `head_x`: distances along the arm of the hanging vehicle heads (one per lane: over
+    the lane centres); default every 2.4 m back from the tip. `setback` shifts the pole +Y behind the origin (kerb
+    reference point). Returns the pole object."""
     if style not in SIGNAL_STYLES: raise ValueError("style %r not in %s" % (style, SIGNAL_STYLES))
-    if not SM: _materials()
+    if not _sm_alive(): _materials()
     heads = tuple(heads)
     if heads == ("vehicle",):   # default per style
         heads = {"pedestrian": ("pedestrian",), "bicycle": ("bicycle",), "combined": ("vehicle", "pedestrian")}.get(style, heads)
     if style == "mast_arm" and arm_length <= 0: arm_length = 5.0
+    xs = -1.0 if arm_side < 0 else 1.0          # the arm's side (geometry is built mirrored, not scaled: normals stay right)
     _fresh(name)
     col = collection or bpy.context.scene.collection
     house = _housing_material(housing_color); mats_house = {"housing": house}
@@ -525,9 +537,12 @@ def make_signal(name, style="post", pole_height=4.0, arm_length=0.0, heads=("veh
         for kind in heads:
             if kind == "pedestrian":
                 mounts.append((kind, (0.0, sy - r1 - HEAD_DEPTH[kind](D) / 2 - 0.05, min(H - 0.3, 2.9)), "side")); continue
-            x = L - 0.7 - 2.4 * k; k += 1
-            if x < 1.2: x = 1.2 + 0.4 * k
-            mounts.append((kind, (x, sy, z_arm(x) - 0.085 - 0.22), "hang"))
+            if head_x is not None and k < len(head_x): x = min(max(float(head_x[k]), 1.2), L - 0.3)
+            else:
+                x = L - 0.7 - 2.4 * k
+                if x < 1.2: x = 1.2 + 0.4 * k
+            k += 1
+            mounts.append((kind, (x * xs, sy, z_arm(x) - 0.085 - 0.22), "hang"))
     else:
         ztop = H - 0.06
         for kind in heads:
@@ -551,17 +566,19 @@ def make_signal(name, style="post", pole_height=4.0, arm_length=0.0, heads=("veh
         hm.lathe([(r1 + 0.01, H), (r1 + 0.01, H + 0.02), (r1 * 0.6, H + 0.035), (0.0, H + 0.04)], "galv", 16, y=sy)
         if style == "mast_arm":
             hm.cyl(0, sy, H - 0.75, H - 0.1, r1 + 0.03, r1 + 0.03, "galv", 16)                                  # collar
-            hm.box(0.0, sy - 0.16, z_root - 0.17, r1 + 0.05, sy + 0.16, z_root + 0.17, "galv")                     # flange plate
+            fx0, fx1 = sorted((0.0, (r1 + 0.05) * xs))
+            hm.box(fx0, sy - 0.16, z_root - 0.17, fx1, sy + 0.16, z_root + 0.17, "galv")                             # flange plate
             for dy in (-0.11, 0.11):
-                for dz in (-0.12, 0.12): hm.tube([(r1 + 0.05, sy + dy, z_root + dz), (r1 + 0.068, sy + dy, z_root + dz)], 0.012, "galv_dark", 6)
-            hm.taper((r1 + 0.05, sy, z_root), (L, sy, z_tip), 0.085, 0.05, "galv", 14, segs=max(1, int(math.ceil(L / 1.9))))   # arm
-            hm.taper((0.0, sy, H - 1.4), (min(1.6, L * 0.35), sy, z_arm(min(1.6, L * 0.35)) - 0.06), 0.03, 0.03, "galv", 10)   # brace
-            hm.box(-0.06, sy - 0.14, H - 1.5, 0.3, sy + 0.14, H - 1.3, "galv")
+                for dz in (-0.12, 0.12): hm.tube([((r1 + 0.05) * xs, sy + dy, z_root + dz), ((r1 + 0.068) * xs, sy + dy, z_root + dz)], 0.012, "galv_dark", 6)
+            hm.taper(((r1 + 0.05) * xs, sy, z_root), (L * xs, sy, z_tip), 0.085, 0.05, "galv", 14, segs=max(1, int(math.ceil(L / 1.9))))   # arm
+            hm.taper((0.0, sy, H - 1.4), (min(1.6, L * 0.35) * xs, sy, z_arm(min(1.6, L * 0.35)) - 0.06), 0.03, 0.03, "galv", 10)   # brace
+            bx0, bx1 = sorted((-0.06 * xs, 0.3 * xs))
+            hm.box(bx0, sy - 0.14, H - 1.5, bx1, sy + 0.14, H - 1.3, "galv")
         for kind, (x, y, z), how in mounts:
             if how == "hang":
-                hm.cyl(x, y, z, z_arm(x), 0.03, 0.03, "galv", 10)
-                ra = 0.085 + (0.05 - 0.085) * x / L + 0.012
-                hm.taper((x - 0.05, y, z_arm(x)), (x + 0.05, y, z_arm(x)), ra, ra, "galv_dark", 14)                  # hanger clamp around the arm
+                hm.cyl(x, y, z, z_arm(abs(x)), 0.03, 0.03, "galv", 10)
+                ra = 0.085 + (0.05 - 0.085) * abs(x) / L + 0.012
+                hm.taper((x - 0.05, y, z_arm(abs(x))), (x + 0.05, y, z_arm(abs(x))), ra, ra, "galv_dark", 14)        # hanger clamp around the arm
             else:
                 hh = HEAD_HEIGHT[kind](D)
                 for zz in (z - 0.08, z - hh + 0.08):
@@ -582,9 +599,56 @@ def make_signal(name, style="post", pole_height=4.0, arm_length=0.0, heads=("veh
         ho, hh = _make_head(hname, kind, D, mats_house, col, pole_o, at)
         head_info.append({"kind": kind, "lenses": HEAD_LENSES[kind], "mesh_names": [ho.data.name], "object": ho.name,
                           "lens_materials": [MRS + "Lens_" + k for k in HEAD_LENSES[kind]], "mount": how})
-    pole_o["mrs_signal"] = {"style": style, "pole_height": H, "arm_length": arm_length if style == "mast_arm" else 0.0, "setback": sy,
+    pole_o["mrs_signal"] = {"style": style, "pole_height": H, "arm_length": arm_length if style == "mast_arm" else 0.0, "arm_side": xs, "setback": sy,
                             "lens_size": D, "faces": "-Y", "housing": house.name, "heads": head_info}
     return pole_o
+
+
+# ============================================================================== lane-use signs (mast arms)
+LANE_SIGN = (0.6, 0.75, 0.025)        # plate width, height, border (m)
+
+
+def _arrow_polys(code):
+    """Arrow outlines (x right, y up, ~4 units tall) for a movement code: 1 left + 2 straight + 4 right; the same
+    shapes as the lane arrows painted on the road (assets.py _markings)."""
+    polys = [[(-0.1, 0.0), (0.1, 0.0), (0.1, 3.0 if code & 2 else 1.4), (-0.1, 3.0 if code & 2 else 1.4)]]
+    if code & 2: polys.append([(-0.45, 3.0), (0.45, 3.0), (0.0, 4.0)])
+    for bit, sgn in ((1, -1.0), (4, 1.0)):
+        if not code & bit: continue
+        bar = [(0.0, 1.2), (sgn * 0.9, 1.2), (sgn * 0.9, 1.4), (0.0, 1.4)]
+        tri = [(sgn * 0.9, 0.9), (sgn * 1.5, 1.3), (sgn * 0.9, 1.7)]
+        polys += [bar if sgn > 0 else bar[::-1], tri if sgn > 0 else tri[::-1]]
+    return polys
+
+
+def lane_use_sign(name, code, collection=None, parent=None, at=(0.0, 0.0, 0.0)):
+    """A lane-use sign (white plate, black border and arrows for movement `code`) facing -Y like the signal heads,
+    centred at `at` (in the parent's space). The mesh is shared per code (MRS_LaneUse_<code>)."""
+    if not _sm_alive(): _materials()
+    mn = MRS + "LaneUse_%d" % code
+    me = bpy.data.meshes.get(mn)
+    if me is None:
+        bm = bmesh.new(); W, H, B = LANE_SIGN
+        def quad(x0, z0, x1, z1, y, mi):
+            f = bm.faces.new([bm.verts.new(v) for v in ((x0, y, z0), (x1, y, z0), (x1, y, z1), (x0, y, z1))]); f.material_index = mi
+        quad(-W / 2, -H / 2, W / 2, H / 2, -0.012, 1)                                          # white face
+        for x0, z0, x1, z1 in ((-W / 2, -H / 2, W / 2, -H / 2 + B), (-W / 2, H / 2 - B, W / 2, H / 2), (-W / 2, -H / 2, -W / 2 + B, H / 2), (W / 2 - B, -H / 2, W / 2, H / 2)):
+            quad(x0, z0, x1, z1, -0.014, 0)                                                    # black border
+        f = bm.faces.new([bm.verts.new(v) for v in ((W / 2, 0.0, -H / 2), (-W / 2, 0.0, -H / 2), (-W / 2, 0.0, H / 2), (W / 2, 0.0, H / 2))]); f.material_index = 2   # back
+        k = (H - 3 * B) / 4.0                                                                  # arrows fill the plate inside the border
+        for poly in _arrow_polys(code):
+            try: f = bm.faces.new([bm.verts.new((x * k, -0.015, (y - 2.0) * k)) for x, y in poly]); f.material_index = 0
+            except ValueError: pass
+        bmesh.ops.recalc_face_normals(bm, faces=[f_ for f_ in bm.faces if f_.material_index != 2])
+        for f_ in bm.faces:                                                                    # fronts face -Y, the back +Y
+            want = Vector((0.0, 1.0 if f_.material_index == 2 else -1.0, 0.0))
+            if f_.normal.dot(want) < 0: f_.normal_flip()
+        me = bpy.data.meshes.new(mn); bm.to_mesh(me); bm.free()
+        for m in (SM["face"]["Black"], SM["face"]["White"], SM["face"]["Grey"]): me.materials.append(m)
+    o = bpy.data.objects.new(name, me); (collection or bpy.context.scene.collection).objects.link(o)
+    if parent is not None: o.parent = parent
+    o.location = at; o["mrs_lane_use"] = int(code)
+    return o
 
 
 # ============================================================================== sign legends (FONT children)
@@ -713,7 +777,7 @@ def make_sign(name, kind, text=None, value=None, pole_height=2.3, size=None, col
     game=True: the baked game version (face from MRS_SignAtlas; needs a cell for `name`, see bake_sign_atlas); falls
     back to the authoring version when the atlas has no cell for this sign."""
     if kind not in SIGN_KINDS: raise ValueError("kind %r not in %s" % (kind, SIGN_KINDS))
-    if not SM: _materials()
+    if not _sm_alive(): _materials()
     cells = None
     if game:
         cells = sign_atlas_cells().get(name)
@@ -871,7 +935,7 @@ def make_direction_board(name, entries=(("CITY CENTRE", "ahead"), ("AIRPORT", "r
                          clearance=2.5, row_height=0.42, text_size=0.24, game=False):
     """Large green advance-direction board on two posts: one row per (destination, "ahead"|"left"|"right") entry,
     board underside at `clearance`. Faces +Y. Legends are FONT children `<name>_text<i>` (game=True: baked face)."""
-    if not SM: _materials()
+    if not _sm_alive(): _materials()
     cells = None
     if game:
         cells = sign_atlas_cells().get(name)
@@ -1050,7 +1114,7 @@ def bake_sign_atlas(specs=None, tex_dir=None, samples=16, verbose=True):
     import time
     t0 = time.time(); specs = specs or _library_specs()
     paths, js = _sa_paths(tex_dir); os.makedirs(os.path.dirname(js), exist_ok=True)
-    if not SM: _materials()
+    if not _sm_alive(): _materials()
     tmpc = bpy.data.collections.new(MRS + "SignAtlasTmp"); bpy.context.scene.collection.children.link(tmpc)
     drawings = {}
     try:

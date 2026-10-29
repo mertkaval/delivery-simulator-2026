@@ -128,7 +128,24 @@ on each corner facing the arriving traffic when the collection exists. Straight-
 continuous sidewalk. `build_roundabout` (island, ring, entry stubs, splitter islands, yield lines,
 outer sidewalk ring), `build_dead_end` (turning circle with sidewalk ring and the road trimmed at the
 circle). `rebuild_all()` recomputes every junction from the roads' current curves;
-`enable_auto_update()` does it when a road curve is edited.
+`enable_auto_update()` does it when a road changes.
+
+Everything a junction paints or places is derived from its roads and its control (2026-10-29):
+- **Clear zone**: each road end gets `Mark Clear Start / End` (crossing + end marking): the road's lane, centre,
+  edge and cycle paint, cycle colour, hatching and symbols stop there.
+- **Movements**: `movements()` (1 left + 2 straight + 4 right per leg with outgoing lanes, U-turns excluded) ->
+  road inputs `Turns Start / End`; `lane_use()` gives each arriving lane its movements: the painted arrows, the
+  lane-use signs on the mast arms and the vehicle paths (`movements.py`) all use it.
+- **End markings** by control (`end_marking()`): signals -> stop line; stop -> stop line + STOP in every lane;
+  yield and the minor roads of a priority junction -> dashed give-way line + triangles; the main road -> nothing.
+  Signs follow the same control (placement).
+- **Signals**: a corner post per corner (vehicle + pedestrian head) and, for 2+ arriving lanes, a mast arm at the
+  stop line with a head and a lane-use sign over every lane (`signage.make_signal(arm_side, head_x)`).
+- **Cycle crossings**: coloured bands with elephant feet through the junction between opposite cycle lanes.
+- **Yellow box** (`box=True`): border + hatching over the junction core.
+- Every build parameter is stored in the junction's metadata (`params`); `configure(obj, **changes)` /
+  panel *Junction Settings* changes any of them and rebuilds. The auto-update hashes each road's curve and every
+  input except the derived ones (no feedback loop) and, with *Auto-place*, re-places the street assets.
 
 ## Asset library (`mrs.assets`, 95 generated objects)
 `build_assets()` fills the collections the road group instances from, all procedural bmesh with
@@ -158,9 +175,15 @@ torus coordinates) for engines; `tools/roads/tests/materials_test.py` renders ev
 
 ## Terrain workflow
 1. `mrs.terrain.demo_terrain()` or your own mesh -> panel *Use Active as Terrain*.
-2. Roads conform to it (Conform on); embankments fill and cut.
-3. *Pull Terrain to Roads* makes `<terrain>_Conformed` with `MRS_TerrainConform` (subdivides near the
-   roads, lowers terrain under the surfaces, blends within Reach; never raises terrain, ignores decks).
+2. Roads conform to it (Conform on).
+3. *Pull Terrain to Roads* makes `<terrain>_Conformed` with `MRS_TerrainConform`: under a road surface the
+   terrain lies `Sink` below it (raised onto fills with *Raise*); beside it the terrain is clipped between the
+   batters from the nearest surface (`Cut Slope` 1:1, `Fill Slope` 1:2), so it meets every edge and returns to its
+   own shape; elevated decks and the roads' instances carry no `ground_surface` mark and are ignored. The roads'
+   own embankment skirts and walls are switched off (the graded terrain replaces them).
+4. Heightfield terrains (any engine): `mrs.grading` (pure numpy) - `network_profiles` gives every road its
+   vertical alignment from the natural ground (averaged, grade limited per class, shared node heights, decks
+   clearing the water), `corridor_field` writes the corridors into the field, `grade` applies the same batters.
 
 ## Export
 `mrs.export.export_glb(path, collection)` - evaluated meshes, metre UVs, +Y up; `<path>_collision.glb`
@@ -168,7 +191,12 @@ with kinds 0/2/3/4 only. `export_ready(objs)` converts to plain meshes. Procedur
 baked tiles (`materials.bake_tiles`) in an engine.
 
 ## Validation
-`tools/roads/build_mrs.py` is the test: it rebuilds everything headless, asserts >= 25 roads and
+`mrs.validate.validate(roads_collection, placed)` (panel *Validate*) checks every road, junction and sign against
+the rules above: paint in clear zones, arrow kind / direction / count, junction inputs, end markings, cycle bands
+on zebras, signal heads and lane-use signs over the lanes, speed signs. Tests: `tools/roads/tests/
+junction_rules_test.py` (4 junction types, 0 problems), `responsive_test.py` (lanes / speed / cycle lanes edited ->
+everything follows), `terrain_conform_test.py` (batters on mesh terrains), `grading_test.py` (heightfields).
+`tools/roads/build_mrs.py` is the older smoke test: it rebuilds everything headless, asserts >= 25 roads and
 >= 12 junctions evaluate to meshes with UVs, exports the city block and renders 20 views to
 `tmp/roads/v2/samples/`. Contact sheets of the validation renders are in `docs/roads/v2/` (city_block, mountain_road, highway, village, bridge_valley, materials, assets).
 

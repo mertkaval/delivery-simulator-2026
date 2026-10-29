@@ -580,3 +580,19 @@ Tests: `tests/port_halden_streets_test.gd` (rendered: every MRS street and sidew
 the fitted ground), `tools/roads/tests/road_bank_test.py` (tilted junction seams), and the existing
 CityForge / Port Halden game tests. Fixed on the way: corner shops on arterial street ends had their
 size unswapped and overhung their sidewalks by ~5 m (`plan_city.py`).
+
+## Road layout only, rules derived in the road tool (2026-10-29)
+
+The new Port Halden is a road layout only: the plan keeps the network, its streets, junctions, signals, signs,
+cycle lanes, sidewalks, back lanes and bridges; CityForge's lots, houses, shops, towers, public buildings, parks
+and furniture are left out (the classic city and every asset stay; buildings will be placed later on the
+frontage plots, which the game uses as delivery addresses meanwhile: `CityForgeWorld.sites()`). Mert Road Studio
+now derives what it used to take from the city: lane / centre / cycle paint stops at each junction's stop line
+and crossing, arrows show each lane's real movements, cycle crossings run through the junction (never over a
+zebra), multi-lane approaches get a mast arm with a head over every lane, speed signs show each road's own
+`Speed Limit`, lane mouths always get their dropped kerb, road heights come from the natural terrain with grade
+limits per class, bridges clear the water by 4 m (two new bridges join streets cut by water), and the ground is
+graded to the roads with cut / fill batters (`tools/roads/mrs/grading.py`). `mrs/validate.py` checks every road,
+junction and sign; `tools/cityforge/mrs_junction_atlas.py` renders every junction. Two long-standing library bugs
+were fixed (the bicycle symbol had no model; constant pick indices were ignored, so cycle lanes and parking bays
+showed rows of turn arrows). Details: `docs/roads/CITY.md` (Rework).
