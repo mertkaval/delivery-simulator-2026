@@ -292,3 +292,68 @@ func add_item_colliders(body: StaticBody3D, lo: Vector2, hi: Vector2) -> int:
 static func set_night(amount: float) -> void:
 	for m: BaseMaterial3D in lamp_materials:
 		m.emission_energy_multiplier = float(m.get_meta("night_energy", LAMP_NIGHT)) * amount
+
+# --- the editor's view -------------------------------------------------------------------------
+## Street assets for the editor preview (world/editor_preview): no game logic runs in the editor, so the kit
+## meshes the preview loaded become plain MultiMeshes (one per model for the whole city) from mrs_city.json.
+static func editor_props(kit_scene: Node, holder: Node3D) -> int:
+	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(DIR + "mrs_city.json")) as Dictionary
+	var meshes: Dictionary = {}
+	for node in kit_scene.find_children("*", "MeshInstance3D", true, false):
+		meshes[kit_key(str(node.name))] = (node as MeshInstance3D).mesh
+	var groups: Dictionary = {}
+	var inst: Dictionary = data.get("instances", {})
+	for lib: String in inst:
+		for r: Array in inst[lib]:
+			_editor_add(groups, lib, Transform3D(Basis(Vector3.UP, float(r[3])).scaled(Vector3.ONE * float(r[4])), g(r)))
+	for s: Dictionary in data.get("signals", []):
+		_editor_add(groups, KIT_SIGNAL, Transform3D(Basis(Vector3.UP, float(s.yaw)), g(s.pos as Array)))
+	for r: Array in data.get("street_name_signs", []):
+		_editor_add(groups, KIT_STREETNAME, Transform3D(Basis(Vector3.UP, float(r[3])), g(r)))
+	var n := 0
+	for name_: String in groups:
+		if not meshes.has(name_): continue
+		var mi := _editor_multimesh(meshes[name_] as Mesh, groups[name_] as Array)
+		mi.name = "Mrs_" + name_
+		mi.visibility_range_end = STREET_RANGE_EDITOR if is_street_kind(name_) else DETAIL_RANGE_EDITOR
+		holder.add_child(mi)
+		n += (groups[name_] as Array).size()
+	return n
+
+## Street trees for the editor preview: each species' LOD1 mesh (assets/roads/foliage) as one MultiMesh.
+static func editor_trees(holder: Node3D) -> int:
+	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(DIR + "mrs_city.json")) as Dictionary
+	var groups: Dictionary = {}
+	for t: Dictionary in data.get("trees", []):
+		_editor_add(groups, str(t.species), Transform3D(Basis(Vector3.UP, float(t.yaw)).scaled(Vector3.ONE * float(t.get("scale", 1.0))), g(t.pos as Array)))
+	var n := 0
+	for sid: String in groups:
+		var path := "res://assets/roads/foliage/%s_lod1.glb" % sid
+		if not ResourceLoader.exists(path): continue
+		var scene := (load(path) as PackedScene).instantiate()
+		var found := scene.find_children("*", "MeshInstance3D", true, false)
+		if not found.is_empty():
+			var mi := _editor_multimesh((found[0] as MeshInstance3D).mesh, groups[sid] as Array)
+			mi.name = "MrsTrees_" + sid
+			mi.visibility_range_end = 900.0
+			holder.add_child(mi)
+			n += (groups[sid] as Array).size()
+		scene.free()
+	return n
+
+const STREET_RANGE_EDITOR := 700.0
+const DETAIL_RANGE_EDITOR := 250.0
+
+static func _editor_add(groups: Dictionary, name_: String, xf: Transform3D) -> void:
+	if not groups.has(name_): groups[name_] = []
+	(groups[name_] as Array).append(xf)
+
+static func _editor_multimesh(mesh: Mesh, xfs: Array) -> MultiMeshInstance3D:
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = mesh
+	mm.instance_count = xfs.size()
+	for k in xfs.size(): mm.set_instance_transform(k, xfs[k])
+	var mi := MultiMeshInstance3D.new()
+	mi.multimesh = mm
+	return mi
