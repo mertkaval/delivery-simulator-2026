@@ -65,3 +65,15 @@ Godot (v3): `tests/capture_street_block.gd` loads the four GLBs + JSON, checks s
 green lens emission and captures views (`godot --path . --script res://tests/capture_street_block.gd -- <export_dir> <out_dir>`).
 Signal control in the game = set `emission_enabled` / `emission_energy_multiplier` on the lens materials
 of a signal node per `signal_phases`; that is the engine's job, not a Blender animation.
+
+## v5 additions
+- `movements`: `lanes`, `movements` (junction turns plus `access_in` / `access_out` for driveways), `bike_movements`, `validation` and `stats`. Every path is swept on the real surfaces, with a minimum radius.
+- `destinations`: delivery destinations, one per shop entrance:
+  - `id`, `kind`, `name`, `address`, `road`, `side`, `along`;
+  - `door`, `facing`, `entrance`;
+  - `service` (`driveway`, `yard`, `width`);
+  - `building`, `kit_modules`.
+  - The Godot loader adds a `Marker3D` per destination to the group `mrs_destinations`.
+- `frontages`: building records (`footprint`, `width`, `depth`, `height`, `floors`, `style`, `kit_modules`).
+- Surface kind **11 (apron)**: dropped-kerb driveway apron and service yard, walked and driven. Kind 10 is the footbridge (movements only).
+- `ground` / `ground_files`: the landscape ground mask and tiles (`ground.py`, `mrs_ground.gdshader`).

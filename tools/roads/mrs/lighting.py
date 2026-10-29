@@ -368,6 +368,15 @@ def _lamp_materials():
     return [m for m in bpy.data.materials if m.name.startswith(LAMP_MATERIAL_PREFIXES)]
 
 
+def _window_glow(night):
+    """City-kit glazing (frontage.py KitGlass): a warm lit interior at night, as the game's window shader does."""
+    m = bpy.data.materials.get("KitGlass")
+    if m is None or not m.use_nodes: return
+    b = next((n for n in m.node_tree.nodes if n.type == "BSDF_PRINCIPLED"), None)
+    # night_setup adds NIGHT_EXPOSURE (+7 EV, x128): 0.006 reads as a warm lit interior (~0.8) instead of white panes
+    if b is not None: b.inputs["Emission Strength"].default_value = 0.006 if night else 0.02
+
+
 def set_lamp_strength(strength):
     """Emission strength of every lamp material (Principled 'Emission Strength' or Emission node 'Strength')."""
     n = 0
@@ -446,6 +455,7 @@ def night_setup(scene=None, exposure=NIGHT_EXPOSURE, moon=MOON_STRENGTH, sky=SKY
     m = _moon(scene, moon); m.hide_render = False; m.hide_viewport = False
     for o in light_objects(): o.hide_render = False
     set_lamp_strength(lamp_strength)
+    _window_glow(True)
     scene[STATE_KEY] = json.dumps(st)
     return scene
 
@@ -473,6 +483,7 @@ def day_setup(scene=None, lamp_strength=LAMP_DAY_STRENGTH):
         scene.world = bpy.data.worlds.get(DAY_WORLD); scene.view_settings.exposure = 0.0
     m = bpy.data.objects.get(MOON)
     if m: m.hide_render = True; m.hide_viewport = True
+    _window_glow(False)
     for o in light_objects(): o.hide_render = True
     set_lamp_strength(lamp_strength)
     scene[STATE_KEY] = json.dumps({"mode": "day"})

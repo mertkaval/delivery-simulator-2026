@@ -20,7 +20,7 @@ def freeze(names=None):
 def _road_key(road):
     sp = road.data.splines[0]
     pts = tuple(round(c, 3) for bp in (sp.bezier_points if sp.type == "BEZIER" else sp.points) for c in bp.co[:3])
-    return (road.name, pts, tuple(round(c, 3) for row in road.matrix_world for c in row), str(road.get("mrs_inputs", "")))
+    return (road.name, pts, tuple(round(c, 3) for row in road.matrix_world for c in row), str(road.get("mrs_inputs", "")), str(road.get("mrs_driveways", "")))
 
 
 def centre_line(road):

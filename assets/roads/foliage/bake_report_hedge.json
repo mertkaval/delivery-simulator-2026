@@ -1,0 +1,14 @@
+{
+ "hedge": {
+  "yard_hedge_leaves": {
+   "lum_before": 0.042,
+   "lum_after": 0.1302,
+   "gain": 3.09
+  },
+  "yard_hedge_sprays": {
+   "lum_before": 0.0463,
+   "lum_after": 0.13,
+   "gain": 2.81
+  }
+ }
+}

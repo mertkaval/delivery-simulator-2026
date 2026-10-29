@@ -219,7 +219,9 @@ def _build(roads_col, rep):
                 sa = _side_of_lookout(a["end"], "left"); sb = _side_of_lookout(b["end"], "right")
                 na = "%s_%s_%s" % (a["road"], sa, "a0" if a["end"] == "start" else "a1"); nb = "%s_%s_%s" % (b["road"], sb, "a0" if b["end"] == "start" else "a1")
                 if na in ped.nodes and nb in ped.nodes:
-                    ped.edge(na, nb, "corner", width=min(models[a["road"]].sw[sa], models[b["road"]].sw[sb]) if a["road"] in models and b["road"] in models else None, junction=o.name)
+                    cp = next((c["points"] for c in meta.get("corner_paths", []) if c["a"] == i and c["b"] == (i + 1) % n), None)
+                    pts = [ped.nodes[na]["pos"]] + cp + [ped.nodes[nb]["pos"]] if cp else None
+                    ped.edge(na, nb, "corner", pts=pts, width=min(models[a["road"]].sw[sa], models[b["road"]].sw[sb]) if a["road"] in models and b["road"] in models else None, junction=o.name)
         elif typ == "roundabout":
             at = Vector(meta["at"])
             arms = []
@@ -271,6 +273,7 @@ def _build(roads_col, rep):
             pts = []
             a = m.A0; step = 3.0
             while True:
+                wa = m.w_at(a); lat = (wa["bike0_" + s] + wa["bike1_" + s]) / 2          # follows the lane taper
                 p, t, r = m.frame(a); q = p + r * sgn * lat; q.z = surface_z(m.road, a, sgn * lat); pts.append(list(q))
                 if a >= m.A1: break
                 a = min(m.A1, a + step)

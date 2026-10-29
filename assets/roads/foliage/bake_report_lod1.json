@@ -1,0 +1,82 @@
+{
+ "lod1": {
+  "plane_tree": {
+   "islands": 2300,
+   "kept": 918,
+   "tris": 2474,
+   "tris_lod0": 6733
+  },
+  "maple_a": {
+   "islands": 1900,
+   "kept": 736,
+   "tris": 2112,
+   "tris_lod0": 5934
+  },
+  "maple_b": {
+   "islands": 1900,
+   "kept": 805,
+   "tris": 2250,
+   "tris_lod0": 5934
+  },
+  "maple_c": {
+   "islands": 1900,
+   "kept": 738,
+   "tris": 2116,
+   "tris_lod0": 5934
+  },
+  "walnut_spring": {
+   "islands": 3784,
+   "kept": 1471,
+   "tris": 2329,
+   "tris_lod0": 6487
+  },
+  "walnut_autumn_a": {
+   "islands": 3915,
+   "kept": 1519,
+   "tris": 2262,
+   "tris_lod0": 6310
+  },
+  "walnut_autumn_b": {
+   "islands": 3953,
+   "kept": 1589,
+   "tris": 2400,
+   "tris_lod0": 6545
+  },
+  "linden_a": {
+   "islands": 4586,
+   "kept": 1874,
+   "tris": 2196,
+   "tris_lod0": 5637
+  },
+  "linden_b": {
+   "islands": 4603,
+   "kept": 1815,
+   "tris": 2113,
+   "tris_lod0": 5596
+  },
+  "linden_c": {
+   "islands": 3323,
+   "kept": 1330,
+   "tris": 1550,
+   "tris_lod0": 4060
+  },
+  "cherry": {
+   "islands": 2200,
+   "kept": 892,
+   "tris": 2669,
+   "tris_lod0": 7350
+  },
+  "grove_a": {
+   "islands": 1781,
+   "kept": 672,
+   "tris": 1328,
+   "tris_lod0": 3958
+  },
+  "grove_b": {
+   "islands": 1489,
+   "kept": 604,
+   "tris": 703,
+   "tris_lod0": 1806
+  }
+ }
+}

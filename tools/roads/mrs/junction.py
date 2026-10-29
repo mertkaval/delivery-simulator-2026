@@ -82,6 +82,89 @@ def _approaches(at, roads, snap):
     return out
 
 
+def _smooth01(v):
+    v = max(0.0, min(1.0, v)); return v * v * (3 - 2 * v)
+
+
+def _road_depsgraph(road):
+    """Evaluated depsgraph of a scene that contains `road`. rebuild_all() rebuilds the junctions of every scene; with
+    another scene active the road was not in the depsgraph, the fit found no evaluated geometry and the junction
+    fell back to the straight-line trim (a 3 cm crack at the avenue end of the T-junction)."""
+    import bpy
+    from .nodes import depsgraph
+    scs = list(getattr(road, "users_scene", ()))
+    if not scs: return depsgraph()
+    sc = scs[0]
+    if sc == bpy.context.scene: return bpy.context.evaluated_depsgraph_get()
+    vl = sc.view_layers[0]; vl.update()
+    return vl.depsgraph
+
+
+def _end_section(road, start):
+    """(E, R): centre and unit right vector of the road's evaluated end cross-section, a least-squares fit
+    position = E + R * lat over the vertices of its first (start) / last station (|lat| <= 30 m)."""
+    dg = _road_depsgraph(road); ev = road.evaluated_get(dg); me = ev.to_mesh()
+    try:
+        if "along" not in me.attributes or "lat" not in me.attributes: return None
+        al = [d.value for d in me.attributes["along"].data]; lt = [d.value for d in me.attributes["lat"].data]
+        if not al: return None
+        tgt = min(al) if start else max(al); M = road.matrix_world
+        pts = [(lt[i], M @ me.vertices[i].co) for i in range(len(al)) if abs(al[i] - tgt) < 0.004 and abs(lt[i]) <= 30.0]
+    finally:
+        ev.to_mesh_clear()
+    n = len(pts)
+    if n < 3: return None
+    sl = sum(l for l, _ in pts); sll = sum(l * l for l, _ in pts); den = n * sll - sl * sl
+    if abs(den) < 1e-9: return None
+    sx = sum(p.x for _, p in pts); sy = sum(p.y for _, p in pts)
+    slx = sum(l * p.x for l, p in pts); sly = sum(l * p.y for l, p in pts)
+    rx = (n * slx - sl * sx) / den; ry = (n * sly - sl * sy) / den
+    E = Vector(((sx - rx * sl) / n, (sy - ry * sl) / n, 0.0)); R = Vector((rx, ry, 0.0))
+    if R.length < 0.5: return None
+    return E, R.normalized()
+
+
+def _actual_ends(approaches, at, setback, cw):
+    """After the trims are set: each approach's real evaluated end (centre, right-of-d vector looking out) and the
+    road's sidewalk ramp factor at its end (same dip as the road group), so the junction surface, corner paving and
+    kerbs meet the road edge to edge (no 1-4 cm gaps from arc-length vs straight-line trims, no ramp steps)."""
+    from .structures import centre_line, road_sample
+    for a in approaches:
+        road = a["road"]
+        a["end_fit"] = "section"
+        sec = _end_section(road, a["start"])          # first: the evaluated end cross-section (in the road's own scene)
+        cl = None
+        if sec is None:
+            try:
+                cl = centre_line(road)
+            except Exception:
+                cl = None
+            if not cl:
+                print("junction: no evaluated end for %s; straight-line trim used" % road.name)
+                a["end_fit"] = "trim"
+                a["E"] = at + a["d"] * a["trim"]; a["R"] = a["d"].cross(UP).normalized(); a["D"] = a["d"]; continue
+        if sec is not None:
+            # the road's real end cross-section (fitted to its first / last station's vertices): the chord tangent of
+            # the cached centre line left a 0.7 m wedge at the curved S-curve end
+            E, Rr = sec
+            a["E"] = E; a["R"] = Rr * (1.0 if a["start"] else -1.0)
+            t = UP.cross(Rr).normalized(); a["D"] = t * (1.0 if a["start"] else -1.0)
+        else:
+            a["end_fit"] = "centre_line"
+            print("junction: end section of %s not found; centre-line end used" % road.name)
+            st = cl[0] if a["start"] else cl[-1]
+            p, t, rr = road_sample(road, st[0])
+            a["E"] = Vector((p.x, p.y, 0.0))
+            a["R"] = Vector((rr.x, rr.y, 0.0)).normalized() * (1.0 if a["start"] else -1.0)
+            a["D"] = Vector((t.x, t.y, 0.0)).normalized() * (1.0 if a["start"] else -1.0)
+        if a.get("cross"):
+            centre = setback + cw * 0.5; hw = cw * 0.5
+            x = abs(0.0 - centre); v = 1.0 - max(0.0, min(1.0, (x - hw) / 1.0))
+            a["ramp_f"] = 1.0 - 0.96 * _smooth01(v)
+        else:
+            a["ramp_f"] = 1.0
+
+
 def _set_end(a, trim, clear, lock_z, ramp=False):
     mod = a["road"].modifiers["MRS_Road"]
     s = a["start"]
@@ -196,6 +279,7 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
         _set_end(a, a["trim"], clear, z, ramp=a["cross"])
         mod = a["road"].modifiers["MRS_Road"]
         mod_input_set(mod, "Ramp Offset", stop_setback); mod_input_set(mod, "Ramp Width", cw)
+    _actual_ends(approaches, at, stop_setback, cw)
     bm = bmesh.new()
     def V(p, zz): return bm.verts.new((p.x, p.y, zz))
     def quad(p0, p1, p2, p3, zz, mat):
@@ -204,7 +288,7 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
         except ValueError: return None
     poly = []
     for i, a in enumerate(approaches):
-        r = a["d"].cross(UP).normalized(); end = at + a["d"] * a["trim"]
+        r = a["R"]; end = a["E"]
         poly.append(end + r * a["half_r"]); poly.append(end - r * a["half_l"])
         poly.extend(corners[i]["rings"][0][0])
     verts = []; last = None
@@ -214,33 +298,49 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
     try:
         f = bm.faces.new(verts); f.material_index = 0
     except ValueError: pass
+    corner_paths = []
     for c in corners:
         a, b = c["a"], c["b"]
         if a["h"] <= 0 and b["h"] <= 0: continue
         h = max(a["h"], b["h"])
-        ea = at + a["d"] * a["trim"]; eb = at + b["d"] * b["trim"]
+        ea = a["E"]; eb = b["E"]; la_ = a["R"]; lb_ = b["R"]
         def ring_pts(k):
             offa = (a["half_l"], a["half_l"] + a["curb"], a["half_l"] + a["curb"] + a["swl"])[k]
             offb = (b["half_r"], b["half_r"] + b["curb"], b["half_r"] + b["curb"] + b["swr"])[k]
-            return [ea - c["la"] * offa] + list(c["rings"][k][0]) + [eb + c["lb"] * offb]
+            return [ea - la_ * offa] + list(c["rings"][k][0]) + [eb + lb_ * offb]
         r0, r1, r2 = ring_pts(0), ring_pts(1), ring_pts(2)
+        fa = a.get("ramp_f", 1.0); fb = b.get("ramp_f", 1.0)
+        def hz(t):
+            """corner height factor: the road's ramped sidewalk height at both ends, full height mid-corner"""
+            wa = _smooth01(t / 0.35); wb = _smooth01((1.0 - t) / 0.35)
+            return min(fa + (1.0 - fa) * wa, fb + (1.0 - fb) * wb)
         def loft(ra, rb, za, zb, mat):
             m = max(len(ra), len(rb))
             def samp(ring, k):
                 if len(ring) == 1: return ring[0]
                 t = k / (m - 1) * (len(ring) - 1); i0 = int(t); i1 = min(len(ring) - 1, i0 + 1); f_ = t - i0
                 return ring[i0] * (1 - f_) + ring[i1] * f_
+            def zv(zz, k): return zz(k / (m - 1)) if callable(zz) else zz
             for k in range(m - 1):
                 p0, p1, p2, p3 = samp(ra, k), samp(ra, k + 1), samp(rb, k + 1), samp(rb, k)
                 try:
-                    ff = bm.faces.new((V(p0, za), V(p1, za), V(p2, zb), V(p3, zb))); ff.material_index = mat
+                    ff = bm.faces.new((V(p0, zv(za, k)), V(p1, zv(za, k + 1)), V(p2, zv(zb, k + 1)), V(p3, zv(zb, k)))); ff.material_index = mat
                 except ValueError: pass
-        loft(r0, r0, z, z + h, 2); loft(r0, r1, z + h, z + h, 2)
+        top = lambda t: z + h * hz(t)
+        # the walking line round the corner (middle of the paving band), for the pedestrian route graph
+        mm = max(len(r1), len(r2))
+        def _sp(ring, k):
+            if len(ring) == 1: return ring[0]
+            tt = k / (mm - 1) * (len(ring) - 1); i0 = int(tt); i1 = min(len(ring) - 1, i0 + 1); f_ = tt - i0
+            return ring[i0] * (1 - f_) + ring[i1] * f_
+        corner_paths.append({"a": approaches.index(a), "b": approaches.index(b),
+                             "points": [[round(c, 3) for c in ((_sp(r1, k) + _sp(r2, k)) * 0.5).to_2d()] + [round(top(k / (mm - 1)), 3)] for k in range(mm)]})
+        loft(r0, r0, z, top, 2); loft(r0, r1, top, top, 2)
         if a["swl"] > 0 or b["swr"] > 0:
-            loft(r1, r2, z + h, z + h, 3); loft(r2, r2, z + h, z, 2)
+            loft(r1, r2, top, top, 3); loft(r2, r2, top, z, 2)
     crossings_meta = []
     for ai, a in enumerate(approaches):
-        r = a["d"].cross(UP).normalized(); end = at + a["d"] * a["trim"]
+        r = a["R"]; end = a["E"]
         med = a["median"] * 0.5
         y0 = stop_setback; y1 = y0 + cw
         in_r = -1.0 if a["rht"] else 1.0            # incoming traffic is on the junction's left (looking out) under RHT
@@ -254,8 +354,8 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
             return crown_h * max(0.0, 1.0 - (abs(x) / max(half, 0.01)) ** 2) * f
         def stripe(x0, x1, ya, yb, mat=1, lift=Z_PAINT):
             try:
-                ff = bm.faces.new((V(end + a["d"] * ya + r * x0, z + lift + zc(x0, ya)), V(end + a["d"] * ya + r * x1, z + lift + zc(x1, ya)),
-                                   V(end + a["d"] * yb + r * x1, z + lift + zc(x1, yb)), V(end + a["d"] * yb + r * x0, z + lift + zc(x0, yb)))); ff.material_index = mat
+                ff = bm.faces.new((V(end + a["D"] * ya + r * x0, z + lift + zc(x0, ya)), V(end + a["D"] * ya + r * x1, z + lift + zc(x1, ya)),
+                                   V(end + a["D"] * yb + r * x1, z + lift + zc(x1, yb)), V(end + a["D"] * yb + r * x0, z + lift + zc(x0, yb)))); ff.material_index = mat
             except ValueError: pass
         if a["cross"]:
             has_refuge = refuge and med >= 0.85
@@ -268,10 +368,10 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
                 else:
                     stripe(x_lo, x_hi, y0, y0 + 0.2); stripe(x_lo, x_hi, y1 - 0.2, y1)
             crossings_meta.append({"id": "%s_X%d" % (name, ai), "road": a["road"].name, "end": "start" if a["start"] else "end",
-                                   "from": list(end + a["d"] * (y0 + cw / 2) - r * (a["half_l"] + a["curb"])), "to": list(end + a["d"] * (y0 + cw / 2) + r * (a["half_r"] + a["curb"])),
+                                   "from": list(end + a["D"] * (y0 + cw / 2) - r * (a["half_l"] + a["curb"])), "to": list(end + a["D"] * (y0 + cw / 2) + r * (a["half_r"] + a["curb"])),
                                    "style": crossing, "refuge": has_refuge})
             if has_refuge:
-                quad(end + a["d"] * (y0 - 0.3) - r * med, end + a["d"] * (y0 - 0.3) + r * med, end + a["d"] * (y1 + 0.3) + r * med, end + a["d"] * (y1 + 0.3) - r * med, z + 0.02, 5)
+                quad(end + a["D"] * (y0 - 0.3) - r * med, end + a["D"] * (y0 - 0.3) + r * med, end + a["D"] * (y1 + 0.3) + r * med, end + a["D"] * (y1 + 0.3) - r * med, z + 0.02, 5)
             if stop_lines and a["lanes_in"] > 0:
                 xa, xb = sorted((in_r * (med + 0.05), in_r * half_in))
                 stripe(xa, xb, y1 + 0.4, y1 + 0.8)
@@ -288,11 +388,13 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
                 while yy + 0.4 <= ymax:
                     stripe(x0 - 0.1, x0 + 0.3, yy, yy + 0.4); stripe(x1 - 0.3, x1 + 0.1, yy, yy + 0.4)
                     yy += 0.8
-        if med > 0.05:
-            nose_y = (y1 + 0.3) if (a["cross"] and refuge and med >= 0.9) else 0.0
+        if med > 0.05 and not (a["cross"] and refuge and med >= 0.85):
+            # (with a refuge crossing the road's own median drops flush through the crossing - see road.py MHa -
+            #  so no raised nose is placed there: it used to reach 0.6 m into the crossing as a 0.15 m lip)
+            nose_y = 0.0
             mh = max(0.02, a["h"] if a["h"] > 0 else 0.15)
-            base = end + a["d"] * nose_y
-            ring = [base + r * (med * math.cos(math.pi * k / 8)) - a["d"] * (med * math.sin(math.pi * k / 8)) for k in range(9)]
+            base = end + a["D"] * nose_y
+            ring = [base + r * (med * math.cos(math.pi * k / 8)) - a["D"] * (med * math.sin(math.pi * k / 8)) for k in range(9)]
             try:
                 ff = bm.faces.new([V(q, z + mh) for q in ring]); ff.material_index = 2
             except ValueError: pass
@@ -304,7 +406,7 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
                 quad(end + r * med, end - r * med, base - r * med, base + r * med, z + 0.02, 5)
     meta = {"at": list(at), "roads": [a["road"].name for a in approaches], "crosswalks": crosswalks, "stop_lines": stop_lines, "corner_radius": corner_radius,
             "traffic_lights": traffic_lights, "control": control, "main_roads": sorted(main_roads), "terrain": terrain.name if terrain else "", "z": z, "type": "junction",
-            "crossing": crossing, "stop_setback": stop_setback, "refuge": refuge, "crossings": crossings_meta,
+            "crossing": crossing, "stop_setback": stop_setback, "refuge": refuge, "crossings": crossings_meta, "corner_paths": corner_paths,
             "approaches": [{"road": a["road"].name, "end": "start" if a["start"] else "end", "heading": [a["d"].x, a["d"].y], "trim": a["trim"],
                             "lanes_in": a["lanes_in"], "lanes_out": a["lanes_out"],
                             "half_l": a["half_l"], "half_r": a["half_r"], "main": a["road"].name in main_roads} for a in approaches]}

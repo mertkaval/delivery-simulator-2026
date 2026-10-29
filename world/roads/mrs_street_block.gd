@@ -12,11 +12,13 @@ extends Node3D
 ## Records are Blender Z-up; Godot (x, y, z) = (x, z, -y).
 
 const ROAD_SHADER := preload("res://world/roads/mrs_road.gdshader")
+const GROUND_SHADER := preload("res://world/roads/mrs_ground.gdshader")
 const StreetLights := preload("res://world/roads/mrs_street_lights.gd")
 const LensState := {"red": ["Red", "PedRed", "BikeRed"], "amber": ["Amber", "BikeAmber"], "green": ["Green", "PedGreen", "BikeGreen"]}
 
 var model: Dictionary = {}
-var landscape: CityLandscape
+var foliage: MrsFoliage
+var landscape: CityLandscape       ## v4 planting (plant_v4), kept for before / after comparisons
 var street_lights: StreetLights
 var collision: StaticBody3D
 var signals: Dictionary = {}        ## id -> {"node": Node3D, "lenses": {"Red": [mats], ...}, "phase": int, "junction": String}
@@ -51,6 +53,9 @@ func build(dir: String, base: String, opts: Dictionary = {}) -> Dictionary:
 		main.name = "Roads"
 		add_child(main)
 		counts["road_shader_surfaces"] = road_materials(main)
+		counts["ground"] = ground_material(main, dir)
+		counts["kit_surfaces"] = kit_materials(main)
+	counts["destinations"] = add_destinations()
 	if bool(opts.get("collision", true)):
 		var col := load_glb(dir.path_join(base + "_collision.glb"))
 		if col:
@@ -60,13 +65,14 @@ func build(dir: String, base: String, opts: Dictionary = {}) -> Dictionary:
 	if props:
 		props.name = "Props"
 		add_child(props)
+		counts["glass_surfaces"] = glass_materials(props) + (glass_materials(main) if main else 0)
 	var sig := load_glb(dir.path_join(base + "_signals.glb"))
 	if sig:
 		sig.name = "Signals"
 		add_child(sig)
 		counts["signals"] = setup_signals(sig)
 	if bool(opts.get("trees", true)):
-		counts.merge(plant(), true)
+		counts.merge(plant_v4() if str(opts.get("foliage", "v5")) == "v4" else plant(), true)
 	if bool(opts.get("lights", true)):
 		street_lights = StreetLights.new()
 		street_lights.name = "StreetLights"
@@ -88,6 +94,8 @@ func road_materials(root: Node) -> int:
 			var src := mi.mesh.surface_get_material(s) as BaseMaterial3D
 			if src != null:
 				src.vertex_color_use_as_albedo = false      # COLOR_0 carries the road masks, not a colour
+				# anisotropic: at grazing angles the paving joints mipped down to dark dots where they cross
+				src.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 			if src == null or not src.resource_name.begins_with("MRS_Asphalt"):
 				continue
 			var m := ShaderMaterial.new()
@@ -104,6 +112,102 @@ func road_materials(root: Node) -> int:
 			m.set_shader_parameter("roughness_base", src.roughness)
 			mi.set_surface_override_material(s, m)
 			n += 1
+	return n
+
+## Glazing (bus shelter panes, lantern panes, footbridge glass): alpha-blended panes of one mesh are not sorted
+## against each other, so a pane seen through another one flickered in and out with the view. A depth pre-pass
+## (DEPTH_DRAW_ALWAYS) makes the nearest pane win consistently; both faces stay visible (closed 12 mm boxes).
+func glass_materials(root: Node) -> int:
+	var n := 0
+	var seen := {}
+	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		for s in mi.mesh.get_surface_count():
+			var m := mi.mesh.surface_get_material(s) as BaseMaterial3D
+			if m == null or seen.has(m) or m.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED:
+				continue
+			if not (m.resource_name.contains("Glass") or m.resource_name.contains("Lens")):
+				continue
+			seen[m] = true
+			m.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_ALWAYS
+			n += 1
+	return n
+
+## City-kit buildings (frontage.py): Kit* surfaces get the game's own materials (CityKit.material: world
+## triplanar PBR sets, the downtown window shader for KitGlass). The GLB carries flat "<Kit>_Engine" stand-ins.
+func kit_materials(root: Node) -> int:
+	var n := 0
+	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		for s in mi.mesh.get_surface_count():
+			var src := mi.mesh.surface_get_material(s)
+			if src == null or not src.resource_name.begins_with("Kit"):
+				continue
+			mi.set_surface_override_material(s, CityKit.material(src.resource_name.trim_suffix("_Engine")))
+			n += 1
+	return n
+
+## Delivery destinations (shop entrances): Marker3D at the door, facing the street, in group
+## "mrs_destinations" with the address / name / service access as metadata.
+func add_destinations() -> int:
+	var recs: Array = model.get("destinations", []) as Array
+	if recs.is_empty():
+		return 0
+	var holder := Node3D.new()
+	holder.name = "Destinations"
+	add_child(holder)
+	for r: Variant in recs:
+		var d: Dictionary = r as Dictionary
+		var mk := Marker3D.new()
+		mk.name = str(d.get("id", "Destination"))
+		var door := g(d.get("door", [0, 0, 0]) as Array)
+		var face := g(d.get("facing", [0, -1, 0]) as Array)
+		mk.position = door
+		if face.length() > 0.01:
+			mk.basis = Basis.looking_at(face.normalized(), Vector3.UP)
+		for k: String in ["name", "address", "road", "kind"]:
+			mk.set_meta(k, d.get(k, ""))
+		mk.set_meta("entrance", g(d.get("entrance", [0, 0, 0]) as Array))
+		var svc: Dictionary = d.get("service", {}) as Dictionary
+		if not svc.is_empty():
+			mk.set_meta("service_driveway", g(svc.get("driveway", [0, 0, 0]) as Array))
+			mk.set_meta("service_yard", g(svc.get("yard", [0, 0, 0]) as Array))
+		mk.add_to_group("mrs_destinations")
+		holder.add_child(mk)
+	return recs.size()
+
+static func texture_file(path: String, srgb: bool = true) -> Texture2D:
+	var img := Image.load_from_file(path)
+	if img == null:
+		push_warning("MrsStreetBlock: missing texture " + path)
+		return null
+	img.generate_mipmaps()
+	return ImageTexture.create_from_image(img)
+
+## The landscape ground (ground.py): block mask + grass / soil / worn tiles in mrs_ground.gdshader.
+func ground_material(root: Node, dir: String) -> int:
+	var rec: Dictionary = model.get("ground", {}) as Dictionary
+	if rec.is_empty():
+		return 0
+	var m := ShaderMaterial.new()
+	m.shader = GROUND_SHADER
+	var mask_img := Image.load_from_file(dir.path_join(str(rec["mask"])))
+	if mask_img != null:
+		m.set_shader_parameter("mask_tex", ImageTexture.create_from_image(mask_img))
+	var tiles: Dictionary = rec["tiles"] as Dictionary
+	for pair: Array in [["GroundGrass", "grass"], ["GroundSoil", "soil"], ["GroundWorn", "worn"]]:
+		var maps: Dictionary = tiles.get(pair[0], {}) as Dictionary
+		for k: String in ["albedo", "rough", "normal"]:
+			var key := "roughness" if k == "rough" else k
+			if maps.has(key):
+				m.set_shader_parameter("%s_%s" % [pair[1], k], texture_file(dir.path_join(str(maps[key]))))
+	m.set_shader_parameter("tile_scale", 1.0 / float(rec.get("tile_size", 4.0)))
+	var n := 0
+	for node: Node in root.find_children(str(rec["name"]) + "*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		for s in mi.mesh.get_surface_count():
+			mi.set_surface_override_material(s, m)
+		n += 1
 	return n
 
 func make_collision(root: Node) -> int:
@@ -209,8 +313,17 @@ func _process(delta: float) -> void:
 			if int(sd["phase"]) == phase_index % maxi(phases.size(), 1):
 				set_signal(id, "amber")
 
-## Trees and plants from the street model through the game's landscape kit (same meshes as Blender).
-func plant() -> Dictionary:
+## Trees and plants: MrsFoliage (v5, world/roads/mrs_foliage.gd): the game's landscape-kit species with Blender-matched
+## leaf shading, MRS LOD1 meshes and hemi-octahedral impostors on shared LOD grids (no gaps / pops), plant
+## MultiMeshes and trunk capsule colliders. `opts` passes through (lod bands, shadows, force a level ...).
+func plant(opts: Dictionary = {}) -> Dictionary:
+	foliage = MrsFoliage.new()
+	foliage.name = "Foliage"
+	add_child(foliage)
+	return foliage.build(model, opts)
+
+## v4 planting: trees and plants through the game's CityLandscape kit directly (kit LOD1 + kit impostors).
+func plant_v4() -> Dictionary:
 	CityLandscape.load_assets()
 	landscape = CityLandscape.new()
 	add_child(landscape)

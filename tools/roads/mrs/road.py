@@ -136,9 +136,11 @@ INPUTS = [
         ("Ramp End", "NodeSocketBool", False, None, None, "Curb ramp + tactile paving at the end crossing"),
         ("Ramp Offset", "NodeSocketFloat", 0.6, 0.0, 10.0, "Crossing starts this far from the trimmed end (m)"),
         ("Ramp Width", "NodeSocketFloat", 2.5, 1.0, 6.0, "Crossing width along the road (m)"),
+        ("Driveways", "NodeSocketObject", None, None, None, "Vehicle accesses: mesh points (station, +/-100 for right / left, 0) with a 'width' attribute "
+         "(written by frontage.sync_driveways from MRS_Driveway_* anchors): dropped kerb, concrete apron across the sidewalk"),
     ]),
 ]
-KIND = dict(asphalt=0, marking=1, concrete=2, structure=3, embankment=4, bike=5, paving=6, tactile=7, crossing=8, bus=9)
+KIND = dict(asphalt=0, marking=1, concrete=2, structure=3, embankment=4, bike=5, paving=6, tactile=7, crossing=8, bus=9, apron=11)   # 10 = footbridge (movements)
 BARRIERS = ["None", "Guardrail", "Jersey", "Parapet", "Railing", "Hedge", "Fence"]
 SIDES = ["None", "Left", "Right", "Both", "Alternate"]
 BIKE = ["None", "Painted", "Buffered", "Protected", "Two-Way"]
@@ -347,7 +349,13 @@ def build_road_group():
     for attempt in ("Z Up", "Z_UP"):
         try: normal_mode.inputs["Mode"].default_value = attempt; break
         except Exception: continue
-    tilt = tb.n("GeometryNodeSetCurveTilt"); tb.inp(tilt, "Curve", normal_mode.outputs[0]); tb.inp(tilt, "Tilt", blur_b.outputs[0])
+    # banking fades out over the lock length toward height-locked (junction) ends, like the crown: the junction
+    # surfaces are flat, so a banked lane would meet them with a step
+    sp_t = tb.n("GeometryNodeSplineParameter"); sl_t = tb.n("GeometryNodeSplineLength")
+    fs_t = smooth01(tb.map_range(sp_t.outputs["Length"], 0.0, I("Lock Length"), 0.0, 1.0))
+    fe_t = smooth01(tb.map_range(tb.math("SUBTRACT", sl_t.outputs["Length"], sp_t.outputs["Length"]), 0.0, I("Lock Length"), 0.0, 1.0))
+    fade_t = tb.math("MULTIPLY", tb.switch(I("Lock Start"), 1.0, fs_t, "FLOAT"), tb.switch(I("Lock End"), 1.0, fe_t, "FLOAT"))
+    tilt = tb.n("GeometryNodeSetCurveTilt"); tb.inp(tilt, "Curve", normal_mode.outputs[0]); tb.inp(tilt, "Tilt", tb.math("MULTIPLY", blur_b.outputs[0], fade_t))
     sp = tb.n("GeometryNodeSplineParameter")
     tang2 = tb.n("GeometryNodeInputTangent").outputs[0]
     side_v = tb.vmath("NORMALIZE", tb.vmath("CROSS_PRODUCT", tang2, up))
@@ -399,6 +407,33 @@ def build_road_group():
     def tactile_sel(along, lat):
         return tb.compare("LESS_THAN", ramp_factor(along), 0.5), I("Tactile Material"), "tactile"
 
+    # vehicle accesses (frontage.sync_driveways): nearest driveway point on this side -> dropped kerb factor
+    dw_info = tb.n("GeometryNodeObjectInfo", transform_space="ORIGINAL"); tb.inp(dw_info, "Object", I("Driveways"))
+    dw_geo = dw_info.outputs["Geometry"]
+    def drive_dip(along, sgn):
+        """0..1 on side sgn at station `along`: 1 across a driveway's width, smooth 1 m flanks (like the crossing ramps)."""
+        sn = tb.n("GeometryNodeSampleNearest", domain="POINT"); tb.inp(sn, "Geometry", dw_geo); tb.inp(sn, "Sample Position", tb.combine(along, 100.0 * sgn, 0.0))
+        sp_ = tb.n("GeometryNodeSampleIndex", data_type="FLOAT_VECTOR", domain="POINT"); tb.inp(sp_, "Geometry", dw_geo)
+        tb.inp(sp_, "Value", tb.n("GeometryNodeInputPosition").outputs[0]); tb.inp(sp_, "Index", sn.outputs["Index"])
+        sw_ = tb.n("GeometryNodeSampleIndex", data_type="FLOAT", domain="POINT"); tb.inp(sw_, "Geometry", dw_geo)
+        tb.inp(sw_, "Value", tb.named("width")); tb.inp(sw_, "Index", sn.outputs["Index"])
+        px, py, _pz = tb.separate(sp_.outputs[0])
+        # the sweeps have stations every `step` m: the flat part is widened by half a step and the flanks are at least
+        # a step long, so at least the requested width is fully dropped whatever the station grid (else the low point
+        # drifted ~1.5 m off the apron at 2.5 m stations)
+        hw = tb.math("ADD", tb.math("MULTIPLY", sw_.outputs[0], 0.5), tb.math("MULTIPLY", step, 0.5))
+        f = smooth01(tb.map_range(tb.math("ABSOLUTE", tb.math("SUBTRACT", along, px)), hw, tb.math("ADD", hw, tb.math("MAXIMUM", step, 1.0)), 1.0, 0.0))
+        valid = tb.boolean("AND", tb.compare("GREATER_THAN", tb.math("MULTIPLY", py, sgn), 0.0), tb.compare("GREATER_THAN", sw_.outputs[0], 0.4))
+        return tb.switch(valid, 0.0, f, "FLOAT")
+    def side_factor(sgn):
+        """Sidewalk / kerb height factor on one side: crossing ramps (both sides) and this side's driveways."""
+        return lambda a: tb.math("MINIMUM", ramp_factor(a), tb.math("SUBTRACT", 1.0, tb.math("MULTIPLY", drive_dip(a, sgn), 0.96)))
+    def apron(geo, sgn):
+        """Fully dropped faces over a driveway become the concrete apron (kind 11: walked and driven)."""
+        sel = tb.compare("GREATER_THAN", drive_dip(tb.named("along"), sgn), 0.98)
+        sm = tb.n("GeometryNodeSetMaterial"); tb.inp(sm, "Geometry", geo); tb.inp(sm, "Selection", sel); tb.inp(sm, "Material", I("Concrete Material"))
+        return tb.store(sm.outputs[0], "kind", tb.switch(sel, tb.named("kind"), float(KIND["apron"]), "FLOAT"), "FLOAT", "FACE")
+
     surf = []
     surf.append(sweep(lambda a, w: (neg(w["half_l"]), w["half_r"], 0.0, 0.0), I("Asphalt Material"), "asphalt", "asphalt", samples=11, zf=camber))
     tb.frame_("Cycleway + bus lanes: coloured surfacing on the asphalt")
@@ -409,26 +444,37 @@ def build_road_group():
         geo = sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", tb.math("SUBTRACT", w["carr_" + s], lw), sgn), tb.math("MULTIPLY", w["carr_" + s], sgn), 0.003, 0.003), I("Bus Lane Material"), "bus", "bus lane " + s, samples=3, zf=camber)
         surf.append(tb.switch(tb.boolean("AND", on, tb.compare("GREATER_THAN", W(ZERO)["lanes_" + s], 0.5)), tb.empty(), geo, "GEOMETRY"))
     tb.frame_("Sidewalk_Curb + Pedestrian_Ramps: curb face / bevel / top, planting strip, paving, edge; heights scaled by the ramps")
-    rf = ramp_factor
     for s, sgn, on in (("r", 1.0, I("Sidewalk Right")), ("l", -1.0, I("Sidewalk Left"))):
-        surf.append(sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["half_" + s], sgn), tb.math("MULTIPLY", w["half_" + s], sgn), 0.0, tb.math("SUBTRACT", H, bev)), I("Concrete Material"), "concrete", "curb face " + s, orient="in", zscale_fn=rf))
-        surf.append(sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["half_" + s], sgn), tb.math("MULTIPLY", tb.math("ADD", w["half_" + s], bev), sgn), tb.math("SUBTRACT", H, bev), H), I("Concrete Material"), "concrete", "curb bevel " + s, zscale_fn=rf))
-        surf.append(sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", tb.math("ADD", w["half_" + s], bev), sgn), tb.math("MULTIPLY", w["curb_" + s], sgn), H, H), I("Concrete Material"), "concrete", "curb top " + s, zscale_fn=rf))
-        plant = sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["curb_" + s], sgn), tb.math("MULTIPLY", w["plant_" + s], sgn), H, H), I("Embankment Material"), "embankment", "planting strip " + s, zscale_fn=rf)
-        slab = sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["plant_" + s], sgn), tb.math("MULTIPLY", w["sw_" + s], sgn), H, H), I("Paving Material"), "paving", "sidewalk " + s, samples=3, zscale_fn=rf, mat_sel=tactile_sel)
+        rf = side_factor(sgn)
+        surf.append(apron(sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["half_" + s], sgn), tb.math("MULTIPLY", w["half_" + s], sgn), 0.0, tb.math("SUBTRACT", H, bev)), I("Concrete Material"), "concrete", "curb face " + s, orient="in", zscale_fn=rf), sgn))
+        surf.append(apron(sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["half_" + s], sgn), tb.math("MULTIPLY", tb.math("ADD", w["half_" + s], bev), sgn), tb.math("SUBTRACT", H, bev), H), I("Concrete Material"), "concrete", "curb bevel " + s, zscale_fn=rf), sgn))
+        surf.append(apron(sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", tb.math("ADD", w["half_" + s], bev), sgn), tb.math("MULTIPLY", w["curb_" + s], sgn), H, H), I("Concrete Material"), "concrete", "curb top " + s, zscale_fn=rf), sgn))
+        # at a crossing the planting strip becomes tactile paving at the kerb (no grass between the ramp and the crossing);
+        # without a strip the tactile surface is the sidewalk slab itself
+        plant = apron(sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["curb_" + s], sgn), tb.math("MULTIPLY", w["plant_" + s], sgn), H, H), I("Embankment Material"), "embankment", "planting strip " + s,
+                      zscale_fn=rf, mat_sel=tactile_sel), sgn)
+        pstrip_s = I("Planting Strip Right") if s == "r" else I("Planting Strip Left")
+        def slab_sel(along, lat, pstrip_s=pstrip_s):
+            sel, m_, k_ = tactile_sel(along, lat)
+            return tb.boolean("AND", sel, tb.compare("LESS_THAN", pstrip_s, 0.05)), m_, k_
+        slab = apron(sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["plant_" + s], sgn), tb.math("MULTIPLY", w["sw_" + s], sgn), H, H), I("Paving Material"), "paving", "sidewalk " + s, samples=3, zscale_fn=rf, mat_sel=slab_sel), sgn)
         edge = sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["sw_" + s], sgn), tb.math("MULTIPLY", w["sw_" + s], sgn), H, 0.0), I("Concrete Material"), "concrete", "sidewalk edge " + s, orient="out", zscale_fn=rf)
         pstrip = I("Planting Strip Right") if s == "r" else I("Planting Strip Left")
         surf.append(tb.switch(on, tb.empty(), tb.join(tb.switch(tb.compare("GREATER_THAN", pstrip, 0.05), tb.empty(), plant, "GEOMETRY"), slab, edge), "GEOMETRY"))
         surf.append(tb.switch(on, sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["curb_" + s], sgn), tb.math("MULTIPLY", w["curb_" + s], sgn), H, 0.0), I("Concrete Material"), "concrete", "curb back " + s, orient="out", zscale_fn=rf), tb.empty(), "GEOMETRY"))
-        sep = tb.join(sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["buf0_" + s], sgn), tb.math("MULTIPLY", w["buf0_" + s], sgn), 0.0, 0.1), I("Concrete Material"), "concrete", "separator face " + s, orient="in"),
-                      sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["buf0_" + s], sgn), tb.math("MULTIPLY", w["bike0_" + s], sgn), 0.1, 0.1), I("Concrete Material"), "concrete", "separator top " + s),
-                      sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["bike0_" + s], sgn), tb.math("MULTIPLY", w["bike0_" + s], sgn), 0.1, 0.0), I("Concrete Material"), "concrete", "separator back " + s, orient="out"))
+        sep = tb.join(sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["buf0_" + s], sgn), tb.math("MULTIPLY", w["buf0_" + s], sgn), 0.0, 0.1), I("Concrete Material"), "concrete", "separator face " + s, orient="in", zscale_fn=rf),
+                      sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["buf0_" + s], sgn), tb.math("MULTIPLY", w["bike0_" + s], sgn), 0.1, 0.1), I("Concrete Material"), "concrete", "separator top " + s, zscale_fn=rf),
+                      sweep(lambda a, w, s=s, sgn=sgn: (tb.math("MULTIPLY", w["bike0_" + s], sgn), tb.math("MULTIPLY", w["bike0_" + s], sgn), 0.1, 0.0), I("Concrete Material"), "concrete", "separator back " + s, orient="out", zscale_fn=rf))
         prot = br_prot if s == "r" else bl_prot
         surf.append(tb.switch(tb.boolean("AND", prot, tb.compare("EQUAL", sep_kind, 0, "INT")), tb.empty(), sep, "GEOMETRY"))
-    MH = I("Median Height")
-    med = tb.join(sweep(lambda a, w: (neg(med_half), neg(med_half), w["crown"], tb.math("ADD", w["crown"], MH)), I("Concrete Material"), "concrete", "median face L", orient="in"),
-                  sweep(lambda a, w: (neg(med_half), med_half, tb.math("ADD", w["crown"], MH), tb.math("ADD", w["crown"], MH)), I("Concrete Material"), "concrete", "median top"),
-                  sweep(lambda a, w: (med_half, med_half, tb.math("ADD", w["crown"], MH), w["crown"]), I("Concrete Material"), "concrete", "median face R", orient="in"))
+    # the median drops flush where a crossing passes (refuge cut-through at road level, like the sidewalk ramps)
+    def MHa(a): return tb.math("MULTIPLY", I("Median Height"), ramp_factor(a))
+    # the median follows the asphalt's crown, which flattens toward height-locked ends (it used to keep the full crown:
+    # a 0.3 m lip next to the flattened asphalt at junctions and refuges)
+    def CRa(a, w): return tb.math("MULTIPLY", w["crown"], crown_factor(a))
+    med = tb.join(sweep(lambda a, w: (neg(med_half), neg(med_half), CRa(a, w), tb.math("ADD", CRa(a, w), MHa(a))), I("Concrete Material"), "concrete", "median face L", orient="in"),
+                  sweep(lambda a, w: (neg(med_half), med_half, tb.math("ADD", CRa(a, w), MHa(a)), tb.math("ADD", CRa(a, w), MHa(a))), I("Concrete Material"), "concrete", "median top"),
+                  sweep(lambda a, w: (med_half, med_half, tb.math("ADD", CRa(a, w), MHa(a)), CRa(a, w)), I("Concrete Material"), "concrete", "median face R", orient="in"))
     has_median = tb.compare("GREATER_THAN", I("Median"), 0.05)
     surf.append(tb.switch(has_median, tb.empty(), med, "GEOMETRY"))
 
@@ -599,7 +645,9 @@ def build_road_group():
         io = tb.n("GeometryNodeInstanceOnPoints"); tb.inp(io, "Points", pts.outputs[0]); tb.inp(io, "Instance", mcoll.outputs[0]); tb.inp(io, "Pick Instance", True)
         tb.inp(io, "Instance Index", aidx); tb.inp(io, "Rotation", al.outputs[0])
         trim_here = I("Trim End") if at_end else I("Trim Start")
-        on = tb.boolean("AND", I("Lane Arrows"), tb.boolean("AND", tb.compare("GREATER_THAN", trim_here, 0.5), tb.compare("GREATER_THAN", L, tb.math("MULTIPLY", I("Arrow Distance"), 2.0))))
+        # single-lane approaches get no arrow (every movement is allowed there: mrs.movements lane-use rules)
+        on = tb.boolean("AND", tb.boolean("AND", I("Lane Arrows"), tb.compare("GREATER_THAN", n_l, 1.5)),
+                        tb.boolean("AND", tb.compare("GREATER_THAN", trim_here, 0.5), tb.compare("GREATER_THAN", L, tb.math("MULTIPLY", I("Arrow Distance"), 2.0))))
         inst_marks.append(tb.switch(on, tb.empty(), io.outputs[0], "GEOMETRY"))
     # merge arrows where a lane ends: right side traffic flows toward the end (RHT) -> arrow 8 m before the taper; left side after it
     for right_side in (True, False):

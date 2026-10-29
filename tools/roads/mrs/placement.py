@@ -180,6 +180,12 @@ class RoadModel:
         self.strip = {s: min(road_input(road, "Planting Strip Right" if s == "r" else "Planting Strip Left") or 0.0, max(0.0, (self.w0["sw" + s] if False else (self.w0["swr"] if s == "r" else self.w0["swl"])) - 1.0)) for s in ("l", "r")}
         self.sw = {"l": self.w0["swl"], "r": self.w0["swr"]}
 
+    def w_at(self, a):
+        """road_widths at station a (numeric fields interpolated through the lane taper like the road group)."""
+        if not self.trans: return self.w0
+        f = _smooth((a - self.t0) / self.tl)
+        return {k: (v + (self.w1[k] - v) * f) if isinstance(v, (int, float)) and not isinstance(v, bool) else (self.w1[k] if f > 0.5 else v) for k, v in self.w0.items()}
+
     def half(self, a, s):
         if not self.trans: return self.w0["half_" + s]
         f = _smooth((a - self.t0) / self.tl)
@@ -294,6 +300,7 @@ def _place_all(roads_col, roads, col, rng, seed, style, speed_limits, bus_stops)
     _reserve_signals(ctx, roads_col)
     _reserve_bridges(ctx)
     _reserve_anchors(ctx, roads_col)
+    _reserve_buildings(ctx)
     stops = list(bus_stops or []) + _bus_anchor_list(roads_col)
     for st in stops: _reserve_bus(ctx, st)
     # ---------------------------------------------------------------- 2. infrastructure
@@ -488,16 +495,47 @@ def _reserve_anchors(ctx, roads_col):
             q, t, n = m.point(a, s, 0.0)
             far = Vector((o.location.x, o.location.y, 0)); near = Vector((q.x, q.y, 0))
             d = far - near; L = d.length
-            wid = 2.4 if nm.startswith("MRS_Entrance") else 4.0
+            wid = 2.4 if nm.startswith("MRS_Entrance") else float(o.get("mrs_width", 4.0)) + 2.0    # driveway + its kerb-drop flanks
             occ.add_keep(Rect((far + near) / 2, d if L > 0.1 else t, max(L, 0.5) / 2 + 0.3, wid / 2), ("entrance " if wid < 3 else "driveway ") + nm, {"*"})
 
 
+def _reserve_buildings(ctx):
+    """Frontage buildings (objects with `mrs_building` JSON: world footprint) and their service yards
+    (`mrs_kind` drive) are keep-out areas for everything optional (landscape, trees, furniture)."""
+    occ = ctx["occ"]
+    for o in bpy.data.objects:
+        poly = None
+        if o.type == "MESH" and o.get("mrs_building"):
+            poly = [Vector((p[0], p[1], 0.0)) for p in json.loads(o["mrs_building"]).get("footprint", [])]
+        elif o.type == "MESH" and o.get("mrs_kind") == "drive":
+            M = o.matrix_world; vs = [M @ v.co for v in o.data.vertices]
+            if vs:
+                # oriented box of the slab: its first edge direction
+                e = (vs[1] - vs[0]); e.z = 0
+                d_ = e.normalized() if e.length > 1e-6 else Vector((1, 0, 0)); n_ = Vector((-d_.y, d_.x, 0))
+                us = [v.dot(d_) for v in vs]; ws = [v.dot(n_) for v in vs]
+                poly = [d_ * u + n_ * w_ for u, w_ in ((min(us), min(ws)), (max(us), min(ws)), (max(us), max(ws)), (min(us), max(ws)))]
+        if not poly or len(poly) < 4: continue
+        c = sum(poly, Vector()) / len(poly); a_ = poly[1] - poly[0]; b_ = poly[3] - poly[0]
+        occ.add_keep(Rect(c, a_ if a_.length > 1e-6 else Vector((1, 0, 0)), a_.length / 2 + 0.6, b_.length / 2 + 0.6), "building " + o.name, {"*"})
+        if o.get("mrs_building") and b_.length > 1e-6:
+            # active frontage: the 1.6 m in front of shop windows / doors stays free of cabinets, bins, planters and
+            # info boards (benches, lights, trees and racks keep their own rules); poly[0]-poly[1] is the facade
+            n_ = b_.normalized(); fc = (poly[0] + poly[1]) / 2 - n_ * 0.8
+            occ.add_keep(Rect(fc, a_, a_.length / 2, 0.8), "active frontage " + o.name, {"cabinet", "bin", "planter", "info_board", "hydrant", "cover"})
+        ctx["rep"].setdefault("buildings", []).append(o.name)
+
+
 def _project(m, pos):
-    best = None
-    for a, p in centre_line(m.road):
-        dd = (Vector((pos.x, pos.y)) - Vector((p.x, p.y))).length
-        if best is None or dd < best[0]: best = (dd, a)
-    return best[1]
+    """Station of the point on the road centre line nearest to pos (projected onto the centre-line segments,
+    not just the nearest sample: the samples are ~2.5 m apart)."""
+    cl = centre_line(m.road); P = Vector((pos.x, pos.y)); best = None
+    for (a0, p0), (a1, p1) in zip(cl, cl[1:]):
+        A = Vector((p0.x, p0.y)); Bv = Vector((p1.x, p1.y)); d = Bv - A; L2 = d.length_squared
+        f = 0.0 if L2 < 1e-12 else max(0.0, min(1.0, (P - A).dot(d) / L2))
+        dd = (A + d * f - P).length
+        if best is None or dd < best[0]: best = (dd, a0 + (a1 - a0) * f)
+    return best[1] if best else cl[0][0]
 
 
 def _bus_anchor_list(roads_col):
@@ -621,9 +659,12 @@ def _bus_stop(ctx, st):
         occ.add_keep(Rect(pc, tc, w / 2 + 2.0, (d_sh - d / 2) / 2 - 0.05), "walking corridor (%s %s) at the bus stop" % (m.name, s), {"tree", "bench", "rack", "planter", "cabinet", "light", "hydrant", "plant"})
         o = _put(ctx, m, s, a, d_sh, "bus_shelter", "shelter", "in", cat="bus", meta={"mrs_bus_stop": st["id"]})
         if o: placed.append(o)
-    pole_a = a + travel * (RULES["bus_boarding"] / 2 - 0.5)
-    o = _put(ctx, m, s, pole_a, 0.45, "bus_pole", "bus_pole", "traffic", cat="bus_pole", meta={"mrs_bus_stop": st["id"]})
-    if o: placed.append(o)
+    # the stop flag at the front of the boarding area; if a sign already stands there it steps back along the boarding area
+    o = None
+    for back in (0.5, 1.5, 2.5, 3.5):
+        pole_a = a + travel * (RULES["bus_boarding"] / 2 - back)
+        o = _put(ctx, m, s, pole_a, 0.45, "bus_pole", "bus_pole", "traffic", cat="bus_pole", meta={"mrs_bus_stop": st["id"]}, quiet=back != 3.5)
+        if o: placed.append(o); break
     if d_sh is not None:
         for ob in (_put(ctx, m, s, a - travel * (w / 2 + 1.0), d_sh, "bus_info", "info_board", "in", cat="bus", meta={"mrs_bus_stop": st["id"]}),
                    _put(ctx, m, s, a + travel * (w / 2 + 0.8), d_sh, "bin", "bin", "in", cat="bus", meta={"mrs_bus_stop": st["id"]})):
@@ -817,9 +858,32 @@ def _furniture(ctx, m):
                 for side_off in (w / 2 + 0.75, -(w / 2 + 0.75)):
                     if _put(ctx, m, s, a + side_off + (ok["mrs_along"] - a), dd, "bin", "bin_recycling" if rng.random() < 0.3 else "bin", "out", cat="bin", quiet=True, pad=True): break
             a += R["bench_spacing"]
+        # bike parking at destinations: a rack 5-13 m from every entrance anchor with mrs_bike_parking
+        # (first free spot either way along the street), generic racks keep 25 m from it
+        dest_racks = []
+        for eo in bpy.data.objects:
+            if eo.type != "EMPTY" or not eo.name.startswith("MRS_Entrance") or not eo.get("mrs_bike_parking"): continue
+            if eo.get("mrs_road") != m.name or eo.get("mrs_side", "r") != s: continue
+            a_e = _project(m, eo.location); ok = None
+            for sh in (5.0, -5.0, 7.0, -7.0, 9.0, -9.0, 11.0, -11.0, 13.0, -13.0):
+                if not (m.A0 + 2.0 < a_e + sh < m.A1 - 2.0): continue
+                for kind in ("rack", "rack1"):
+                    src = lib_object(kind); w, d, acc = footprint(kind, src)
+                    need = d + acc.get("front", 0) + acc.get("back", 0)
+                    f_ = m.frame(a_e + sh)[1] if depth + 0.35 < need else "out"
+                    ok = _put(ctx, m, s, a_e + sh, (fz[0] + fz[1]) / 2, "bike_rack", kind, f_, cat="rack", quiet=True, pad=True, access_no_walk=True, meta={"serves": eo.name})
+                    if ok: break
+                if ok: break
+            if ok:
+                dest_racks.append(a_e + sh)
+                ctx["rep"].setdefault("destination_racks", []).append({"entrance": eo.name, "rack": ok.name, "offset_m": sh})
+            else:
+                _skip(ctx, m, "bike_rack", a_e, "no rack spot 5-13 m from %s (furniture zone %.2f m)" % (eo.name, depth))
         # bike racks: access envelope out of the walking corridor (bikes stand in the furniture / strip zone)
         a = m.A0 + R["rack_spacing"] * (0.6 if s == "r" else 0.35)
         while a < m.A1 - 3.0:
+            if any(abs(a - x) < 25.0 for x in dest_racks):
+                a += R["rack_spacing"]; continue
             ok = None
             for kind in ("rack", "rack1"):
                 src = lib_object(kind); w, d, acc = footprint(kind, src)
@@ -1132,6 +1196,7 @@ def entrance_paths(roads_col, rep):
         m = models.get(o.get("mrs_road", ""))
         if m is None: continue
         s = o.get("mrs_side", "r"); a = _project(m, o.location); z = m.zones(s)
+        if o.get("mrs_on_sidewalk"): continue
         q, t, n = m.point(a, s, z["sw"] - 0.05)
         out.append(_path_mesh(col, "%s_path" % o.name, [q, o.location], 2.4, q.z, o.location.z - 0.03, bpy.data.materials.get(MRS + "Paving"), ped=False, ramp_len=0.01))
     return out

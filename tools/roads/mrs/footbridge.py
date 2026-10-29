@@ -370,7 +370,7 @@ def _build_approach(plan, F, chain, column, kind, res, end, sgn, d, v_line, z_to
                               "poly": [list(F.w(uu, vv, 0))[:2] for uu, vv in ((d * W / 2, v_line - sgn * W / 2), (d * (max_u + W / 2 + 1.0), v_line - sgn * W / 2),
                                                                                   (d * (max_u + W / 2 + 1.0), v_line + sgn * (res["depth"] - W / 2)), (d * W / 2, v_line + sgn * (res["depth"] - W / 2)))]})
     # pedestrian route edges (sidewalk -> foot -> head landing); deck edge added by the caller
-    joined = [list(map(lambda c: round(c, 3), q)) for q in centre]
+    joined = [list(map(lambda c: round(c, 3), q)) for q in [F.w(0, v_line, z_top)] + centre]
     plan["ped_edges"].append({"id": "%s_%s_%s" % (end, kind, "p" if d > 0 else "m"), "kind": kind, "end": end, "step_free": kind == "ramp",
                               "max_slope": round(cfg["ramp_max_slope"], 4) if kind == "ramp" else None, "width": W, "rise": round(z_top - z_ground, 3),
                               "length": round(sum((Vector(a) - Vector(b)).length for a, b in zip(joined, joined[1:])), 2),
@@ -487,7 +487,9 @@ def _lights(obj, plan, conf):
     for i, q in enumerate(pts):
         ld = bpy.data.lights.get(obj.name + "_LampData") or bpy.data.lights.new(obj.name + "_LampData", "POINT")
         # ~15 lx on the deck 1 m below / ~3 m away (mrs.lighting calibration: E = P / (4 pi d^2) x 683 lm/W)
-        ld.energy = 2.5; ld.shadow_soft_size = 0.15; ld.color = (1.0, 0.86, 0.68)
+        ld.energy = 2.5; ld.shadow_soft_size = 0.15; ld.color = (1.0, 1.0, 1.0)
+        try: ld.use_temperature = True; ld.temperature = 3000          # the same 3000 K the light record gives Godot
+        except AttributeError: ld.color = (1.0, 0.72, 0.45)
         try: ld.use_custom_distance = True; ld.cutoff_distance = 9.0
         except Exception: pass
         lo = bpy.data.objects.new("%s_Lamp%d" % (obj.name, i), ld)
@@ -532,11 +534,11 @@ def build_profiles():
     T_ = 0.22   # deck slab thickness (m)
     girder = [(-0.5, 0.0, 0.0, -0.08, 0), (-0.5, 0.0, 0.0, 0.0, 1), (0.5, 0.0, 0.0, 0.0, 1), (0.5, 0.0, 0.0, -0.08, 0)]
     # walking surface across (pmat 0), then down the right fascia, inner fascia, soffit, left fascia
-    girder = [(-0.5, 0.06, 0.0, 0.0, 0), (0.5, -0.06, 0.0, 0.0, 0), (0.5, 0.0, 0.0, -0.10, 1), (0.5, 0.0, 1.0, 0.0, 1), (0.5, -0.32, 1.0, 0.0, 1),
-              (0.5, -0.32, 0.0, T_, 1), (-0.5, 0.32, 0.0, T_, 1), (-0.5, 0.32, 1.0, 0.0, 1), (-0.5, 0.0, 1.0, 0.0, 1), (-0.5, 0.0, 0.0, -0.10, 1)]
-    box = [(-0.5, 0.06, 0.0, 0.0, 0), (0.5, -0.06, 0.0, 0.0, 0), (0.5, 0.0, 0.0, -0.10, 1), (0.5, 0.0, 0.0, T_, 1), (0.5, -0.45, 1.0, 0.0, 1),
-           (-0.5, 0.45, 1.0, 0.0, 1), (-0.5, 0.0, 0.0, T_, 1), (-0.5, 0.0, 0.0, -0.10, 1)]
-    truss = [(-0.5, 0.06, 0.0, 0.0, 0), (0.5, -0.06, 0.0, 0.0, 0), (0.5, 0.0, 0.0, -0.08, 1), (0.5, 0.0, 1.0, 0.0, 1), (-0.5, 0.0, 1.0, 0.0, 1), (-0.5, 0.0, 0.0, -0.08, 1)]
+    girder = [(-0.5, 0.0, 0.0, 0.0, 0), (0.5, 0.0, 0.0, 0.0, 0), (0.5, 0.0, 0.0, 0.02, 1), (0.5, 0.0, 1.0, 0.0, 1), (0.5, -0.32, 1.0, 0.0, 1),
+              (0.5, -0.32, 0.0, T_, 1), (-0.5, 0.32, 0.0, T_, 1), (-0.5, 0.32, 1.0, 0.0, 1), (-0.5, 0.0, 1.0, 0.0, 1), (-0.5, 0.0, 0.0, 0.02, 1)]
+    box = [(-0.5, 0.0, 0.0, 0.0, 0), (0.5, 0.0, 0.0, 0.0, 0), (0.5, 0.0, 0.0, 0.02, 1), (0.5, 0.0, 0.0, T_, 1), (0.5, -0.45, 1.0, 0.0, 1),
+           (-0.5, 0.45, 1.0, 0.0, 1), (-0.5, 0.0, 0.0, T_, 1), (-0.5, 0.0, 0.0, 0.02, 1)]
+    truss = [(-0.5, 0.0, 0.0, 0.0, 0), (0.5, 0.0, 0.0, 0.0, 0), (0.5, 0.0, 0.0, 0.02, 1), (0.5, 0.0, 1.0, 0.0, 1), (-0.5, 0.0, 1.0, 0.0, 1), (-0.5, 0.0, 0.0, 0.02, 1)]
     # approaches and stairs: slab with upstand edges (stair stringers rise 0.12 m above the nosing line)
     stair = [(-0.5, 0.06, 0.0, -0.0, 0), (0.5, -0.06, 0.0, 0.0, 0), (0.5, -0.06, 0.0, -0.12, 1), (0.5, 0.0, 0.0, -0.12, 1), (0.5, 0.0, 1.0, 0.0, 1),
              (-0.5, 0.0, 1.0, 0.0, 1), (-0.5, 0.0, 0.0, -0.12, 1), (-0.5, 0.06, 0.0, -0.12, 1)]
@@ -751,11 +753,18 @@ def build_footbridge_group():
 
 def _defaults(g):
     from .props import mat
-    vals = {"Deck Material": bpy.data.materials.get(MRS + "Paving") or mat(MRS + "FB_Deck", (0.42, 0.42, 0.40), 0.85),
-            "Structure Material": mat(MRS + "FB_Steel", (0.20, 0.26, 0.30), 0.45, 0.6),
-            "Concrete Material": bpy.data.materials.get(MRS + "PropConcrete") or mat(MRS + "FB_Concrete", (0.56, 0.55, 0.52), 0.85),
-            "Railing Material": bpy.data.materials.get(MRS + "PropSteel") or mat(MRS + "FB_Rail", (0.7, 0.72, 0.74), 0.3, 1.0),
-            "LED Material": _led_material()}
+    # v5: the street-hardware materials (hardware.py, tileable PBR on the metre UVs) when built, else the v4 fallbacks
+    try:
+        from . import hardware as _hw
+        if not bpy.data.materials.get(MRS + "HW_DeckAntiSlip"): _hw.build_hardware_materials(bake="auto")
+    except Exception as e:
+        print("footbridge: hardware materials unavailable (%s); v4 materials used" % e)
+    hw = lambda n: bpy.data.materials.get(MRS + "HW_" + n)
+    vals = {"Deck Material": hw("DeckAntiSlip") or bpy.data.materials.get(MRS + "Paving") or mat(MRS + "FB_Deck", (0.42, 0.42, 0.40), 0.85),
+            "Structure Material": hw("PaintedSteel") or mat(MRS + "FB_Steel", (0.20, 0.26, 0.30), 0.45, 0.6),
+            "Concrete Material": hw("Concrete") or bpy.data.materials.get(MRS + "PropConcrete") or mat(MRS + "FB_Concrete", (0.56, 0.55, 0.52), 0.85),
+            "Railing Material": hw("Galvanized") or bpy.data.materials.get(MRS + "PropSteel") or mat(MRS + "FB_Rail", (0.7, 0.72, 0.74), 0.3, 1.0),
+            "LED Material": hw("LEDDiffuser") or _led_material()}
     for it in g.interface.items_tree:
         if getattr(it, "in_out", "") == "INPUT" and it.name in vals:
             try: it.default_value = vals[it.name]

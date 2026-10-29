@@ -1,20 +1,30 @@
 """Export: evaluated road meshes (instances realized, materials and metre UVs kept) as GLB plus a
 collision GLB with only the drivable / walkable surfaces; 'export-ready' plain mesh copies."""
 import bpy, bmesh, os
-from .nodes import depsgraph, set_scene, MRS, mod_input_set, scene as _scene
+from .nodes import depsgraph, set_scene, MRS, mod_input_set, mod_input_get, scene as _scene
 from .roads import all_roads
 
 
 def evaluated_mesh_object(o, name, collection, realize=True, collision=False):
     """A static mesh copy of a road (or junction / structure) as an engine will see it."""
     mod = o.modifiers.get("MRS_Road") if o.type == "CURVE" else None
+    vq = None
     if mod:
-        mod_input_set(mod, "Realize Instances", realize); mod_input_set(mod, "Collision Only", collision); o.update_tag()
+        mod_input_set(mod, "Realize Instances", realize); mod_input_set(mod, "Collision Only", collision)
+        # game geometry at Final quality (1 m stations): Preview (2.5 m) cannot represent the 2.5 m crossing ramps or
+        # the kerb drops (a 3 cm lip at refuges), and curves facet
+        try:
+            vq = mod_input_get(mod, "Viewport Quality"); mod_input_set(mod, "Viewport Quality", "Final")
+        except Exception:
+            vq = None
+        o.update_tag()
     dg = depsgraph()
     ev = o.evaluated_get(dg)
     me = bpy.data.meshes.new_from_object(ev, preserve_all_data_layers=True, depsgraph=dg)
     if mod:
-        mod_input_set(mod, "Realize Instances", False); mod_input_set(mod, "Collision Only", False); o.update_tag()
+        mod_input_set(mod, "Realize Instances", False); mod_input_set(mod, "Collision Only", False)
+        if vq is not None: mod_input_set(mod, "Viewport Quality", vq)
+        o.update_tag()
     out = bpy.data.objects.new(name, me); out.matrix_world = o.matrix_world.copy(); collection.objects.link(out)
     return out
 
@@ -31,6 +41,15 @@ def engine_material(m, tiles_dir=None):
     if m is None: return None
     name = m.name
     if name.startswith(MRS + "Lens_") or name.endswith("_Baked") or name.endswith("_Engine"): return m
+    if m.get("mrs_kit") and m.node_tree and any(n.type == "TEX_IMAGE" for n in m.node_tree.nodes):
+        # city-kit surfaces: the game replaces them by name (CityKit.material); export a flat stand-in, not the textures
+        en = name + "_Engine"
+        if en in bpy.data.materials: return bpy.data.materials[en]
+        e = bpy.data.materials.new(en); e.use_nodes = True
+        b = next(n for n in e.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+        b.inputs["Base Color"].default_value = tuple(m.diffuse_color); b.inputs["Roughness"].default_value = 0.8
+        e.diffuse_color = m.diffuse_color
+        return e
     bsdf = next((n for n in m.node_tree.nodes if n.type == "BSDF_PRINCIPLED"), None) if m.use_nodes and m.node_tree else None
     if bsdf is not None and not bsdf.inputs["Base Color"].is_linked: return m
     if bsdf is not None and m.node_tree and any(n.type == "TEX_IMAGE" and n.image is not None for n in m.node_tree.nodes) and \
@@ -253,6 +272,12 @@ def export_block(path, collection_name, lod_trees=True):
         import json as _json
         try: model["placement_report"] = _json.loads(report) if isinstance(report, str) else dict(report)
         except Exception: model["placement_report"] = str(report)
+    if model.get("ground_files"):
+        import shutil
+        from .ground import TILES
+        for fn in model["ground_files"]:
+            src_f = os.path.join(TILES, fn)
+            if os.path.exists(src_f): shutil.copy2(src_f, os.path.join(os.path.dirname(os.path.abspath(path)), fn))
     street_model.export_json(path + ".json", model)
     stats["json"] = path + ".json"; stats["validation"] = model["validation"]
     return stats
@@ -289,8 +314,18 @@ def block_records(src, sc=None):
     for o in src.all_objects:
         if o.get("mrs_footbridge_plan") and o.type == "MESH":
             pl = _json.loads(o["mrs_footbridge_plan"]); pl.pop("chains", None); out["footbridges"].append(dict(pl, name=o.name))
+    for o in src.all_objects:
+        if o.get("mrs_ground_record"):
+            rec = _json.loads(o["mrs_ground_record"]); out["ground"] = rec
+            out["ground_files"] = [rec["mask"]] + [f for maps in rec["tiles"].values() for f in maps.values()]
+    try:
+        from . import frontage
+        out["destinations"] = frontage.destinations()
+        out["frontages"] = [dict(_json.loads(o["mrs_building"]), name=o.name) for o in src.all_objects if o.get("mrs_building")]
+    except Exception as e:
+        out["destinations_error"] = str(e)
     sc = sc or bpy.context.scene
-    for key, dst in (("mrs_routes", "routes"), ("mrs_placement_items", "items")):
+    for key, dst in (("mrs_routes", "routes"), ("mrs_placement_items", "items"), ("mrs_movements", "movements")):
         if sc.get(key):
             try: out[dst] = _json.loads(sc[key])
             except Exception: pass

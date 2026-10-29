@@ -142,6 +142,57 @@ try:
         check(c7["objects"] == c0["objects"], "object count after all scenarios %d != %d" % (c7["objects"], c0["objects"]))
     results["scenarios"] = scen
 
+    # ------------------------------------------------------------------ v5 street frontage: envelopes, kerb drop, bike rack, access
+    # movements, and the rules adapting when the shop moves along the street (then restored: same object count)
+    from mrs import frontage as FR
+    from mathutils.bvhtree import BVHTree
+    def kerb_z(road, a, side="l"):
+        dg = bpy.context.evaluated_depsgraph_get(); me = road.evaluated_get(dg).to_mesh(); M = road.matrix_world
+        bvh = BVHTree.FromPolygons([M @ v.co for v in me.vertices], [list(p.vertices) for p in me.polygons])
+        road.evaluated_get(dg).to_mesh_clear()
+        w = RD.road_widths(road); p, t, r = mrs.structures.road_sample(road, a)
+        q = p + r * (-1.0 if side == "l" else 1.0) * (w["half_l" if side == "l" else "half_r"] + 0.12)
+        h = bvh.ray_cast(Vector((q.x, q.y, q.z + 3.0)), Vector((0, 0, -1)), 6.0)
+        return round(h[0].z, 3) if h[0] else None        # absolute kerb-top height (the centre line carries the crown)
+    def frontage_check(tag):
+        d = FR.destinations()
+        rep = json.loads(SC["mrs_placement_report"]); its = json.loads(SC["mrs_placement_items"]); mv = json.loads(SC["mrs_movements"])
+        ent = bpy.data.objects["MRS_Entrance_SB_Shop"]; drv = bpy.data.objects["MRS_Driveway_SB_Shop"]
+        m = PL.RoadModel(north); a_e = PL._project(m, ent.location); a_d = PL._project(m, drv.location); dw = float(drv.get("mrs_width", 5.0))
+        inside = []
+        for it in its:
+            if it.get("road") != "SB_North" or it.get("side") != "l" or it.get("flush") or not it.get("foot"): continue
+            al = [PL._project(m, Vector((c[0], c[1], 0))) for c in it["foot"]]
+            if (min(al) < a_e + 1.2 and max(al) > a_e - 1.2) or (min(al) < a_d + dw / 2 + 1.0 and max(al) > a_d - dw / 2 - 1.0): inside.append(it["name"])
+        racks = rep.get("destination_racks", [])
+        acc = [x for x in mv["movements"] if x["turn"].startswith("access")]
+        out = {"destinations": len(d), "address": d[0]["address"] if d else None, "entrance_station": round(a_e, 2), "driveway_station": round(a_d, 2),
+               "items_in_envelopes": inside, "rack": racks, "kerb_z_at_drive": kerb_z(north, a_d), "kerb_z_10m_away": kerb_z(north, a_d + 10.0),
+               "access_movements": [(x["id"], x["clearance_ok"], x["min_radius"]) for x in acc],
+               "bus_S2": next(({"boarding": b.get("boarding"), "items": b.get("items")} for b in rep.get("bus_stops", []) if b.get("id") == "S2"), None)}
+        print("FRONTAGE_CHECK %-12s %s" % (tag, out))
+        check(len(d) == 1 and d[0]["address"] == "24 Maple St", "%s: shop destination missing" % tag)
+        check(not inside, "%s: items inside the entrance / driveway envelopes: %s" % (tag, inside))
+        check(bool(racks) and all(abs(r_["offset_m"]) <= 13.0 for r_ in racks), "%s: no bike rack near the shop entrance" % tag)
+        zd, za = out["kerb_z_at_drive"], out["kerb_z_10m_away"]
+        check(zd is not None and za is not None and za - zd > 0.12, "%s: kerb not dropped at the driveway (kerb top %s there, %s 10 m away)" % (tag, zd, za))
+        check(zd is not None and zd < 0.03, "%s: dropped kerb still %.3f m high" % (tag, zd if zd is not None else -1))
+        check(len(acc) == 2 and all(x["clearance_ok"] for x in acc), "%s: driveway access movements %s" % (tag, [(x["id"], x["problems"][:2]) for x in acc]))
+        return out
+    fr = {"baseline": frontage_check("baseline")}
+    c_fr0 = scene_census(col)
+    specs = json.loads(SC["mrs_frontages"]); specs[0]["along"] = 14.0; SC["mrs_frontages"] = json.dumps(specs)
+    regen("shop moved to 14 m", False); fr["moved"] = frontage_check("moved 14 m")
+    check(abs(fr["moved"]["driveway_station"] - (fr["baseline"]["driveway_station"] - 8.0)) < 0.3, "driveway did not follow the shop")
+    if "--no-render" not in args:
+        qa.render(os.path.join(REN, "blender_frontage_moved_top.png"), (-10.0, 40.0, 75.0), (-10.0, 40.01, 0.0), 40, scene=SC, samples=16)
+    specs[0]["along"] = 22.0; SC["mrs_frontages"] = json.dumps(specs)
+    regen("shop restored to 22 m", False); fr["restored"] = frontage_check("restored")
+    check(scene_census(col)["objects"] == c_fr0["objects"], "object count after the frontage round-trip %d != %d" % (scene_census(col)["objects"], c_fr0["objects"]))
+    if "--no-render" not in args:
+        qa.render(os.path.join(REN, "blender_frontage_top.png"), (-10.0, 40.0, 75.0), (-10.0, 40.01, 0.0), 40, scene=SC, samples=16)
+    results["frontage"] = fr
+
     # ------------------------------------------------------------------ roundabout + dead end (inherited builders, now connected)
     try:
         cur = SC
@@ -209,6 +260,15 @@ try:
         {"name": "tree_close", "eye": list(V(tree["pos"]) + Vector((5.0, -9.0, 1.7))), "target": list(V(tree["pos"]) + Vector((0, 0, 4.0))), "lens": 30, "night": False},
         {"name": "furniture_close", "eye": list(V(bench["pos"]) - br_ * 3.4 * (1 if bench["side"] == "r" else -1) * -1 + bt_ * 2.2 + Vector((0, 0, 1.5))), "target": list(V(bench["pos"]) + Vector((0, 0, 0.5))), "lens": 35, "night": False},
         {"name": "park", "eye": [-36.0, -66.0, 1.7], "target": [-55.0, -35.0, 3.5], "lens": 30, "night": False},
+    ]
+    # v5 frontage views from the destination record (door, facing = toward the street, road tangent = up x facing)
+    dst = FR.destinations()[0]; D = V(dst["door"]); F = V(dst["facing"]); T = Vector((0, 0, 1)).cross(F).normalized(); Z = Vector((0, 0, 1))
+    yard = V(dst["service"]["yard"]); mouth = V(dst["service"]["driveway"])
+    cams += [
+        {"name": "shop_front", "eye": list(D + F * 16.8 - T * 11.7 + Z * 0.45), "target": list(D + T * 0.3 + Z * 2.0), "lens": 30, "night": True},
+        {"name": "shop_door", "eye": list(D + F * 5.3 - T * 4.2 + Z * 0.45), "target": list(D + T * 0.3 + Z * 0.75), "lens": 35, "night": False},
+        {"name": "shop_yard", "eye": list(mouth + F * 15.5 + T * 17.8 + Z * 6.85), "target": list(mouth - F * 2.4 - T * 2.2 + Z * 0.85), "lens": 32, "night": False},
+        {"name": "shop_sidewalk", "eye": list(D + F * 2.8 - T * 21.7 + Z * 0.4), "target": list(D + F * 2.3 + T * 18.3), "lens": 30, "night": True},
     ]
     json.dump(cams, open(os.path.join(EXP, "cameras.json"), "w"), indent=1)
     if "--no-render" not in args:

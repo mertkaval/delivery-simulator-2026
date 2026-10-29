@@ -210,5 +210,8 @@ func set_night(amount: float) -> void:
 		m.emission_enabled = night > 0.02
 		m.emission = m.get_meta("night_emission", Color(1.0, 0.93, 0.75)) as Color
 		m.emission_energy_multiplier = e
+	# city-kit glazing (frontage buildings): the downtown window shader lights its interiors at night
+	if UrbanKit.window_material != null:
+		UrbanKit.window_material.set_shader_parameter("night", night)
 	if night > 0.02:
 		update_shadows(focus)

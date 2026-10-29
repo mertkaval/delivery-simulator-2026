@@ -66,7 +66,9 @@ func day() -> void:
 	sky.ground_bottom_color = Color(0.28, 0.30, 0.26)
 	env.sky.sky_material = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	env.ambient_light_energy = 1.0
+	# v5: EEVEE's day world lights shaded sides ~3.8x more than Godot's procedural sky at 1.0 (grey-sphere
+	# measurement, docs/roads/FOLIAGE.md); 3.0 brings shaded canopies / facades in line with the Blender renders
+	env.ambient_light_energy = 3.0
 	env.tonemap_mode = Environment.TONE_MAPPER_AGX
 	env.tonemap_exposure = 1.0
 	env.glow_enabled = false
@@ -108,7 +110,7 @@ func run() -> void:
 	RenderingServer.viewport_set_measure_render_time(vp_rid, true)
 	env = Environment.new()
 	env.sky = Sky.new()
-	env.ssao_enabled = true
+	env.ssao_enabled = OS.get_environment("MRS_SSAO") != "0"
 	var we := WorldEnvironment.new()
 	we.environment = env
 	root.add_child(we)

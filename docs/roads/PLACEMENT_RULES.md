@@ -93,3 +93,16 @@ spatial hash.
 `place_all` returns `placed`, `skipped` `(road, kind, along, reason)`, `skip_summary`, `by_kind`, `items`
 (world footprint corners + access rects per item), `regions`, `bus_stops`, `corridors`, `light_presets`.
 `routes.build()` then checks connectivity and clear widths against these footprints.
+
+## v5 additions
+- **Building footprints:**
+  - Objects with `mrs_building` (frontage.py) and service yards (`mrs_kind` drive) are keep-out areas for everything optional, with a 0.6 m margin.
+  - A 1.6 m active-frontage strip in front of a building facade blocks cabinets, bins, planters, information boards, hydrants and access covers.
+- **Driveways:**
+  - `MRS_Driveway_*` anchors reserve their `mrs_width` plus 2 m (the kerb-drop flanks) from the yard mouth to the kerb.
+  - The road drops the kerb there through its `Driveways` input (`frontage.sync_driveways`).
+- **Destination bike parking:** an `MRS_Entrance_*` anchor with `mrs_bike_parking` gets a rack 5–13 m away along the street (first free spot either way). Generic racks keep 25 m from it.
+- **Entrances on the sidewalk:** an entrance with `mrs_on_sidewalk` gets no separate access path; it would lie coplanar on the paving.
+- **Bus stop pole:** if the front of the boarding area is taken (e.g. by a sign), the pole steps back up to 3 m along the boarding area.
+- **Park path starts:** the first station near the wanted one whose first 9 m keep clear of footbridge approach paths and of any structure lower than about 2.5 m overhead (`samples._clear_of_footbridges`).
+- **Anchor projection:** `_project` projects onto the centre-line segments, not the nearest of the ~2.5 m samples.

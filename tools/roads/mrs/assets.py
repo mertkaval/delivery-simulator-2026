@@ -506,51 +506,215 @@ def _anchors(o, heads):
     return o
 
 
+def _hw():
+    from . import hardware
+    return hardware
+
+
+def _bez(p0, c, p1, n):
+    return [tuple(v) for v in _arc(p0, p1, c, n)]
+
+
+def _hw_shaft(hm, z0, z1, r0, r1, cell, contact, n=16, z_contact=1.0, cap=True):
+    """Tapered round shaft z0..z1 with loops every <= 1.9 m (atlas UV chunks keep 256 px/m); the part below
+    z_contact gets the ground-contact cell; optional dome cap."""
+    def ring(z):
+        rr = r0 + (r1 - r0) * (z - z0) / (z1 - z0)
+        return [(rr * math.cos(TAU * k / n), rr * math.sin(TAU * k / n), z) for k in range(n)]
+    zc = min(z_contact, z1)
+    if contact and zc > z0 + 1e-3: hm.loft([ring(z0), ring(zc)], contact, caps=False)
+    else: zc = z0
+    m = max(1, int(math.ceil((z1 - zc) / 1.9)))
+    hm.loft([ring(zc + (z1 - zc) * i / m) for i in range(m + 1)], cell, caps=False)
+    if cap: hm.lathe([(r1, z1), (r1 * 0.75, z1 + r1 * 0.3), (r1 * 0.3, z1 + r1 * 0.45), (0.0, z1 + r1 * 0.47)], cell, n, nobevel=True)
+
+
+def _hw_column_base(hm, r0, plate_r=0.22, plate_t=0.025, plate_n=16, contact="galv_contact", bolt_r=0.165, square=False):
+    """Flange plate (round, n=16 keeps the library extents) with anchor bolts and a weld collar."""
+    if square: hm.box(-plate_r, -plate_r, 0.0, plate_r, plate_r, plate_t, contact)
+    else: hm.cyl(0, 0, 0.0, plate_t, plate_r, plate_r, contact, plate_n)
+    _hw().anchor_bolts(hm, bolt_r, 4, plate_t, 0.012 if plate_r > 0.15 else 0.009, c="galv")
+    hm.lathe([(r0 + 0.028, plate_t), (r0 + 0.02, plate_t + 0.012), (r0 + 0.008, plate_t + 0.05), (r0 + 0.001, plate_t + 0.075)], contact, 16, caps=False, nobevel=True)
+
+
+def _hw_sleeve(hm, z0, z1, r, cell, bolts=2, n=16):
+    """Bracket sleeve slipped over a column top (arm joint) with grub-screw bolt heads."""
+    hm.cyl(0, 0, z0, z1, r, r, cell, n)
+    hm.lathe([(r, z0), (r - 0.006, z0 - 0.012), (r - 0.012, z0 - 0.014)], cell, n, caps=False, nobevel=True)
+    for k in range(bolts):
+        a = math.pi + TAU * k / max(bolts, 1) + 0.6
+        for zz in (z0 + 0.06, z1 - 0.06):
+            p = Vector((math.cos(a), math.sin(a), 0.0))
+            hm.tube([(p.x * (r - 0.004), p.y * (r - 0.004), zz), (p.x * (r + 0.012), p.y * (r + 0.012), zz)], 0.009, "galv", 6)
+
+
+def _hw_luminaire(hm, y0, sgn, ztop=10.05, length=1.005, lamp=None):
+    """Die-cast LED road luminaire from the spigot end y0 to y0 + sgn * length: lofted canopy (peak at ztop), gear
+    compartment at the back, flat optical bay with the lens (MRS_PropLamp, underside at z 9.82, centred on
+    y0 + sgn * 0.75) in a black bezel, cooling fins, spigot sleeve."""
+    L = length; lamp = lamp or M["lamp"]
+
+    def sstep(a, b, t):
+        t = max(0.0, min(1.0, (t - a) / (b - a))); return t * t * (3 - 2 * t)
+
+    def w(t): return 0.055 + 0.09 * sstep(0.0, 0.25, t) - 0.03 * sstep(0.82, 1.0, t)
+    def zt(t): return 9.965 + (ztop - 9.965) * (sstep(0.0, 0.42, t) - 0.7 * sstep(0.56, 1.0, t))
+    def zb(t): return 9.925 - 0.055 * sstep(0.02, 0.2, t) - 0.035 * sstep(0.38, 0.5, t) + 0.018 * sstep(0.94, 1.0, t)
+    rings = []
+    for t in (0.0, 0.03, 0.08, 0.15, 0.24, 0.34, 0.44, 0.5, 0.56, 0.66, 0.76, 0.86, 0.93, 0.975, 1.0):
+        y = y0 + sgn * t * L; ww, b_, t_ = w(t), zb(t), zt(t); h = t_ - b_
+        prof = [(ww, b_ + 0.01), (ww, b_ + 0.5 * h), (0.88 * ww, b_ + 0.82 * h), (0.58 * ww, t_ - 0.006), (0.22 * ww, t_), (-0.22 * ww, t_),
+                (-0.58 * ww, t_ - 0.006), (-0.88 * ww, b_ + 0.82 * h), (-ww, b_ + 0.5 * h), (-ww, b_ + 0.01), (-0.9 * ww, b_), (0.9 * ww, b_)]
+        rings.append([(x, y, z) for x, z in prof])
+    hm.loft(rings, "alu_cast", caps=True, smooth=True)
+    yc = y0 + sgn * 0.75
+    hm.box(-0.085, yc - 0.2, 9.82, 0.085, yc + 0.2, 9.836, lamp, nobevel=True)                              # lens
+    hm.band([(-0.106, yc - 0.222), (0.106, yc - 0.222), (0.106, yc + 0.222), (-0.106, yc + 0.222)],
+            [(-0.086, yc - 0.201), (0.086, yc - 0.201), (0.086, yc + 0.201), (-0.086, yc + 0.201)], 9.827, 9.836, "black_plastic", "z", nobevel=True)
+    for i in range(5):                                                                                         # cooling fins on the gear compartment
+        x = -0.06 + 0.03 * i; ts = [0.07 + 0.23 * k / 5 for k in range(6)]
+        top = [(y0 + sgn * t * L, min(zt(t) + 0.008, ztop - 0.004)) for t in ts]; bot = [(y0 + sgn * t * L, zt(t) - 0.012) for t in ts]
+        hm.prism(top + bot[::-1], x - 0.002, x + 0.002, "alu_cast", "x", nobevel=True)
+    zs = (zt(0.0) + zb(0.0)) / 2
+    hm.taper((0, y0 - sgn * 0.07, zs), (0, y0 + sgn * 0.05, zs), 0.046, 0.046, "alu_cast", 14)               # spigot sleeve
+    hm.box(-0.05, y0 + sgn * 0.985 * L - 0.012, zb(0.98) - 0.006, 0.05, y0 + sgn * 0.985 * L + 0.012, zb(0.98) + 0.01, "black_plastic", nobevel=True)  # latch
+    return zs
+
+
 def _streetlights():
-    col = collection(MRS + "Streetlights"); m = M
+    HW = _hw(); col = collection(MRS + "Streetlights"); lamp = M["lamp"]; glass = HW.mat(HW.GLASS)
 
-    def highway(bm):
-        _pole(bm, 9.4, 0.09, 0.055, 0); _tube(bm, _arc((0, 0, 9.3), (0, 2.4, 10.0), (0, 0.05, 10.0), 8), 0.045, 10, 0)
-        _cobra(bm, 1.7, 2.7, 10.05, 0, 1)
-    _anchors(make2(col, "MRS_Light_Highway", highway, [m["steel"], m["lamp"]], 0.01), [((0, 2.45, 9.80), (0, 0, -1))])
+    def column(hm, h, r0, r1, cell="galv", contact="galv_contact", door_r=None):
+        _hw_column_base(hm, r0 + 0.004, contact=contact)
+        _hw_shaft(hm, 0.025, h, r0, r1, cell, contact, cap=False)
+        HW.base_door(hm, door_r or r0 - 0.003, 0.5, 0.95, 0.11, facing=-1.0, c=contact)
 
-    def double(bm):
-        _pole(bm, 9.4, 0.1, 0.06, 0)
-        for s in (1, -1):
-            _tube(bm, _arc((0, 0, 9.3), (0, s * 1.9, 10.0), (0, 0, 10.0), 8), 0.045, 10, 0)
-            if s > 0: _cobra(bm, 1.2, 2.2, 10.05, 0, 1)
-            else:
-                _box(bm, -0.14, -2.2, 9.91, 0.14, -1.2, 10.05, 0)
-                _prism(bm, [(-0.14, 9.91), (0.14, 9.91), (0.1, 9.83), (-0.1, 9.83)], -2.2, -1.7, 0)
-                _box(bm, -0.08, -2.15, 9.82, 0.08, -1.75, 9.83, 1)
-    _anchors(make2(col, "MRS_Light_Double", double, [m["steel"], m["lamp"]], 0.01), [((0, 1.95, 9.80), (0, 0, -1)), ((0, -1.95, 9.80), (0, 0, -1))])
+    def highway(hm):
+        column(hm, 9.30, 0.105, 0.064)
+        hm.lathe([(0.064, 9.30), (0.056, 9.315), (0.052, 9.32)], "galv", 16, caps=False, nobevel=True)
+        _hw_sleeve(hm, 8.88, 9.24, 0.076, "galv")
+        zs = 9.945
+        pts = _bez((0, 0, 9.0), (0, 0.0, zs), (0, 1.66, zs), 14)
+        hm.sweep(pts, [0.052 - 0.014 * i / (len(pts) - 1) for i in range(len(pts))], "galv", 12)
+        _hw_luminaire(hm, 1.7, 1.0)
+    _anchors(HW.make_object(col, "MRS_Light_Highway", highway, 0.008), [((0, 2.45, 9.80), (0, 0, -1))])
 
-    def lantern(bm):
-        _lathe(bm, [(0.2, 0), (0.2, 0.05), (0.16, 0.08), (0.15, 0.35), (0.11, 0.42), (0.07, 0.5), (0.06, 1.0), (0.075, 1.05), (0.06, 1.1), (0.05, 3.25), (0.08, 3.3), (0.08, 3.38), (0.05, 3.42), (0.0, 3.42)], 14, 0)
-        _lathe(bm, [(0.18, 3.42), (0.18, 3.47), (0.14, 3.47), (0.14, 3.5), (0.0, 3.5)], 4, 0, smooth=False)
-        _lathe(bm, [(0.17, 3.5), (0.21, 4.0)], 4, 1, smooth=False, caps=False)
-        for k in range(4):
-            a = TAU * k / 4; _tube(bm, [(0.17 * math.cos(a), 0.17 * math.sin(a), 3.5), (0.21 * math.cos(a), 0.21 * math.sin(a), 4.0)], 0.012, 6, 0)
-        _lathe(bm, [(0.25, 4.0), (0.25, 4.04), (0.08, 4.28), (0.08, 4.32), (0.0, 4.36)], 4, 0, smooth=False); _ico(bm, (0, 0, 4.4), 0.05, 2, mi=0)
-        _ico(bm, (0, 0, 3.75), 0.09, 2, mi=2)
-    _anchors(make2(col, "MRS_Light_Lantern", lantern, [m["iron"], m["glass"], m["lamp"]], 0.006), [((0, 0, 3.64), (0, 0, -1))])
+    def double(hm):
+        column(hm, 9.30, 0.112, 0.07)
+        hm.lathe([(0.07, 9.30), (0.06, 9.315), (0.055, 9.32)], "galv", 16, caps=False, nobevel=True)
+        _hw_sleeve(hm, 8.85, 9.24, 0.084, "galv")
+        for s in (1.0, -1.0):
+            pts = _bez((0, s * 0.005, 9.0), (0, s * 0.02, 9.945), (0, s * 1.16, 9.945), 12)
+            hm.sweep(pts, [0.05 - 0.012 * i / (len(pts) - 1) for i in range(len(pts))], "galv", 12)
+            _hw_luminaire(hm, s * 1.2, s)
+    _anchors(HW.make_object(col, "MRS_Light_Double", double, 0.008), [((0, 1.95, 9.80), (0, 0, -1)), ((0, -1.95, 9.80), (0, 0, -1))])
 
-    def led(bm):
-        _pole(bm, 7.0, 0.07, 0.05, 0); _tube(bm, [(0, 0, 6.95), (0, 0.9, 7.0)], 0.035, 8, 0)
-        _prism(bm, [(-0.12, 7.03), (0.12, 7.03), (0.12, 6.97), (-0.12, 6.97)], 0.45, 1.15, 0)
-        _box(bm, -0.1, 0.5, 6.965, 0.1, 1.1, 6.97, 1)
-    _anchors(make2(col, "MRS_Light_LED", led, [m["steel"], m["lamp"]], 0.008), [((0, 0.8, 6.945), (0, 0, -1))])
+    def lantern(hm):
+        hm.lathe([(0.2, 0.0), (0.2, 0.045), (0.19, 0.06), (0.172, 0.065), (0.168, 0.11), (0.15, 0.135), (0.155, 0.17), (0.13, 0.2), (0.112, 0.3),
+                  (0.098, 0.42), (0.086, 0.52), (0.094, 0.55), (0.094, 0.58), (0.078, 0.6)], "iron_black", 16)
+        n = 24; rings = []
+        for z, r in ((0.6, 0.068), (1.0, 0.064)):
+            rings.append([((r if k % 2 == 0 else r * 0.92) * math.cos(TAU * k / n), (r if k % 2 == 0 else r * 0.92) * math.sin(TAU * k / n), z) for k in range(n)])
+        hm.loft(rings, "iron_black", caps=False)                                                         # fluted lower shaft
+        hm.lathe([(0.064, 1.0), (0.08, 1.0), (0.08, 1.03), (0.07, 1.045), (0.07, 1.07), (0.056, 1.09)], "iron_black", 16, caps=False)
+        hm.lathe([(0.056, 1.09), (0.05, 2.0), (0.046, 3.0)], "iron_black", 16, caps=False, nobevel=True)
+        hm.lathe([(0.046, 3.0), (0.06, 3.0), (0.06, 3.04), (0.052, 3.06), (0.052, 3.2), (0.07, 3.22), (0.075, 3.27), (0.05, 3.3), (0.045, 3.4)], "iron_black", 16, caps=False)
+        hm.box(-0.205, -0.011, 3.095, 0.205, 0.011, 3.115, "iron_black")                                    # ladder bar
+        for s in (-1, 1): hm.run(_ico, "iron_black", (s * 0.215, 0.0, 3.105), 0.022, 1, nobevel=True)
+        # lantern head: gallery tray, flared glazing between corner posts, roof with eaves, vent crown, finial
+        def sq(hw, z): return [(hw, hw, z), (-hw, hw, z), (-hw, -hw, z), (hw, -hw, z)]
+        hm.loft([sq(0.05, 3.40), sq(0.105, 3.445), sq(0.15, 3.49), sq(0.162, 3.505), sq(0.162, 3.525)], "iron_black", caps=True, smooth=False)
+        hb, ht, z0, z1 = 0.150, 0.195, 3.525, 3.955
+        for sx, sy in ((1, 1), (1, -1), (-1, 1), (-1, -1)):
+            hm.tube([(sx * hb, sy * hb, z0), (sx * ht, sy * ht, z1)], 0.009, "iron_black", 6)
+        for k in range(4):                                                                                 # 4 glass panes (6 mm, closed)
+            a = TAU * k / 4; c, s = math.cos(a), math.sin(a)
+            def P(u, h, off, c=c, s=s):
+                hw_ = hb + (ht - hb) * (h - z0) / (z1 - z0)
+                return (c * (hw_ - off) - s * u * (hw_ - 0.012), s * (hw_ - off) + c * u * (hw_ - 0.012), h)
+            quad = [P(-1, z0 + 0.008, 0.004), P(1, z0 + 0.008, 0.004), P(1, z1 - 0.008, 0.004), P(-1, z1 - 0.008, 0.004)]
+            inner = [P(-1, z0 + 0.008, 0.010), P(1, z0 + 0.008, 0.010), P(1, z1 - 0.008, 0.010), P(-1, z1 - 0.008, 0.010)]
+            bm = hm.bm; mi = hm.mi(glass); n0 = len(bm.faces)
+            vo = [bm.verts.new(p) for p in quad]; vi = [bm.verts.new(p) for p in inner]
+            bm.faces.new(vo).material_index = mi; bm.faces.new(vi[::-1]).material_index = mi
+            for i in range(4):
+                j = (i + 1) % 4; bm.faces.new((vo[i], vi[i], vi[j], vo[j])).material_index = mi
+            hm._end(n0, True)
+        hm.box(-0.2, -0.2, 3.955, 0.2, 0.2, 3.99, "iron_black")                                              # top frame
+        hm.box(-0.17, -0.17, 3.94, 0.17, 0.17, 3.955, "alu_mill", nobevel=True)                               # reflector
+        hm.box(-0.2456, -0.2456, 3.99, 0.2456, 0.2456, 4.012, "iron_black")                                  # eaves
+        hm.loft([sq(0.2456, 4.012), sq(0.17, 4.08), sq(0.105, 4.215)], "iron_black", caps=False, smooth=False)
+        hm.cyl(0, 0, 4.215, 4.27, 0.075, 0.075, "iron_black", 16)                                          # vent crown
+        for k in range(8):
+            a = TAU * (k + 0.5) / 8; hm.box(0.0755 * math.cos(a) - 0.008, 0.0755 * math.sin(a) - 0.008, 4.225, 0.0755 * math.cos(a) + 0.008, 0.0755 * math.sin(a) + 0.008, 4.258, "void", nobevel=True)
+        hm.lathe([(0.09, 4.27), (0.09, 4.282), (0.05, 4.33), (0.02, 4.37), (0.0, 4.372)], "iron_black", 16)
+        hm.run(_ico, "iron_black", (0, 0, 4.395), 0.026, 2, nobevel=True)
+        hm.lathe([(0.012, 4.415), (0.0, 4.45)], "iron_black", 8, nobevel=True)
+        hm.cyl(0, 0, 3.86, 3.95, 0.022, 0.022, "black_plastic", 12)                                        # bulb holder + pear bulb
+        hm.lathe([(0.0, 3.665), (0.03, 3.672), (0.058, 3.695), (0.072, 3.73), (0.074, 3.765), (0.06, 3.8), (0.035, 3.83), (0.024, 3.86)], lamp, 24, caps=False, nobevel=True)
+    o = HW.make_object(col, "MRS_Light_Lantern", lantern, 0.005)
+    _anchors(o, [((0, 0, 3.64), (0, 0, -1))])
 
-    def bollard_light(bm):
-        _lathe(bm, [(0.1, 0), (0.1, 0.72), (0.09, 0.72)], 14, 0); _cyl(bm, 0, 0, 0.72, 0.9, 0.088, 0.088, 14, 1)
-        _lathe(bm, [(0.1, 0.9), (0.1, 0.96), (0.06, 1.0), (0.0, 1.0)], 14, 0)
-    _anchors(make2(col, "MRS_Light_Bollard", bollard_light, [m["metal"], m["lamp"]], 0.006), [((0, 0, 0.81), (0, 0, -1))])
+    def led(hm):
+        column(hm, 6.86, 0.076, 0.05, "paint_dark", "paint_dark_contact")
+        _hw_sleeve(hm, 6.56, 6.84, 0.062, "paint_dark")
+        pts = _bez((0, 0, 6.70), (0, 0.0, 6.995), (0, 0.40, 6.995), 10)
+        hm.sweep(pts, [0.044 - 0.01 * i / (len(pts) - 1) for i in range(len(pts))], "paint_dark", 12)
+        y0, L = 0.40, 0.75
 
-    def wall_pack(bm):
-        _box(bm, -0.06, -0.06, 0.0, 0.06, 0.06, 3.5, 0); _box(bm, -0.15, -0.15, 0.0, 0.15, 0.15, 0.04, 0)
-        _box(bm, -0.16, 0.06, 3.1, 0.16, 0.3, 3.35, 0)
-        _prism(bm, [(-0.16, 3.1), (0.16, 3.1), (0.16, 3.35), (-0.16, 3.35)][::-1], 0.3, 0.32, 1)
-    _anchors(make2(col, "MRS_Light_WallPack", wall_pack, [m["metal"], m["lamp"]], 0.008), [((0, 0.34, 3.22), (0, 0.6, -0.8))])
+        def sst(a, b, t):
+            t = max(0.0, min(1.0, (t - a) / (b - a))); return t * t * (3 - 2 * t)
+        def w(t): return 0.062 + 0.068 * sst(0.0, 0.18, t) - 0.018 * sst(0.9, 1.0, t)
+        def zt(t): return 7.004 + 0.022 * sst(0.0, 0.12, t) - 0.018 * sst(0.5, 1.0, t)
+        zb = 6.972
+        rings = []
+        for t in (0.0, 0.04, 0.1, 0.18, 0.3, 0.45, 0.6, 0.75, 0.88, 0.95, 1.0):
+            y = y0 + t * L; ww = w(t); t_ = zt(t); h = t_ - zb
+            prof = [(ww, zb + 0.006), (ww, zb + 0.55 * h), (0.85 * ww, t_ - 0.002), (0.3 * ww, t_), (-0.3 * ww, t_), (-0.85 * ww, t_ - 0.002),
+                    (-ww, zb + 0.55 * h), (-ww, zb + 0.006), (-0.93 * ww, zb), (0.93 * ww, zb)]
+            rings.append([(x, y, z) for x, z in prof])
+        hm.loft(rings, "paint_dark", caps=True)
+        for i in range(7):                                                                                 # heat-sink fins
+            x = -0.09 + 0.03 * i; ts = [0.1 + 0.38 * k / 4 for k in range(5)]
+            top = [(y0 + t * L, 7.0339) for t in ts]; bot = [(y0 + t * L, zt(t) - 0.005) for t in ts]
+            hm.prism(top + bot[::-1], x - 0.002, x + 0.002, "paint_dark", "x", nobevel=True)
+        hm.box(-0.104, 0.496, 6.9655, 0.104, 1.104, 6.973, "black_plastic", nobevel=True)                    # LED board + lens array
+        for ix in range(4):
+            for iy in range(12):
+                x = -0.075 + 0.05 * ix; y = 0.525 + 0.05 * iy
+                bm = hm.bm; mi = hm.mi(lamp); n0 = len(bm.faces)
+                f = bm.faces.new([bm.verts.new((x + dx, y + dy, 6.965)) for dx, dy in ((-0.016, -0.016), (-0.016, 0.016), (0.016, 0.016), (0.016, -0.016))])
+                f.material_index = mi; hm._end(n0, True)
+        hm.taper((0, 0.355, 6.995), (0, 0.445, 6.995), 0.038, 0.038, "paint_dark", 14)
+    _anchors(HW.make_object(col, "MRS_Light_LED", led, 0.006), [((0, 0.8, 6.945), (0, 0, -1))])
+
+    def bollard_light(hm):
+        hm.cyl(0, 0, 0.0, 0.7, 0.1, 0.1, "paint_dark_contact", 14)
+        hm.cyl(0, 0, 0.7, 0.9, 0.082, 0.082, lamp, 14, nobevel=True)                                       # opal diffuser
+        for k in range(7):                                                                                   # louvre bars
+            a = TAU * (k + 0.5) / 7; ca, sa = math.cos(a), math.sin(a)
+            rect = [(-0.004, 0.08), (0.004, 0.08), (0.004, 0.097), (-0.004, 0.097)]
+            hm.prism([(x * ca - y * sa, x * sa + y * ca) for x, y in rect], 0.705, 0.895, "paint_dark", "z", nobevel=True)
+        hm.lathe([(0.1, 0.9), (0.1, 0.935), (0.094, 0.97), (0.07, 0.992), (0.03, 1.0), (0.0, 1.0)], "paint_dark", 14)
+        hm.lathe([(0.1, 0.7), (0.1, 0.71), (0.083, 0.71)], "paint_dark", 14, caps=False, nobevel=True)
+    _anchors(HW.make_object(col, "MRS_Light_Bollard", bollard_light, 0.004), [((0, 0, 0.81), (0, 0, -1))])
+
+    def wall_pack(hm):
+        hm.box(-0.15, -0.15, 0.0, 0.15, 0.15, 0.02, "paint_dark_contact")
+        HW.anchor_bolts(hm, 0.155, 4, 0.02, 0.008, c="galv")
+        hm.box(-0.06, -0.06, 0.02, 0.06, 0.06, 1.0, "paint_dark_contact", nobevel=False)
+        hm.box(-0.06, -0.06, 1.0, 0.06, 0.06, 2.24, "paint_dark"); hm.box(-0.06, -0.06, 2.24, 0.06, 0.06, 3.47, "paint_dark")
+        hm.box(-0.066, -0.066, 3.47, 0.066, 0.066, 3.485, "paint_dark")
+        hm.loft([[(0.066, 0.066, 3.485), (-0.066, 0.066, 3.485), (-0.066, -0.066, 3.485), (0.066, -0.066, 3.485)],
+                 [(0.004, 0.004, 3.5), (-0.004, 0.004, 3.5), (-0.004, -0.004, 3.5), (0.004, -0.004, 3.5)]], "paint_dark", caps=True, smooth=False)
+        hm.box(-0.05, 0.06, 3.13, 0.05, 0.075, 3.33, "paint_dark")                                           # mounting plate
+        hm.prism([(0.075, 3.10), (0.30, 3.10), (0.30, 3.335), (0.075, 3.35)], -0.155, 0.155, "paint_dark", "x")  # body, sloped lid
+        hm.band([(-0.16, 3.10), (0.16, 3.10), (0.16, 3.335), (-0.16, 3.335)], [(-0.125, 3.135), (0.125, 3.135), (0.125, 3.305), (-0.125, 3.305)],
+                0.30, 0.32, "paint_dark", "y")                                                               # bezel
+        hm.box(-0.125, 0.30, 3.135, 0.125, 0.312, 3.305, lamp, nobevel=True)                                 # lens
+        for i in range(4):
+            z = 3.16 + 0.05 * i; hm.box(-0.16, 0.1, z, -0.154, 0.27, z + 0.012, "paint_dark", nobevel=True); hm.box(0.154, 0.1, z, 0.16, 0.27, z + 0.012, "paint_dark", nobevel=True)
+    _anchors(HW.make_object(col, "MRS_Light_WallPack", wall_pack, 0.006), [((0, 0.34, 3.22), (0, 0.6, -0.8))])
     return col
 
 
@@ -854,51 +1018,126 @@ def _offset_polyline(pts, d):
     return out
 
 
+def _wbeam_x(z):
+    """Road-side face of the W-beam (x, metres) at height z: crests at -0.1, centre valley at -0.045, edges -0.035."""
+    s = max(0.0, min(1.0, (z - 0.455) / 0.305))
+    f = min(1.0, 1.18 * (0.5 - 0.5 * math.cos(4.0 * math.pi * s)))
+    return -0.035 - 0.06 * f - 0.01 * math.sin(math.pi * s) ** 2
+
+
 def _barriers():
-    col = collection(MRS + "Barriers"); m = M
+    HW = _hw(); col = collection(MRS + "Barriers")
 
-    def guardrail(bm):
-        front = [(-0.035, 0.76), (-0.1, 0.735), (-0.1, 0.675), (-0.045, 0.63), (-0.045, 0.585), (-0.1, 0.54), (-0.1, 0.48), (-0.035, 0.455)]
-        back = _offset_polyline(front, 0.004)
-        _prism(bm, front + back[::-1], -1.0, 1.0, 0)
-        _box(bm, 0.0, -0.05, 0.0, 0.09, 0.05, 0.74, 1); _box(bm, -0.04, -0.06, 0.47, 0.0, 0.06, 0.745, 1)
-        _tube(bm, [(-0.047, 0, 0.607), (-0.062, 0, 0.607)], 0.014, 8, 0)
-        _box(bm, -0.108, -0.03, 0.688, -0.1, 0.03, 0.722, 2)
-    make2(col, "MRS_Guardrail", guardrail, [m["steel"], m["metal"], m["white"]], 0.004)
+    def guardrail(hm):
+        front = [(-0.029, 0.455)] + [(_wbeam_x(0.457 + 0.304 * i / 28), 0.457 + 0.304 * i / 28) for i in range(29)] + [(-0.029, 0.763)]
+        back = _offset_polyline(front, 0.003)
+        n0 = hm.prism(front + back[::-1], -1.0, 1.0, "galv", "y", nobevel=True)
+        for f in hm.since(n0): f.smooth = True
+        lap = _offset_polyline(front[1:-1], -0.0006); lap2 = _offset_polyline(front[1:-1], -0.0036)        # overlapping end of the next rail
+        n0 = hm.prism(lap2 + lap[::-1], 0.68, 1.0, "galv", "y", nobevel=True)
+        for f in hm.since(n0): f.smooth = True
+        for y in (0.72, 0.8, 0.88, 0.96):                                                                      # 8 splice bolts
+            for z in (0.585, 0.629):
+                x = _wbeam_x(z) - 0.0036
+                hm.tube([(x + 0.001, y, z), (x - 0.004, y, z)], 0.0125, "galv_dark", 8)
+                hm.tube([(x - 0.004, y, z), (x - 0.007, y, z)], 0.008, "galv_dark", 8)
+        x = _wbeam_x(0.607)                                                                                    # post bolt with slotted washer
+        hm.box(x - 0.003, -0.022, 0.592, x + 0.0005, 0.022, 0.622, "galv_dark", nobevel=True)
+        hm.tube([(x - 0.003, 0.0, 0.607), (x - 0.008, 0.0, 0.607)], 0.012, "galv_dark", 8)
+        hm.tube([(x - 0.008, 0.0, 0.607), (x - 0.011, 0.0, 0.607)], 0.0075, "galv_dark", 8)
+        # sigma post (C-section open to the back), ground-contact cell
+        hm.box(0.0, -0.05, 0.0, 0.005, 0.05, 0.74, "galv_contact")
+        for s in (-1, 1):
+            hm.box(0.0, s * 0.046, 0.0, 0.09, s * 0.05, 0.74, "galv_contact", nobevel=True)
+            hm.box(0.085, s * 0.03, 0.0, 0.09, s * 0.046, 0.74, "galv_contact", nobevel=True)
+        # blockout spacer (C-channel) between rail and post
+        hm.box(-0.041, -0.06, 0.47, -0.036, 0.06, 0.745, "galv_dark")
+        for s in (-1, 1): hm.box(-0.041, s * 0.056, 0.47, 0.0, s * 0.06, 0.745, "galv_dark", nobevel=True)
+        # delineator clipped to the upper crest
+        hm.box(-0.106, -0.035, 0.682, -0.098, 0.035, 0.728, "black_plastic")
+        hm.box(-0.108, -0.028, 0.688, -0.106, 0.028, 0.722, "white_refl", nobevel=True)
+    HW.make_object(col, "MRS_Guardrail", guardrail, 0.003)
 
-    def jersey(bm):
-        _prism(bm, [(-0.305, 0), (0.305, 0), (0.305, 0.075), (0.127, 0.33), (0.075, 0.81), (-0.075, 0.81), (-0.127, 0.33), (-0.305, 0.075)], -1.0, 1.0, 0)
-        for y in (-0.6, 0.6): _box(bm, -0.03, y - 0.06, 0.78, 0.03, y + 0.06, 0.815, 1)
-        _box(bm, -0.31, -0.1, 0.0, 0.31, 0.1, 0.05, 0)
-    make2(col, "MRS_Jersey", jersey, [m["concrete"], m["metal"]], 0.012)
+    def jersey(hm):
+        full = [(-0.31, 0.0), (0.31, 0.0), (0.31, 0.075), (0.127, 0.33), (0.075, 0.81), (-0.075, 0.81), (-0.127, 0.33), (-0.31, 0.075)]
+        xc = 0.31 - 0.183 * (0.015 / 0.255)
+        clip = [(-xc, 0.09), (xc, 0.09), (0.127, 0.33), (0.075, 0.81), (-0.075, 0.81), (-0.127, 0.33)]
+        hm.prism(full, -1.0, -0.121, "concrete_contact"); hm.prism(clip, -0.121, 0.121, "concrete_contact"); hm.prism(full, 0.121, 1.0, "concrete_contact")
+        for y in (-0.6, 0.6):                                                                                   # lifting anchors
+            hm.box(-0.032, y - 0.048, 0.8094, 0.032, y + 0.048, 0.8102, "void", nobevel=True)
+            hm.sweep(_bez((-0.022, y, 0.803), (0.0, y, 0.818), (0.022, y, 0.803), 6), [0.004] * 7, "galv_dark", 6)
+        for y in (-0.985, 0.985):                                                                               # end connector plates
+            hm.box(-0.05, y - 0.012, 0.25, 0.05, y + 0.012, 0.6, "galv_dark", nobevel=True)
+    HW.make_object(col, "MRS_Jersey", jersey, 0.014)
 
-    def parapet(bm):
-        _prism(bm, [(-0.3, 0), (0.22, 0), (0.22, 0.22), (-0.3, 0.22)], -1.0, 1.0, 0)
-        _prism(bm, [(-0.3, 0.22), (0.22, 0.22), (0.22, 1.0), (-0.17, 1.0)], -1.0, 1.0, 0)
-        _prism(bm, [(-0.3, 1.0), (0.3, 1.0), (0.3, 1.06), (0.27, 1.13), (0.0, 1.16), (-0.27, 1.13), (-0.3, 1.06)], -1.0, 1.0, 0)
-        _box(bm, -0.32, -0.3, 1.0, 0.32, -0.28, 1.04, 0); _box(bm, 0.22, -0.9, 0.3, 0.25, 0.9, 0.9, 1)
-    make2(col, "MRS_Parapet", parapet, [m["concrete"], m["concrete"]], 0.015)
+    def parapet(hm):
+        n0 = hm.prism([(-0.30, 0.0), (0.22, 0.0), (0.22, 1.0), (-0.17, 1.0), (-0.30, 0.22)], -1.0, 1.0, "concrete_contact")
+        hm.bisect(n0, 0.5)
+        hm.paint(n0, "concrete_streak", lambda f: f.calc_center_median().z > 0.5)
+        hm.prism([(-0.32, 1.0), (0.32, 1.0), (0.32, 1.065), (0.29, 1.12), (0.0, 1.16), (-0.29, 1.12), (-0.32, 1.065)], -1.0, 1.0, "concrete")
+        for x in (-0.306, 0.306): hm.box(x - 0.006, -1.0, 0.9984, x + 0.006, 1.0, 0.9996, "void", nobevel=True)   # drip grooves
+    HW.make_object(col, "MRS_Parapet", parapet, 0.014)
 
-    def railing(bm):
-        _box(bm, -0.035, -0.035, 0.0, 0.035, 0.035, 1.1, 0); _box(bm, -0.07, -0.07, 0.0, 0.07, 0.07, 0.01, 0)
-        for z, r in ((1.1, 0.025), (0.55, 0.012), (0.1, 0.012)): _tube(bm, [(0, -1.0, z), (0, 1.0, z)], r, 10, 0)
-        for i in range(15):
-            y = -1.0 + 0.125 * (i + 0.5)
-            if abs(y) > 0.06: _cyl(bm, 0, y, 0.1, 1.1, 0.009, 0.009, 6, 0)
-    make2(col, "MRS_Railing", railing, [m["steel"]])
+    def railing(hm):
+        hm.box(-0.07, -0.07, 0.0, 0.07, 0.07, 0.012, "galv_contact")
+        HW.anchor_bolts(hm, 0.0707, 4, 0.012, 0.006, c="galv")
+        hm.box(-0.035, -0.035, 0.012, 0.035, 0.035, 1.0, "galv_contact")
+        hm.box(-0.035, -0.035, 1.0, 0.035, 0.035, 1.074, "galv")
+        hm.box(-0.038, -0.038, 1.074, 0.038, 0.038, 1.08, "galv")
+        hm.box(-0.018, -0.03, 1.08, 0.018, 0.03, 1.09, "galv", nobevel=True)
+        hm.tube([(0, -1.0, 1.1), (0, 1.0, 1.1)], 0.0238, "galv", 12, caps=False)
+        for z in (0.55, 0.1): hm.tube([(0, -1.0, z), (0, 1.0, z)], 0.012, "galv", 10, caps=False)
+        for i in range(16):
+            y = -0.9375 + 0.125 * i
+            if abs(y) < 0.07: continue
+            hm.cyl(0, y, 0.1, 1.1, 0.008, 0.008, "galv", 6, nobevel=True)
+    HW.make_object(col, "MRS_Railing", railing, 0.003)
 
-    def hedge(bm):
-        _ico(bm, (0, 0, 0.5), 1.0, 4, (0.32, 1.02, 0.52), 0.07, 3.0, 21, 0, zmin=0.0)
-    make2(col, "MRS_Hedge", hedge, [m["leaf_bush"]])
+    def fence(hm):
+        hm.box(-0.05, -0.05, 0.0, 0.05, 0.05, 0.95, "wood_contact")
+        hm.box(-0.05, -0.05, 0.95, 0.05, 0.05, 1.15, "wood")
+        hm.box(-0.0643, -0.0643, 1.15, 0.0643, 0.0643, 1.168, "wood")
+        hm.loft([[(0.0643, 0.0643, 1.168), (-0.0643, 0.0643, 1.168), (-0.0643, -0.0643, 1.168), (0.0643, -0.0643, 1.168)],
+                 [(0.004, 0.004, 1.2043), (-0.004, 0.004, 1.2043), (-0.004, -0.004, 1.2043), (0.004, -0.004, 1.2043)]], "wood", caps=True, smooth=False)
+        for z in (0.28, 0.82): hm.box(-0.05, -1.0, z, -0.028, 1.0, z + 0.08, "wood")
+        for i in range(12):
+            y = -1.0 + 2.0 / 12 * (i + 0.5)
+            hm.prism([(y - 0.0375, 0.06), (y + 0.0375, 0.06), (y + 0.0375, 0.99), (y, 1.06), (y - 0.0375, 0.99)], -0.0643, -0.046, "wood", "x")
+    HW.make_object(col, "MRS_Fence", fence, 0.003)
 
-    def fence(bm):
-        _box(bm, -0.05, -0.05, 0.0, 0.05, 0.05, 1.15, 0); _lathe(bm, [(0.07, 1.15), (0.0, 1.21)], 4, 0, smooth=False)
-        for z in (0.3, 0.85): _box(bm, -0.025, -1.0, z, 0.0, 1.0, z + 0.08, 0)
-        for i in range(13):
-            y = -1.0 + 0.155 * i + 0.03
-            _box(bm, -0.045, y, 0.08, -0.025, y + 0.08, 1.0, 0)
-            _prism(bm, [(y, 1.0), (y + 0.08, 1.0), (y + 0.04, 1.07)], -0.045, -0.025, 0, "x")
-    make2(col, "MRS_Fence", fence, [m["wood"]], 0.004)
+    def hedge(hm):
+        from mathutils import noise as _n
+        bm = hm.bm; mi = hm.mi("foliage"); n0 = len(bm.faces)
+        hx, hy, hz = 0.33, 1.03, 0.5; res = (6, 22, 10); r = 0.16
+
+        def face(o, du, dv, nu, nv):
+            vs = [[bm.verts.new(o + du * (i / nu) + dv * (j / nv)) for i in range(nu + 1)] for j in range(nv + 1)]
+            for j in range(nv):
+                for i in range(nu):
+                    f = bm.faces.new((vs[j][i], vs[j][i + 1], vs[j + 1][i + 1], vs[j + 1][i])); f.material_index = mi; f.smooth = True
+        V = Vector; nx, ny, nz = res
+        face(V((-hx, -hy, -hz)), V((2 * hx, 0, 0)), V((0, 2 * hy, 0)), nx, ny); face(V((-hx, -hy, hz)), V((0, 2 * hy, 0)), V((2 * hx, 0, 0)), ny, nx)
+        face(V((-hx, -hy, -hz)), V((0, 0, 2 * hz)), V((2 * hx, 0, 0)), nz, nx); face(V((-hx, hy, -hz)), V((2 * hx, 0, 0)), V((0, 0, 2 * hz)), nx, nz)
+        face(V((-hx, -hy, -hz)), V((0, 2 * hy, 0)), V((0, 0, 2 * hz)), ny, nz); face(V((hx, -hy, -hz)), V((0, 0, 2 * hz)), V((0, 2 * hy, 0)), nz, ny)
+        inner = V((hx - r, hy + 0.5, hz - r))                     # y is not rounded: the ends meet the next segment
+        for v in bm.verts:
+            p = v.co.copy(); q = V((max(-inner.x, min(inner.x, p.x)), max(-inner.y, min(inner.y, p.y)), max(-inner.z, min(inner.z, p.z))))
+            d = p - q; nrm = d.normalized() if d.length > 1e-9 else V((0, 0, 1))
+            pr = q + nrm * r if d.length > 1e-9 else p
+            w = p * 9.0 + V((3.1, 0.0, 1.7)); w.y = (p.y % 2.06) * 9.0
+            amp = 0.018 * _n.noise(w) + 0.03 * _n.noise(p * 2.6 + V((7.0, 0.0, 2.0))) * (1.0 if abs(abs(p.y) - hy) > 0.2 else abs(abs(p.y) - hy) / 0.2)
+            pr += nrm * amp
+            pr.z += hz
+            pr.x *= 0.86 + 0.14 * min(1.0, max(0.0, pr.z / 0.35))
+            pr.z = max(0.0, pr.z)
+            v.co = pr
+        hm._end(n0, True)
+        xs = [v.co.x for v in bm.verts]; ys = [v.co.y for v in bm.verts]; zs = [v.co.z for v in bm.verts]
+        lo, hi = V((min(xs), min(ys), min(zs))), V((max(xs), max(ys), max(zs)))
+        tgt = (0.33575, 1.0284, 0.9981)
+        for v in bm.verts:
+            v.co = V(((v.co.x - (lo.x + hi.x) / 2) / (hi.x - lo.x) * 2 * tgt[0], (v.co.y - (lo.y + hi.y) / 2) / (hi.y - lo.y) * 2 * tgt[1], (v.co.z - lo.z) / (hi.z - lo.z) * tgt[2]))
+    HW.make_object(col, "MRS_Hedge", hedge, 0.0)
     return col
 
 
@@ -1115,6 +1354,7 @@ def _structures():
 def build_assets():
     """(Re)build every asset collection. Returns {short name: collection}."""
     _materials()
+    _hw().build_hardware_materials(verbose=False)                         # baked hardware atlas + MRS_HW_* (footbridge) materials
     _props(); _streetlights(); _trees(); _signs(); _traffic_lights(); _barriers(); _pillars(); _scatter(); _manholes(); _drains(); _markings(); _structures()
     return {c: bpy.data.collections[MRS + c] for c in COLLECTIONS}
 

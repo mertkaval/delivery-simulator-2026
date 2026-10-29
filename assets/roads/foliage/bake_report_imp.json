@@ -1,0 +1,10 @@
+{
+ "impostors": {
+  "frames": 8,
+  "px": 64,
+  "npx": 32,
+  "grid": 4,
+  "albedo": "impostor_albedo.png",
+  "normal": "impostor_normal.png"
+ }
+}

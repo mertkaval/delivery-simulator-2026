@@ -153,7 +153,51 @@ def street_block(wear="light_wear"):
 
 
 SB_SPEEDS = {"SB_AvenueW": 50, "SB_AvenueE": 50, "SB_North": 30, "SB_South": 30, "SB_SCurve": 30, "SB_TSide": 30}
-SB_BUS = [{"id": "S1", "road": "SB_South", "along": 52.0, "side": "r"}]
+SB_BUS = [{"id": "S1", "road": "SB_South", "along": 52.0, "side": "r"},
+          {"id": "S2", "road": "SB_North", "along": 50.0, "side": "l"}]          # serves the shop frontage (v5)
+# v5 street frontage: a shop built from the city kit on Maple St (west side), service yard + dropped kerb north of it
+SB_FRONTAGES = [{"id": "SB_Shop", "road": "SB_North", "side": "l", "along": 22.0, "bays": 4, "floors": 2, "depth": 12.0, "style": 1,
+                 "name": "Halden Grocer", "number": 24, "street": "Maple St", "yard_side": "ahead", "yard_width": 9.0, "drive_width": 5.0}]
+
+
+def _clear_of_footbridges(pts, width, margin=0.5):
+    """True when a path polyline (world XY points, `width` m wide) keeps `margin` m from every footbridge
+    approach path and does not pass under an approach (ramp / stairs footprint)."""
+    import json as _json
+    P = [Vector((p[0], p[1])) for p in pts]
+    samples = []
+    for a_, b_ in zip(P, P[1:]):
+        n = max(1, int((b_ - a_).length / 0.5))
+        samples += [a_.lerp(b_, i / n) for i in range(n + 1)]
+    def seg_d(p, a_, b_):
+        d = b_ - a_; L2 = d.length_squared
+        f = 0.0 if L2 < 1e-12 else max(0.0, min(1.0, (p - a_).dot(d) / L2))
+        return (a_ + d * f - p).length
+    def inside(p, poly):
+        c = False
+        for i in range(len(poly)):
+            a_, b_ = poly[i], poly[i - 1]
+            if (a_.y > p.y) != (b_.y > p.y) and p.x < (b_.x - a_.x) * (p.y - a_.y) / (b_.y - a_.y + 1e-12) + a_.x: c = not c
+        return c
+    for o in bpy.data.objects:
+        plan = o.get("mrs_footbridge_plan")
+        if not plan: continue
+        plan = _json.loads(plan)
+        for e in plan.get("ped_edges", []):
+            ap = [Vector((q[0], q[1])) for q in e.get("approach_path", [])]
+            for a_, b_ in zip(ap, ap[1:]):
+                if any(seg_d(p, a_, b_) < width / 2 + min(e.get("width", 2.5), 2.5) / 2 + margin for p in samples): return False
+        # no low part of the bridge overhead or underfoot along the path (ray down onto the evaluated footbridge mesh)
+        from mathutils.bvhtree import BVHTree
+        dg = bpy.context.evaluated_depsgraph_get(); ev = o.evaluated_get(dg); me = ev.to_mesh(); M = o.matrix_world
+        bvh = BVHTree.FromPolygons([M @ v.co for v in me.vertices], [list(pg.vertices) for pg in me.polygons]); ev.to_mesh_clear()
+        dd = (P[-1] - P[0]); nn = Vector((-dd.y, dd.x)).normalized() if dd.length > 1e-6 else Vector((1.0, 0.0))
+        for p in samples:
+            for off in (-width / 2, 0.0, width / 2):
+                q = p + nn * off
+                h = bvh.ray_cast(Vector((q.x, q.y, 30.0)), Vector((0, 0, -1)), 60.0)
+                if h[0] is not None and h[0].z < 3.2: return False         # < ~2.5 m headroom under the structure (or on it)
+    return True
 SB_PARK = [(-140.0, -27.0), (-17.0, -27.0), (-17.0, -88.0), (-140.0, -88.0)]
 
 
@@ -208,6 +252,8 @@ def block_v4_features(sc, col, r, seed=7, footbridge_along=100.0, bus_stops=None
     ground = next((o for o in col.objects if o.name.startswith(MRS + "GroundPlane")), None)
     if ground is not None: _lawn(ground)
     roads.set_road(r["s"], Sidewalk_Width_Right=4.6)
+    roads.set_road(r["n"], Sidewalk_Width_Left=4.5)                     # the shop frontage side: room for the bus shelter and the shop door
+    sc["mrs_frontages"] = __import__("json").dumps(SB_FRONTAGES)
     for o in r.values(): roads.set_road(o, Scatter_Density=0.0)       # planting strips belong to the landscape regions (placement v4)
     junction.rebuild_all()
     footbridge.ensure_group()
@@ -224,7 +270,7 @@ def block_v4_features(sc, col, r, seed=7, footbridge_along=100.0, bus_stops=None
     _pavilion("SB_Cafe", Vector((16.5, 52.0, 0.0)), (8.0, 11.0, 3.6), 0.0, bcol, door_side=-1)
     ent = bpy.data.objects.get("MRS_Entrance_Cafe") or bpy.data.objects.new("MRS_Entrance_Cafe", None)
     if ent.name not in col.objects: col.objects.link(ent)
-    ent.location = (12.4, 52.0, 0.15); ent["mrs_road"] = "SB_North"; ent["mrs_side"] = "r"; ent.empty_display_size = 1.0
+    ent.location = (11.8, 52.0, 0.15); ent["mrs_road"] = "SB_North"; ent["mrs_side"] = "r"; ent.empty_display_size = 1.0    # 0.7 m in front of the facade
     kiosk_src = bpy.data.objects.get(MRS + "Kiosk")
     if kiosk_src is not None:
         k = bpy.data.objects.new("SB_ParkKiosk", kiosk_src.data); bcol.objects.link(k); k.location = (-72.0, -66.0, -0.12)
@@ -241,6 +287,13 @@ def regenerate_block(sc, col, seed=None, bus_stops=None, rebuild_junctions=False
     import json as _json
     seed = sc.get("mrs_block_seed", 7) if seed is None else seed
     if rebuild_junctions: junction.rebuild_all()
+    # street frontages (city-kit shops with entrance / service anchors), then the driveways they declare -> the
+    # roads' dropped kerbs; everything below re-reads the anchors
+    from . import frontage as _fr
+    specs = _json.loads(sc.get("mrs_frontages", "[]"))
+    _fr.clear(col, keep=[f["id"] for f in specs])
+    fronts = [_fr.make_shop(f, col) for f in specs]
+    print("FRONTAGE", [(f["id"], f["address"], round(f["along"], 1)) for f in fronts], "driveways", _fr.sync_driveways(col))
     footbridge.rebuild_all(col)
     r_ = {k: bpy.data.objects[n] for k, n in (("avW", "SB_AvenueW"), ("s", "SB_South"))}
     rep = placement.place_all(col, seed=seed, style="avenue", speed_limits=SB_SPEEDS, bus_stops=bus_stops if bus_stops is not None else SB_BUS)
@@ -250,16 +303,31 @@ def regenerate_block(sc, col, seed=None, bus_stops=None, rebuild_junctions=False
     ms = placement.RoadModel(r_["s"]); mw = placement.RoadModel(r_["avW"])
     a_bus = (bs["along"] + 4.0) if bs else ms.A0 + 40.0
     q_bus = ms.point(a_bus, "r", ms.sw["r"] - 0.05)[0]
-    q_ave = mw.point(90.0, "r", mw.sw["r"] - 0.05)[0]
+    # the avenue path starts at the first station near 90 m whose first 9 m keep clear of the footbridge approaches
+    # (v4 started it under the ramp foot, on top of the footbridge's own approach path: a 12 cm upstand between them)
+    a_ave = 90.0
+    for a_try in (90.0, 94.0, 86.0, 98.0, 82.0, 102.0, 78.0, 106.0, 74.0, 110.0, 70.0):
+        q_try = mw.point(a_try, "r", mw.sw["r"] - 0.05)[0]
+        if _clear_of_footbridges([(q_try.x, q_try.y), (q_try.x, q_try.y - 9.0)], 2.5): a_ave = a_try; break
+    q_ave = mw.point(a_ave, "r", mw.sw["r"] - 0.05)[0]
     hub = Vector((-42.0, -64.0, 0.0))
     paths = [{"pts": [(q_bus.x, q_bus.y), (q_bus.x - 12.0, q_bus.y), (hub.x, hub.y)], "z_top": q_bus.z},                     # bus stop -> park hub
              {"pts": [(q_ave.x, q_ave.y), (q_ave.x, q_ave.y - 9.0), (-50.0, -45.0), (hub.x, hub.y)], "z_top": q_ave.z},          # avenue sidewalk -> hub
              {"pts": [(hub.x, hub.y), (-58.0, -66.0), (-70.4, -65.2)], "z_top": -0.09, "ramp": 0.01, "dest": "kiosk"}]           # hub -> kiosk
     park = placement.place_park(col, rep, "SB_Park", SB_PARK, paths=paths, seed=seed)
     print("PLACEMENT", rep["counts"], rep["by_kind"], "park", park)
+    # landscape ground: mask (beds, tree bases, access wear, macro variation) + tiling grass / soil / worn textures
+    from . import ground as _ground_mod
+    for o in [o for o in col.objects if o.name.startswith(MRS + "GroundPlane")]: bpy.data.objects.remove(o)
+    g_obj, g_rec = _ground_mod.build(col, rep, z=placement.RULES["ground_z"])
+    print("GROUND", g_rec["bounds"], g_rec["mask"])
     rt = routes.build(col, rep)
+    from . import movements as _mv
+    mv = _mv.build(col, rt)                      # lane paths, curved junction movements, swept clearance; refines ped corners
     print("ROUTES", rt["stats"], "validation", len(rt["validation"]))
-    for v in rt["validation"][:10]: print("   ", v)
+    print("MOVEMENTS", mv["stats"], "validation", len(mv["validation"]))
+    for v in (rt["validation"] + mv["validation"])[:14]: print("   ", v)
+    sc["mrs_movements"] = _json.dumps(mv, default=str)
     sc["mrs_placement_report"] = _json.dumps({k: v for k, v in rep.items() if not k.startswith("_") and k != "items"}, default=str)
     sc["mrs_placement_items"] = _json.dumps(rep["items"], default=str)
     sc["mrs_routes"] = _json.dumps(rt, default=str)
