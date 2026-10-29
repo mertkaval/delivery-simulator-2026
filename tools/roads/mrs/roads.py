@@ -76,7 +76,12 @@ def set_road(o, preset=None, terrain=None, **overrides):
     mod = o.modifiers["MRS_Road"]
     vals = dict(PRESETS[preset]) if preset else {}
     vals.update({k.replace("_", " "): v for k, v in overrides.items()})
-    stored = dict(o.get("mrs_inputs", {})) if preset is None else {}
+    known = {i.name for i in mod.node_group.interface.items_tree if getattr(i, "in_out", "") == "INPUT"}
+    unknown = [k for k in vals if k not in known]
+    if unknown:                                   # inputs of an older group version (e.g. stored on old roads): dropped, reported
+        print("set_road %s: ignoring unknown inputs %s" % (o.name, unknown))
+        for k in unknown: vals.pop(k)
+    stored = {k: v for k, v in (dict(o.get("mrs_inputs", {})) if preset is None else {}).items() if k in known}
     stored.update(vals); o["mrs_inputs"] = stored
     for k, v in vals.items(): mod_input_set(mod, k, v)
     for k, c in COLLECTION_INPUTS.items():

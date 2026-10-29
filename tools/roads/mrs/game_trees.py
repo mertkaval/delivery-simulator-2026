@@ -35,9 +35,27 @@ def _library_collection(name):
 
 
 def _import(path):
-    before = set(bpy.data.objects)
+    before = set(bpy.data.objects); cols = set(bpy.data.collections); scenes = set(bpy.data.scenes)
     bpy.ops.import_scene.gltf(filepath=path, import_shading="NORMALS", merge_vertices=False)
-    return [o for o in bpy.data.objects if o not in before]
+    new = [o for o in bpy.data.objects if o not in before]
+    _NEW.append((set(bpy.data.collections) - cols, set(bpy.data.scenes) - scenes))
+    return new
+
+
+_NEW = []        # collections / scenes the glTF importer created (the kit GLBs carry scenes named Bake / Scene)
+
+
+def _cleanup_import_leftovers():
+    for cols, scenes in _NEW:
+        for c in cols:
+            try:
+                if len(c.all_objects) == 0 and len(c.children) == 0: bpy.data.collections.remove(c)
+            except ReferenceError: pass
+        for s in scenes:
+            try:
+                if len(s.objects) == 0 and s != bpy.context.scene: bpy.data.scenes.remove(s)
+            except ReferenceError: pass
+    _NEW.clear()
 
 
 def _game_material(m, leaves):
@@ -144,6 +162,8 @@ def build_game_trees(plants=True):
             o["mrs_crown_reach"] = max(max(abs(min(xs)), max(xs)), max(abs(min(ys)), max(ys)), props["mrs_crown_radius"])
         l1 = far_meshes.get(sid + "_LOD1")
         if l1 is not None: _take_mesh(l1, MRS + "GTree_" + sid + "_LOD1", tcol, dict(props, mrs_lod=1))
+        for nm in (MRS + "GTree_" + sid, MRS + "GTree_" + sid + "_LOD1"):      # library trees stand at the origin: keep them out of
+            if bpy.data.objects.get(nm): bpy.data.objects[nm].hide_viewport = True   # the viewport (placed copies are new objects)
         _cleanup(objs)
     _cleanup(far)
     if plants:
@@ -157,6 +177,7 @@ def build_game_trees(plants=True):
                 _take_mesh(src, MRS + "GPlant_" + pid, pcol, {"mrs_plant": pid, "mrs_height": max(zs) - min(zs), "mrs_size": [max(xs) - min(xs), max(ys) - min(ys)],
                                                               "mrs_source": "res://assets/landscape/%s.glb#%s" % (f, pid)})
             _cleanup(objs)
+    _cleanup_import_leftovers()
     return tcol
 
 
