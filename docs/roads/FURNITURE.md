@@ -40,7 +40,7 @@ about 0.3 s, and a bake takes about 15 s on the CPU. The module has no side effe
 ## Custom-property contract (glTF extras on every node)
 | property | type | meaning |
 |---|---|---|
-| `mrs_kind` | str | `bench, bin, bike_rack, bus_shelter, bus_pole, info_board, bollard, barrier, planter, tree_pit, utility, hydrant, drain, access_cover` |
+| `mrs_kind` | str | `bench, bin, bike_rack, bus_shelter, bus_pole, info_board, bollard, barrier, planter, tree_pit, tree_guard, utility, hydrant, drain, access_cover` |
 | `mrs_footprint` | JSON str `"[w, d]"` | physical footprint in metres along local X and Y, i.e. the XY bounds of the mesh including overhangs (test: within 10 % of the mesh bounds) |
 | `mrs_access` | JSON str `{"front","back","left","right"}` | clear space in metres that must stay free around the footprint for use or maintenance. **Rule:** the access envelope (footprint grown by these distances in the object's frame) must not contain another object's footprint, a wall or the carriageway. It may overlap other access envelopes and the walking corridor. |
 | `mrs_zone` | str | preferred sidewalk zone: `furniture` (between the walking corridor and the kerb), `curb` (kerb edge), `frontage` (building side), `flush` (anywhere, walkable), `gutter` (in the carriageway gutter against the kerb) |

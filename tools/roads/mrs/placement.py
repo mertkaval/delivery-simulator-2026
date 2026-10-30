@@ -53,7 +53,7 @@ LIB = {"bench": ("MRS_F_Bench", "MRS_Bench_Wood"), "bench_backless": ("MRS_F_Ben
        "shelter": ("MRS_F_BusShelter", "MRS_BusStopShelter"), "bus_pole": ("MRS_F_BusStopPole", "MRS_Sign_BusStop"),
        "info_board": ("MRS_F_InfoBoard", "MRS_Kiosk"), "bollard": ("MRS_F_Bollard", "MRS_Bollard_Steel"),
        "barrier": ("MRS_F_PedBarrier", "MRS_Railing"), "planter": ("MRS_F_Planter", "MRS_Planter"),
-       "pit_grate": ("MRS_F_TreePitGrate",), "pit_open": ("MRS_F_TreePitOpen",), "cabinet": ("MRS_F_UtilityCabinet",),
+       "pit_grate": ("MRS_F_TreePitGrate",), "pit_open": ("MRS_F_TreePitOpen",), "cabinet": ("MRS_F_UtilityCabinet",), "tree_guard": ("MRS_F_TreeGuard",),
        "hydrant": ("MRS_F_Hydrant", "MRS_Hydrant"), "drain": ("MRS_F_DrainGrate", "MRS_Gully1"), "cover": ("MRS_F_AccessCover", "MRS_Manhole_Square")}
 # fallback footprints / access (when a library object has no mrs_footprint / mrs_access)
 DEFAULT = {"bench": ((1.8, 0.65), {"front": 0.9}), "bench_backless": ((1.9, 0.5), {"front": 0.8, "back": 0.8}), "bin": ((0.6, 0.6), {"front": 0.6}),
@@ -64,6 +64,16 @@ DEFAULT = {"bench": ((1.8, 0.65), {"front": 0.9}), "bench_backless": ((1.9, 0.5)
            "drain": ((0.6, 0.45), {}), "cover": ((0.7, 0.7), {}), "light": ((0.4, 0.4), {}), "sign": ((0.3, 0.3), {}), "signal": ((0.5, 0.5), {}), "tree": ((0.7, 0.7), {}),
            "column": ((0.9, 0.9), {})}
 FLUSH = {"pit_grate", "drain", "cover", "pad"}
+# how an object meets sloping ground (by library kind; everything else is embedded: poles, posts, signs, hydrants and
+# trees are set into the ground at the lowest point under their base)
+FREE_STANDING = {"bench", "bench_backless", "bin", "bin_recycling", "rack", "rack1", "planter", "barrier"}   # need near-level ground
+ON_PLINTH = {"shelter", "cabinet"}             # built on a level concrete plinth that reaches down to the slope
+FREE_RISE = 0.10                               # free-standing furniture: at most this rise across its base (m)
+TREE_GUARD = 1.2                               # the tree guard's nominal side (m): scaled to the bed it surrounds
+TREE_GUARD_SCALE = (0.85, 1.25)                # ... within this
+TREE_EDGING_MIN_STRIP = 1.2                    # a planting strip this wide gets a square concrete edging round the tree (m)
+TREE_EDGING_W, TREE_EDGING_H = 0.08, 0.06      # edging width and height above the strip (m)
+PLINTH_MARGIN = 0.10                           # a plinth reaches this far beyond the base (m)
 TALL = {"tree", "shelter", "cabinet", "planter", "info_board", "hedge", "shrub"}
 
 
@@ -269,6 +279,100 @@ def clear_placed(roads_col):
 def _yaw(f): return math.atan2(f.y, f.x) - math.pi / 2
 
 
+_GROUND = [None]                 # BVH of every road and junction surface of the placement run (_network_ground)
+
+
+def _network_ground(roads_col):
+    """One BVH of the upward faces of every road and junction of the collection (no paint): what an object near a
+    junction stands on may be the junction's surface, not its road's (a bench at a road's start sank into the corner)."""
+    from mathutils.bvhtree import BVHTree
+    from .nodes import depsgraph
+    dg = depsgraph(); vs, fs = [], []
+    objs = all_roads(roads_col) + [o for o in roads_col.all_objects if o.get("mrs_junction") and o.type == "MESH"]
+    for o in objs:
+        ev = o.evaluated_get(dg); me = ev.to_mesh(); M = o.matrix_world; R3 = M.to_3x3()
+        try:
+            kind = me.attributes.get("kind"); kv = [d.value for d in kind.data] if kind is not None and kind.domain == "FACE" else None
+            b = len(vs); vs += [M @ v.co for v in me.vertices]
+            fs += [tuple(b + i for i in p.vertices) for p in me.polygons if (R3 @ p.normal).z > 0.3 and (kv is None or int(round(kv[p.index])) not in (1, 5, 9))]
+        finally:
+            ev.to_mesh_clear()
+    return BVHTree.FromPolygons(vs, fs) if fs else None
+
+
+def _ground_z(m, pts, z_hint):
+    """The surface height under each plan point: the network's road and junction surfaces (_GROUND) during a placement
+    run, else the road's own upward faces (as surface_z); None where none is."""
+    from . import structures as _st
+    centre_line(m.road)
+    rec = _st._CENTRE.get(m.road.name)
+    bvh = _GROUND[0] or (rec[3] if rec is not None and len(rec) > 3 else None)
+    out = []
+    for p in pts:
+        h = bvh.ray_cast(Vector((p.x, p.y, z_hint + 50.0)), Vector((0.0, 0.0, -1.0)), 200.0) if bvh is not None else (None,)
+        out.append(h[0].z if h[0] is not None else None)
+    return out
+
+
+_BASE_HULLS = {}
+
+
+def _base_hull(src):
+    """The plan outline (convex hull, local x / y) of where a library object touches the ground: its vertices within
+    0.25 m of its lowest point (a bench's legs, a rack's hoops, a cabinet's plinth); cached per object."""
+    from mathutils.geometry import convex_hull_2d
+    key = (src.name, len(src.data.vertices)) if src.type == "MESH" else None
+    if key is None: return None
+    if key not in _BASE_HULLS:
+        vs = [v.co for v in src.data.vertices]
+        if not vs: _BASE_HULLS[key] = None
+        else:
+            z0 = min(v.z for v in vs); base = [(v.x, v.y) for v in vs if v.z <= z0 + 0.25]
+            _BASE_HULLS[key] = [base[i] for i in convex_hull_2d(base)] if len(base) >= 3 else base
+    return _BASE_HULLS[key]
+
+
+def _seat(m, lib_kind, pos, foot, src=None, yaw=0.0, scale=1.0):
+    """Where an item meets the ground under its base: (z, plinth, why). The ground is probed where the object really
+    touches it (its base hull, else the footprint `foot`): embedded items stand at the lowest point (the uphill side set
+    into the ground); free-standing furniture likewise, but only where the ground rises at most FREE_RISE across it
+    (else `why`); structures on a plinth stand at the highest point on a level plinth. They all stood at the height
+    under their centre, so on a sloping sidewalk half of each base hung in the air."""
+    if lib_kind in FLUSH: return pos.z, None, None
+    hull = _base_hull(src) if src is not None else None
+    if hull:
+        cy, sy = math.cos(yaw), math.sin(yaw)
+        corners = [Vector((pos.x + (x * cy - y * sy) * scale, pos.y + (x * sy + y * cy) * scale)) for x, y in hull]
+    else:
+        corners = [foot.c + (c - foot.c) * 0.96 for c in foot.corners()]
+    zs = [z for z in _ground_z(m, [Vector((c.x, c.y, pos.z)) for c in corners] + [pos], pos.z) if z is not None]
+    if not zs: return pos.z, None, None
+    lo, hi = min(zs), max(zs)
+    if lib_kind in ON_PLINTH and hi - lo > 0.02: return hi, (lo, hi), None
+    if lib_kind in FREE_STANDING and hi - lo > FREE_RISE:
+        return lo, None, "the ground rises %.2f m across its base (> %.2f for free-standing furniture)" % (hi - lo, FREE_RISE)
+    return lo, None, None
+
+
+def _plinth(ctx, name, foot, z_top, z_low, material):
+    """A level concrete plinth under a structure on sloping ground: its top at the base's highest ground point, its sides
+    down below the lowest (a bus shelter on an 11 % sidewalk stands on one, as built ones do)."""
+    bm = bmesh.new(); hx, hy = foot.hx + PLINTH_MARGIN, foot.hy + PLINTH_MARGIN
+    ux = Vector((foot.ux.x, foot.ux.y, 0.0)); uy = Vector((foot.uy.x, foot.uy.y, 0.0)); c = Vector((foot.c.x, foot.c.y, 0.0))
+    ring = [c + ux * sx * hx + uy * sy * hy for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+    top = [bm.verts.new((p.x, p.y, z_top)) for p in ring]; bot = [bm.verts.new((p.x, p.y, z_low - 0.08)) for p in ring]
+    bm.faces.new(top)
+    for i in range(4): bm.faces.new((bot[i], bot[(i + 1) % 4], top[(i + 1) % 4], top[i]))
+    me = bpy.data.meshes.new("MRS_PL_" + name); bm.to_mesh(me); bm.free()
+    uv = me.uv_layers.new(name="UVMap")
+    for li, l in enumerate(me.loops):
+        co = me.vertices[l.vertex_index].co; uv.data[li].uv = (co.x + co.z, co.y + co.z)
+    if material: me.materials.append(material)
+    o = bpy.data.objects.new(name, me); ctx["col"].objects.link(o); o["mrs_placed"] = "plinth"; o["mrs_kind"] = "pad"
+    ctx["occ"].add_solid(Rect(Vector((foot.c.x, foot.c.y)), Vector((foot.ux.x, foot.ux.y)), hx, hy), name, "pad")
+    return o
+
+
 # ============================================================================ main entry
 def place_all(roads_col, seed=0, style="avenue", speed_limits=None, bus_stops=None, rules=None, log=None):
     """Run the whole placement for every road in the collection. Returns a report dict:
@@ -276,15 +380,22 @@ def place_all(roads_col, seed=0, style="avenue", speed_limits=None, bus_stops=No
     items [{name, kind, road, side, along, pos, foot (corners), solid}], regions (landscape)."""
     if rules: RULES.update(rules)
     from . import structures as _st
+    from .roads import set_road
+    # a speed given here is that road's posted speed: written to its Speed Limit input (the one source the signs and
+    # validate read), so a sign never disagrees with its road (a separate table put 30 signs on 50 roads)
+    for r in all_roads(roads_col):
+        if speed_limits and r.name in speed_limits and road_input(r, "Speed Limit") != int(speed_limits[r.name]):
+            set_road(r, Speed_Limit=int(speed_limits[r.name]))
     rng = random.Random(seed)
     col = clear_placed(roads_col)
     roads = all_roads(roads_col)
     for r in roads: centre_line(r)
     _st.freeze([r.name for r in roads])
+    _GROUND[0] = _network_ground(roads_col)
     try:
         return _place_all(roads_col, roads, col, rng, seed, style, speed_limits, bus_stops)
     finally:
-        _st.freeze(None)
+        _st.freeze(None); _GROUND[0] = None
 
 
 def _place_all(roads_col, roads, col, rng, seed, style, speed_limits, bus_stops):
@@ -370,16 +481,29 @@ def _put(ctx, m, s, a, d, kind, lib_kind=None, f_dir=None, lift=0.0, cat=None, o
                     dd_ = (Vector((cpt.x, cpt.y, 0)) - Vector((m.frame(a)[0].x, m.frame(a)[0].y, 0))).dot(n) - (m.half(a, s) + m.curb)
                     if dd_ < -0.05 and kind not in ("drain",): why = "access space would reach into the carriageway"; break
                 if why: break
+    pad_w, pad_d = w * scale + 2 * RULES["pad_margin"], dd * scale + acc.get("front", 0) * 0.6 + 2 * RULES["pad_margin"]
+    if why is None and pad:
+        # the item's pad is ground it occupies too: it never reaches under something already standing there (a cabinet's
+        # pad used to run under a streetlight's foot)
+        pr = _pad_rect(m, s, a, pos, fv, pad_w, pad_d)
+        if pr is not None:
+            for e in ctx["occ"].near(pr[0]):
+                if e["t"] == "solid" and e["r"].overlaps(pr[0], 0.01): why = "its pad would reach under %s" % e["owner"]; break
+    plinth = None
+    if why is None:
+        z_seat, plinth, why = _seat(m, lib_kind, pos, foot, src, _yaw(fv), scale)
+        pos = pos.copy(); pos.z = z_seat + lift
     if why:
         if not quiet: _skip(ctx, m, kind, a, why)
         return None
     o = _place(src, owner, pos, _yaw(fv), ctx["col"], scale, kind, dict(meta or {}, mrs_road=m.name, mrs_side=s, mrs_along=round(a, 2)))
+    if plinth is not None: _plinth(ctx, owner + "_plinth", foot, plinth[1], plinth[0], bpy.data.materials.get(MRS + "Concrete"))
     ctx["occ"].add(foot, accs, owner, lib_kind)
     ctx["rep"]["placed"].append((m.name, kind, s, round(a, 1), src.name))
     ctx["rep"]["items"].append({"name": owner, "kind": kind, "lib": src.name, "road": m.name, "side": s, "along": round(a, 2), "d": round(d, 2),
                                 "pos": [round(c, 3) for c in pos], "yaw": round(_yaw(fv), 4), "scale": scale, "foot": [[round(c.x, 3), round(c.y, 3)] for c in foot.corners()],
                                 "flush": lib_kind in FLUSH, "access": [[[round(c.x, 3), round(c.y, 3)] for c in r.corners()] for r in accs]})
-    if pad: _pad(ctx, m, s, a, pos, fv, w * scale + 2 * RULES["pad_margin"], dd * scale + acc.get("front", 0) * 0.6 + 2 * RULES["pad_margin"], owner)
+    if pad: _pad(ctx, m, s, a, pos, fv, pad_w, pad_d, owner)
     return o
 
 
@@ -497,6 +621,29 @@ def _reserve_anchors(ctx, roads_col):
             d = far - near; L = d.length
             wid = 2.4 if nm.startswith("MRS_Entrance") else float(o.get("mrs_width", 4.0)) + 2.0    # driveway + its kerb-drop flanks
             occ.add_keep(Rect((far + near) / 2, d if L > 0.1 else t, max(L, 0.5) / 2 + 0.3, wid / 2), ("entrance " if wid < 3 else "driveway ") + nm, {"*"})
+    _reserve_driveways(ctx)
+
+
+def _reserve_driveways(ctx):
+    """Every road's own vehicle accesses (its Driveways input: points (station, +/-100 for right / left) with a width,
+    the source of its dropped kerb and apron): nothing optional across the sidewalk there. Only MRS_Driveway_* anchors
+    were reserved, and a city's driveways (written straight into the roads) got benches half on the apron."""
+    occ = ctx["occ"]
+    for m in ctx["models"].values():
+        dw = road_input(m.road, "Driveways")
+        if dw is None or dw.type != "MESH": continue
+        wa = dw.data.attributes.get("width")
+        step = max(road_input(m.road, "Resolution") or 1.0, 0.1)
+        for i, v in enumerate(dw.data.vertices):
+            w = wa.data[i].value if wa is not None else 0.0
+            if w <= 0.4: continue                                                       # as the road: no access
+            s = "r" if v.co.y > 0 else "l"
+            if m.sw[s] <= 0.05: continue
+            a = min(max(v.co.x, m.A0), m.A1)
+            # the road's apron: the width plus half a station, then a flank of at least a station (road.drive_dip)
+            half = w / 2 + step / 2 + max(step, 1.0) + 0.3
+            p, t, n = m.point(a, s, m.sw[s] / 2)
+            occ.add_keep(Rect(p, t, half, m.sw[s] / 2 + 0.3), "driveway %s @%.1f%s" % (m.name, a, s), {"*"})
 
 
 def _reserve_buildings(ctx):
@@ -674,7 +821,10 @@ def _bus_stop(ctx, st):
     # boarding pad (paving over the planting strip along the boarding area) + BUS STOP lane text
     if z["strip"] > 0.05:
         p, t, n = m.point(a, s, z["strip"] / 2)
-        _slab(ctx, "%s_busstop_pad" % m.name, p, t, n, RULES["bus_boarding"] + 1.0, z["strip"] + 0.02, 0.025, bpy.data.materials.get(MRS + "Paving"))
+        _slab(ctx, "%s_busstop_pad" % m.name, p, t, n, RULES["bus_boarding"] + 1.0, z["strip"] + 0.02, 0.025, bpy.data.materials.get(MRS + "Paving"), m=m)
+        # the boarding pad is occupied ground for everything placed after the stop (lights, cabinets, bins, trees and
+        # their pads): a cabinet used to be set down on it
+        occ.add_solid(Rect(Vector((p.x, p.y)), Vector((t.x, t.y)), (RULES["bus_boarding"] + 1.0) / 2, (z["strip"] + 0.02) / 2), "%s_busstop_pad" % m.name, "pad")
     try:
         from .structures import _text_mesh
         p, t, r = m.frame(a); sgn = 1.0 if s == "r" else -1.0
@@ -691,12 +841,17 @@ def _bus_stop(ctx, st):
                                                    "point": [round(c, 3) for c in m.point(a, s, RULES["bus_boarding_depth"] / 2)[0]]})
 
 
-def _slab(ctx, name, centre, t, n, length, depth, thick, material):
-    """A thin paved slab (boarding pad, furniture pad) on the surface, edges bevelled down so nothing floats."""
+def _slab(ctx, name, centre, t, n, length, depth, thick, material, m=None):
+    """A thin paved slab (boarding pad, furniture pad) on the surface, edges bevelled down so nothing floats. With the
+    road model `m` every corner follows the surface under it (a level slab on a sloping sidewalk hung over it downhill)."""
     bm = bmesh.new()
     hx, hy = length / 2, depth / 2
     top = [centre + t * sx * hx + n * sy * hy + Vector((0, 0, thick)) for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
     bot = [centre + t * sx * (hx + 0.02) + n * sy * (hy + 0.02) + Vector((0, 0, -0.03)) for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+    if m is not None:
+        for q, dz in [(q, thick) for q in top] + [(q, -0.03) for q in bot]:
+            g = _ground_z(m, [q], centre.z)[0]
+            if g is not None: q.z = g + dz
     vt = [bm.verts.new(q) for q in top]; vb = [bm.verts.new(q) for q in bot]
     bm.faces.new(vt)
     for i in range(4): bm.faces.new((vb[i], vb[(i + 1) % 4], vt[(i + 1) % 4], vt[i]))
@@ -709,16 +864,27 @@ def _slab(ctx, name, centre, t, n, length, depth, thick, material):
     return o
 
 
-def _pad(ctx, m, s, a, pos, f_dir, w, d, owner):
+def _pad_rect(m, s, a, pos, f_dir, w, d):
+    """The slab an item in the planting strip stands on (None outside the strip): (Rect, centre, ux, fy)."""
     z = m.zones(s)
-    if z is None or z["strip"] < 0.05: return
+    if z is None or z["strip"] < 0.05: return None
     # only when the item stands in the planting strip
     p, t, n = m.frame(a)
     dd = (Vector((pos.x, pos.y, 0)) - Vector((p.x, p.y, 0))).dot(n * (1.0 if s == "r" else -1.0)) - (m.half(a, s) + m.curb)
-    if dd > z["strip"] + 0.1: return
+    if dd > z["strip"] + 0.1: return None
     fy = Vector((f_dir.x, f_dir.y, 0)).normalized(); ux = Vector((fy.y, -fy.x, 0))
-    c = pos.copy(); c.z = pos.z - 0.0
-    _slab(ctx, owner + "_pad", c + fy * 0.15, ux, fy, w, d, 0.02, bpy.data.materials.get(MRS + "Paving"))
+    c = pos.copy(); cc = c + fy * 0.15
+    return Rect(Vector((cc.x, cc.y)), Vector((ux.x, ux.y)), w / 2, d / 2), c, ux, fy
+
+
+def _pad(ctx, m, s, a, pos, f_dir, w, d, owner):
+    pr = _pad_rect(m, s, a, pos, f_dir, w, d)
+    if pr is None: return
+    _r, c, ux, fy = pr
+    _slab(ctx, owner + "_pad", c + fy * 0.15, ux, fy, w, d, 0.02, bpy.data.materials.get(MRS + "Paving"), m=m)
+    # the slab is occupied ground: a later tree's mulch bed or another item keeps off it (a mulch ring used to cover
+    # part of a cabinet's pad)
+    ctx["occ"].add_solid(Rect(Vector(((c + fy * 0.15).x, (c + fy * 0.15).y)), Vector((ux.x, ux.y)), w / 2, d / 2), owner + "_pad", "pad")
 
 
 def _light_preset(m):
@@ -949,6 +1115,13 @@ def _trees(ctx, m):
         if mode is None:
             _skip(ctx, m, "tree", m.A0, "side %s: no planting strip >= 0.9 m and no furniture zone >= 1.25 m for a tree pit" % s); continue
         d_tree = strip / 2 if mode == "strip" else (z["fz"][0] + z["fz"][1]) / 2
+        # a tree in a strip occupies its whole mulch bed (radius r_mulch), not only its trunk; every street tree has a square
+        # guard round its bed (the grate in a pit, the bed in a strip) and reserves it
+        r_mulch = min(0.7, strip / 2 - 0.05) if mode == "strip" else 0.0
+        side = TREE_GUARD if mode == "pit" else min(max(strip - 0.1, 0.9), 1.6)
+        g_scale = min(max(side / TREE_GUARD, TREE_GUARD_SCALE[0]), TREE_GUARD_SCALE[1])
+        half_foot = max(0.35, r_mulch, TREE_GUARD * g_scale / 2 + 0.05)
+        edging = mode == "strip" and strip >= TREE_EDGING_MIN_STRIP
         # phase: midway between the streetlights on this side when possible
         a = m.A0 + R["tree_spacing"] * 0.5; k = 0
         while a < m.A1 - 1.0:
@@ -962,7 +1135,14 @@ def _trees(ctx, m):
                         why = _tree_check(ctx, m, s, a + sh, d_tree, info, sc, heads, signs, signals)
                         if why: reasons.append(why); continue
                         pos, t, n = m.point(a + sh, s, d_tree)
-                        foot = Rect(pos, t, 0.35, 0.35)
+                        rt = max(0.3, info["trunk"] * sc * 1.6)                  # the trunk's foot with its root flare
+                        ring = [Vector((pos.x + rt * math.cos(k * math.pi / 4), pos.y + rt * math.sin(k * math.pi / 4), pos.z)) for k in range(8)]
+                        zs_ = [z_ for z_ in _ground_z(m, ring + [pos], pos.z) if z_ is not None]
+                        if zs_: pos = pos.copy(); pos.z = min(zs_)
+                        foot = Rect(pos, t, half_foot, half_foot)
+                        # the whole bed (guard, edging, mulch) on the surface: past a road's end it hung over nothing
+                        if any(z_ is None for z_ in _ground_z(m, [Vector((c.x, c.y, pos.z)) for c in foot.corners()], pos.z)):
+                            reasons.append("its %.1f m bed would overhang the end of the surface" % (2 * half_foot)); continue
                         why = ctx["occ"].blocked(foot, [], "tree", "tree", "tree", info["height"] * sc)
                         if why: reasons.append(why); continue
                         owner = "%s_tree_%s%d" % (m.name, s, k)
@@ -975,9 +1155,12 @@ def _trees(ctx, m):
                                                     "foot": [[round(c.x, 3), round(c.y, 3)] for c in foot.corners()], "crown": round(info["reach"] * sc, 2)})
                         # tree base: grate on paving, mulch bed in a strip
                         if mode == "pit":
-                            _put(ctx, m, s, a + sh, d_tree, "tree_pit", "pit_grate", "out", cat="flush", quiet=True)
+                            _put(ctx, m, s, a + sh, d_tree, "tree_pit", "pit_grate", "out", cat="flush", quiet=True, owner=owner + "_grate")
+                        elif edging:
+                            _tree_edging(ctx, m, owner, pos, t, side)
                         else:
-                            _mulch(ctx, owner, pos, min(0.7, strip / 2 - 0.05))
+                            _mulch(ctx, owner, pos, r_mulch, m)
+                        _tree_guard(ctx, m, owner, pos, t, g_scale)
                         placed = o; break
                     if placed: break
                 if placed: break
@@ -1015,12 +1198,66 @@ def _tree_check(ctx, m, s, a, d, info, sc, heads, signs, signals):
     return None
 
 
-def _mulch(ctx, owner, pos, r):
-    """Low domed mulch ring around a trunk in a planting strip (edges flush with the strip: nothing floats)."""
+def _tree_guard(ctx, m, owner, pos, t, scale):
+    """The square guard round a street tree (library MRS_F_TreeGuard, scaled to its bed), along the street, its posts set
+    into the ground at the lowest point under its corners."""
+    src = lib_object("tree_guard")
+    if src is None: return None
+    h = TREE_GUARD * scale / 2; tt = Vector((t.x, t.y, 0.0)).normalized(); nn = Vector((-tt.y, tt.x, 0.0))
+    corners = [pos + tt * sx * h + nn * sy * h for sx in (-1, 1) for sy in (-1, 1)]
+    zs = [z for z in _ground_z(m, corners + [pos], pos.z) if z is not None]
+    p = pos.copy(); p.z = min(zs) if zs else pos.z
+    return _place(src, owner + "_guard", p, _yaw(tt), ctx["col"], scale, "tree_guard", {"mrs_road": m.name})
+
+
+def _tree_edging(ctx, m, owner, pos, t, side):
+    """A square concrete edging round a tree in a planting strip, `side` m across, with a soil bed inside it; every vertex
+    follows the strip's surface (a sloping strip keeps its edging on the ground)."""
+    tt = Vector((t.x, t.y, 0.0)).normalized(); nn = Vector((-tt.y, tt.x, 0.0)); h = side / 2; w = TREE_EDGING_W
+    def at(u, v, dz):
+        q = pos + tt * u + nn * v
+        g = _ground_z(m, [q], pos.z)[0]
+        q = q.copy(); q.z = (g if g is not None else pos.z) + dz
+        return q
+    bm = bmesh.new(); n = 4                         # each side of the frame in n pieces so it follows the slope
+    def ring(r, dz):
+        pts = []
+        for k in range(4 * n):
+            s_, f = divmod(k, n); f = f / n
+            u, v = {0: (-r + 2 * r * f, -r), 1: (r, -r + 2 * r * f), 2: (r - 2 * r * f, r), 3: (-r, r - 2 * r * f)}[s_]
+            pts.append(bm.verts.new(at(u, v, dz)))
+        return pts
+    o_bot, o_top, i_top, i_bot = ring(h, -0.03), ring(h, TREE_EDGING_H), ring(h - w, TREE_EDGING_H), ring(h - w, 0.02)
+    N = len(o_top)
+    for k in range(N):
+        k1 = (k + 1) % N
+        bm.faces.new((o_top[k], o_top[k1], i_top[k1], i_top[k]))            # top of the edging
+        bm.faces.new((o_bot[k], o_bot[k1], o_top[k1], o_top[k]))            # outer face
+        bm.faces.new((i_top[k], i_top[k1], i_bot[k1], i_bot[k]))            # inner face down to the soil
+    bm.faces.new(i_bot)                                                      # the soil bed inside (counter-clockwise: faces up)
+    me = bpy.data.meshes.new("MRS_PL_" + owner + "_edging"); bm.to_mesh(me); bm.free()
+    me.materials.append(bpy.data.materials.get(MRS + "Concrete")); me.materials.append(_mulch_material())
+    for p_ in me.polygons: p_.material_index = 1 if p_.index == 3 * N else 0      # the bed is the last face
+    uv = me.uv_layers.new(name="UVMap")
+    for li, l in enumerate(me.loops):
+        co = me.vertices[l.vertex_index].co; uv.data[li].uv = (co.x + co.z, co.y + co.z)
+    o = bpy.data.objects.new(owner + "_edging", me); ctx["col"].objects.link(o); o["mrs_placed"] = "tree_edging"; o["mrs_kind"] = "tree_edging"
+    return o
+
+
+def _mulch(ctx, owner, pos, r, m=None):
+    """Low domed mulch ring around a trunk in a planting strip (edges flush with the strip: nothing floats). With the
+    road model `m` every vertex follows the strip's surface (a level ring hung over a sloping strip downhill)."""
     bm = bmesh.new(); n = 14
-    c = bm.verts.new(pos + Vector((0, 0, 0.035)))
-    ring1 = [bm.verts.new(pos + Vector((math.cos(2 * math.pi * k / n) * r * 0.55, math.sin(2 * math.pi * k / n) * r * 0.55, 0.03))) for k in range(n)]
-    ring2 = [bm.verts.new(pos + Vector((math.cos(2 * math.pi * k / n) * r, math.sin(2 * math.pi * k / n) * r, -0.01))) for k in range(n)]
+    def at(dx, dy, dz):
+        q = pos + Vector((dx, dy, 0.0))
+        if m is not None:
+            g = _ground_z(m, [q], pos.z)[0]
+            if g is not None: q.z = g
+        return q + Vector((0.0, 0.0, dz))
+    c = bm.verts.new(at(0.0, 0.0, 0.035))
+    ring1 = [bm.verts.new(at(math.cos(2 * math.pi * k / n) * r * 0.55, math.sin(2 * math.pi * k / n) * r * 0.55, 0.03)) for k in range(n)]
+    ring2 = [bm.verts.new(at(math.cos(2 * math.pi * k / n) * r, math.sin(2 * math.pi * k / n) * r, -0.01)) for k in range(n)]
     for k in range(n):
         bm.faces.new((c, ring1[k], ring1[(k + 1) % n]))
         bm.faces.new((ring1[k], ring2[k], ring2[(k + 1) % n], ring1[(k + 1) % n]))

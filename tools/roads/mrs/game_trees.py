@@ -150,6 +150,14 @@ def _game_material(m, leaves):
 
 def _take_mesh(obj, name, col, props):
     me = obj.data.copy(); me.name = name
+    # the library copy stands at the origin with its lowest point ON the ground: the imported object's own transform is
+    # baked in and the mesh is shifted so min z = 0 (the cherry's trunk base sat 9 cm above its origin, and every placed
+    # cherry floated 9 cm over its planting strip)
+    from mathutils import Matrix
+    me.transform(obj.matrix_world)
+    if len(me.vertices):
+        zmin = min(v.co.z for v in me.vertices)
+        if abs(zmin) > 1e-4: me.transform(Matrix.Translation((0.0, 0.0, -zmin))); props = dict(props, mrs_base_shift=round(zmin, 4))
     o = bpy.data.objects.get(name)
     if o is None: o = bpy.data.objects.new(name, me); col.objects.link(o)
     else:

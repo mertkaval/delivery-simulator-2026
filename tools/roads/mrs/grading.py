@@ -89,7 +89,13 @@ def profile(field, pts, z0=None, z1=None, max_grade=0.08, smooth=30.0, clearance
     differences to the pinned heights blended out along the length, grade limited. Wet stretches (and a `bridge`)
     span bank to bank: the line between the dry ends, lifted to `clearance` over the water level with a smooth
     crest, then grade limited (the approaches ramp up at the max grade)."""
-    s = _stations(pts); S = max(s[-1], 1e-9)
+    s = _stations(pts)
+    return grade_limit(_profile_target(field, pts, s, z0, z1, smooth, clearance, bridge), s, max_grade, z0, z1)
+
+
+def _profile_target(field, pts, s, z0, z1, smooth, clearance, bridge):
+    """profile()'s height target before the grade limit (the averaged ground, the pinned ends blended in, decks)."""
+    S = max(s[-1], 1e-9)
     g = np.array([field(x, y) for x, y in pts])
     wet = np.array([field.wet(x, y) for x, y in pts])
     if wet.all() or (bridge and not wet.any()):
@@ -111,7 +117,7 @@ def profile(field, pts, z0=None, z1=None, max_grade=0.08, smooth=30.0, clearance
         lift = np.clip(1.0 - ((s - mid) / (half + 30.0)) ** 2, 0.0, 1.0)
         z = np.maximum(z, z + (need - z) * lift * (s >= sa - 30.0) * (s <= sb + 30.0))
         z[wet] = np.maximum(z[wet], need)
-    return grade_limit(z, s, max_grade, z0, z1)
+    return z
 
 
 def network_profiles(field, nodes, edges, node_radius=8.0, iterations=40, clearance=4.0):
@@ -221,3 +227,163 @@ def grade(h0, own, surface, cell, slope=0.5, sink=0.3, water=None, max_passes=40
     g = np.where(own, surface - sink, g)
     if water is not None: g = np.where(np.asarray(water).astype(bool) & ~own, h0, g)
     return g
+
+
+# ============================================================================ landing-aware vertical design
+# A built street exists only between its junctions' footprints (trims), and the road group blends each locked end to
+# the junction's height over its Lock Length with a smoothstep that arrives level (the grade inside the blend peaks
+# at 27/16 of the profile's). The design below budgets every edge's climb on what is built: level over the junction
+# footprint and a platform past it, a gentle landing over the lock zone, a vertical curve, then the class maximum.
+LOCK_K = 27.0 / 16.0                 # peak grade of road.py's constant-height smoothstep lock / the landing grade
+
+
+def insert_stations(pts, stations):
+    """pts (x, y) with extra collinear vertices at the given plan stations (the plan line is unchanged)."""
+    s = _stations(pts); P = np.asarray(pts, float); S = s[-1]
+    extra = sorted({round(float(v), 4) for v in stations if 1e-3 < v < S - 1e-3})
+    extra = [v for v in extra if np.min(np.abs(s - v)) > 0.05]
+    if not extra: return [tuple(p) for p in pts]
+    allv = np.sort(np.concatenate([s, extra]), kind="stable")
+    return list(zip(np.interp(allv, s, P[:, 0]).tolist(), np.interp(allv, s, P[:, 1]).tolist()))
+
+
+def caps(s, G, ends=None, land_grade=0.0, vc=0.0, flat=0.0):
+    """The grade cap of every segment (len(s) - 1) of an edge. `ends` ((trim_a, land_a), (trim_b, land_b)): metres
+    from each node centre; 0 over the junction footprint and the first `flat` m past it (level, at the node height),
+    `land_grade` over the rest of the landing, a linear ramp to G over `vc` m (a vertical curve), G elsewhere. `flat`
+    and `land_grade` may be (a, b) pairs. Without `ends` every segment is capped at G."""
+    s = np.asarray(s, float); mid = 0.5 * (s[1:] + s[:-1]); S = s[-1]
+    g = np.full(len(mid), float(G))
+    if not ends: return g
+    for k, (trim, land) in enumerate(ends):
+        if trim <= 0 and land <= 0: continue
+        gl = land_grade[k] if isinstance(land_grade, (list, tuple)) else land_grade
+        fl = flat[k] if isinstance(flat, (list, tuple)) else flat
+        d = mid if k == 0 else S - mid
+        cap = np.where(d < trim + min(fl, land), 0.0, np.where(d < trim + land, gl, G))
+        if vc > 0: cap = np.where(d >= trim + land, np.minimum(G, gl + (G - gl) * (d - trim - land) / vc), cap)
+        g = np.minimum(g, cap)
+    return g
+
+
+def grade_limit_caps(z, s, gk, z0=None, z1=None, tol=1e-3):
+    """(z, feasible): z clipped so |dz| <= gk * ds on every segment, pinned ends kept. Pins further apart than the
+    capacity spread the difference in proportion to the caps (level segments stay level) and report infeasible."""
+    z = np.array(z, dtype=np.float64); ds = np.diff(s); cum = np.concatenate([[0.0], np.cumsum(gk * ds)]); C = cum[-1]
+    if z0 is not None and z1 is not None and abs(z1 - z0) > C:
+        ok = abs(z1 - z0) <= C + tol
+        if C > 1e-9: return z0 + (z1 - z0) * cum / C, ok
+        return z0 + (z1 - z0) * s / max(s[-1], 1e-9), ok
+    lo = np.full_like(z, -np.inf); hi = np.full_like(z, np.inf)
+    if z0 is not None: lo = np.maximum(lo, z0 - cum); hi = np.minimum(hi, z0 + cum)
+    if z1 is not None: lo = np.maximum(lo, z1 - (C - cum)); hi = np.minimum(hi, z1 + (C - cum))
+    z = np.clip(z, lo, hi); step = gk * ds
+    for _ in range(2):
+        for k in range(1, len(z)): z[k] = min(max(z[k], z[k - 1] - step[k - 1]), z[k - 1] + step[k - 1])
+        for k in range(len(z) - 2, -1, -1): z[k] = min(max(z[k], z[k + 1] - step[k]), z[k + 1] + step[k])
+    if z0 is not None: z[0] = z0
+    if z1 is not None: z[-1] = z1
+    return z, True
+
+
+def node_heights(field, nodes, node_radius=8.0):
+    """{node: the natural ground averaged round it} (dry points of a ring of `node_radius`)."""
+    zn = {}
+    for nid, (x, y) in nodes.items():
+        ring = [(x + node_radius * math.cos(a), y + node_radius * math.sin(a)) for a in np.linspace(0, 2 * math.pi, 9)[:-1]] + [(x, y)]
+        dry = [field(px, py) for px, py in ring if not field.wet(px, py)]
+        zn[nid] = float(np.mean(dry)) if dry else field(x, y)
+    return zn
+
+
+def network_profiles_landed(field, nodes, edges, node_radius=8.0, iterations=2000, clearance=4.0, tol=1e-4, info=None, max_move=None):
+    """network_profiles with per-edge caps (see caps): an edge may carry "ends", "land_grade", "vc", "flat". Node
+    heights are relaxed on each edge's CAPACITY (sum of cap x run: the climb its built part can make), each node kept
+    within `max_move` of its natural (or bridge-lifted) height. `info` receives iterations, residual {edge: m},
+    infeasible edges, moves, z_nat, lifted, capacity and caps."""
+    zn = node_heights(field, nodes, node_radius); z_nat = dict(zn)
+    st = [_stations(e["pts"]) for e in edges]
+    gks = [caps(s, e.get("max_grade", 0.08), e.get("ends"), e.get("land_grade", 0.0), e.get("vc", 0.0), e.get("flat", 0.0)) for e, s in zip(edges, st)]
+    cums = [np.concatenate([[0.0], np.cumsum(gk * np.diff(s))]) for gk, s in zip(gks, st)]
+    lifted = {}
+    for e, cum in zip(edges, cums):
+        if not e.get("bridge"): continue
+        pts = e["pts"]; wet = [field.wet(x, y) for x, y in pts]
+        if not any(wet): continue
+        need = max(field.level(x, y) for (x, y), w in zip(pts, wet) if w) + e.get("clearance", clearance)
+        k0 = wet.index(True); k1 = len(wet) - 1 - wet[::-1].index(True)
+        for nid, cap_to_water in ((e["a"], cum[k0]), (e["b"], cum[-1] - cum[k1])):
+            if nid in zn: lifted[nid] = max(lifted.get(nid, -1e9), need - cap_to_water)
+    for nid, zmin in lifted.items(): zn[nid] = max(zn[nid], zmin)
+    box = {k: (v - max_move, v + max_move) for k, v in zn.items()} if max_move else {}
+    it = 0
+    for it in range(1, iterations + 1):
+        moved = 0.0
+        for e, cum in zip(edges, cums):
+            a, b = e["a"], e["b"]
+            if a == b or a not in zn or b not in zn: continue
+            lim = cum[-1]; dz = zn[b] - zn[a]
+            if abs(dz) > lim:
+                c = (abs(dz) - lim) * math.copysign(1.0, dz)
+                fa = 0.0 if (a in lifted and c < 0) else (1.0 if (b in lifted and c > 0) else 0.5)
+                za = zn[a] + c * fa; zb = zn[b] - c * (1.0 - fa)
+                if box: za = min(max(za, box[a][0]), box[a][1]); zb = min(max(zb, box[b][0]), box[b][1])
+                moved = max(moved, abs(za - zn[a]), abs(zb - zn[b])); zn[a] = za; zn[b] = zb
+        if moved < tol: break
+    out = []; infeasible = []
+    for i, (e, gk, s) in enumerate(zip(edges, gks, st)):
+        z0, z1 = zn.get(e["a"]), zn.get(e["b"])
+        target = _profile_target(field, e["pts"], s, z0, z1, e.get("smooth", 30.0), e.get("clearance", clearance), e.get("bridge", False))
+        z, ok = grade_limit_caps(target, s, gk, z0, z1)
+        out.append(z)
+        if not ok: infeasible.append(i)
+    if info is not None:
+        res = {}
+        for i, (e, cum) in enumerate(zip(edges, cums)):
+            a, b = e["a"], e["b"]
+            if a in zn and b in zn and a != b:
+                r = abs(zn[b] - zn[a]) - cum[-1]
+                if r > 1e-3: res[i] = r
+        info.update(iterations=it, residual=res, infeasible=infeasible, moves={k: zn[k] - z_nat[k] for k in zn}, z_nat=z_nat,
+                    capacity=[float(c[-1]) for c in cums], caps=gks, lifted=lifted)
+    return zn, out
+
+
+def window_grades(plan, z, w=10.0):
+    """(worst, station): the steepest |dz| / w over every window of `w` m of PLAN run (rise over horizontal run,
+    interpolated), or the whole length once when it is shorter. The design, the tests and the validator all measure
+    a street's grade with this."""
+    plan = np.asarray(plan, float); z = np.asarray(z, float)
+    if len(plan) < 2: return 0.0, 0.0
+    if plan[-1] - plan[0] <= w: return abs(z[-1] - z[0]) / max(plan[-1] - plan[0], 1e-6), float(plan[0])
+    zi = np.interp(plan + w, plan, z); ok = plan + w <= plan[-1] + 1e-9
+    g = np.abs(zi[ok] - z[ok]) / w; k = int(np.argmax(g))
+    return float(g[k]), float(plan[ok][k])
+
+
+def _smooth01(v):
+    v = np.clip(v, 0.0, 1.0); return v * v * (3 - 2 * v)
+
+
+def rail_model(pts, ta, tb, lock_a, lock_b, za, zb, lock_length=14.0, crown_h=0.0, resolution=1.0, smoothing=4):
+    """A numpy twin of the MRS_Road rail and its crest (road.py: trim, resample every `resolution` m, Blur Attribute
+    `smoothing` times, smoothstep locks toward a constant Lock Z over `lock_length`, the crown fading in over the same
+    length): (along, plan run, z rail, z crest) of the road built on the 3D polyline `pts`, or None when the trims
+    leave nothing. The design uses it to predict the built grade."""
+    P = np.asarray(pts, float)
+    s3 = np.concatenate([[0.0], np.cumsum(np.linalg.norm(np.diff(P, axis=0), axis=1))])
+    sp = np.concatenate([[0.0], np.cumsum(np.linalg.norm(np.diff(P[:, :2], axis=0), axis=1))])
+    s0, s1 = ta, s3[-1] - tb; Lt = s1 - s0
+    if Lt < 0.5: return None
+    ss = np.linspace(s0, s1, max(int(Lt / resolution) + 1, 2))
+    z = np.interp(ss, s3, P[:, 2]); plan = np.interp(ss, s3, sp)
+    for _ in range(int(smoothing)):
+        zz = z.copy()
+        if len(z) >= 3: zz[1:-1] = (z[:-2] + z[1:-1] + z[2:]) / 3.0
+        if len(z) >= 2: zz[0] = (z[0] + z[1]) / 2; zz[-1] = (z[-1] + z[-2]) / 2
+        z = zz
+    a = ss - s0; LL = max(lock_length, 1e-6)
+    if lock_a: z = z + (za - z) * _smooth01(1 - a / LL)
+    if lock_b: z = z + (zb - z) * _smooth01(1 - (Lt - a) / LL)
+    fs = _smooth01(a / LL) if lock_a else 1.0; fe = _smooth01((Lt - a) / LL) if lock_b else 1.0
+    return a, plan - plan[0], z, z + crown_h * fs * fe

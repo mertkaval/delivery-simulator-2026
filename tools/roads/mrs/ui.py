@@ -15,6 +15,20 @@ def _selected_roads(ctx):
     return [o for o in ctx.selected_objects if o.type == "CURVE" and "MRS_Road" in o.modifiers]
 
 
+class MRS_OT_load_example(bpy.types.Operator):
+    """Build an example scene (in a scene of its own) to learn from or start with: every example validates with no
+    problem (tools/roads/tests/examples_test.py)"""
+    bl_idname = "mrs.load_example"; bl_label = "Load Example"; bl_options = {"REGISTER", "UNDO"}
+    example: bpy.props.EnumProperty(name="Example", items=lambda self, ctx: [(k, k.replace("_", " ").title(), "") for k in __import__("mrs.samples", fromlist=["ALL"]).ALL])
+
+    def execute(self, ctx):
+        from . import samples
+        sc = samples.ALL[self.example]()
+        try: ctx.window.scene = sc
+        except Exception: pass
+        self.report({"INFO"}, "example %s built in scene %s" % (self.example, sc.name)); return {"FINISHED"}
+
+
 class MRS_OT_add_road(bpy.types.Operator):
     """Add a road at the 3D cursor (or turn the active curve into a road)"""
     bl_idname = "mrs.add_road"; bl_label = "Add Road"; bl_options = {"REGISTER", "UNDO"}
@@ -356,6 +370,8 @@ class MRS_PT_panel(bpy.types.Panel):
 
     def draw(self, ctx):
         L = self.layout
+        box = L.box(); box.label(text="Examples", icon="FILE_BLEND")
+        box.operator_menu_enum("mrs.load_example", "example", text="Load Example")
         box = L.box(); box.label(text="Roads", icon="CURVE_BEZCURVE")
         row = box.row(align=True)
         for k in list(roads.PRESETS)[:3]: row.operator("mrs.add_road", text=k.title()).preset = k
@@ -405,7 +421,7 @@ class MRS_PT_panel(bpy.types.Panel):
             L.label(text="All road inputs: Modifier panel")
 
 
-CLASSES = (MRS_OT_add_road, MRS_OT_apply_preset, MRS_OT_set_terrain, MRS_OT_conform_terrain, MRS_OT_demo_terrain, MRS_OT_add_junction, MRS_OT_add_roundabout,
+CLASSES = (MRS_OT_load_example, MRS_OT_add_road, MRS_OT_apply_preset, MRS_OT_set_terrain, MRS_OT_conform_terrain, MRS_OT_demo_terrain, MRS_OT_add_junction, MRS_OT_add_roundabout,
            MRS_OT_add_dead_end, MRS_OT_rebuild_junctions, MRS_OT_auto_update, MRS_OT_junction_settings, MRS_OT_place, MRS_OT_auto_place, MRS_OT_validate, MRS_OT_structure, MRS_OT_custom_sign, MRS_OT_set_tongues, MRS_OT_add_area_junction, MRS_OT_add_extension,
            MRS_OT_add_marking_lines, MRS_OT_material_preset, MRS_OT_export,
            MRS_OT_export_ready, MRS_PT_panel)

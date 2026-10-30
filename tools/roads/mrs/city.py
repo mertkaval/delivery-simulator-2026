@@ -21,7 +21,7 @@ CF_REPLACED = ("lamp", "traffic_light", "bus_stop", "hydrant", "bench", "stop_si
 CF_KEPT = {"vending_machine": 0.7, "post_box": 0.5, "phone_box": 0.8, "ad_column": 0.8, "cesme": 1.0, "cafe_set": 1.6, "utility_pole": 0.5}
 
 
-BASE_VERSION = 22          # bump when tools/roads/mrs changes the node groups or the asset library
+BASE_VERSION = 32          # bump when tools/roads/mrs changes the node groups or the asset library
 
 
 def ensure_base(path, rebuild=False, log=print):
@@ -108,6 +108,7 @@ def _terrain_probe(H, col, step=8.0):
 
 def _road_object(rd, col, probe=None):
     preset, vals = citynet.profile(rd["cls"], rd.get("bridge", False))
+    if rd.get("lock_length"): vals["Lock Length"] = float(rd["lock_length"])     # the design's lock zone (citynet.lock_length)
     pts = [tuple(B(x, y, z)) for x, y, z in rd["pts"]]
     o = roads.curve_object(rd["id"], pts, col, kind="POLY")
     roads.add_road_modifier(o, preset, terrain=probe if rd.get("bridge") else None, **{k.replace(" ", "_"): v for k, v in vals.items()})
@@ -119,6 +120,10 @@ def _road_object(rd, col, probe=None):
     o["mrs_street_name"] = rd.get("street", "") or rd["id"]
     o["ph_cls"] = rd["cls"]; o["ph_cf_roads"] = json.dumps(rd.get("cf_roads", [rd.get("cf_lane", "")]))
     o["ph_culture"] = rd.get("culture", "")
+    # the class maximum grade the design held this street to: validate.check_grade measures the built street against it
+    if rd.get("max_grade") is not None: o["mrs_max_grade"] = float(rd["max_grade"])
+    if rd.get("grade_predicted") is not None: o["mrs_grade_predicted"] = float(rd["grade_predicted"])
+    if rd.get("grade_infeasible"): o["mrs_grade_infeasible"] = True
     return o
 
 
@@ -170,9 +175,9 @@ def build(plan_dir, region=None, seed=7, place=True, log=print):
     if nat is not None:
         tm["bridges_added"] = citynet.bridge_gaps(city, nat)          # streets cut by water on both banks get a bridge
         log("BRIDGES", json.dumps(tm["bridges_added"]))
-        # the roads' own vertical alignment on the natural terrain (the city's graded lot pads play no part)
-        net0 = citynet.build(city, citynet.Heights(nat.h, nat.cell), region, natural=nat)
-        H, tm["profiles"], prof = citynet.design_heights(net0, nat)
+        # the roads' own vertical alignment on the natural terrain (the city's graded lot pads play no part), designed
+        # on what is built: level junction landings, the class grade table, earthwork bounded (citynet.design_network)
+        net0, H, tm["profiles"], prof = citynet.design_network(city, nat, region, log=log)
         log("PROFILES", json.dumps(tm["profiles"]))
     else:
         prof = None
@@ -239,8 +244,7 @@ def load_state(plan_dir, region=None):
     nat = load_natural(plan_dir, STATE.get("terrain")) if ROADS_ONLY else None
     if nat is not None:
         citynet.bridge_gaps(city, nat)
-        net0 = citynet.build(city, citynet.Heights(nat.h, nat.cell), region, natural=nat)
-        H, _rep, prof = citynet.design_heights(net0, nat)
+        net0, H, _rep, prof = citynet.design_network(city, nat, region, log=lambda *a: None)
     else:
         prof = None
     net = citynet.build(city, H, region, natural=nat, profiles=prof)
@@ -1051,7 +1055,7 @@ def write_plan(plan_out, ground_meshes, log=print):
     # duplicates between two junctions and near-parallel approaches (roads merged into a junction stay: they are
     # inside its surface)
     rep_ = net["report"]
-    dropped = {d["dropped"] for d in rep_.get("duplicates", [])} | {d["dropped"] for d in rep_.get("angle_drops", [])}
+    dropped = {d["dropped"] for d in rep_.get("duplicates", [])} | {d["dropped"] for d in rep_.get("angle_drops", [])} | set(city.get("mrs_steep_drops", []))
     city["roads"] = [r for r in city["roads"] if r["id"] not in dropped]
     for nd in city["nodes"]: nd["edges"] = [e for e in nd["edges"] if e not in dropped]
     city["mrs_removed"] = {"houses": gone, "shops": shops, "roads": sorted(dropped)}

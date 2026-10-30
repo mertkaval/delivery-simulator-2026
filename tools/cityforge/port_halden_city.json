@@ -25,6 +25,7 @@
    1700
   ],
   "max_local_grade": 0.12,
+  "max_grade": {"local": 0.12, "downtown": 0.12, "arterial": 0.12, "boulevard": 0.10, "lane": 0.18, "bridge": 0.06},
   "margin_m": 30
  },
  "widths": {

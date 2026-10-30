@@ -15,13 +15,30 @@ Junction checks
   speed_sign      (validate_speed_signs) every speed-limit sign shows its road's Speed Limit
   trimmed_away    a road keeps some length between its junction trims
   junction_zones  a road keeps both ends' paint zones (Mark Clear Start + End) + junction.ZONE_MARGIN between its trims
+  grade           (a road tagged mrs_max_grade: the city's streets) its built asphalt crest at the centre climbs at
+                  most its class maximum over every 10 m of plan run (grading.window_grades, the measure the design
+                  used); the message names the station, its distance from the nearer end and the design's prediction
+  buried          (check_buried) no terrain or ground object of the scene covers a road's walkable surface (a flat
+                  ground over a banked road hid its sidewalk); tunnels are exempt
   limit           every numeric input of a road lies inside its tested range (limits.json; the UI enforces it, a
                   script setting the modifier directly does not)
+  warning         (check_warnings) no MRS modifier shows a combination warning ("MRS: ..." node warnings: a bend
+                  tighter than the road's width allows, a value in a forbidden gap, sign content off its panel, a
+                  marking line off its road)
+  tongue_uncovered (check_tongues) every road tongue lies under an area junction's surface (at least 90 % of its road
+                  footprint): a tongue out of every junction's range leaves a hole at the road's end
 Network check
   overlap         no two road / junction surfaces cover the same ground (within 1 m in height): roads meet only
                   at their own junctions (check_overlaps, a 1 m grid of the evaluated top surfaces)
   building        (footprints given) no building footprint stands on a road / junction surface (check_buildings,
                   the same grid)
+Placed objects (check_placed: every top-level object of the placed collection, from its evaluated mesh)
+  placed_conflict no two placed objects overlap: standing objects by the convex plan hull of their base (within
+                  PLACED_BASE of their lowest point), flat ones (paths, pads, mulch, grates, painted words) by their
+                  real top faces; paths may join paths, an object may stand on its own pad / mulch / grate
+  placed_road     no base other than a flush item's stands on a carriageway (asphalt, paint, cycle / bus lane, crossing)
+  placed_ground   every base sits on the surface under it (within PLACED_Z): not floating, not sunk
+  placed_building (footprints given) no base stands inside a building footprint
 `validate(roads_col)` -> {"roads", "junctions", "problems": [{object, check, message}], "counts": {check: n}}."""
 import bpy, math, json
 from mathutils import Vector
@@ -102,6 +119,22 @@ def _in_crossing(c, x):
     return -TOL <= t <= L + TOL and abs(v.x * u.y - v.y * u.x) < c["width"] * 0.5 - TOL
 
 
+def _surface_end(r, dg, default):
+    """The largest `along` of the road's asphalt vertices: where its surface really ends."""
+    ev = r.evaluated_get(dg); me = ev.to_mesh()
+    try:
+        kind = me.attributes.get("kind"); along = me.attributes.get("along")
+        if kind is None or along is None or kind.domain != "FACE" or along.domain != "POINT": return default
+        kv = kind.data; av = along.data; best = None
+        for p in me.polygons:
+            if int(round(kv[p.index].value)) != 0: continue
+            m = max(av[i].value for i in p.vertices)
+            if best is None or m > best: best = m
+        return best if best is not None else default
+    finally:
+        ev.to_mesh_clear()
+
+
 def check_road(r, dg, inst, out):
     try:
         L = centre_line(r)[-1][0]
@@ -114,10 +147,12 @@ def check_road(r, dg, inst, out):
         _problem(out, r.name, "junction_zones", "%.1f m left between the junctions, their paint zones need %.1f m" % (L, zones))
     mcs = road_input(r, "Mark Clear Start") or 0.0; mce = road_input(r, "Mark Clear End") or 0.0
     bad_s = bad_e = 0
+    # the road's surface ends at its last station; the centre-line sample may stop up to a station earlier
+    L_end = _surface_end(r, dg, L)
     for c, vs, a in _faces(r, dg, kinds=PAINT_KINDS):
         if a is None: continue
         if a < mcs - TOL: bad_s += 1
-        elif a > L - mce + TOL: bad_e += 1
+        elif a > L_end - mce + TOL: bad_e += 1
     if bad_s: _problem(out, r.name, "paint_clear", "%d paint faces inside the start clear zone (%.1f m)" % (bad_s, mcs))
     if bad_e: _problem(out, r.name, "paint_clear", "%d paint faces inside the end clear zone (%.1f m)" % (bad_e, mce))
     # lane arrows
@@ -214,6 +249,52 @@ def check_junction(o, dg, out, roads_by_name):
                 if off > HEAD_TOL: _problem(out, o.name, "signal_lanes", "%s: head %s is %.2f m off its lane centre" % (r.name, h.name, off))
 
 
+GRADE_TOL = 0.002                    # the built grade may exceed the design's prediction by this (sampling; = citynet.GRADE_MARGIN)
+
+
+def _crest(r, dg):
+    """(plan run, z) along the evaluated road: per station the highest asphalt vertex within the inner lanes (the
+    crest at the centre line, crown included, no paint), world coordinates; None without the road's attributes."""
+    ev = r.evaluated_get(dg); me = ev.to_mesh(); M = r.matrix_world
+    try:
+        kind = me.attributes.get("kind"); lat = me.attributes.get("lat"); al = me.attributes.get("along")
+        if kind is None or lat is None or al is None or kind.domain != "FACE" or lat.domain != "POINT": return None
+        reach = (road_input(r, "Median") or 0.0) * 0.5 + (road_input(r, "Lane Width") or 3.0)
+        on = set()
+        for p in me.polygons:
+            if int(round(kind.data[p.index].value)) == 0: on.update(p.vertices)
+        st = {}
+        for i in on:
+            if abs(lat.data[i].value) > reach: continue
+            k = round(al.data[i].value, 2); co = M @ me.vertices[i].co
+            if k not in st or co.z > st[k][2]: st[k] = (co.x, co.y, co.z)
+    finally:
+        ev.to_mesh_clear()
+    if len(st) < 2: return None
+    pts = [st[k] for k in sorted(st)]
+    plan = [0.0]
+    for a, b in zip(pts, pts[1:]): plan.append(plan[-1] + math.hypot(b[0] - a[0], b[1] - a[1]))
+    return plan, [p[2] for p in pts]
+
+
+def check_grade(r, dg, out):
+    """A street held to a class maximum grade (mrs_max_grade, set by the city build) climbs no steeper over any 10 m of
+    plan run than that maximum (+ GRADE_TOL)."""
+    G = r.get("mrs_max_grade")
+    if G is None: return
+    from .grading import window_grades
+    c = _crest(r, dg)
+    if c is None: return
+    plan, z = c
+    worst, at = window_grades(plan, z, 10.0)
+    if worst > float(G) + GRADE_TOL:
+        L = plan[-1]; end = min(at, L - at - 10.0)
+        pred = r.get("mrs_grade_predicted")
+        _problem(out, r.name, "grade", "%.1f %% over 10 m from %.1f m (%.1f m from the nearer end; end to end %.1f %%) exceeds its class maximum %.1f %%%s"
+                 % (100 * worst, at, max(end, 0.0), 100 * abs(z[-1] - z[0]) / max(L, 1e-6), 100 * float(G),
+                    "" if pred is None else "; the design predicted %.1f %%" % (100 * float(pred))))
+
+
 def check_limits(r, out):
     """Numeric inputs of the road's MRS_Road modifier outside the tested limits (limits.json)."""
     from .limits import out_of_range
@@ -224,8 +305,101 @@ def check_limits(r, out):
     for it in mod.node_group.interface.items_tree:
         if getattr(it, "item_type", "") == "SOCKET" and it.in_out == "INPUT" and it.socket_type in ("NodeSocketFloat", "NodeSocketInt"):
             vals[it.name] = mod_input_get(mod, it.name)
-    for k, v, lo, hi in out_of_range(mod.node_group.name, vals):
-        _problem(out, r.name, "limit", "%s = %g is outside its tested range [%g, %g] (docs/roads/LIMITS.md)" % (k, v, lo, hi))
+    for k, v, lo, hi, gap in out_of_range(mod.node_group.name, vals):
+        if gap: _problem(out, r.name, "limit", "%s = %g lies between %g and %g, where the tests found mistakes (docs/roads/LIMITS.md)" % (k, v, gap[0], gap[1]))
+        else: _problem(out, r.name, "limit", "%s = %g is outside its tested range [%g, %g] (docs/roads/LIMITS.md)" % (k, v, lo, hi))
+
+
+BURIED_TOL = 0.02                    # a ground this far over a road surface hides it (m)
+BURIED_MIN = 1.0                     # ... over at least this much of the road's surface (m2) before it is reported
+
+
+def _is_ground(o):
+    """A scene's terrain / ground object: tagged as a terrain source, graded to the roads, or a sample's ground plane
+    (debug probes excluded)."""
+    if o.type != "MESH" or o.get("mrs_debug"): return False
+    if o.get("mrs_terrain_source") or o.name.startswith("MRS_GroundPlane"): return True
+    return any(m.type == "NODES" and m.node_group and m.node_group.name == "MRS_TerrainConform" for m in o.modifiers)
+
+
+def check_buried(roads_col, objects, dg, out):
+    """Road surfaces (asphalt, cycle / bus lane, paving, kerb tops, planting strips) hidden under a ground object: a ray
+    from above each top face's centre meets the ground more than BURIED_TOL above the face (tunnel spans skipped)."""
+    from mathutils.bvhtree import BVHTree
+    grounds = [o for o in objects if _is_ground(o)]
+    if not grounds: return 0
+    vs, fs = [], []
+    for o in grounds:
+        ev = o.evaluated_get(dg); me = ev.to_mesh(); M = o.matrix_world
+        try: b = len(vs); vs += [M @ v.co for v in me.vertices]; fs += [tuple(b + i for i in p.vertices) for p in me.polygons]
+        finally: ev.to_mesh_clear()
+    if not fs: return 0
+    gb = BVHTree.FromPolygons(vs, fs); n_bad = 0
+    for r in all_roads(roads_col):
+        ev = r.evaluated_get(dg); me = ev.to_mesh(); M = r.matrix_world; area = 0.0; at = None
+        try:
+            kind = me.attributes.get("kind"); tun = me.attributes.get("tunnel_surface")
+            for p in me.polygons:
+                if kind is not None and kind.domain == "FACE" and int(round(kind.data[p.index].value)) not in (0, 2, 4, 5, 6, 7, 9, 11): continue
+                if tun is not None and tun.domain == "FACE" and tun.data[p.index].value > 0.5: continue
+                nz = (M.to_3x3() @ p.normal).z
+                if nz < 0.5: continue
+                c = M @ p.center
+                h = gb.ray_cast(Vector((c.x, c.y, c.z + 100.0)), Vector((0, 0, -1)), 100.0 - BURIED_TOL)
+                if h[0] is not None:
+                    area += p.area; at = at or c
+        finally:
+            ev.to_mesh_clear()
+        if area >= BURIED_MIN:
+            n_bad += 1
+            _problem(out, r.name, "buried", "%.0f m2 of its surface lie under the ground (e.g. at %.1f, %.1f): the ground does not follow the road there"
+                     % (area, at.x, at.y))
+    return n_bad
+
+
+def check_warnings(objects, out):
+    """Every MRS modifier's own combination warnings (node warnings starting "MRS:", see the module docstring)."""
+    n = 0
+    for o in objects:
+        for m in getattr(o, "modifiers", ()):
+            if m.type != "NODES" or m.node_group is None or not m.node_group.name.startswith("MRS_"): continue
+            for w in getattr(m, "node_warnings", ()):
+                if w.message.startswith("MRS:"): _problem(out, o.name, "warning", w.message[4:].strip()); n += 1
+    return n
+
+
+TONGUE_COVER = 0.9          # share of a tongue's road footprint an area junction must cover
+
+
+def check_tongues(roads_col, objects, dg, out):
+    """Each road tongue (Tongue Start / End > 0) lies under an area junction (any object with MRS_AreaJunction among
+    `objects`): its road footprint faces' centres are covered from above (TONGUE_COVER of them)."""
+    from mathutils.bvhtree import BVHTree
+    rs = [r for r in all_roads(roads_col) if (road_input(r, "Tongue Start") or 0.0) > 0.0 or (road_input(r, "Tongue End") or 0.0) > 0.0]
+    if not rs: return 0
+    vs, fs = [], []
+    for o in objects:
+        if o.type != "MESH" or not any(m.type == "NODES" and m.node_group and m.node_group.name == MRS_AREA for m in o.modifiers): continue
+        ev = o.evaluated_get(dg); me = ev.to_mesh(); M = o.matrix_world
+        try: b = len(vs); vs += [M @ v.co for v in me.vertices]; fs += [tuple(b + i for i in p.vertices) for p in me.polygons]
+        finally: ev.to_mesh_clear()
+    bvh = BVHTree.FromPolygons(vs, fs) if fs else None
+    for r in rs:
+        ev = r.evaluated_get(dg); me = ev.to_mesh(); M = r.matrix_world
+        try:
+            t = me.attributes.get("mrs_tongue")
+            cs = [M @ p.center for p in me.polygons if t is not None and t.domain == "FACE" and abs(t.data[p.index].value - 1.0) < 0.5]
+        finally:
+            ev.to_mesh_clear()
+        if not cs: continue
+        hit = sum(1 for c in cs if bvh is not None and bvh.ray_cast(Vector((c.x, c.y, c.z + 50.0)), Vector((0, 0, -1)), 100.0)[0] is not None)
+        if hit < TONGUE_COVER * len(cs):
+            _problem(out, r.name, "tongue_uncovered", "%d of %d road footprint faces of its tongue lie under no area junction (out of every junction's range?)"
+                     % (len(cs) - hit, len(cs)))
+    return len(rs)
+
+
+MRS_AREA = "MRS_AreaJunction"
 
 
 def validate_speed_signs(objects, out):
@@ -258,10 +432,12 @@ def _top_cells(o, dg, cell, cand=None):
     ev = o.evaluated_get(dg); me = ev.to_mesh(); M = o.matrix_world
     try:
         kind = me.attributes.get("kind"); kv = [d.value for d in kind.data] if kind is not None and kind.domain == "FACE" else None
+        # a road's tongues are footprints under an area junction, not a surface of its own (they overlap by design)
+        tg = me.attributes.get("mrs_tongue"); tv = [d.value for d in tg.data] if tg is not None and tg.domain == "FACE" else None
         me.calc_loop_triangles()
         verts = [M @ v.co for v in me.vertices]
         tris = [tuple(t.vertices) for t in me.loop_triangles
-                if (M.to_3x3() @ t.normal).z > 0.5 and (kv is None or int(round(kv[t.polygon_index])) != 4)]
+                if (M.to_3x3() @ t.normal).z > 0.5 and (kv is None or int(round(kv[t.polygon_index])) != 4) and (tv is None or tv[t.polygon_index] < 0.5)]
     finally:
         ev.to_mesh_clear()
     if not tris: return {}
@@ -379,21 +555,223 @@ def check_buildings(grid, footprints, out, cell=OVERLAP_CELL, inset=BUILDING_INS
     return n_bad
 
 
+PLACED_FLUSH = {"drain", "cover", "pit_grate", "pit_open", "tree_pit", "pad", "mulch", "path", "marking", "tree_edging"}   # lie in the surface they cover
+PLACED_PARTS = ("pad", "plinth", "mulch", "guard", "edging", "grate")   # name suffixes of an object's own parts (X_pad, X_guard ...)
+PLACED_SKIP = {"landscape"}          # grass / shrub scatter (points): no footprint of its own
+PLACED_JOIN = {("path", "path"), ("pad", "path"), ("path", "pad")}     # flat items that may overlap: paths join paths and pads
+PLACED_STAND_ON = {"pad", "path"}    # flat items made to be stood on (a bus pole on its boarding pad, a bench on its slab)
+CARRIAGEWAY = (0, 1, 5, 8, 9)        # asphalt, marking, cycle lane, crossing, bus lane (road.py KIND)
+PLACED_BASE = 0.25                   # a standing object's base: its vertices within this of its lowest point (m)
+PLACED_OVERLAP = 0.03                # two standing bases may touch; overlapping deeper than this is a conflict (m)
+PLACED_CELL = 0.2                    # plan grid of the footprints (m)
+PLACED_Z = 0.05                      # no point of a base floats more than this over the surface under it (m)
+PLACED_SINK = 0.125                  # free-standing furniture may sink this far into a slope: placement.FREE_RISE (0.10 m across its base) + its 0.02 m pad + 5 mm sampling
+PLACED_SINK_EMBEDDED = 0.6           # poles, posts, trees: set into the ground, but not buried
+PLACED_FREE = {"bench", "bench_backless", "bin", "bin_recycling", "bike_rack", "planter", "barrier"}   # free-standing (placement.FREE_STANDING)
+
+
+def _tri_cells(a, b, c, cell=PLACED_CELL):
+    """The plan cells whose centre lies in the triangle abc."""
+    d = (b.y - c.y) * (a.x - c.x) + (c.x - b.x) * (a.y - c.y)
+    if abs(d) < 1e-12: return set()
+    out = set()
+    for i in range(int(math.floor(min(a.x, b.x, c.x) / cell)), int(math.floor(max(a.x, b.x, c.x) / cell)) + 1):
+        x = (i + 0.5) * cell
+        for j in range(int(math.floor(min(a.y, b.y, c.y) / cell)), int(math.floor(max(a.y, b.y, c.y) / cell)) + 1):
+            y = (j + 0.5) * cell
+            l1 = ((b.y - c.y) * (x - c.x) + (c.x - b.x) * (y - c.y)) / d; l2 = ((c.y - a.y) * (x - c.x) + (a.x - c.x) * (y - c.y)) / d
+            if l1 >= -1e-9 and l2 >= -1e-9 and l1 + l2 <= 1.0 + 1e-9: out.add((i, j))
+    return out
+
+
+def _in_tris(p, tris):
+    for a, b, c in tris:
+        d = (b.y - c.y) * (a.x - c.x) + (c.x - b.x) * (a.y - c.y)
+        if abs(d) < 1e-12: continue
+        l1 = ((b.y - c.y) * (p.x - c.x) + (c.x - b.x) * (p.y - c.y)) / d; l2 = ((c.y - a.y) * (p.x - c.x) + (a.x - c.x) * (p.y - c.y)) / d
+        if l1 >= 0.0 and l2 >= 0.0 and l1 + l2 <= 1.0: return True
+    return False
+
+
+def _footprints(placed_col, dg):
+    """Every placed top-level mesh object's footprint: {o, kind, flush, hull, tris, cells, z0, c}. A flat item (paths,
+    pads, mulch, grates, painted words) covers its real top faces; a standing item the convex plan hull of its base
+    (its vertices within PLACED_BASE of its lowest point: a trunk, a pole's foot, a bench's legs). Paths and pads are
+    built in world coordinates, so an object's own heading says nothing about their shape (a bounding rectangle in it
+    called a diagonal path a conflict with trees beside it)."""
+    from mathutils.geometry import convex_hull_2d
+    out = []
+    for o in placed_col.all_objects:
+        kind = str(o.get("mrs_kind", ""))
+        if o.parent is not None or o.type != "MESH" or not kind or kind in PLACED_SKIP: continue
+        ev = o.evaluated_get(dg); me = ev.to_mesh(); M = o.matrix_world; R3 = M.to_3x3()
+        try:
+            vs = [M @ v.co for v in me.vertices]
+            if not vs: continue
+            z0 = min(v.z for v in vs); flush = kind in PLACED_FLUSH; hull = None
+            tris3 = []
+            if flush:
+                me.calc_loop_triangles()
+                tris3 = [tuple(vs[i].copy() for i in t.vertices) for t in me.loop_triangles if (R3 @ t.normal).z > 0.5]
+                tris = [tuple(Vector((p.x, p.y)) for p in t) for t in tris3]
+                pts = [p for t in tris for p in t]
+            else:
+                base = [Vector((v.x, v.y)) for v in vs if v.z <= z0 + PLACED_BASE]
+                hull = [base[i] for i in convex_hull_2d([tuple(p) for p in base])]
+                if len(hull) < 3:                                     # a single foot point: a 10 cm square round it
+                    c_ = sum(base, Vector((0.0, 0.0))) / len(base); hull = [c_ + Vector((sx, sy)) * 0.05 for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+                tris = [(hull[0], hull[k], hull[k + 1]) for k in range(1, len(hull) - 1)]
+                pts = hull
+        finally:
+            ev.to_mesh_clear()
+        if not pts: continue
+        cen = sum(pts, Vector((0.0, 0.0))) / len(pts)
+        cells = set()
+        for t in tris: cells |= _tri_cells(*t)
+        cells.add((int(math.floor(cen.x / PLACED_CELL)), int(math.floor(cen.y / PLACED_CELL))))
+        out.append({"o": o, "kind": kind, "flush": flush, "hull": hull, "tris": tris, "tris3": tris3, "cells": cells, "z0": z0, "c": Vector((cen.x, cen.y, z0))})
+    return out
+
+
+def _owner_of(name):
+    """The object a placed part belongs to (X for X_pad, X_guard, X_edging ...; a name with no part suffix is its own)."""
+    head, _sep, tail = name.rpartition("_")
+    return head if head and tail in PLACED_PARTS else name
+
+
+def _hull_depth(a, b):
+    """How deep two convex plan polygons overlap: the smallest penetration over their edge normals (<= 0: apart)."""
+    depth = 1e9
+    for poly in (a, b):
+        for k in range(len(poly)):
+            e = poly[(k + 1) % len(poly)] - poly[k]
+            if e.length < 1e-9: continue
+            ax = Vector((-e.y, e.x)).normalized()
+            pa = [p.dot(ax) for p in a]; pb = [p.dot(ax) for p in b]
+            depth = min(depth, min(max(pa), max(pb)) - max(min(pa), min(pb)))
+    return depth
+
+
+def _surface_bvh(roads_col, dg, kinds=None):
+    """One BVH of every road / junction face (the faces of `kinds` only when given), world space."""
+    from mathutils.bvhtree import BVHTree
+    vs, fs = [], []
+    for o in all_roads(roads_col) + [o for o in roads_col.all_objects if o.get("mrs_junction") and o.type == "MESH"]:
+        ev = o.evaluated_get(dg); me = ev.to_mesh(); M = o.matrix_world
+        try:
+            kind = me.attributes.get("kind"); kv = [d.value for d in kind.data] if kind is not None and kind.domain == "FACE" else None
+            b = len(vs); vs += [M @ v.co for v in me.vertices]
+            fs += [tuple(b + i for i in f.vertices) for f in me.polygons if kinds is None or (kv is not None and int(round(kv[f.index])) in kinds)]
+        finally:
+            ev.to_mesh_clear()
+    return BVHTree.FromPolygons(vs, fs) if fs else None
+
+
+def check_placed(placed_col, roads_col, dg, out, footprints=None, ground=None):
+    """The placed objects against each other, the carriageway, the surface under them and the buildings (see the module
+    docstring). `ground` (optional BVH) is the terrain beside the roads. Returns the number of objects checked."""
+    items = _footprints(placed_col, dg)
+    if not items: return 0
+    cw = _surface_bvh(roads_col, dg, CARRIAGEWAY); surf = _surface_bvh(roads_col, dg)
+    # what a standing object stands on: the road surfaces and the flat placed items over them (its pad, a plinth, a path)
+    from mathutils.bvhtree import BVHTree
+    fv, ff = [], []
+    for it in items:
+        for t in it["tris3"]:
+            b = len(fv); fv += list(t); ff.append((b, b + 1, b + 2))
+    flats = BVHTree.FromPolygons(fv, ff) if ff else None
+    by_cell = {}
+    for k, it in enumerate(items):
+        for c in it["cells"]: by_cell.setdefault(c, []).append(k)
+    seen = set()
+    for lst in by_cell.values():
+        for x in range(len(lst)):
+            for y in range(x + 1, len(lst)):
+                ka, kb = sorted((lst[x], lst[y]))
+                if (ka, kb) in seen: continue
+                seen.add((ka, kb)); a, b = items[ka], items[kb]
+                if abs(a["z0"] - b["z0"]) > 2.0: continue                               # one passes over the other
+                na, nb = a["o"].name, b["o"].name
+                if nb.startswith(na + "_") or na.startswith(nb + "_"): continue         # its own pad / mulch / grate
+                if _owner_of(na) == _owner_of(nb): continue                             # two parts of one object (a tree's guard and edging)
+                if a["flush"] and b["flush"]:
+                    if (a["kind"], b["kind"]) in PLACED_JOIN: continue
+                    if na.rsplit("_", 1)[0] == nb.rsplit("_", 1)[0]: continue          # one object's pad and plinth
+                    shared = len(a["cells"] & b["cells"])
+                    if shared < 2: continue
+                    why = "overlap over %.2f m2" % (shared * PLACED_CELL ** 2)
+                elif not a["flush"] and not b["flush"]:
+                    dep = _hull_depth(a["hull"], b["hull"])
+                    if dep <= PLACED_OVERLAP: continue
+                    why = "overlap by %.2f m" % dep
+                else:                                                                  # a standing item on a flat one
+                    st, fl = (a, b) if not a["flush"] else (b, a)
+                    if fl["kind"] in PLACED_STAND_ON: continue
+                    probe = [st["c"].to_2d()] + [p + (st["c"].to_2d() - p) * 0.2 for p in st["hull"]]
+                    if not any(_in_tris(p, fl["tris"]) for p in probe): continue
+                    why = "%s stands on %s" % (st["o"].name, fl["o"].name)
+                _problem(out, na, "placed_conflict", "%s (%s) and %s (%s): %s at %.1f, %.1f" % (na, a["kind"], nb, b["kind"], why, a["c"].x, a["c"].y))
+    down = Vector((0.0, 0.0, -1.0))
+    def under(bvh, p):
+        if bvh is None: return None
+        h = bvh.ray_cast(Vector((p.x, p.y, p.z + 2.0)), down, 4.0); return h[0].z if h[0] is not None else None
+    for it in items:
+        o, kind, c, z0 = it["o"], it["kind"], it["c"], it["z0"]
+        if not it["flush"]:
+            probe = [c] + [Vector((p.x, p.y, z0)) + (c - Vector((p.x, p.y, z0))) * 0.2 for p in it["hull"]]
+            hit = next((p for p in probe if (lambda z: z is not None and abs(z - z0) <= PLACED_Z + 0.3)(under(cw, p))), None)
+            if hit is not None:
+                _problem(out, o.name, "placed_road", "%s (%s) stands on the carriageway at %.1f, %.1f" % (o.name, kind, hit.x, hit.y)); continue
+        if kind != "path":                           # a path ramps from the sidewalk down to the ground beyond the roads
+            pts = [c] + ([Vector((p.x, p.y, z0)) for p in it["hull"]] if it["hull"] else [])
+            zs = []
+            for p in pts:
+                # a standing object meets the top of whatever is under it (road surface, its pad or plinth); a flat item the
+                # road surface itself
+                zz = [z for z in (under(surf, p), under(ground, p), under(flats, p) if not it["flush"] else None) if z is not None]
+                if zz: zs.append(max(z for z in zz if z <= z0 + 0.5) if any(z <= z0 + 0.5 for z in zz) else min(zz))
+            if zs:
+                float_by = z0 - min(zs); sink_by = max(zs) - z0
+                sink_max = PLACED_SINK if kind in PLACED_FREE else (None if it["flush"] else PLACED_SINK_EMBEDDED)
+                if float_by > PLACED_Z:
+                    _problem(out, o.name, "placed_ground", "%s (%s) floats over the surface by %.2f m at %.1f, %.1f" % (o.name, kind, float_by, c.x, c.y))
+                elif sink_max is not None and sink_by > sink_max:
+                    _problem(out, o.name, "placed_ground", "%s (%s) sinks into the surface by %.2f m at %.1f, %.1f" % (o.name, kind, sink_by, c.x, c.y))
+        if footprints:
+            for bid, poly, _z in footprints:
+                if len(poly) >= 3 and _inside(poly, c.x, c.y):
+                    _problem(out, o.name, "placed_building", "%s (%s) stands inside %s at %.1f, %.1f" % (o.name, kind, bid, c.x, c.y)); break
+    return len(items)
+
+
+def _inside(poly, x, y):
+    inside = False
+    for k in range(len(poly)):
+        (x0, y0), (x1, y1) = poly[k], poly[(k + 1) % len(poly)]
+        if (y0 > y) != (y1 > y) and x < x0 + (y - y0) * (x1 - x0) / (y1 - y0): inside = not inside
+    return inside
+
+
 def validate(roads_col, placed=None, log=print, overlaps=True, footprints=None):
     from .nodes import depsgraph
     _CACHE.clear()
     dg = depsgraph(); inst = _instances(dg)
     rs = all_roads(roads_col); by_name = {r.name: r for r in rs}
     out = []
-    for r in rs: check_road(r, dg, inst, out); check_limits(r, out)
+    for r in rs: check_road(r, dg, inst, out); check_limits(r, out); check_grade(r, dg, out)
     js = [o for o in roads_col.all_objects if o.get("mrs_junction") and o.type == "MESH"]
     for o in js: check_junction(o, dg, out, by_name)
     grid = surface_grid(roads_col, dg) if overlaps or footprints else None
     if overlaps: check_overlaps(roads_col, dg, out, grid=grid)
     if footprints: check_buildings(grid, footprints, out)
     n_signs = validate_speed_signs(placed.all_objects if placed else bpy.data.objects, out)
+    n_placed = check_placed(placed, roads_col, dg, out, footprints) if placed else 0
+    scene_objs = list(bpy.context.scene.objects)
+    check_warnings(set(roads_col.all_objects) | set(o for o in scene_objs if o.type in ("MESH", "CURVE")), out)
+    check_tongues(roads_col, scene_objs, dg, out)
+    check_buried(roads_col, scene_objs, dg, out)
     counts = {}
     for p in out: counts[p["check"]] = counts.get(p["check"], 0) + 1
-    rep = {"roads": len(rs), "junctions": len(js), "speed_signs": n_signs, "problems": out, "counts": counts}
-    log("VALIDATE roads %d junctions %d speed signs %d problems %d %s" % (len(rs), len(js), n_signs, len(out), json.dumps(counts)))
+    rep = {"roads": len(rs), "junctions": len(js), "speed_signs": n_signs, "placed": n_placed, "problems": out, "counts": counts}
+    log("VALIDATE roads %d junctions %d speed signs %d placed %d problems %d %s" % (len(rs), len(js), n_signs, n_placed, len(out), json.dumps(counts)))
     return rep

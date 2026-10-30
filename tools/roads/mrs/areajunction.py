@@ -199,6 +199,20 @@ def build_area_junction():
     road_ol = tb.group(MRS + "RegionOutline", Mesh=of_kind(TONGUE_ROAD), Radius=I["Inner Radius"], Count=I["Resolution"], **{"Fill Holes": True})
     all_ol = tb.group(MRS + "RegionOutline", Mesh=fp_flat, Radius=I["Outer Radius"], Count=I["Resolution"], **{"Fill Holes": True})   # a solid area
     isl_ol = tb.group(MRS + "RegionOutline", Mesh=of_kind(TONGUE_ISLAND), Radius=0.0, Count=I["Resolution"])
+    def ccw(curve):
+        """Every loop turned counter-clockwise (by its signed area): a Non-Zero fill then unites them."""
+        def nb(off):
+            idx = tb.n("GeometryNodeInputIndex").outputs[0]
+            op = tb.n("GeometryNodeOffsetPointInCurve"); tb.inp(op, "Point Index", idx); tb.inp(op, "Offset", off)
+            fa = tb.n("GeometryNodeFieldAtIndex", data_type="FLOAT_VECTOR", domain="POINT"); tb.inp(fa, "Index", op.outputs["Point Index"])
+            tb.inp(fa, "Value", tb.n("GeometryNodeInputPosition").outputs[0]); return fa.outputs[0]
+        x0, y0, _ = tb.separate(tb.n("GeometryNodeInputPosition").outputs[0]); x1, y1, _ = tb.separate(nb(1))
+        cid = tb.n("GeometryNodeCurveOfPoint"); tb.inp(cid, "Point Index", tb.n("GeometryNodeInputIndex").outputs[0])
+        acc = tb.n("GeometryNodeAccumulateField", data_type="FLOAT", domain="POINT")
+        tb.inp(acc, "Value", tb.math("SUBTRACT", tb.math("MULTIPLY", x0, y1), tb.math("MULTIPLY", x1, y0))); tb.inp(acc, "Group ID", cid.outputs["Curve Index"])
+        a2 = tb.store(curve, "mrs_area2", acc.outputs["Total"], "FLOAT", "POINT")
+        rv = tb.n("GeometryNodeReverseCurve"); tb.inp(rv, "Curve", a2); tb.inp(rv, "Selection", tb.compare("LESS_THAN", tb.named("mrs_area2"), 0.0))
+        return rv.outputs[0]
     def fill(curve, rule):
         f = tb.n("GeometryNodeFillCurve"); tb.inp(f, "Curve", curve)
         f.inputs["Fill Rule"].default_value = rule; f.inputs["Mode"].default_value = "Triangles"      # planar faces at any level
@@ -213,17 +227,22 @@ def build_area_junction():
         return up.outputs[0]
     # even-odd: the road with its islands as holes
     road = fill(tb.join(road_ol.outputs["Curve"], isl_ol.outputs["Curve"]), "Even-Odd")
-    # the roadside = the area minus every carriageway (the junction road and the roads' own), islands raised: one
-    # constrained triangulation of all the loops (every triangle lies wholly inside or outside each region), the odd
-    # triangles kept when their centre is inside the area
-    road_fill = fill(road_ol.outputs["Curve"], "Non-Zero")
-    cw_ol = tb.group(MRS + "RegionOutline", Mesh=tb.join(road_fill, surf_flat.outputs[0]), Radius=0.0, Count=I["Resolution"])
-    side = fill(tb.join(all_ol.outputs["Curve"], cw_ol.outputs["Curve"], isl_ol.outputs["Curve"]), "Even-Odd")
-    area_fill = fill(all_ol.outputs["Curve"], "Non-Zero")
-    pc = tb.separate(tb.n("GeometryNodeInputPosition").outputs[0])                                  # a face's centre (face domain)
-    rc_a = tb.n("GeometryNodeRaycast"); tb.inp(rc_a, "Target Geometry", area_fill); tb.inp(rc_a, "Source Position", tb.combine(pc[0], pc[1], 50.0))
-    tb.inp(rc_a, "Ray Direction", (0.0, 0.0, -1.0)); tb.inp(rc_a, "Ray Length", 100.0)
-    out_a = tb.n("GeometryNodeDeleteGeometry", domain="FACE"); tb.inp(out_a, "Geometry", side); tb.inp(out_a, "Selection", tb.boolean("NOT", rc_a.outputs["Is Hit"]))
+    # the roadside: ONE constrained triangulation of every loop (area, road, islands, the roads' own carriageways), so
+    # each triangle lies wholly inside or outside each region; a triangle is roadside when its centre is inside the
+    # area and in neither the road nor a carriageway, or inside an island. It never overlaps the road by construction
+    # (an outline re-derived from the road fill differed from the road's own by slivers that read as road AND roadside).
+    surf_ol = tb.group(MRS + "RegionOutline", Mesh=surf_flat.outputs[0], Radius=0.0, Count=I["Resolution"])
+    loops = [all_ol.outputs["Curve"], road_ol.outputs["Curve"], isl_ol.outputs["Curve"], surf_ol.outputs["Curve"]]
+    arr = fill(tb.join(*[ccw(c) for c in loops]), "Non-Zero")                         # the union, with every loop's edges
+    def inside(target):
+        pc = tb.separate(tb.n("GeometryNodeInputPosition").outputs[0])                              # the face's centre (face domain)
+        rc = tb.n("GeometryNodeRaycast"); tb.inp(rc, "Target Geometry", target); tb.inp(rc, "Source Position", tb.combine(pc[0], pc[1], 50.0))
+        tb.inp(rc, "Ray Direction", (0.0, 0.0, -1.0)); tb.inp(rc, "Ray Length", 100.0)
+        return rc.outputs["Is Hit"]
+    in_area = inside(fill(all_ol.outputs["Curve"], "Non-Zero")); in_road = inside(fill(road_ol.outputs["Curve"], "Non-Zero"))
+    in_isl = inside(fill(isl_ol.outputs["Curve"], "Non-Zero")); in_cw = inside(surf_ol.outputs["Region"])
+    keep = tb.boolean("OR", tb.boolean("AND", in_area, tb.boolean("NOT", tb.boolean("OR", in_road, in_cw))), in_isl)
+    out_a = tb.n("GeometryNodeDeleteGeometry", domain="FACE"); tb.inp(out_a, "Geometry", arr); tb.inp(out_a, "Selection", tb.boolean("NOT", keep))
     side = out_a.outputs[0]
 
     tb.frame_("Heights: each vertex at the nearest footprint's surface level")

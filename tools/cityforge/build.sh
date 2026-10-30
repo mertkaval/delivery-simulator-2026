@@ -5,6 +5,7 @@
 #   --houses      also rebuild the house catalogue (tools/cityforge/houses.py, ~4 min)
 #   --cf-streets  CityForge's own street ribbons and street furniture instead of Mert Road Studio's
 #                 (default: tools/cityforge/mrs_streets.py builds roads, junctions, lanes, bridges and street assets)
+#   --quick       validate the streets without the junction renders (fix rounds; the final build renders)
 #   --with-buildings  the classic city (CityForge's buildings, lots, parks) into assets/cityforge; by default the
 #                 roads-only city (Mert Road Studio streets on the natural terrain, frontage plots) goes into
 #                 assets/cityforge_roads and the classic city is left as it is
@@ -60,8 +61,10 @@ if [ "$MRS" = 1 ]; then
   "$BLENDER" --background "$WORK/mrs_out/port_halden_streets.blend" --python tools/cityforge/assemble_map.py -- "$BUILD/port_halden.blend" "$WORK/port_halden_map.blend" | grep -E "^MAP|Error|Traceback" || true
   echo "== check (Blender)"
   rm -rf "$WORK/atlas"
-  "$BLENDER" --background "$WORK/port_halden_map.blend" --python tools/cityforge/mrs_junction_atlas.py -- "$WORK/atlas" --plan "$PLAN/city.json" | grep -E "^ATLAS|Traceback" || true
-  [ -f "$WORK/atlas/sheet_manifest.json" ] && python -I tools/cityforge/contact_sheet.py "$WORK/atlas/sheet_manifest.json" | tail -1
+  QUICK=0; for arg in "$@"; do [ "$arg" = "--quick" ] && QUICK=1; done     # --quick: validation only, no junction renders (a fix round)
+  ATLAS_OPT=""; [ "$QUICK" = 1 ] && ATLAS_OPT="--no-render"
+  "$BLENDER" --background "$WORK/port_halden_map.blend" --python tools/cityforge/mrs_junction_atlas.py -- "$WORK/atlas" --plan "$PLAN/city.json" $ATLAS_OPT | grep -E "^ATLAS|Traceback" || true
+  [ "$QUICK" = 0 ] && [ -f "$WORK/atlas/sheet_manifest.json" ] && python -I tools/cityforge/contact_sheet.py "$WORK/atlas/sheet_manifest.json" | tail -1
   FORCE=0; for arg in "$@"; do [ "$arg" = "--force" ] && FORCE=1; done
   if ! python -I -c "import json,sys; r=json.load(open(sys.argv[1])); sys.exit(1 if r['problems'] or r['lane_mouths_without_kerb'] else 0)" "$WORK/atlas/validation.json"; then
     [ "$FORCE" = 1 ] || { echo "Validation found problems ($WORK/atlas/validation.json): nothing installed (--force to install anyway)"; exit 1; }

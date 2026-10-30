@@ -111,7 +111,9 @@ def dist_point_seg(p, a, b):
 DT = SPEC["downtown"]
 DT_POLY = DT["poly"]
 MARGIN = SPEC["grid"]["margin_m"]
-MAX_GRADE = SPEC["grid"]["max_local_grade"]
+# one grade table for the planner and the street network (citynet.grade_table reads it from city.json)
+MAX_GRADES = SPEC["grid"].get("max_grade") or {"local": SPEC["grid"]["max_local_grade"]}
+MAX_GRADE = MAX_GRADES["local"]
 BRIDGE_MAX = SPEC["bridge_max_span_m"]
 
 
@@ -1024,7 +1026,7 @@ for kind, lst in props.items():
         it.insert(2, round(h_at(it[0], it[1], G_H), 2))
 
 # --- 6. write --------------------------------------------------------------------------------
-city = {"name": SPEC["name"], "size_m": SIZE, "cell_m": CELL, "grid": N, "sea_level": 0.0,
+city = {"name": SPEC["name"], "size_m": SIZE, "cell_m": CELL, "grid": N, "sea_level": 0.0, "max_grade": MAX_GRADES,
         "nodes": [{"id": n["id"], "pos": n["pos"], "h": round(node_h[n["id"]], 2), "control": n["control"], "edges": [edges[e]["id"] for e in n["edges"]]} for n in nodes],
         "roads": edges, "lanes": items["lanes"], "lots": items["lots"], "houses": items["houses"], "garages": items["garages"], "fences": items["fences"],
         "shops": items["shops"], "towers": items["towers"], "warehouses": items["warehouses"], "public": items["public"], "parks": items["parks"],

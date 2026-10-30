@@ -21,9 +21,19 @@ REPO_TOOLS = os.path.normpath(os.path.join(HERE, "..", ".."))                   
 REPO_LIBRARY = os.path.normpath(os.path.join(REPO_TOOLS, "..", "..", "tmp", "roads", "city", "base.blend"))
 
 
+def _register_tools(self=None, context=None):
+    """Register the Road Studio panel and operators from the tools path (called at enable and whenever the preference
+    changes: an installed copy of the add-on lives outside the repository, so the default path rarely fits)."""
+    try:
+        _mrs().register()
+    except Exception as e:
+        print("Mert Road Studio: tools not found (%s); set the MRS tools path in the add-on preferences" % e)
+
+
 class MRSADDON_Preferences(bpy.types.AddonPreferences):
     bl_idname = __name__
-    tools_path: StringProperty(name="MRS tools path", subtype="DIR_PATH", default=REPO_TOOLS, description="The folder holding the mrs package (<repo>/tools/roads)")
+    tools_path: StringProperty(name="MRS tools path", subtype="DIR_PATH", default=REPO_TOOLS, description="The folder holding the mrs package (<repo>/tools/roads)",
+                               update=_register_tools)
     library: StringProperty(name="Library file", subtype="FILE_PATH", default=REPO_LIBRARY, description="The MRS library .blend (node groups, materials, assets)")
 
     def draw(self, context):
@@ -36,9 +46,11 @@ def _prefs():
 
 
 def _mrs():
-    p = _prefs(); path = p.tools_path if p else REPO_TOOLS
-    if path and path not in sys.path: sys.path.insert(0, path)
-    import mrs
+    p = _prefs(); path = os.path.normpath(bpy.path.abspath(p.tools_path)) if p and p.tools_path else REPO_TOOLS
+    if not os.path.isdir(os.path.join(path, "mrs")): raise ImportError("no mrs package in %s" % path)
+    if path not in sys.path: sys.path.insert(0, path)
+    import importlib, mrs
+    if os.path.normpath(os.path.dirname(os.path.dirname(os.path.abspath(mrs.__file__)))) != path: mrs = importlib.reload(mrs)
     return mrs
 
 
@@ -88,10 +100,7 @@ CLASSES = (MRSADDON_Preferences, MRSADDON_OT_open_library, MRSADDON_OT_build_lib
 
 def register():
     for c in CLASSES: bpy.utils.register_class(c)
-    try:
-        _mrs().register()                          # the Road Studio panel and operators (mrs/ui.py)
-    except Exception as e:
-        print("Mert Road Studio: tools not found (%s); set the MRS tools path in the add-on preferences" % e)
+    _register_tools()                              # the Road Studio panel and operators (mrs/ui.py)
 
 
 def unregister():

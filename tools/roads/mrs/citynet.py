@@ -30,23 +30,23 @@ CONTROL_RANK = {"signal": 3, "stop": 2, "uncontrolled": 1, "none": 0}
 # MRS road inputs per CityForge class. Every profile fills the CityForge right of way exactly:
 # carriageway = `width`, then kerb 0.25 + sidewalk 4.35 (= verge 1.6 + sidewalk 3.0), so lots, fences and
 # front walks keep their places.
-COMMON = {"Conform": False, "Embankment": False, "Superelevation": 0.0, "Curb Width": 0.25, "Curb Height": 0.15,
+COMMON = {"Conform": False, "Embankment": False, "Superelevation": 0.0, "Curb Width": 0.25, "Curb Height": 0.15, "Smoothing": 4, "Resolution": 1.0,
           "Sidewalk Left": True, "Sidewalk Right": True, "Sidewalk Width Left": WALK - 0.25, "Sidewalk Width Right": WALK - 0.25,
           "Light Side": "None", "Prop Side": "None", "Tree Side": "None", "Scatter Density": 0.0, "Edge Depth": EDGE_DEPTH}
 PROFILES = {
-    "local": dict(preset="residential", **{"Lanes Forward": 1, "Lanes Backward": 1, "Lane Width": 3.0, "Parking Left": 2.5, "Parking Right": 2.5,
+    "local": dict(preset="residential", **{"Crown": 2.0, "Lanes Forward": 1, "Lanes Backward": 1, "Lane Width": 3.0, "Parking Left": 2.5, "Parking Right": 2.5,
                                            "Centre Line": "None", "Edge Lines": False, "Lane Arrows": False, "Parking Ticks": False,
                                            "Planting Strip Left": 1.35, "Planting Strip Right": 1.35, "Median": 0.0, "Bike Left": "None", "Bike Right": "None"}),
-    "arterial": dict(preset="urban", **{"Lanes Forward": 2, "Lanes Backward": 2, "Lane Width": 3.25, "Parking Left": 0.0, "Parking Right": 0.0, "Median": 0.0,
+    "arterial": dict(preset="urban", **{"Crown": 2.0, "Lanes Forward": 2, "Lanes Backward": 2, "Lane Width": 3.25, "Parking Left": 0.0, "Parking Right": 0.0, "Median": 0.0,
                                         "Centre Line": "Double", "Edge Lines": False, "Bike Left": "Buffered", "Bike Right": "Buffered", "Bike Width": 1.8, "Bike Buffer": 0.7,
                                         "Planting Strip Left": 1.35, "Planting Strip Right": 1.35}),
-    "boulevard": dict(preset="urban", **{"Lanes Forward": 2, "Lanes Backward": 2, "Lane Width": 3.4, "Parking Left": 0.0, "Parking Right": 0.0, "Median": 4.4,
+    "boulevard": dict(preset="urban", **{"Crown": 2.0, "Lanes Forward": 2, "Lanes Backward": 2, "Lane Width": 3.4, "Parking Left": 0.0, "Parking Right": 0.0, "Median": 4.4,
                                          "Centre Line": "None", "Edge Lines": False, "Bike Left": "None", "Bike Right": "None",
                                          "Planting Strip Left": 1.35, "Planting Strip Right": 1.35}),
-    "downtown": dict(preset="urban", **{"Lanes Forward": 2, "Lanes Backward": 2, "Lane Width": 3.0, "Parking Left": 2.0, "Parking Right": 2.0, "Median": 0.0,
+    "downtown": dict(preset="urban", **{"Crown": 2.0, "Lanes Forward": 2, "Lanes Backward": 2, "Lane Width": 3.0, "Parking Left": 2.0, "Parking Right": 2.0, "Median": 0.0,
                                         "Centre Line": "Double", "Edge Lines": False, "Bike Left": "None", "Bike Right": "None",
                                         "Planting Strip Left": 0.0, "Planting Strip Right": 0.0}),
-    "bridge": dict(preset="bridge", **{"Lanes Forward": 2, "Lanes Backward": 2, "Lane Width": 3.25, "Shoulder": 2.5, "Median": 0.0,
+    "bridge": dict(preset="bridge", **{"Crown": 1.5, "Lanes Forward": 2, "Lanes Backward": 2, "Lane Width": 3.25, "Shoulder": 2.5, "Median": 0.0,
                                        "Sidewalk Width Left": 2.2, "Sidewalk Width Right": 2.2, "Centre Line": "Double", "Light Side": "None",
                                        "Planting Strip Left": 0.0, "Planting Strip Right": 0.0, "Pillar Spacing": 32.0}),
     "lane": dict(preset="service", **{"Lanes Forward": 1, "Lanes Backward": 1, "Lane Width": 2.75, "Shoulder": 0.25, "Curb Height": 0.0, "Curb Width": 0.1,
@@ -54,10 +54,55 @@ PROFILES = {
                                       "Crown": 1.0, "Edge Depth": 0.8}),
 }
 SPEED = {"local": 30, "downtown": 40, "arterial": 50, "boulevard": 50, "lane": 20}
-MAX_GRADE = {"local": 0.16, "downtown": 0.12, "arterial": 0.12, "boulevard": 0.10, "lane": 0.18, "bridge": 0.06}   # vertical alignment (rise / run)
+MAX_GRADE = {"local": 0.12, "downtown": 0.12, "arterial": 0.12, "boulevard": 0.10, "lane": 0.18, "bridge": 0.06}   # vertical alignment (rise / run)
+# the default grade table; a plan's own "max_grade" (port_halden_city.json grid.max_grade, carried in city.json)
+# overrides it, so the planner and the network use one table (grade_table)
+LANDING_GRADE = 0.03                  # a street's landing at a junction: at most this grade over its lock zone
+LOCK_MAX = 14.0                       # longest Lock Length a street gets (m; the road group's default)
+VC_K = 0.7                            # vertical curve length per % of grade change (m)
+GRADE_WINDOW = 10.0                   # a street's grade is measured over every window of this much plan run (m)
+GRADE_MARGIN = 0.002                  # the design keeps this below the class maximum (the validator's tolerance)
+EARTH_MAX = 3.0                       # a junction moved further than this from its natural (or bridge) height: an optional link pulling it is dropped
+EARTH_HARD = 6.0                      # no junction moves further than this
 SMOOTH = {"local": 30.0, "downtown": 40.0, "arterial": 50.0, "boulevard": 60.0, "lane": 20.0}   # ground averaged over this length (m)
 BRIDGE_CLEARANCE = 4.0                # deck height over the water level (m)
 STYLE = {"local": "residential", "downtown": "avenue", "arterial": "avenue", "boulevard": "boulevard", "lane": "residential"}
+
+
+def grade_table(city=None):
+    """{class: max grade}: MAX_GRADE overridden by the plan's own table (city.json "max_grade")."""
+    t = dict(MAX_GRADE); t.update((city or {}).get("max_grade") or {})
+    return t
+
+
+def carriageway_half(cls, bridge=False):
+    """The wider side's carriageway half width of a class profile (Road_Profile: median / 2 + lanes x lane width +
+    shoulder + parking + cycle buffer + cycle lane)."""
+    _p, v = profile(cls, bridge)
+    lanes = max(v.get("Lanes Forward", 1), v.get("Lanes Backward", 1))
+    best = 0.0
+    for side in ("Left", "Right"):
+        bk = v.get("Bike " + side, "None"); bw = 0.0
+        if bk != "None":
+            bw = v.get("Bike Width", 1.6) * (2.0 if bk == "Two-Way" else 1.0) + (v.get("Bike Buffer", 0.5) if bk in ("Buffered", "Protected", "Two-Way") else 0.0)
+        best = max(best, v.get("Parking " + side, 0.0) + bw)
+    return v.get("Median", 0.0) / 2.0 + lanes * v.get("Lane Width", 3.2) + v.get("Shoulder", 0.0) + best
+
+
+def crown_h(cls, bridge=False):
+    """The crown's rise at the centre line (m): Crown % of the carriageway half width."""
+    _p, v = profile(cls, bridge)
+    return v.get("Crown", 2.0) * 0.01 * carriageway_half(cls, bridge)
+
+
+def lock_length(ch, G, live, locked_ends):
+    """A street's Lock Length: long enough that its crown fades in at <= LANDING_GRADE, at least the blur reach,
+    short enough to leave GRADE_WINDOW m of climbing between its two landings, never more than half its live length."""
+    m = COMMON["Smoothing"] * COMMON["Resolution"]
+    ll_c = min(LOCK_MAX, max(m, 1.5 * ch / LANDING_GRADE))
+    floor = max(m, 1.5 * ch / max(G, 1e-6))
+    room = (live - GRADE_WINDOW) / max(locked_ends, 1) - m
+    return float(min(live / 2.0, max(floor, min(ll_c, room))))
 
 
 def profile(cls, bridge=False):
@@ -224,7 +269,9 @@ def _adopt_classes(city, N, rep, short=45.0):
 
 
 def _build_once(city, heights, region, forced, radius_override, natural=None, profiles=None):
-    rep = {"clusters": [], "absorbed": [], "duplicates": [], "angle_drops": [], "bends": [], "bend_junctions": [], "loops": [], "lanes": [], "notes": []}
+    rep = {"clusters": [], "absorbed": [], "duplicates": [], "angle_drops": [], "bends": [], "bend_junctions": [], "loops": [], "lanes": [], "notes": [],
+           "profile_fallbacks": []}
+    designed = profiles if isinstance(profiles, dict) and isinstance(profiles.get("roads"), dict) else None
     N = {n["id"]: n for n in city["nodes"]}
     roads_in = _adopt_classes(city, N, rep)
     R = {r["id"]: r for r in roads_in}
@@ -355,8 +402,20 @@ def _build_once(city, heights, region, forced, radius_override, natural=None, pr
         if region is not None and not any(region[0] <= p[0] <= region[2] and region[1] <= p[1] <= region[3] for p in poly): continue
         dense = _densify(poly, 6.0)
         name = "PH_" + seq_r[0].replace("road_", "R")
-        own = (profiles or {}).get(name)
-        if own is not None and len(own) == len(dense):
+        own = designed["roads"].get(name) if designed else (profiles or {}).get(name)
+        extra = {}
+        if designed and own is not None:
+            P = own["pts"]
+            if _d(P[0], dense[0]) < 1e-3 and _d(P[-1], dense[-1]) < 1e-3 and abs(sum(_d(a, b) for a, b in zip(P, P[1:])) - sum(_d(a, b) for a, b in zip(dense, dense[1:]))) < 1e-2:
+                dense = [tuple(q) for q in P]                  # the designed line: the same plan line with the landing stations
+                z = [float(v) + ASPH for v in own["z"]]
+                extra = {"lock_length": own["lock_length"], "max_grade": own["max_grade"], "grade_predicted": own["predicted"],
+                         "grade_infeasible": own.get("infeasible", False), "designed": True}
+            else:
+                rep["profile_fallbacks"].append(name); own = None
+        if extra:
+            pass
+        elif own is not None and not designed and len(own) == len(dense):
             z = [float(v) + ASPH for v in own]            # the road's own vertical alignment (design_heights)
         elif bridge and natural is not None:
             # the deck spans bank to bank at the clearance over the water, ramps at the bridge grade (mrs.grading)
@@ -374,9 +433,9 @@ def _build_once(city, heights, region, forced, radius_override, natural=None, pr
         else:
             z = [heights(*p) + ASPH for p in dense]
         name = "PH_" + seq_r[0].replace("road_", "R")
-        out_roads.append({"id": name, "cf_roads": seq_r, "cls": r0["cls"], "width": r0["width"], "bridge": bridge, "street": r0.get("name", ""),
-                          "culture": r0.get("culture", ""), "start": seq_j[0], "end": seq_j[-1], "pts": [(p[0], p[1], zz) for p, zz in zip(dense, z)],
-                          "length": round(sum(_d(p, q) for p, q in zip(dense, dense[1:])), 2)})
+        out_roads.append(dict({"id": name, "cf_roads": seq_r, "cls": r0["cls"], "width": r0["width"], "bridge": bridge, "street": r0.get("name", ""),
+                               "culture": r0.get("culture", ""), "start": seq_j[0], "end": seq_j[-1], "pts": [(p[0], p[1], zz) for p, zz in zip(dense, z)],
+                               "length": round(sum(_d(p, q) for p, q in zip(dense, dense[1:])), 2)}, **extra))
     kept = {r["id"] for r in out_roads}
     jz = {}
     deg = {}
@@ -388,8 +447,13 @@ def _build_once(city, heights, region, forced, radius_override, natural=None, pr
         kind = "junction" if len(lst) >= 2 else "dead_end"
         if len(lst) == 2 and j_id in passthrough: continue           # (cannot happen: chains run through these)
         aps = [(next(r for r in out_roads if r["id"] == rid), end) for rid, end in lst]
-        z, plane = junction_plane(heights, j["pos"], [r["pts"] if end == "start" else r["pts"][::-1] for r, end in aps])
-        if kind == "dead_end": z, plane = heights(*j["pos"]) + ASPH, (0.0, 0.0)
+        if designed and j_id in designed["nodes"]:
+            # the designed node height, level: every locked street end meets it exactly at its own height (Lock Z equals
+            # the street's level platform), so nothing is blended into the street's grade
+            z, plane = designed["nodes"][j_id] + ASPH, (0.0, 0.0)
+        else:
+            z, plane = junction_plane(heights, j["pos"], [r["pts"] if end == "start" else r["pts"][::-1] for r, end in aps])
+            if kind == "dead_end": z, plane = heights(*j["pos"]) + ASPH, (0.0, 0.0)
         cls = [next(r for r in out_roads if r["id"] == rid)["cls"] for rid, _ in lst]
         cr = min(CORNER.get(c, 6.0) for c in cls) if cls else 6.0
         over = [radius_override[m] for m in j["members"] if m in radius_override]
@@ -421,10 +485,11 @@ def _build_once(city, heights, region, forced, radius_override, natural=None, pr
             ends.append({"pos": q, "street": rd["id"], "along_pos": c, "out": out, "side": side, "dist": round(t, 2)})
         p0, p1 = ends[0]["pos"], ends[1]["pos"]
         dense = _densify([p0, p1], 6.0)
-        lid = "PH_" + ln["id"].replace("lane_", "L_"); own = (profiles or {}).get(lid)
+        lid = "PH_" + ln["id"].replace("lane_", "L_"); own = designed["lanes"].get(lid) if designed else (profiles or {}).get(lid)
         zs_ = [float(v) + ASPH for v in own] if own is not None and len(own) == len(dense) else [heights(*p) + ASPH for p in dense]
-        out_lanes.append({"id": lid, "cf_lane": ln["id"], "cls": "lane", "width": ln.get("width", 6),
-                          "pts": [(p[0], p[1], z_) for p, z_ in zip(dense, zs_)], "ends": ends, "length": round(_d(p0, p1), 2)})
+        out_lanes.append(dict({"id": lid, "cf_lane": ln["id"], "cls": "lane", "width": ln.get("width", 6),
+                               "pts": [(p[0], p[1], z_) for p, z_ in zip(dense, zs_)], "ends": ends, "length": round(_d(p0, p1), 2)},
+                              **({"max_grade": designed["lane_max_grade"]} if designed else {})))
         rep["lanes"].append(ln["id"])
     rep["summary"] = {"cf_nodes": len([n for n in city["nodes"] if n["edges"]]), "cf_roads": len(roads_in), "mrs_roads": len(out_roads),
                       "junctions": len([j for j in out_j if j["kind"] == "junction"]), "dead_ends": len([j for j in out_j if j["kind"] == "dead_end"]),
@@ -568,32 +633,146 @@ def bridge_gaps(city, natural, max_span=160.0, aligned=0.95, probe=40.0):
     return added
 
 
-def design_heights(net, natural, feather=10.0):
-    """(Heights, report, {road / lane id: z per point}) for the network built on the NATURAL terrain (roads integrated by the tool, not by a city's grading):
-    every road's vertical alignment from mrs.grading.network_profiles (natural ground averaged, grade limited, node
-    heights shared, decks over water), the corridors written into the natural field, then the back lanes pinned to
-    the streets they open onto. Feed the result back to build() for the final road and junction heights."""
+def design_heights(net, natural, feather=10.0, table=None):
+    """(Heights, report, profiles) for the network built on the NATURAL terrain: every street's vertical alignment
+    designed on what is built (mrs.grading.network_profiles_landed). Each locked street end is level over its
+    junction's footprint and a platform past it (to the paint zone, at least the blur reach), climbs at most
+    LANDING_GRADE over its lock zone (so road.py's level-arriving lock and the crown fading in stay within the class
+    maximum), then eases into the class maximum over a vertical curve; node heights are relaxed on that capacity,
+    within EARTH_HARD of the natural ground. Junctions are built level at the designed node height. Every street's
+    built grade is predicted with grading.rail_model. `profiles`: {"roads": {id: {pts, z, lock_length, max_grade,
+    predicted, infeasible}}, "nodes": {node: z}, "lanes": {id: z}, "lane_max_grade": g}; feed it back to build()."""
     from . import grading
-    nodes = {}; edges = []
-    for j in net["junctions"]: nodes[j["id"][3:]] = tuple(j["pos"])
+    table = table or MAX_GRADE
+    J = {j["id"][3:]: j for j in net["junctions"]}
+    nodes = {k: tuple(j["pos"]) for k, j in J.items()}
+    m_flat = COMMON["Smoothing"] * COMMON["Resolution"]          # the blur reach: the platform past a footprint is at least this
+    edges, meta = [], []
     for rd in net["roads"]:
         for key, p in ((rd["start"], rd["pts"][0]), (rd["end"], rd["pts"][-1])): nodes.setdefault(key, (p[0], p[1]))
-        edges.append({"a": rd["start"], "b": rd["end"], "pts": [(p[0], p[1]) for p in rd["pts"]], "bridge": bool(rd["bridge"]),
-                      "max_grade": MAX_GRADE["bridge" if rd["bridge"] else rd["cls"]], "smooth": SMOOTH.get(rd["cls"], 30.0), "clearance": BRIDGE_CLEARANCE})
-    zn, zs = grading.network_profiles(natural, nodes, edges)
-    profiles = {rd["id"]: [round(float(v), 3) for v in z] for rd, z in zip(net["roads"], zs)}
+        P2 = [(p[0], p[1]) for p in rd["pts"]]; S = float(grading._stations(P2)[-1])
+        ja, jb = J.get(rd["start"]), J.get(rd["end"])
+        la = ja is not None and ja["kind"] == "junction"; lb = jb is not None and jb["kind"] == "junction"
+        ta, tb = rd.get("trims", (0.0, 0.0)); ta = float(ta) if la else 0.0; tb = float(tb) if lb else 0.0
+        live = S - ta - tb
+        k = "bridge" if rd["bridge"] else rd["cls"]
+        G = table[k] - GRADE_MARGIN
+        ch = crown_h(rd["cls"], rd["bridge"])
+        LL = lock_length(ch, G, live, int(la) + int(lb)) if (la or lb) else LOCK_MAX
+        fa = max(m_flat, end_zone_of(ja, rd)) if la else m_flat
+        fb = max(m_flat, end_zone_of(jb, rd)) if lb else m_flat
+        land_a = max(LL + m_flat, fa); land_b = max(LL + m_flat, fb)
+        gl = min(LANDING_GRADE, max(0.0, (G - 1.5 * ch / max(LL, 1e-6)) / grading.LOCK_K))
+        vc = VC_K * 100.0 * (G - gl)
+        br = [ta, S - tb]
+        if la: br += [ta + fa, ta + land_a, ta + land_a + vc]
+        if lb: br += [S - tb - fb, S - tb - land_b, S - tb - land_b - vc]
+        pts = grading.insert_stations(P2, br)
+        edges.append({"a": rd["start"], "b": rd["end"], "pts": pts, "bridge": bool(rd["bridge"]), "max_grade": G, "smooth": SMOOTH.get(rd["cls"], 30.0),
+                      "clearance": BRIDGE_CLEARANCE, "ends": ((ta, land_a if la else 0.0), (tb, land_b if lb else 0.0)), "land_grade": gl, "vc": vc,
+                      "flat": (fa, fb)})
+        meta.append({"rd": rd, "la": la, "lb": lb, "ta": ta, "tb": tb, "LL": LL, "live": live, "G": table[k], "ch": ch, "gl": gl})
+    info = {}
+    zn, zs = grading.network_profiles_landed(natural, nodes, edges, iterations=2000, tol=1e-4, info=info, max_move=EARTH_HARD)
+    roads_prof = {}; predicted = {}
+    for i, (e, z, m) in enumerate(zip(edges, zs, meta)):
+        rd = m["rd"]
+        P3 = [(x, y, float(zz) + ASPH) for (x, y), zz in zip(e["pts"], z)]
+        o = grading.rail_model(P3, m["ta"], m["tb"], m["la"], m["lb"], zn[rd["start"]] + ASPH, zn[rd["end"]] + ASPH, m["LL"], m["ch"],
+                               COMMON["Resolution"], COMMON["Smoothing"])
+        pred = 0.0
+        if o is not None:
+            _a, plan, z_rail, z_crest = o
+            pred = max(grading.window_grades(plan, z_crest, GRADE_WINDOW)[0], grading.window_grades(plan, z_rail, GRADE_WINDOW)[0])
+        predicted[rd["id"]] = pred
+        roads_prof[rd["id"]] = {"pts": [(float(x), float(y)) for x, y in e["pts"]], "z": [round(float(v), 4) for v in z], "lock_length": round(m["LL"], 3),
+                                "max_grade": m["G"], "predicted": round(pred, 4), "infeasible": i in info["infeasible"]}
     streets = [{"pts": e["pts"], "z": z, "half": rd["width"] / 2.0 + WALK + 0.5} for e, z, rd in zip(edges, zs, net["roads"]) if not rd["bridge"]]
     f1 = grading.Field(grading.corridor_field(natural, streets, feather), natural.cell, (natural.ox, natural.oy), natural.water, natural.wl)
-    lanes = []
+    lanes = []; lanes_prof = {}
     for ln in net["lanes"]:
         pts = [(p[0], p[1]) for p in ln["pts"]]
-        z = grading.profile(f1, pts, f1(*pts[0]), f1(*pts[-1]), MAX_GRADE["lane"], SMOOTH["lane"])
+        z = grading.profile(f1, pts, f1(*pts[0]), f1(*pts[-1]), table["lane"] - GRADE_MARGIN, SMOOTH["lane"])
         lanes.append({"pts": pts, "z": z, "half": float(ln.get("width", 6)) / 2.0 + 1.0})
-        profiles[ln["id"]] = [round(float(v), 3) for v in z]
+        lanes_prof[ln["id"]] = [round(float(v), 3) for v in z]
     h = grading.corridor_field(f1, lanes, feather * 0.5)
-    rep = {"nodes": len(zn), "edges": len(edges), "max_edge_grade": round(max((float(np.max(np.abs(np.diff(z) / np.maximum(np.diff(grading._stations(e["pts"])), 1e-6))))
-                                                                           for e, z in zip(edges, zs) if len(z) > 1), default=0.0), 4)}
+    # earthwork: each node against its natural (or bridge-lifted) height, and each junction's level footprint against
+    # the natural ground along its arms out to the platform's end (centre and both sidewalk edges)
+    zref = {k: max(info["z_nat"][k], info["lifted"].get(k, -1e9)) for k in zn}
+    moves = {k: zn[k] - zref[k] for k in zn}
+    foot = {}
+    for e, m in zip(edges, meta):
+        rd = m["rd"]; half = rd["width"] / 2.0 + WALK
+        for key, la_, t, f, sgn in ((rd["start"], m["la"], m["ta"], e["flat"][0], 1), (rd["end"], m["lb"], m["tb"], e["flat"][1], -1)):
+            if not la_: continue
+            pts = e["pts"] if sgn > 0 else e["pts"][::-1]; st = grading._stations(pts); reach = t + f
+            for d in np.linspace(0.0, min(reach, st[-1]), 8):
+                x = float(np.interp(d, st, [p[0] for p in pts])); y = float(np.interp(d, st, [p[1] for p in pts]))
+                x2 = float(np.interp(min(d + 1.0, st[-1]), st, [p[0] for p in pts])); y2 = float(np.interp(min(d + 1.0, st[-1]), st, [p[1] for p in pts]))
+                u = _unit((x2 - x, y2 - y)); n = (-u[1], u[0])
+                for off in (0.0, half, -half):
+                    px, py = x + n[0] * off, y + n[1] * off
+                    if natural.wet(px, py): continue
+                    dz = zn[key] - natural(px, py)
+                    if abs(dz) > abs(foot.get(key, 0.0)): foot[key] = dz
+    mv = np.abs(np.array(list(moves.values()))) if moves else np.zeros(1)
+    over = sorted([(k, round(v, 2)) for k, v in moves.items() if abs(v) > EARTH_MAX], key=lambda t: -abs(t[1]))
+    fv = np.abs(np.array(list(foot.values()))) if foot else np.zeros(1)
+    by_cls = {}
+    for m in meta:
+        c = "bridge" if m["rd"]["bridge"] else m["rd"]["cls"]
+        by_cls[c] = max(by_cls.get(c, 0.0), predicted[m["rd"]["id"]] / max(m["G"], 1e-6))
+    rep = {"nodes": len(zn), "edges": len(edges), "sweeps": info["iterations"],
+           "residual": {net["roads"][i]["id"]: round(r, 3) for i, r in info["residual"].items()},
+           "infeasible": [{"road": net["roads"][i]["id"], "cf_roads": net["roads"][i]["cf_roads"]} for i in info["infeasible"]],
+           "predicted_over": sorted([(m["rd"]["id"], round(100 * predicted[m["rd"]["id"]], 2)) for m in meta if predicted[m["rd"]["id"]] > m["G"] + GRADE_MARGIN], key=lambda t: -t[1]),
+           "predicted_ratio_by_class": {k: round(v, 3) for k, v in by_cls.items()},
+           "earthwork": {"node_max": round(float(mv.max()), 2), "node_p90": round(float(np.percentile(mv, 90)), 2), "over_bound": over,
+                         "footprint_max": round(float(fv.max()), 2), "footprint_p90": round(float(np.percentile(fv, 90)), 2),
+                         "footprint_over": sorted([(k, round(v, 2)) for k, v in foot.items() if abs(v) > EARTH_MAX], key=lambda t: -abs(t[1]))[:20]},
+           "lock_length": {"min": round(min([m["LL"] for m in meta] or [0]), 2), "max": round(max([m["LL"] for m in meta] or [0]), 2)},
+           "_info": info, "_capacity": {rd["id"]: c for rd, c in zip(net["roads"], info["capacity"])}, "_zref": zref, "_zn": zn}
+    profiles = {"roads": roads_prof, "nodes": {k: float(v) for k, v in zn.items()}, "lanes": lanes_prof, "lane_max_grade": table["lane"]}
     return Heights(h, natural.cell), rep, profiles
+
+
+def design_network(city, natural, region=None, rounds=4, log=print):
+    """(net0, Heights, report, profiles): the network built on the natural terrain and designed (design_heights), with
+    the earthwork bound applied: a junction moved more than EARTH_MAX from its natural (or bridge) height by an
+    optional link (a planner connector, family "conn") whose two ends stay connected without it loses that link (the
+    city's road dict and its nodes; city["mrs_steep_drops"] records it), and the network is rebuilt and redesigned.
+    Junctions that no droppable link explains stay, reported in report["earthwork"]["over_bound"]."""
+    table = grade_table(city)
+    fam = {r["id"]: r.get("family", "") for r in city["roads"]}
+    for rnd in range(1, rounds + 1):
+        net0 = build(city, Heights(natural.h, natural.cell), region, natural=natural)
+        H, rep, prof = design_heights(net0, natural, table=table)
+        cap = rep.pop("_capacity"); zref = rep.pop("_zref"); zn = rep.pop("_zn"); rep.pop("_info", None)
+        new = []
+        for k, _mv in rep["earthwork"]["over_bound"]:
+            inc = [r for r in net0["roads"] if k in (r["start"], r["end"])]
+            if not inc: continue
+            worst = max(inc, key=lambda r: abs(zref.get(r["end"], 0.0) - zref.get(r["start"], 0.0)) - cap.get(r["id"], 0.0))
+            conn = [c for c in worst["cf_roads"] if fam.get(c) == "conn"]
+            adj = {}
+            for r in net0["roads"]:
+                if r["id"] == worst["id"]: continue
+                adj.setdefault(r["start"], set()).add(r["end"]); adj.setdefault(r["end"], set()).add(r["start"])
+            seen = {worst["start"]}; st = [worst["start"]]
+            while st:
+                for m_ in adj.get(st.pop(), ()):
+                    if m_ not in seen: seen.add(m_); st.append(m_)
+            connected = worst["end"] in seen
+            log("EARTHWORK round %d: %s moved %.2f m beyond its natural / bridge height, pulled by %s %s; connector pieces %s; network connected without it: %s"
+                % (rnd, k, zn[k] - zref[k], worst["id"], worst["cf_roads"], conn, connected))
+            if conn and connected: new += [c for c in conn if c not in new]
+        if not new: break
+        drop = set(new)
+        city["roads"] = [r for r in city["roads"] if r["id"] not in drop]
+        for nd in city["nodes"]: nd["edges"] = [e for e in nd["edges"] if e not in drop]
+        city.setdefault("mrs_steep_drops", []).extend(sorted(drop))
+    rep["rounds"] = rnd; rep["steep_drops"] = list(city.get("mrs_steep_drops", []))
+    return net0, H, rep, prof
 
 
 def junction_plane(heights, at, approaches, reach=22.0):

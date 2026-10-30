@@ -1,0 +1,235 @@
+{
+ "MRS_Road": {
+  "Lanes Backward": {
+   "min": 0,
+   "max": 5,
+   "gaps": [],
+   "regions_passing": [
+    [
+     0,
+     5,
+     null,
+     6
+    ]
+   ],
+   "declared": [
+    0,
+    6
+   ],
+   "evidence": "tmp/roads/limits/road/Lanes_Backward.json"
+  },
+  "Object Clearance": {
+   "min": 1.099112971987049,
+   "max": 10.0,
+   "gaps": [],
+   "regions_passing": [
+    [
+     0.9991936108973172,
+     10.0,
+     0.9928962115263492,
+     null
+    ]
+   ],
+   "declared": [
+    0.30000001192092896,
+    10.0
+   ],
+   "evidence": "tmp/roads/limits/road/Object_Clearance.json"
+  },
+  "Resolution": {
+   "min": 0.23057279092330205,
+   "max": 2.3428286630786093,
+   "gaps": [],
+   "regions_passing": [
+    [
+     0.20961162811209277,
+     2.6031429589762327,
+     0.20800969059011604,
+     2.6187619733958796
+    ],
+    [
+     2.7725000021979214,
+     3.4057568809627377,
+     2.7571875022025782,
+     3.430672783293228
+    ]
+   ],
+   "declared": [
+    0.20000000298023224,
+    10.0
+   ],
+   "evidence": "tmp/roads/limits/road/Resolution.json"
+  }
+ },
+ "MRS_MarkingLines": {
+  "Edge Width": {
+   "min": 0.009999999776482582,
+   "max": 1.7888062499987427,
+   "gaps": [],
+   "regions_passing": [
+    [
+     0.009999999776482582,
+     1.987562499998603,
+     null,
+     2.0
+    ]
+   ],
+   "declared": [
+    0.009999999776482582,
+    2.0
+   ],
+   "evidence": "tmp/roads/limits/area/MRS_MarkingLines_Edge_Width.json"
+  }
+ },
+ "MRS_TerrainConform": {
+  "Cut Slope": {
+   "min": 0.6963085945215426,
+   "max": 10.0,
+   "gaps": [],
+   "regions_passing": [
+    [
+     0.6330078132014023,
+     10.0,
+     0.6274553578446752,
+     null
+    ]
+   ],
+   "declared": [
+    0.05000000074505806,
+    10.0
+   ],
+   "evidence": "tmp/roads/limits/terrain/Cut_Slope.json"
+  },
+  "Edge Band": {
+   "min": 1.9029017857142858,
+   "max": 20.0,
+   "gaps": [],
+   "regions_passing": [
+    [
+     1.7299107142857144,
+     20.0,
+     1.713169642857143,
+     null
+    ]
+   ],
+   "declared": [
+    0.0,
+    20.0
+   ],
+   "evidence": "tmp/roads/limits/terrain/Edge_Band.json"
+  },
+  "Fill Slope": {
+   "min": 0.26382812547381035,
+   "max": 10.0,
+   "gaps": [],
+   "regions_passing": [
+    [
+     0.2398437504307367,
+     10.0,
+     0.23808593793364707,
+     null
+    ]
+   ],
+   "declared": [
+    0.05000000074505806,
+    10.0
+   ],
+   "evidence": "tmp/roads/limits/terrain/Fill_Slope.json"
+  },
+  "Max Rise": {
+   "min": 5.248325892857143,
+   "max": 200.0,
+   "gaps": [],
+   "regions_passing": [
+    [
+     4.771205357142858,
+     200.0,
+     4.743303571428571,
+     null
+    ]
+   ],
+   "declared": [
+    0.0,
+    200.0
+   ],
+   "evidence": "tmp/roads/limits/terrain/Max_Rise.json"
+  },
+  "Reach": {
+   "min": 7.826450892857143,
+   "max": 500.0,
+   "gaps": [],
+   "regions_passing": [
+    [
+     7.114955357142858,
+     500.0,
+     7.045200892857143,
+     null
+    ]
+   ],
+   "declared": [
+    0.0,
+    500.0
+   ],
+   "evidence": "tmp/roads/limits/terrain/Reach.json"
+  },
+  "Sink": {
+   "min": 0.025167410714285708,
+   "max": 1.0,
+   "gaps": [],
+   "regions_passing": [
+    [
+     0.02287946428571428,
+     1.0,
+     0.02232142857142857,
+     null
+    ]
+   ],
+   "declared": [
+    0.0,
+    1.0
+   ],
+   "evidence": "tmp/roads/limits/terrain/Sink.json"
+  },
+  "Subdivide": {
+   "min": 1,
+   "max": 3,
+   "gaps": [],
+   "regions_passing": [
+    [
+     1,
+     3,
+     0,
+     null
+    ]
+   ],
+   "declared": [
+    0,
+    3
+   ],
+   "evidence": "tmp/roads/limits/terrain/Subdivide.json"
+  },
+  "Subdivide Reach": {
+   "min": 2.0809151785714284,
+   "max": 60.0,
+   "gaps": [],
+   "regions_passing": [
+    [
+     1.8917410714285714,
+     60.0,
+     1.875,
+     null
+    ]
+   ],
+   "declared": [
+    0.0,
+    60.0
+   ],
+   "evidence": "tmp/roads/limits/terrain/Subdivide_Reach.json"
+  }
+ },
+ "_rules": {
+  "MRS_Road": {
+   "bend_ratio": 1.0758
+  }
+ }
+}

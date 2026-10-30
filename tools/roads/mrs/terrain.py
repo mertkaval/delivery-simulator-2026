@@ -92,6 +92,8 @@ def build_terrain_conform_group():
         ("Subdivide", "NodeSocketInt", 1, 0, 3, "Subdivision levels for terrain faces near roads"),
         ("Subdivide Reach", "NodeSocketFloat", 8.0, 0.0, 60.0, "Faces this close to a road are subdivided (m)"),
         ("Cut", "NodeSocketBool", False, None, None, "Delete terrain faces under the road surface instead of sinking them"),
+        ("Deck Clearance", "NodeSocketFloat", 2.0, 0.5, 40.0, "Under an elevated road's deck the terrain stays at least this far below the deck's surface (m): "
+         "a hill or a bank at an abutment never rises through a bridge"),
         ("Tunnel Clearance", "NodeSocketFloat", 9.0, 3.0, 40.0, "Over a road's tunnel span the terrain stays at least this far above the road (m): the hill "
          "never cuts through the tunnel lining; near a portal it covers the lining like a cut-and-cover entrance"),
     ])])
@@ -124,15 +126,27 @@ def build_terrain_conform_group():
     hz = tb.math("SUBTRACT", tb.separate(rc.outputs["Hit Position"])[2], I("Sink"))
     under = tb.boolean("AND", rc.outputs["Is Hit"], tb.compare("LESS_THAN", tb.math("SUBTRACT", hz, pz), I("Max Rise")))
     z_under = tb.switch(I("Raise"), tb.math("MINIMUM", pz, hz), hz, "FLOAT")
-    # beside the roads: clipped between the batters from the nearest surface point (horizontal distance)
-    prox2 = tb.n("GeometryNodeProximity", target_element="FACES"); tb.inp(prox2, "Target", road_tops); tb.inp(prox2, "Source Position", pos2)
-    nx, ny, nz0 = tb.separate(prox2.outputs["Position"])
-    nz = tb.math("SUBTRACT", nz0, I("Sink"))
-    dh = tb.vmath("LENGTH", tb.combine(tb.math("SUBTRACT", px, nx), tb.math("SUBTRACT", py, ny), 0.0))
-    run = tb.math("MAXIMUM", tb.math("SUBTRACT", dh, I("Edge Band")), 0.0)          # the batters start beyond the edge band
-    d1 = tb.math("DIVIDE", I("Deep Cut"), tb.math("MAXIMUM", I("Cut Slope"), 0.01))          # run of the first, gentler part
-    cut_rise = tb.math("ADD", tb.math("MULTIPLY", I("Cut Slope"), tb.math("MINIMUM", run, d1)),
+    # beside the roads: clipped between the batters from the nearest surface point in plan. The nearest point in 3D
+    # was the wrong one in a cut on a steep street: a kerb point a few metres uphill lay nearer the (higher) original
+    # terrain than the kerb beside it, and the terrain stood at that point's height over the sidewalk's edge.
+    def plan_nearest(tops_geo):
+        """(horizontal distance, surface height, found) of the surfaces `tops_geo` nearest each terrain point in plan."""
+        oz = tb.store(tops_geo, "mrs_plan_z", tb.separate(tb.n("GeometryNodeInputPosition").outputs[0])[2], "FLOAT", "POINT")
+        fx, fy, _fz = tb.separate(tb.n("GeometryNodeInputPosition").outputs[0])
+        flat = tb.n("GeometryNodeSetPosition"); tb.inp(flat, "Geometry", oz); tb.inp(flat, "Position", tb.combine(fx, fy, 0.0))
+        src = tb.combine(px, py, 0.0)
+        pr = tb.n("GeometryNodeProximity", target_element="FACES"); tb.inp(pr, "Target", flat.outputs[0]); tb.inp(pr, "Source Position", src)
+        sn = tb.n("GeometryNodeSampleNearestSurface", data_type="FLOAT"); tb.inp(sn, "Mesh", flat.outputs[0])
+        tb.inp(sn, "Value", tb.named("mrs_plan_z")); tb.inp(sn, "Sample Position", src)
+        return pr.outputs["Distance"], sn.outputs["Value"], pr.outputs["Is Valid"]
+    def cut_rise_of(run):
+        d1 = tb.math("DIVIDE", I("Deep Cut"), tb.math("MAXIMUM", I("Cut Slope"), 0.01))          # run of the first, gentler part
+        return tb.math("ADD", tb.math("MULTIPLY", I("Cut Slope"), tb.math("MINIMUM", run, d1)),
                        tb.math("MULTIPLY", I("Deep Slope"), tb.math("MAXIMUM", tb.math("SUBTRACT", run, d1), 0.0)))
+    dh, nz0, _found = plan_nearest(road_tops)
+    nz = tb.math("SUBTRACT", nz0, I("Sink"))
+    run = tb.math("MAXIMUM", tb.math("SUBTRACT", dh, I("Edge Band")), 0.0)          # the batters start beyond the edge band
+    cut_rise = cut_rise_of(run)
     hi = tb.math("ADD", nz, cut_rise); lo = tb.math("SUBTRACT", nz, tb.math("MULTIPLY", I("Fill Slope"), run))
     clipped = tb.math("MINIMUM", tb.math("MAXIMUM", pz, lo), hi)
     z_side = tb.switch(I("Raise"), tb.math("MINIMUM", pz, clipped), clipped, "FLOAT")
@@ -145,9 +159,27 @@ def build_terrain_conform_group():
     tb.inp(trc, "Source Position", tb.combine(px, py, tb.math("ADD", pz, 400.0))); tb.inp(trc, "Ray Direction", (0.0, 0.0, -1.0)); tb.inp(trc, "Ray Length", 900.0)
     t_need = tb.math("ADD", tb.separate(trc.outputs["Hit Position"])[2], I("Tunnel Clearance"))
     newz = tb.switch(trc.outputs["Is Hit"], newz, tb.math("MAXIMUM", newz, t_need), "FLOAT")
+    # under an elevated deck (its faces carry deck_surface): at most Deck Clearance below the deck's surface (the first
+    # deck face a ray from far below meets); the terrain used to ignore decks, and a valley ridge or the ground at an
+    # abutment rose through the bridge
+    dk = tb.n("GeometryNodeSeparateGeometry", domain="FACE"); tb.inp(dk, "Geometry", real.outputs[0])
+    tb.inp(dk, "Selection", tb.boolean("AND", tb.compare("GREATER_THAN", tb.named("deck_surface"), 0.5),
+                                       tb.compare("GREATER_THAN", tb.separate(tb.n("GeometryNodeInputNormal").outputs[0])[2], 0.3)))
+    drc = tb.n("GeometryNodeRaycast", data_type="FLOAT"); tb.inp(drc, "Target Geometry", dk.outputs[0])
+    tb.inp(drc, "Source Position", tb.combine(px, py, tb.math("SUBTRACT", pz, 1000.0))); tb.inp(drc, "Ray Direction", (0.0, 0.0, 1.0)); tb.inp(drc, "Ray Length", 3000.0)
+    d_top = tb.math("SUBTRACT", tb.separate(drc.outputs["Hit Position"])[2], I("Deck Clearance"))
+    newz = tb.switch(drc.outputs["Is Hit"], newz, tb.math("MINIMUM", newz, d_top), "FLOAT")
+    # beside a deck: at most the cut batter from the deck's surface (lowering only), so where a deck runs low (its ends
+    # at an abutment, a ramp) the ground beside it does not rise over its edge; under a high deck it changes nothing
+    ddh, ddz, dfound = plan_nearest(dk.outputs[0])
+    d_hi = tb.math("ADD", tb.math("SUBTRACT", ddz, I("Sink")), cut_rise_of(tb.math("MAXIMUM", tb.math("SUBTRACT", ddh, I("Edge Band")), 0.0)))
+    newz = tb.switch(tb.boolean("AND", dfound, tb.compare("LESS_THAN", ddh, I("Reach"))), newz, tb.math("MINIMUM", newz, d_hi), "FLOAT")
     sp = tb.n("GeometryNodeSetPosition"); tb.inp(sp, "Geometry", terrain); tb.inp(sp, "Position", tb.combine(px, py, newz))
     # cut: delete faces whose corners are all under the road
     delsel = tb.n("GeometryNodeDeleteGeometry", domain="FACE", mode="ALL"); tb.inp(delsel, "Geometry", sp.outputs[0]); tb.inp(delsel, "Selection", under)
     out = tb.switch(I("Cut"), sp.outputs[0], delsel.outputs[0], "GEOMETRY")
+    from . import limits
+    out = limits.gap_warnings(tb, g, gi.outputs, out)
     tb.link(out, go.inputs[0])
+    limits.apply_to_group(g)                     # the tested ranges (limits.json) as the sockets' min / max
     return g

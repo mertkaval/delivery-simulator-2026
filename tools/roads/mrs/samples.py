@@ -336,7 +336,29 @@ def regenerate_block(sc, col, seed=None, bus_stops=None, rebuild_junctions=False
     return rep, rt
 
 
-ALL = {"street_block": street_block, "city_block": city_block, "mountain_road": mountain_road, "highway": highway, "roundabout_village": roundabout_village, "bridge_valley": bridge_valley}
+def area_junction_crossing():
+    """The tongue workflow (City Road Maker style): four roads end in tongues, one area junction joins them, a round
+    extension widens the middle into a small plaza (inside the tongues' reach, so it never covers a road), a custom
+    sign and free marking lines beside the junction."""
+    from . import areajunction as AJ, customsign as CS, markinglines as ML
+    sc, col = _scene("MRS_AreaJunction")
+    _ground(col)
+    juncs = bpy.data.collections.get("MRS_AreaJunction_Junctions") or bpy.data.collections.new("MRS_AreaJunction_Junctions")
+    if juncs.name not in [c.name for c in sc.collection.children]: sc.collection.children.link(juncs)
+    for o in list(juncs.objects): bpy.data.objects.remove(o)
+    L, TG = 70.0, 10.0
+    for name, (dx, dy), preset in (("AJ_East", (1, 0), "urban"), ("AJ_West", (-1, 0), "urban"), ("AJ_North", (0, 1), "residential"), ("AJ_South", (0, -1), "residential")):
+        roads.make_road(name, [(dx * L, dy * L, 0.0), (dx * L * 0.5, dy * L * 0.5, 0.0), (-dx * 2.0, -dy * 2.0, 0.0)], col, preset, Conform=False, Embankment=False,
+                        Tongue_End=TG)
+    AJ.add_area_junction("AJ_Junction", (0.0, 0.0, 0.0), col, juncs, Distance=24.0)
+    AJ.add_extension("AJ_Plaza", "round", col, location=(0.0, 0.0, 0.0), size=(15.0, 15.0))
+    CS.add_custom_sign("AJ_Sign", location=(-16.0, -13.5, 0.0), preset="CRM 2.1", collection=col)
+    ML.add_marking_lines("AJ_Lines", [(30.0, 30.0, 0.0), (60.0, 30.0, 0.0), (90.0, 40.0, 0.0)], col)
+    return sc
+
+
+ALL = {"street_block": street_block, "city_block": city_block, "mountain_road": mountain_road, "highway": highway, "roundabout_village": roundabout_village, "bridge_valley": bridge_valley,
+       "area_junction_crossing": area_junction_crossing}
 
 
 def build_all():

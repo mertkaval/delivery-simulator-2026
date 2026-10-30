@@ -63,7 +63,7 @@ def build_custom_sign():
     sock(g, "Scale X", "INPUT", "NodeSocketFloat", 0.6, 0.05, 20.0, "Panel width (m)", parent=pp, subtype="DISTANCE")
     sock(g, "Scale Y", "INPUT", "NodeSocketFloat", 0.6, 0.05, 20.0, "Panel height (m)", parent=pp, subtype="DISTANCE")
     sock(g, "Color", "INPUT", "NodeSocketMenu", parent=pp)
-    sock(g, "Rotation", "INPUT", "NodeSocketFloat", 0.0, -6.3, 6.3, "Panel rotation in its plane", parent=pp, subtype="ANGLE")
+    sock(g, "Rotation", "INPUT", "NodeSocketFloat", 0.0, -6.3, 6.3, "The whole sign face (panel, texts, images, lines) turned in its plane", parent=pp, subtype="ANGLE")
     sock(g, "Bevel Radius", "INPUT", "NodeSocketFloat", 0.044, 0.0, 5.0, "Corner rounding (m)", parent=pp, subtype="DISTANCE")
     sock(g, "Bevel Res", "INPUT", "NodeSocketInt", 4, 1, 32, "Points per rounded corner", parent=pp)
     sock(g, "Outline", "INPUT", "NodeSocketBool", True, desc="A border band inside the panel edge", parent=pp)
@@ -130,7 +130,7 @@ def build_custom_sign():
         tri = ngon(3, -math.pi / 2, 0.5 / math.cos(math.pi / 6))             # point down (give way), 1 wide
         dia = ngon(4, 0.0, 0.5)
         shp = index_switch(tb, shape_i, [quad.outputs[0], oct_, circ, tri, dia], "GEOMETRY")         # SHAPES order
-        sc_ = tb.n("GeometryNodeTransform"); tb.inp(sc_, "Geometry", shp); tb.inp(sc_, "Scale", tb.combine(sx, sy, 1.0)); tb.inp(sc_, "Rotation", tb.combine(0.0, 0.0, I["Rotation"]))
+        sc_ = tb.n("GeometryNodeTransform"); tb.inp(sc_, "Geometry", shp); tb.inp(sc_, "Scale", tb.combine(sx, sy, 1.0))
         fl = tb.n("GeometryNodeFilletCurve"); tb.inp(fl, "Curve", sc_.outputs[0]); fl.inputs["Mode"].default_value = "Poly"
         tb.inp(fl, "Radius", tb.math("MAXIMUM", tb.math("SUBTRACT", I["Bevel Radius"], inset), 0.0)); tb.inp(fl, "Count", I["Bevel Res"]); tb.inp(fl, "Limit Radius", True)
         return fl.outputs[0]
@@ -221,7 +221,24 @@ def build_custom_sign():
     poles = tb.switch(tb.compare("GREATER_THAN", n_p, 0, "INT"), tb.empty(), pio.outputs[0], "GEOMETRY")
     post = tb.n("GeometryNodeRealizeInstances"); tb.inp(post, "Geometry", tb.join(struts, poles))
     postm = tb.n("GeometryNodeSetMaterial"); tb.inp(postm, "Geometry", post.outputs[0]); tb.inp(postm, "Material", metal)
-    out = tb.join(panel_geo, border, *words, *extras, postm.outputs[0])
+    # Rotation turns the whole face (panel, border, texts, images, lines) in its plane about the panel centre,
+    # counter-clockwise seen from the front; the post stays upright (rotating only the panel left the texts sticking out)
+    face = tb.join(panel_geo, border, *words, *extras)
+    down = tb.n("GeometryNodeTransform"); tb.inp(down, "Geometry", face); tb.inp(down, "Translation", tb.combine(0.0, 0.0, tb.math("MULTIPLY", I["Panel Height"], -1.0)))
+    turn = tb.n("GeometryNodeTransform"); tb.inp(turn, "Geometry", down.outputs[0]); tb.inp(turn, "Rotation", tb.combine(0.0, tb.math("MULTIPLY", I["Rotation"], -1.0), 0.0))
+    up_ = tb.n("GeometryNodeTransform"); tb.inp(up_, "Geometry", turn.outputs[0]); tb.inp(up_, "Translation", tb.combine(0.0, 0.0, I["Panel Height"]))
+    out = tb.join(up_.outputs[0], postm.outputs[0])
+    # combination rule (area sweep): texts, images and lines stay on the panel; their room depends on the panel's size,
+    # shape and corner rounding, so no single limit holds. A ray from each content vertex (1 cm toward the panel centre)
+    # into the panel must hit it.
+    content = tb.join(*words, *extras)
+    cx_, _cy, cz_ = tb.separate(tb.n("GeometryNodeInputPosition").outputs[0])
+    toward = tb.vmath("NORMALIZE", tb.combine(tb.math("MULTIPLY", cx_, -1.0), 0.0, tb.math("SUBTRACT", I["Panel Height"], cz_)))
+    rc = tb.n("GeometryNodeRaycast"); tb.inp(rc, "Target Geometry", panel_geo)
+    tb.inp(rc, "Source Position", tb.vmath("ADD", tb.combine(cx_, -0.5, cz_), tb.vmath("SCALE", toward, scale=0.01)))
+    tb.inp(rc, "Ray Direction", (0.0, 1.0, 0.0)); tb.inp(rc, "Ray Length", 1.0)
+    off_panel = tb.compare("GREATER_THAN", tb.stat_max(content, tb.switch(rc.outputs["Is Hit"], 1.0, 0.0)), 0.5)
+    out = tb.warn(out, off_panel, "MRS: a text, image or line reaches beyond the sign's panel: make the panel larger or move / shrink it")
     tb.link(out, go.inputs["Geometry"])
     # menu defaults (the menu switches define the entries)
     for nm, d in (("Shape", "Quad"), ("Color", "Blue"), ("Outline Color", "Auto"), ("Post Shape", "Pipe")):

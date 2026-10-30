@@ -64,5 +64,41 @@ print("   deepest natural ground over the road %.1f m, graded width at x=520: %.
 check(np.allclose(g[water & ~own], h0[water & ~own]), "the river bed keeps its height")
 far = (np.abs(yy - 320.0) > 120.0)
 check(np.allclose(g[far], h0[far]), "the terrain far from the road is untouched")
+# ---------------------------------------------------------------- landing-aware design (network_profiles_landed)
+# a T on a 15 % hillside: a through street across the slope and a stem straight up it, junction footprints (trims)
+# and landings at the junction end; the built road (rail_model: trim, blur, constant-height lock, crown fade) must
+# stay within the stem's 12 % in every 10 m window, with the junction end level at the node height
+hill = G.Field(np.fromfunction(lambda j, i: 0.15 * j * 2.0, (200, 200)), 2.0)
+Gd, trim, flat, LLk, ch = 0.118, 12.0, 4.9, 9.0, 0.11
+gl = min(0.03, (Gd - 1.5 * ch / LLk) / G.LOCK_K); vc = 0.7 * 100.0 * (Gd - gl); land = LLk + 4.0
+stem = G.insert_stations([(200.0, 100.0), (200.0, 160.0), (200.0, 220.0)], [trim, trim + flat, trim + land, trim + land + vc])
+through = [(120.0, 100.0), (200.0, 100.0), (280.0, 100.0)]
+nodes_t = {"J": (200.0, 100.0), "N": (200.0, 220.0), "W": (120.0, 100.0), "E": (280.0, 100.0)}
+edges_t = [{"a": "J", "b": "N", "pts": stem, "max_grade": Gd, "smooth": 30.0, "ends": ((trim, land), (0.0, 0.0)), "land_grade": gl, "vc": vc, "flat": (flat, 0.0)},
+           {"a": "W", "b": "J", "pts": through[:2], "max_grade": Gd, "smooth": 30.0, "ends": ((0.0, 0.0), (trim, land)), "land_grade": gl, "vc": vc, "flat": (0.0, flat)},
+           {"a": "J", "b": "E", "pts": through[1:], "max_grade": Gd, "smooth": 30.0, "ends": ((trim, land), (0.0, 0.0)), "land_grade": gl, "vc": vc, "flat": (flat, 0.0)}]
+info = {}
+zn_t, zs_t = G.network_profiles_landed(hill, nodes_t, edges_t, info=info)
+seg_ok = all(np.all(np.abs(np.diff(z)) <= gk * np.diff(G._stations(e["pts"])) + 1e-9) for e, z, gk in zip(edges_t, zs_t, info["caps"]))
+check(seg_ok and not info["residual"] and not info["infeasible"], "landed design: every segment within its cap, no residual, nothing infeasible (%d sweeps)" % info["iterations"])
+s0 = G._stations(stem); lvl = np.abs(zs_t[0][s0 <= trim + flat] - zn_t["J"]).max()
+check(lvl < 1e-9, "the stem is level at the node height over the junction footprint and its platform (%.2e)" % lvl)
+P3 = [(x, y, z) for (x, y), z in zip(stem, zs_t[0])]
+o = G.rail_model(P3, trim, 0.0, True, False, zn_t["J"], 0.0, LLk, ch)
+w_built = max(G.window_grades(o[1], o[3])[0], G.window_grades(o[1], o[2])[0])
+check(w_built <= Gd + 1e-6, "the built stem (blur, lock, crown) climbs at most %.1f %% over 10 m (%.2f %%)" % (100 * Gd, 100 * w_built))
+check(abs(o[3][0] - zn_t["J"]) < 1e-9, "the stem meets the junction exactly at its height (lock offset %.2e)" % abs(o[3][0] - zn_t["J"]))
+# the old point-to-point budget on the same stem: centre to centre within the cap, but the built street is steeper
+z_old = G.profile(hill, stem, zn_t["J"], G.node_heights(hill, {"N": (200.0, 220.0)})["N"], Gd, 30.0)
+o_old = G.rail_model([(x, y, z) for (x, y), z in zip(stem, z_old)], trim, 0.0, True, False, zn_t["J"] + 0.8, 0.0, 14.0, ch)
+check(max(G.window_grades(o_old[1], o_old[3])[0], G.window_grades(o_old[1], o_old[2])[0]) > Gd, "control: a 14 m lock to an offset junction plane over the old profile breaks the cap")
+# infeasible: a short link between two nodes the earthwork bound keeps 6 m apart in height
+cliff = {"A": (0.0, 0.0), "B": (30.0, 0.0)}
+cf = G.Field(np.fromfunction(lambda j, i: np.where(i * 2.0 > 15.0, 6.0, 0.0), (20, 40)), 2.0)
+info2 = {}
+G.network_profiles_landed(cf, cliff, [{"a": "A", "b": "B", "pts": G.insert_stations([(0.0, 0.0), (30.0, 0.0)], [12.0, 18.0]), "max_grade": 0.12,
+                                       "ends": ((8.0, 4.0), (8.0, 4.0)), "land_grade": 0.0, "flat": (4.0, 4.0)}], info=info2, max_move=1.0)
+check(info2["infeasible"] == [0] and info2["residual"], "an edge the earthwork bound cannot satisfy is reported infeasible (residual %.2f m)" % max(info2["residual"].values(), default=0.0))
+
 print("GRADING_TEST %s" % ("OK" if not fails else "FAILED %d" % len(fails)))
 sys.exit(1 if fails else 0)

@@ -118,7 +118,14 @@ def build_marking_lines():
             try: g.interface.items_tree[k_].default_value = d
             except Exception: pass
     sm = tb.n("GeometryNodeSetShadeSmooth"); tb.inp(sm, "Geometry", tb.join(*out)); tb.inp(sm, "Shade Smooth", False)
-    tb.link(sm.outputs[0], go.inputs["Geometry"])
+    # combination rule (area sweep): the centre and lane lines lie on the road, within Road Size / 2 of the curve (the
+    # outermost lane line is at Lane X +- Duplicate x half / (Duplicate + 1))
+    half = tb.math("MULTIPLY", I["Road Size"], 0.5); n_ = I["Lane Duplicate"]
+    c_off = tb.boolean("AND", I["Center Marking"], tb.compare("GREATER_THAN", tb.math("ABSOLUTE", I["Center X"]), tb.math("ADD", half, 0.001)))
+    outer = tb.math("ADD", tb.math("ABSOLUTE", I["Lane X"]), tb.math("DIVIDE", tb.math("MULTIPLY", n_, half), tb.math("ADD", n_, 1.0)))
+    l_off = tb.boolean("AND", tb.boolean("AND", I["Lane Marking"], tb.compare("GREATER_EQUAL", n_, 1.0)), tb.compare("GREATER_THAN", outer, tb.math("ADD", half, 0.001)))
+    tb.link(tb.warn(sm.outputs[0], tb.boolean("OR", c_off, l_off), "MRS: a centre or lane line lies outside the road (more than Road Size / 2 from the curve)"),
+            go.inputs["Geometry"])
     from . import limits
     limits.apply_to_group(g)                     # the tested ranges (limits.json) as the sockets' min / max
     return g

@@ -39,7 +39,7 @@ GLASS = MRS + "FurnitureGlass"
 AW, AH, PPM = 2048, 1024, 256          # atlas size (px) and tiling-cell density (px per metre)
 BAKE_VERSION = 5
 KINDS = ("bench", "bin", "bike_rack", "bus_shelter", "bus_pole", "info_board", "bollard", "barrier", "planter", "tree_pit",
-         "utility", "hydrant", "drain", "access_cover")
+         "tree_guard", "utility", "hydrant", "drain", "access_cover")
 ZONES = ("furniture", "curb", "frontage", "flush", "gutter")
 FACINGS = ("walk", "carriageway", "any")
 
@@ -1104,6 +1104,18 @@ def _tree_grate(m):
     m.cyl(0, 0, 0.0, 0.002, 0.222, 0.222, "soil", 32, nobevel=True)                                           # mulch around the trunk
 
 
+def _tree_guard(m):
+    """A square street-tree guard, 1.2 m across and 1.1 m tall: four 50 mm dark steel posts at the corners and two flat
+    rails (knee and top) round them; the trunk stands in the middle. Placement scales it to the bed it surrounds."""
+    P, H = 0.55, 1.10
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            m.box(sx * P - 0.025, sy * P - 0.025, 0.0, sx * P + 0.025, sy * P + 0.025, H, "steel_dark")
+            m.box(sx * P - 0.032, sy * P - 0.032, H, sx * P + 0.032, sy * P + 0.032, H + 0.012, "steel_dark", nobevel=True)   # post cap
+    for z0, z1 in ((0.30, 0.34), (1.02, 1.06)):
+        m.band(_sq(P + 0.035), _sq(P + 0.015), z0, z1, "steel_dark", "z")
+
+
 def _tree_pit_open(m):
     rnd = random.Random(7); L, J = 0.192, 0.008
     for sy in (-1, 1):
@@ -1201,6 +1213,7 @@ SPECS = [
     ("MRS_F_Planter", _planter, "planter", "furniture", (1.24, 1.24), _acc(0.3, 0.3, 0.3, 0.3), False, "any", 0.015, {}),
     ("MRS_F_TreePitGrate", _tree_grate, "tree_pit", "furniture", (1.20, 1.20), _acc(0.0, 0.0, 0.0, 0.0), True, "any", 0.0, {}),
     ("MRS_F_TreePitOpen", _tree_pit_open, "tree_pit", "furniture", (2.00, 1.20), _acc(0.0, 0.0, 0.0, 0.0), False, "any", 0.0, {}),
+    ("MRS_F_TreeGuard", _tree_guard, "tree_guard", "furniture", (1.20, 1.20), _acc(0.0, 0.0, 0.0, 0.0), False, "any", 0.004, {}),
     ("MRS_F_UtilityCabinet", _cabinet, "utility", "frontage", (1.06, 0.46), _acc(0.9, 0.0, 0.3, 0.3), False, "walk", 0.006, {}),
     ("MRS_F_Hydrant", _hydrant, "hydrant", "curb", (0.46, 0.38), _acc(0.9, 0.9, 0.9, 0.9), False, "carriageway", 0.004, {}),
     ("MRS_F_DrainGrate", _drain_grate, "drain", "gutter", (0.50, 0.35), _acc(0.3, 0.3, 0.3, 0.3), True, "carriageway", 0.0, {}),

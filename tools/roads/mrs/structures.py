@@ -3,12 +3,14 @@ stays, tunnel portals, bus stops, custom text signs. They are plain objects pare
 positioned with the road's evaluated centre line (so they follow the terrain-conformed height)."""
 import bpy, bmesh, math
 from mathutils import Vector
+from mathutils.bvhtree import BVHTree
 from .nodes import depsgraph, set_scene, MRS
 from .roads import road_widths
 
 
 _CENTRE = {}
 _FROZEN = set()
+PAINT_KINDS = (1, 5, 9)          # marking, cycle lane colour, bus lane colour (road.py KIND): not part of a cross-section
 
 
 def freeze(names=None):
@@ -34,11 +36,28 @@ def centre_line(road):
     dg = depsgraph()
     me = road.evaluated_get(dg).to_mesh()
     lat = me.attributes["lat"].data; al = me.attributes["along"].data
+    # the cross-sections (surface_z) come from the surface faces only: paint (marking, cycle / bus lane colour) lies on
+    # stations of its own (subdivided between the surface's stations, clamped to the clear zones), and a station
+    # holding only paint gave the carriageway's height out to the sidewalk (furniture sank into the pavement)
+    kind = me.attributes.get("kind")
+    on_surface = None
+    if kind is not None and kind.domain == "FACE":
+        on_surface = [False] * len(me.vertices)
+        for p_ in me.polygons:
+            if int(round(kind.data[p_.index].value)) not in PAINT_KINDS:
+                for vi in p_.vertices: on_surface[vi] = True
+    # surface_z casts onto the road's own upward surface faces (no paint): exact at a kerb, where the cross-section's
+    # interpolation ran a ramp from the gutter up to the kerb top (the kerb face is vertical)
+    Mw = road.matrix_world; R3 = Mw.to_3x3()
+    tops = [tuple(p_.vertices) for p_ in me.polygons if (R3 @ p_.normal).z > 0.3
+            and (kind is None or kind.domain != "FACE" or int(round(kind.data[p_.index].value)) not in PAINT_KINDS)]
+    top_bvh = BVHTree.FromPolygons([Mw @ v.co for v in me.vertices], tops) if tops else None
     st = {}; prof = {}
     for i in range(len(me.vertices)):
         la = lat[i].value; key = round(al[i].value, 2); co = me.vertices[i].co
-        pk = prof.setdefault(key, {}); lk = round(la, 2)
-        if lk not in pk or co.z > pk[lk]: pk[lk] = co.z
+        if on_surface is None or on_surface[i]:
+            pk = prof.setdefault(key, {}); lk = round(la, 2)
+            if lk not in pk or co.z > pk[lk]: pk[lk] = co.z
         if abs(la) > 12.0: continue
         st.setdefault(key, []).append((abs(la), la, co.copy()))
     pts = []
@@ -58,14 +77,21 @@ def centre_line(road):
         if not clean or a - clean[-1][0] >= 0.25: clean.append((a, p))
     if len(clean) < 2: raise ValueError("road %s has no centre line" % road.name)
     profiles = [(a, sorted(prof[a].items())) for a, _ in clean if a in prof]
-    _CENTRE[road.name] = (key, clean, profiles)
+    _CENTRE[road.name] = (key, clean, profiles, top_bvh)
     return clean
 
 
 def surface_z(road, along, lat):
     """Top-surface height (world z, object at identity rotation/scale assumed for z) of the evaluated
-    road cross-section at station `along` and lateral offset `lat` (right +): asphalt, kerb, sidewalk."""
+    road cross-section at station `along` and lateral offset `lat` (right +): asphalt, kerb, sidewalk. A ray onto the
+    road's upward surface faces at that point; the cross-section of the nearest station where it misses."""
     centre_line(road)
+    top_bvh = _CENTRE[road.name][3]
+    if top_bvh is not None:
+        p, _t, r = road_sample(road, along)
+        q = p + r * lat
+        h = top_bvh.ray_cast(Vector((q.x, q.y, q.z + 50.0)), Vector((0.0, 0.0, -1.0)), 200.0)
+        if h[0] is not None: return h[0].z
     profiles = _CENTRE[road.name][2]
     lo, hi = 0, len(profiles) - 1
     while hi - lo > 1:

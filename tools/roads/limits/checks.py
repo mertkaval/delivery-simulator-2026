@@ -103,9 +103,11 @@ def check_fold(md, cell=FOLD_CELL):
 
 def check_width(md, road, at=None):
     """The asphalt / bike / bus lateral extent at a few stations equals road_widths' half_l + half_r."""
-    from mrs.roads import road_widths
+    from mrs.roads import road_widths, road_input
     if md["lat"] is None: return []
     w = road_widths(road); want_l, want_r = w["half_l"], w["half_r"]
+    if road_input(road, "Transition"):                 # a lane taper: the widest of the two lane counts
+        w1 = road_widths(road, at_end=True); want_l, want_r = max(want_l, w1["half_l"]), max(want_r, w1["half_r"])
     lats = [md["lat"][i] for f in md["faces"] if f["kind"] in CARRIAGEWAY_KINDS for i in f["v"]]
     if not lats: return ["no carriageway faces"]
     got_l, got_r = -min(lats), max(lats)
@@ -177,8 +179,9 @@ def check_props(road, md, dg, scene_ground=None):
             continue
         if zc is not None and abs(zc - p.z) < PROP_DROP: side_on_cw += 1
         h = bvh.ray_cast(p + Vector((0, 0, 2.0)), Vector((0, 0, -1)), 6.0) if bvh else (None,)
-        hg = scene_ground(p) if scene_ground else None
-        z = max([x for x in (h[0].z if h[0] is not None else None, hg) if x is not None], default=None)
+        # the road's own surface under the object counts when there is one; the scene ground only beyond the road (a flat
+        # test ground is not graded to a banked road, whose outer sidewalk may dip below it)
+        z = h[0].z if h[0] is not None else (scene_ground(p) if scene_ground else None)
         if z is None or abs(p.z - z) > PROP_DROP: side_float += 1
     if in_off: out.append("%d gullies / manholes off the carriageway" % in_off)
     if in_float: out.append("%d gullies / manholes float / sink (> %.2f m from the carriageway)" % (in_float, PROP_DROP))

@@ -17,8 +17,26 @@ Mert Road Studio (MRS) builds roads, junctions, markings, signs, signals and str
    - Set **Library file** to `<repo>/tmp/roads/city/base.blend`.
 3. 3D View > Sidebar (N) > **Road Studio** tab > **Open Library as New Project**. This opens the MRS library (every
    node group, material, sign, signal, tree and prop). Save it under your own name and work in that file.
-4. If the library file is missing or out of date, **Build Library** rebuilds it (about 12 minutes). The library
+4. If the library file is missing or out of date, **Build Library** rebuilds it (about 13 minutes). The library
    carries a version number (`city.BASE_VERSION`); a mismatch is rebuilt on its own.
+
+## 1a. Examples (start here)
+
+**Road Studio > Examples > Load Example** builds a finished scene in a scene of its own. Look at how it is made,
+change its parameters, or copy its roads into your own scene:
+
+| example | what it shows |
+|---|---|
+| Street Block | the demonstration block: avenue with a lane taper, bus stop, footbridge, S-curve, T junction, furniture |
+| City Block | avenues with cycle lanes and parking, a residential grid, signalised junctions, a dead end, a gantry |
+| Mountain Road | a winding road on hills: embankments, cuts, a tunnel, a service branch |
+| Highway | a dual carriageway with guardrails and banking, an overpass |
+| Roundabout Village | a four-arm roundabout, village streets, a bus stop |
+| Bridge Valley | a cable-stayed bridge between two mountain road sections |
+| Area Junction Crossing | the tongue workflow: four roads in tongues, one area junction, a round plaza extension, a custom sign, marking lines |
+
+Every example validates with no problem (`tools/roads/tests/examples_test.py` checks this), so each one is a known
+good starting point.
 
 ## 2. Roads
 
@@ -88,13 +106,27 @@ Rules the tool enforces:
 
 - **Use Active as Terrain** (a mesh), then **Pull Terrain to Roads**. The terrain is cut and filled to the roads with
   batters: 1:1 cut, 2:1 past 6 m deep, 1:2 fill.
+  Beside a road the terrain takes the height of the road surface nearest to it in plan, so on a steep street in a cut
+  it meets the kerb beside it, not one uphill.
 - **Bridge:** set the road's **Mode** to Elevated. Piers, barriers and deck come from the road's Structure inputs.
+  A pulled terrain stays at least **Deck Clearance** (2 m) under an elevated deck, and beside a deck it stays under
+  the cut batter from the deck, so a hill or an abutment never rises through a bridge or over a low deck's edge.
 - **Tunnel:** set **Tunnel Start** and **Tunnel End**.
 
 ## 5. Street assets and signs
 
 - **Place Street Assets** puts signs by junction control, speed signs, street names, bus stops and furniture.
   With **Auto: on** it re-places after edits.
+- **Street trees** (Place Street Assets) stand in a square guard of steel posts and rails, sized to their bed: in a paved
+  sidewalk on a tree-pit grate, in a planting strip of 1.2 m or more inside a square concrete edging with a soil bed, in a
+  narrower strip on a mulch ring. The tree reserves its whole surround: benches, lights and signs keep clear of it. A
+  tree is only planted where its whole bed lies on the surface (never hanging past a strip's end).
+- **Driveways.** Nothing optional (benches, bins, trees, lights) is placed across a road's driveways (its Driveways
+  input, the dropped kerb and apron), whether they come from MRS_Driveway anchors or straight from a city plan.
+- **Slopes.** Posts, poles, signs, hydrants and trees are set into the ground at the lowest point under them; benches,
+  bins and racks only go where the ground rises at most 10 cm across them (measured on the road and junction surfaces,
+  else the placer tries the next spot); bus
+  shelters and utility cabinets stand on a level concrete plinth that reaches down to the slope.
 - Roadside lights, trees and props come from the road itself (Roadside inputs). Their placement follows four rules:
   - Every object stands on the surface below it.
   - Lights win over trees, and trees win over props, within **Object Clearance**.
@@ -118,8 +150,24 @@ Click **Validate** in the panel. Every problem is listed with the object and wha
 | speed_sign | a speed sign not showing its road's speed limit |
 | overlap | two roads or junctions covering the same ground |
 | trimmed_away, junction_zones | a road eaten by its junctions, or two junctions so close their paint meets |
-| limit | an input set outside its tested range by a script |
+| limit | an input set outside its tested range by a script, or inside a forbidden gap |
+| warning | a combination warning on a modifier (see below) |
+| tongue_uncovered | a road tongue no area junction covers (out of every junction's range): a hole at the road's end |
+| placed_conflict | two placed objects overlapping (bases, pads, mulch beds) |
+| placed_road | a placed object other than a drain or cover standing on the carriageway |
+| placed_ground | a placed object floating over or sunk into the surface under it (more than 5 cm) |
+| placed_building | (cities) a placed object inside a building |
 | building | (cities) a building standing on a street |
+
+**Combination warnings.** Some inputs are fine alone but wrong together. The modifier shows a warning (and Validate
+reports it) when:
+
+- a bend is tighter than the road's outer half width allows (the inner side would fold over itself);
+- an input lies in a forbidden gap between two passing ranges (for example a parking strip too narrow to park in);
+- a sign's text, image or line reaches beyond its panel (depends on the panel's size, shape and corner rounding);
+- a centre or lane line of Marking Lines lies outside its Road Size.
+
+Nothing is corrected for you: the warning names what to change.
 
 Never export with problems: fix the parameter the message names.
 

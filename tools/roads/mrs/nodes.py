@@ -106,6 +106,22 @@ class T:
         for k, v in inputs.items(): self.inp(node, k, v)
         return node
 
+    def warn(self, geo, show, message, kind="WARNING"):
+        """`geo` passed on; a node warning `message` (shown on the node, its group nodes and the modifier; validate
+        reports the ones starting "MRS:") while `show` (a single value) is true. The switch reads the warning node's
+        output, so the warning is evaluated with the geometry."""
+        w = self.n("GeometryNodeWarning")
+        try: w.warning_type = kind
+        except Exception: pass
+        self.inp(w, "Show", show); self.inp(w, "Message", message)
+        return self.switch(w.outputs[0], geo, geo, "GEOMETRY")
+
+    def stat_max(self, geo, value, domain="POINT"):
+        """The largest value of a field over a geometry (a single value)."""
+        st = self.n("GeometryNodeAttributeStatistic", data_type="FLOAT", domain=domain)
+        self.inp(st, "Geometry", geo); self.inp(st, "Attribute", value)
+        return st.outputs["Max"]
+
     def map_range(self, v, a0, a1, b0, b1, clamp=True, interp="LINEAR"):
         node = self.n("ShaderNodeMapRange", interpolation_type=interp); node.clamp = clamp
         self.inp(node, "Value", v); self.inp(node, "From Min", a0); self.inp(node, "From Max", a1); self.inp(node, "To Min", b0); self.inp(node, "To Max", b1)

@@ -52,7 +52,7 @@ fitting the city:
 | Signals | a mast arm at the stop line with one head over each arriving lane (`ARM_LANES` = 2+), plus the corner post (vehicle + pedestrian heads) | lane count, lane width, median, kerb (`signage.make_signal(arm_side, head_x)`); one kit model per variant in the game |
 | Speed signs | road input `Speed Limit`; `assets.speed_sign(v)` builds any value on demand | the road's speed |
 | Back-lane dropped kerbs | `citynet._lane_mouth` (the lane's ray meets the street centre line), lot line from the built street's cross-section, station on the street as built (after the junction trims) | street geometry |
-| Vertical alignment | `mrs/grading.py` `network_profiles`: natural ground averaged per class (`SMOOTH`), node heights shared, grade limited per class (`MAX_GRADE`: local 16 %, downtown / arterial 12 %, boulevard 10 %, lane 18 %, bridge 6 %) | the natural terrain (`terrain.npz`), not CityForge's graded lots |
+| Vertical alignment | `mrs/grading.py` `network_profiles_landed` (`citynet.design_heights`): natural ground averaged per class (`SMOOTH`), node heights shared, every street budgeted on what is built: level over its junction's footprint and a platform past it (to the paint zone, at least the blur reach), at most 3 % over its lock zone, a vertical curve, then the class maximum from one grade table (`port_halden_city.json` grid.max_grade -> city.json -> `citynet.grade_table`: local / downtown / arterial 12 %, boulevard 10 %, lane 18 %, bridge 6 %); per-road Lock Length; the built grade predicted (`grading.rail_model`) and measured (`validate.check_grade`, every 10 m of plan run) | the natural terrain (`terrain.npz`), not CityForge's graded lots |
 | Bridges | decks span bank to bank at `BRIDGE_CLEARANCE` (4 m) over the water level, their end nodes lifted so the deck reaches it at the bridge grade; `citynet.bridge_gaps` joins dead-end streets facing each other across water | water mask + level |
 | Ground | `grading.grade`: under a surface 0.3 m below it; beyond, the natural ground clipped by cut (1:1) / fill (1:2) batters from the surfaces; the first cell keeps the per-street plane cap | the built road and junction surfaces |
 | Planar network | `citynet.planarize` before anything is built: 21 street ends that lay on another road became T-junctions on it (the Dorothy Vaughan Boulevard ran through six downtown junctions), one near-duplicate junction merged, 13 collinear overlaps dropped; `validate.check_overlaps` on the built surfaces | the road graph |
@@ -88,10 +88,12 @@ reject. `citynet.build()` resolves it, recording every decision in the report:
   connector of another class between two long roads takes their class (a 25 m "local" piece inside a boulevard).
 - **Lanes.** Back lanes become 6 m service roads from lot line to lot line; the streets they meet get an MRS
   driveway there (dropped kerb, concrete apron across the sidewalk).
-- **Junction planes.** A junction on a slope is a tilted plane fitted to its approach roads' graded profiles
-  (0-22 m out, grade capped at 22 %). The roads lock to the plane's height and bank to its cross-fall at their
-  ends (road inputs `Bank Start` / `Bank End`), so the edges meet. A flat plate would have left 56 junctions more
-  than 0.5 m off their approach roads; the planes leave 14 (the 3 worst are steeper than the cap).
+- **Level junctions, landings and the earthwork bound.** Every junction is built level at its designed node height, so a
+  street meets it exactly at its own height (no blend offset). A junction pulled more than 3 m from its natural (or
+  bridge) height by an optional link (a planner connector whose ends stay connected without it) loses that link
+  (`city["mrs_steep_drops"]`, removed from the plan, routes and minimap); otherwise the move stays (at most 6 m) and is
+  reported in the PROFILES log (`earthwork.over_bound`, footprint earthwork too). City streets carry `mrs_max_grade`
+  and `mrs_grade_predicted`; a street steeper than its class over any 10 m stops the install (validate `grade`).
 
 Result for Port Halden: 473 CityForge roads -> 414 MRS roads (50.1 km) + 80 back lanes (14.2 km), 203
 junctions (all built), 80 road ends, 15 merged clusters, 4 duplicates and 6 near-parallel approaches removed,

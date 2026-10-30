@@ -37,7 +37,7 @@ objs = {o.name: o for o in col.objects}
 # ------------------------------------------------------------------------------------------- checks
 REQUIRED = ["MRS_F_Bench", "MRS_F_BenchBackless", "MRS_F_BinWaste", "MRS_F_BinRecycling", "MRS_F_BikeRackHoop", "MRS_F_BikeRackRow",
             "MRS_F_BusShelter", "MRS_F_BusShelter_LOD1", "MRS_F_BusStopPole", "MRS_F_InfoBoard", "MRS_F_Bollard", "MRS_F_BollardRemovable",
-            "MRS_F_PedBarrier", "MRS_F_Planter", "MRS_F_TreePitGrate", "MRS_F_TreePitOpen", "MRS_F_UtilityCabinet", "MRS_F_Hydrant",
+            "MRS_F_PedBarrier", "MRS_F_Planter", "MRS_F_TreePitGrate", "MRS_F_TreePitOpen", "MRS_F_TreeGuard", "MRS_F_UtilityCabinet", "MRS_F_Hydrant",
             "MRS_F_DrainGrate", "MRS_F_AccessCover"]
 missing = [n for n in REQUIRED if n not in objs]
 if missing: fails.append("missing objects: %s" % missing)

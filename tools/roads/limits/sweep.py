@@ -6,8 +6,7 @@
 For every parameter: a dense grid over its declared socket range in every scenario (straight, curves of 60 m and 20 m
 radius, a 7 % grade, an S-bend); each value passes only when every check (checks.py) passes in every scenario. Each
 pass / fail boundary is refined by bisection to 1 % of the range and confirmed by testing five values on the safe side
-of it again. The proposed limit is the refined boundary moved inward by MARGIN of the safe interval (the user's choice:
-a safety margin inside the last passing value). Writes <out_dir>/road/<param>.json (every evaluation) and
+of it again. The proposed limit is the refined boundary moved inward by 10 % of the boundary value (the user's choice). Writes <out_dir>/road/<param>.json (every evaluation) and
 <out_dir>/road_summary.json."""
 import bpy, json, math, os, sys, time, traceback
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
@@ -30,6 +29,11 @@ SKIP = {"Trim Start", "Trim End", "Tongue Start", "Tongue End", "Clear Start", "
         "Tunnel Start", "Tunnel End", "Transition Start"}                                                         # positions along the road (scenario tests)
 
 
+def margin_of(v, typ):
+    """The user's safety margin: 10 % of the boundary value itself (whole steps for integers, at least 1 mm)."""
+    return math.floor(MARGIN * abs(v)) if typ == "int" else max(MARGIN * abs(v), 0.001)
+
+
 def road_params():
     """[(name, type, default, lo, hi)] of MRS_Road's numeric inputs (the declared ranges in road.py)."""
     g = bpy.data.node_groups["MRS_Road"]; out = []
@@ -50,21 +54,40 @@ SCENARIOS = {
     "curve20": arc(0, 0, 20.0, -math.pi / 2, math.pi / 4),
     "grade7": [(0, 0, 0), (60, 0, 4.2), (120, 0, 8.4)],
     "sbend": [(0, 0, 0), (30, 0, 0), (50, 15, 0), (70, 30, 0), (100, 30, 0)],
+    "paint": arc(0, 0, 80.0, -math.pi / 2, 0.15),
 }
+# the paint road carries every instanced marking on a banked curve: arrows at a junction end, buffered cycle lanes
+# (symbols, hatching), parking ticks, bus-lane letters, a lane added through a hatched taper
+SCENARIO_OVERRIDES = {"paint": {"Lanes Forward": 2, "Lanes Backward": 2, "Bike Left": "Buffered", "Bike Right": "Buffered", "Parking Left": 2.2, "Parking Right": 2.2,
+                                "Parking Ticks": True, "Bus Lane Forward": True, "Bus Lane Text": "BUS", "Transition": True, "Lanes Forward End": 3,
+                                "Lanes Backward End": 2, "Transition Start": 25.0, "Taper Length": 20.0, "Trim End": 6.0, "Turns End": 7, "Mark Clear End": 4.0,
+                                "Lane Arrows": True, "Superelevation": 6.0}}
+
+
+GROUND_Z = -0.1          # the scenarios' flat terrain (m): below the roads, as a city's ground beside its streets
+GROUND = None
 
 
 def build_scenarios(col, overrides):
+    global GROUND
+    me = bpy.data.meshes.new("LS_Ground"); me.from_pydata([(-200.0, -200.0, GROUND_Z), (2600.0, -200.0, GROUND_Z), (2600.0, 200.0, GROUND_Z), (-200.0, 200.0, GROUND_Z)], [], [(0, 1, 2, 3)])
+    GROUND = bpy.data.objects.new("LS_Ground", me); col.objects.link(GROUND)
     rs = {}
     for k, (nm, pts) in enumerate(SCENARIOS.items()):
-        o = roads.make_road("LS_" + nm, [(x + k * 400.0, y, z) for x, y, z in pts], col, "residential", Conform=False, Embankment=False, **overrides)
+        o = roads.make_road("LS_" + nm, [(x + k * 400.0, y, z) for x, y, z in pts], col, "residential", Conform=False, Embankment=False, terrain=GROUND,
+                            **dict(overrides, **SCENARIO_OVERRIDES.get(nm, {})))
         rs[nm] = o
     return rs
+
+
+def scene_ground(p):
+    return GROUND_Z
 
 
 def evaluate(rs, which):
     dg = bpy.context.evaluated_depsgraph_get(); res = {}
     for nm, o in rs.items():
-        try: res[nm] = C.road_checks(o, dg, which)
+        try: res[nm] = C.road_checks(o, dg, which, scene_ground)
         except Exception as e: res[nm] = {"exception": [traceback.format_exc(limit=2).strip().splitlines()[-1]]}
     return res
 
@@ -84,6 +107,14 @@ def set_all(rs, name, value):
 def sweep_param(rs, name, typ, default, lo, hi, which, log):
     """Grid, boundary bisection and confirmation for one parameter. Returns the record."""
     t0 = time.time(); evals = []
+    # each scenario road keeps the value it was built with (furnished / scenario overrides): that is its "default",
+    # tested as it is and restored afterwards (restoring the socket default changed the scenarios for every later input)
+    orig = {nm: mod_input_get(o.modifiers["MRS_Road"], name) for nm, o in rs.items()}
+    def restore():
+        for nm, o in rs.items(): mod_input_set(o.modifiers["MRS_Road"], name, orig[nm]); o.update_tag()
+    def run_orig():
+        restore(); res = evaluate(rs, which); ok_ = passes(res)
+        evals.append({"value": "built", "pass": ok_, "problems": problems(res)}); return ok_
     def run(v):
         v = int(round(v)) if typ == "int" else float(v)
         set_all(rs, name, v); res = evaluate(rs, which); ok = passes(res)
@@ -95,23 +126,15 @@ def sweep_param(rs, name, typ, default, lo, hi, which, log):
         # wide ranges: a log-spaced grid as well (small values matter most)
         grid = sorted({lo + span * k / (GRID - 1) for k in range(GRID)} | ({lo + (hi - lo) * (10 ** (2 * k / (GRID - 1)) - 1) / 99 for k in range(GRID)} if hi > 20 * max(lo, 0.1) else set()))
     ok = {v: run(v) for v in grid}
-    if not run(default):
-        set_all(rs, name, default)
+    if not run_orig():
+        restore()
         return {"param": name, "type": typ, "default": default, "declared": [lo, hi], "status": "default fails", "evals": evals, "seconds": round(time.time() - t0, 1)}
-    # the passing interval around the default, then each boundary refined by bisection
-    vs = sorted(ok); below = [v for v in vs if v < default]; above = [v for v in vs if v > default]
-    a = default
-    fail_lo = None
-    for v in reversed(below):
-        if ok[v]: a = v
-        else: fail_lo = v; break
-    b = default; fail_hi = None
-    for v in above:
-        if ok[v]: b = v
-        else: fail_hi = v; break
-    tol = max((hi - lo) * REFINE, 1.0 if typ == "int" else 1e-4)
+    vals = set(round(float(v), 9) for v in orig.values() if isinstance(v, (int, float)) and not isinstance(v, bool))
+    if len(vals) == 1: ok[(int if typ == "int" else float)(vals.pop())] = True        # every road built with one value: it passes
+    # a boundary is found to within REFINE of its own value (at least 1 mm; integers to adjacent values)
+    tol = lambda g, b: 1.0 if typ == "int" else max(REFINE * max(abs(g), abs(b)), 0.001)
     def bisect(good, bad):
-        while abs(bad - good) > tol:
+        while abs(bad - good) > tol(good, bad):
             m = (good + bad) * 0.5
             if typ == "int":
                 m = int(round(m))
@@ -119,28 +142,49 @@ def sweep_param(rs, name, typ, default, lo, hi, which, log):
             if run(m): good = m
             else: bad = m
         return good, bad
-    if fail_lo is not None: a, fail_lo = bisect(a, fail_lo)
-    if fail_hi is not None: b, fail_hi = bisect(b, fail_hi)
-    # confirmation: five values between the boundary and the default must pass again
+    # every passing region of the grid, each pass / fail boundary bisected (a region is [a, b]; a_fail / b_fail is
+    # the failing value next to it, None at the declared bound)
+    vs = sorted(ok); regions = []; cur = None
+    for k, v in enumerate(vs):
+        if ok[v]:
+            if cur is None: cur = [v, v, vs[k - 1] if k > 0 else None, None]
+            cur[1] = v
+        elif cur is not None:
+            cur[3] = v; regions.append(cur); cur = None
+    if cur is not None: regions.append(cur)
+    refined = []
+    for a, b, fa, fb in regions:
+        if fa is not None: a, fa = bisect(a, fa)
+        if fb is not None: b, fb = bisect(b, fb)
+        refined.append([a, b, fa, fb])
+    # confirmation: five values inside each refined boundary pass again
     confirm_fail = []
-    for edge, other in ((a, b), (b, a)):
-        for k in range(1, 6):
-            v = edge + (other - edge) * 0.02 * k
-            if not run(v): confirm_fail.append(v)
-    safe = b - a
-    lim_lo = lo if fail_lo is None else a + MARGIN * safe
-    lim_hi = hi if fail_hi is None else b - MARGIN * safe
-    if typ == "int":
-        lim_lo = lo if fail_lo is None else int(math.ceil(lim_lo)); lim_hi = hi if fail_hi is None else int(math.floor(lim_hi))
-    # failures outside the main interval (not monotonic) are kept in the record
-    islands = sorted(v for v in vs if not ok[v] and a < v < b)
-    set_all(rs, name, default)
-    rec = {"param": name, "type": typ, "default": default, "declared": [lo, hi], "pass_interval": [a, b], "first_fail_below": fail_lo,
-           "first_fail_above": fail_hi, "confirm_failures": confirm_fail, "islands": islands, "limit": [lim_lo, lim_hi],
-           "status": "ok" if not confirm_fail and not islands else "check", "n_evals": len(evals), "seconds": round(time.time() - t0, 1), "evals": evals}
-    log("%-26s %-5s declared [%g, %g] pass [%g, %g] fail below %s above %s -> limit [%g, %g] (%d evals x %d scenarios, %.0fs)%s" % (
-        name, typ, lo, hi, a, b, fail_lo, fail_hi, lim_lo, lim_hi, len(evals), len(rs), time.time() - t0,
-        "" if rec["status"] == "ok" else "  CHECK: confirm %s islands %s" % (confirm_fail, islands)))
+    for a, b, fa, fb in refined:
+        for edge, other, failed in ((a, b, fa), (b, a, fb)):
+            if failed is None: continue
+            for k in range(1, 6):
+                v = edge + (other - edge) * 0.02 * k
+                if not run(v): confirm_fail.append(v)
+    if not refined:                                        # the built values pass, no single grid value does
+        restore()
+        return {"param": name, "type": typ, "default": default, "declared": [lo, hi], "status": "no passing value", "evals": evals, "seconds": round(time.time() - t0, 1)}
+    main = next(r for r in refined if r[0] - 1e-9 <= default <= r[1] + 1e-9) if any(r[0] - 1e-9 <= default <= r[1] + 1e-9 for r in refined) else refined[0]
+    def shrink(r):
+        a, b, fa, fb = r
+        la = a if fa is None else a + margin_of(a, typ); lb = b if fb is None else b - margin_of(b, typ)
+        return [la, lb] if la <= lb else [(a + b) * 0.5, (a + b) * 0.5]
+    allowed = [shrink(r) for r in refined]
+    a, b, fail_lo, fail_hi = main
+    lim_lo, lim_hi = min(x[0] for x in allowed), max(x[1] for x in allowed)
+    gaps = [[allowed[k][1], allowed[k + 1][0]] for k in range(len(allowed) - 1)]
+    islands = []
+    restore()
+    rec = {"param": name, "type": typ, "default": default, "declared": [lo, hi], "pass_interval": [a, b], "regions": refined, "allowed": allowed, "gaps": gaps,
+           "first_fail_below": fail_lo, "first_fail_above": fail_hi, "confirm_failures": confirm_fail, "islands": islands, "limit": [lim_lo, lim_hi],
+           "status": "ok" if not confirm_fail else "check", "n_evals": len(evals), "seconds": round(time.time() - t0, 1), "evals": evals}
+    log("%-26s %-5s declared [%g, %g] regions %s -> allowed %s (%d evals x %d scenarios, %.0fs)%s" % (
+        name, typ, lo, hi, [[round(r[0], 3), round(r[1], 3)] for r in refined], [[round(x, 3) for x in r] for r in allowed], len(evals), len(rs), time.time() - t0,
+        "" if rec["status"] == "ok" else "  CHECK: confirm failures %s" % confirm_fail))
     return rec
 
 
@@ -163,12 +207,17 @@ def main():
     params = road_params()
     only = arg("--params")
     if only: params = [p for p in params if p[0] in only.split(",")]
-    summary = {}
+    part = arg("--part")                                   # "k/n": every n-th parameter from the k-th (parallel runs)
+    if part:
+        k, n = (int(x) for x in part.split("/")); params = params[k::n]
+    summary_path = os.path.join(OUT, "road_summary%s.json" % ("_part%s" % part.replace("/", "of") if part else ""))
+    summary = json.load(open(summary_path)) if os.path.exists(summary_path) and "--resume" in argv else {}
+    params = [p for p in params if p[0] not in summary]
     for name, typ, d, lo, hi in params:
         rec = sweep_param(rs, name, typ, d, lo, hi, which, log)
         with open(os.path.join(OUT, "road", name.replace(" ", "_") + ".json"), "w") as f: json.dump(rec, f, indent=1, default=str)
-        summary[name] = {k: rec.get(k) for k in ("type", "default", "declared", "pass_interval", "first_fail_below", "first_fail_above", "limit", "status", "n_evals")}
-        with open(os.path.join(OUT, "road_summary.json"), "w") as f: json.dump(summary, f, indent=1, default=str)
+        summary[name] = {k: rec.get(k) for k in ("type", "default", "declared", "pass_interval", "regions", "allowed", "gaps", "first_fail_below", "first_fail_above", "limit", "status", "n_evals")}
+        with open(summary_path, "w") as f: json.dump(summary, f, indent=1, default=str)
     log("SWEEP done: %d params" % len(summary))
 
 main()
