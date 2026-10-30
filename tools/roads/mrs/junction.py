@@ -302,7 +302,8 @@ def end_zone(cross, marking, setback, cw):
     lane, centre, edge and cycle markings start beyond it."""
     y = setback + cw if cross else 0.0
     gap = STOP_LINE[0] if cross else NO_CROSS_STOP
-    if marking in ("line", "stop"): return y + gap + STOP_LINE[1]
+    if marking == "stop": return y + gap + STOP_LINE[1] + STOP_TEXT[0] + STOP_TEXT[1]     # the STOP letters beyond the line
+    if marking == "line": return y + gap + STOP_LINE[1]
     if marking == "give_way": return y + gap + GIVE_WAY[2] + TEETH[2] + TEETH[1]
     return y + STOP_LINE[0] if cross else 0.0
 
@@ -337,13 +338,21 @@ def _inside(poly, p):
     return inside
 
 
-def _mats():
+def _mats(roads=()):
     """Material names for the junction slots (asphalt, paint, concrete, paving, cycleway, tactile, crossing),
-    falling back when a dedicated material is missing."""
+    falling back when a dedicated material is missing. The paving follows `roads`' Sidewalk Surface when the roads
+    with a sidewalk agree on one."""
     def pick(*names):
         return next((MRS + n for n in names if bpy.data.materials.get(MRS + n)), MRS + "Concrete")
-    return (pick("Asphalt"), pick("Paint"), pick("Concrete"), pick("Paving", "Concrete"), pick("Cycleway", "BikeLane"), pick("Tactile", "Paint"), pick("Cycleway", "BikeLane"),
-            pick("PaintYellow", "Paint"))
+    surfaces = set()
+    for r in roads:
+        try:
+            if road_input(r, "Sidewalk Left") or road_input(r, "Sidewalk Right"): surfaces.add(road_input(r, "Sidewalk Surface") or "Default")
+        except (KeyError, AttributeError, TypeError):
+            surfaces.add("Default")                     # a library without the input
+    paving = ("Paving" + surfaces.pop(),) if len(surfaces) == 1 and "Default" not in surfaces else ()
+    return (pick("Asphalt"), pick("Paint"), pick("Concrete"), pick(*(paving + ("Paving", "Concrete"))), pick("Cycleway", "BikeLane"), pick("Tactile", "Paint"),
+            pick("Cycleway", "BikeLane"), pick("PaintYellow", "Paint"))
 
 
 MATS = _mats
@@ -378,6 +387,52 @@ def _mesh_object(name, bm, collection, materials, meta):
 CONTROLS = ("none", "signals", "stop", "yield", "priority")
 
 
+MIN_APPROACH_ANGLE = 25.0    # degrees between neighbouring approaches (3+ arms); tools/roads/limits/junction_sweep.py tests it
+ZONE_MARGIN = 0.10           # a road keeps (1 + ZONE_MARGIN) x the paint zones of both its ends between its trims (the
+                             # junction length sweep: two junctions' paint met when less was left)
+
+
+def _corner_rings(at, a, b, corner_radius):
+    """The corner between approach a (its left edges) and the next approach b (its right edges): (la, lb, rings), rings
+    = [(points, C, t)] for the asphalt edge, the kerb, the ramp top and the sidewalk back. The asphalt is a fillet of
+    corner_radius (its tangent clamped to 12 m); every further layer is the concentric ring, or - collapsed (the layer
+    lies further out than the radius) - the crossing of the two roads' edges of that layer. Approaches need d (unit
+    Vector out of the junction), half_l, half_r, curb, swl, swr. Shared by build_junction and citynet.junction_trims."""
+    la = a["d"].cross(UP).normalized(); lb = b["d"].cross(UP).normalized()
+    swa, swb = a["swl"], b["swr"]
+    rings = []
+    # ring 0: fillet of the asphalt edges; rings 1 / 2 (curb, sidewalk back): concentric arcs around the same
+    # centre with radius R - offset (the back of a sidewalk corner is a TIGHTER arc; <= 0 collapses to a point),
+    # so every ring starts at the same station as the asphalt tangent point and meets the road's straight edges
+    pa = at - la * a["half_l"]; pb = at + lb * b["half_r"]
+    span = math.degrees(math.atan2(b["d"].y, b["d"].x) - math.atan2(a["d"].y, a["d"].x)) % 360.0
+    # a corner wider than 150 deg is a straight continuation: a fillet there would run almost parallel to
+    # the edges and push its tangent points (and the road trims) tens of metres out
+    fil = _fillet(pa, a["d"], pb, b["d"], corner_radius) if span <= 150.0 else None
+    sw_c = max(swa, swb)
+    offs = [0.0, a["curb"], a["curb"] + min(RAMP_DEPTH, sw_c * 0.6), a["curb"] + sw_c]      # asphalt, kerb, ramp top, back
+    if fil is None:
+        for k, off in enumerate(offs):
+            mid = ((at - la * (a["half_l"] + off)) + (at + lb * (b["half_r"] + off))) * 0.5
+            rings.append(([mid], mid, 0.0))
+    else:
+        pts, C, t, centre, a0, da, Rr = fil
+        for k, off in enumerate(offs):
+            rk = Rr - off
+            if rk > 0.05:
+                rings.append(([Vector((centre.x + rk * math.cos(a0 + da * j / 8), centre.y + rk * math.sin(a0 + da * j / 8), 0.0)) for j in range(9)], C, t))
+            else:
+                # the ring's arc has collapsed (the layer lies further out than the corner radius): its corner is where
+                # the two roads' edges of this layer cross, each at its own offset. The fillet centre lies inside that
+                # crossing; at acute angles far inside, so the sidewalks overlapped past trims taken from it.
+                offa = (a["half_l"], a["half_l"] + a["curb"], a["half_l"] + a["curb"] + min(RAMP_DEPTH, swa * 0.6), a["half_l"] + a["curb"] + swa)[k]
+                offb = (b["half_r"], b["half_r"] + b["curb"], b["half_r"] + b["curb"] + min(RAMP_DEPTH, swb * 0.6), b["half_r"] + b["curb"] + swb)[k]
+                X = _line_x(at - la * offa, a["d"], at + lb * offb, b["d"])
+                X = Vector((centre.x, centre.y, 0.0)) if X is None else Vector((X.x, X.y, 0.0))
+                rings.append(([X], C, t))
+    return la, lb, rings
+
+
 def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True, corner_radius=6.0, traffic_lights=False,
                    snap=0.8, terrain=None, lights_collection=None, crossing="zebra", stop_setback=0.6, refuge=True, control=None,
                    main_roads=None, bike_crossings=True, crossing_width=2.5, edge_depth=0.0, plane=None, z=None, box=False):
@@ -386,7 +441,7 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
     crossings (zebra or parallel lines) with ramps on the roads, stop lines set back from the crossing,
     median noses and refuge islands, coloured bicycle crossings, and signal poles with IDs
     (control = "signals"); "stop" / "yield" / "priority" are consumed by the sign placer.
-    Returns the junction object; raises ValueError for unsupported layouts."""
+    Returns the junction object; raises ValueError for unsupported layouts (neighbours closer than MIN_APPROACH_ANGLE)."""
     at = Vector(at)
     approaches = _approaches(at, roads, snap)
     n = len(approaches)
@@ -394,7 +449,8 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
     for i in range(n):
         a, b = approaches[i], approaches[(i + 1) % n]
         ang = math.degrees(math.atan2(b["d"].y, b["d"].x) - math.atan2(a["d"].y, a["d"].x)) % 360.0
-        if n > 2 and ang < 25.0: raise ValueError("%s: roads %s and %s meet at %.0f degrees (min 25)" % (name, a["road"].name, b["road"].name, ang))
+        if n > 2 and ang < MIN_APPROACH_ANGLE:
+            raise ValueError("%s: roads %s and %s meet at %.0f degrees (min %g)" % (name, a["road"].name, b["road"].name, ang, MIN_APPROACH_ANGLE))
     zs = [a["p"].z for a in approaches]
     if max(zs) - min(zs) > 1.5: raise ValueError("%s: road ends differ in height by %.1f m (max 1.5 for a flat junction)" % (name, max(zs) - min(zs)))
     z_given = z
@@ -409,31 +465,7 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
     corners = []
     for i in range(n):
         a, b = approaches[i], approaches[(i + 1) % n]
-        la = a["d"].cross(UP).normalized(); lb = b["d"].cross(UP).normalized()
-        swa, swb = a["swl"], b["swr"]
-        rings = []
-        # ring 0: fillet of the asphalt edges; rings 1 / 2 (curb, sidewalk back): concentric arcs around the same
-        # centre with radius R - offset (the back of a sidewalk corner is a TIGHTER arc; <= 0 collapses to a point),
-        # so every ring starts at the same station as the asphalt tangent point and meets the road's straight edges
-        pa = at - la * a["half_l"]; pb = at + lb * b["half_r"]
-        span = math.degrees(math.atan2(b["d"].y, b["d"].x) - math.atan2(a["d"].y, a["d"].x)) % 360.0
-        # a corner wider than 150 deg is a straight continuation: a fillet there would run almost parallel to
-        # the edges and push its tangent points (and the road trims) tens of metres out
-        fil = _fillet(pa, a["d"], pb, b["d"], corner_radius) if span <= 150.0 else None
-        sw_c = max(swa, swb)
-        offs = [0.0, a["curb"], a["curb"] + min(RAMP_DEPTH, sw_c * 0.6), a["curb"] + sw_c]      # asphalt, kerb, ramp top, back
-        if fil is None:
-            for k, off in enumerate(offs):
-                mid = ((at - la * (a["half_l"] + off)) + (at + lb * (b["half_r"] + off))) * 0.5
-                rings.append(([mid], mid, 0.0))
-        else:
-            pts, C, t, centre, a0, da, Rr = fil
-            for k, off in enumerate(offs):
-                rk = Rr - off
-                if rk > 0.05:
-                    rings.append(([Vector((centre.x + rk * math.cos(a0 + da * j / 8), centre.y + rk * math.sin(a0 + da * j / 8), 0.0)) for j in range(9)], C, t))
-                else:
-                    rings.append(([Vector((centre.x, centre.y, 0.0))], C, t))
+        la, lb, rings = _corner_rings(at, a, b, corner_radius)
         corners.append(dict(a=a, b=b, la=la, lb=lb, rings=rings))
     cw = crossing_width
     for i, a in enumerate(approaches):
@@ -442,6 +474,21 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
             for pts, C, t in c["rings"]:
                 reach = max(reach, max((p - at).dot(a["d"]) for p in pts))
         a["trim"] = max(reach + 0.3, a["half"] + 1.0)
+    # refuse a layout that leaves a road too short: between its trims it must keep both ends' paint zones (crossing,
+    # stop line, STOP letters, give-way teeth) + ZONE_MARGIN, or the two junctions' paint meet (acute corners need more
+    # of each road: roughly its width / sin(angle))
+    for a in approaches:
+        r = a["road"]; length = sum(sp.calc_length() for sp in r.data.splines) * max(r.scale.x, r.scale.y)
+        other = road_input(r, "Trim End" if a["start"] else "Trim Start") or 0.0
+        other_zone = road_input(r, "Mark Clear End" if a["start"] else "Mark Clear Start") or 0.0
+        cross = crosswalks and (a["swl"] > 0 or a["swr"] > 0)
+        zone = end_zone(cross, end_marking(control, a["road"].name in main_roads, a["lanes_in"]) if stop_lines else None, stop_setback, crossing_width)
+        left = length - a["trim"] - other; need = (zone + other_zone) * (1.0 + ZONE_MARGIN)
+        if left < need:
+            raise ValueError("%s: road %s is %.1f m long; this junction needs %.1f m of it and its other end %.1f m, leaving %.1f m "
+                             "where the paint zones of both ends need %.1f m: lengthen the road or widen the angle"
+                             % (name, r.name, length, a["trim"], other, left, need))
+    for i, a in enumerate(approaches):
         a["cross"] = crosswalks and (a["swl"] > 0 or a["swr"] > 0)
         clear = a["trim"] + (stop_setback + cw + 5.0 if a["cross"] else 3.0)
         E0 = at + a["d"] * a["trim"]
@@ -637,7 +684,7 @@ def build_junction(name, at, roads, collection, crosswalks=True, stop_lines=True
                             "lanes_in": a["lanes_in"], "lanes_out": a["lanes_out"], "mark_clear": a["mark_clear"], "turns": a["turns"], "cross": bool(a["cross"]), "marking": a["marking"],
                             "end_point": [round(c, 4) for c in a["E"]], "right": [round(c, 5) for c in a["R"].normalized()], "out": [round(c, 5) for c in a["D"]],
                             "half_l": a["half_l"], "half_r": a["half_r"], "main": a["road"].name in main_roads} for a in approaches]}
-    o = _mesh_object(name, bm, collection, _mats(), meta)
+    o = _mesh_object(name, bm, collection, _mats([a["road"] for a in approaches]), meta)
     if traffic_lights and n >= 3:
         _place_signals(name, o, at, z, approaches, corners, collection, dz)
     return o
@@ -701,7 +748,7 @@ def _place_signals(name, jobj, at, z, approaches, corners, collection, dz=None):
         codes = lane_use(a.get("turns", 7), n_in, a["rht"])
         variant = "Arm%d_%.1f_%s_U%s" % (n_in, arm, "_".join("%.1f" % o_ for o_ in offs), "".join(str(c) for c in codes))
         sig = signage.make_signal(sid, style="mast_arm", pole_height=ARM_HEIGHT, arm_length=arm, heads=("vehicle",) * n_in, collection=collection,
-                                  arm_side=in_r, head_x=offs)
+                                  arm_side=in_r, head_x=offs, head_arrows=codes)      # a turn-only lane's head shows arrows
         # a lane-use sign over every head: the movements its lane may make (the arrows painted in that lane)
         heads = [h for h in dict(sig["mrs_signal"]).get("heads", []) if dict(h).get("kind") == "vehicle"]
         for k, h in enumerate(heads[:n_in]):
@@ -772,7 +819,7 @@ def build_dead_end(name, road, end="end", radius=9.0, collection=None, terrain=N
             path_pts = [[c[0], c[1], z + h] for c in path_pts]
     meta = {"at": list(p), "roads": [road.name], "end": end, "radius": radius, "terrain": terrain.name if terrain else "", "z": z, "type": "dead_end",
             "through_path": bool(through_path), "path_width": path_width, "path_length": path_length, "path": path_pts}
-    return _mesh_object(name, bm, collection or road.users_collection[0], _mats(), meta)
+    return _mesh_object(name, bm, collection or road.users_collection[0], _mats([road]), meta)
 
 
 def _zebra_band(bm, V, end, d, r, z, x0, x1, y0, y1, mat, zc=None, pitch=1.0, bar=0.5):
@@ -925,7 +972,7 @@ def build_roundabout(name, at, roads, collection, island_radius=8.0, lanes=1, la
             "approaches": [{"road": a["road"].name, "end": "start" if a["start"] else "end", "heading": [a["d"].x, a["d"].y], "trim": a["trim"],
                             "lanes_in": a["lanes_in"], "lanes_out": a["lanes_out"],
                             "half_l": a["half_l"], "half_r": a["half_r"], "main": False} for a in approaches]}
-    return _mesh_object(name, bm, collection, _mats(), meta)
+    return _mesh_object(name, bm, collection, _mats([a["road"] for a in approaches]), meta)
 
 
 # ---------------------------------------------------------------------------- rebuild / auto update

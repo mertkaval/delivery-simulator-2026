@@ -55,6 +55,9 @@ fitting the city:
 | Vertical alignment | `mrs/grading.py` `network_profiles`: natural ground averaged per class (`SMOOTH`), node heights shared, grade limited per class (`MAX_GRADE`: local 16 %, downtown / arterial 12 %, boulevard 10 %, lane 18 %, bridge 6 %) | the natural terrain (`terrain.npz`), not CityForge's graded lots |
 | Bridges | decks span bank to bank at `BRIDGE_CLEARANCE` (4 m) over the water level, their end nodes lifted so the deck reaches it at the bridge grade; `citynet.bridge_gaps` joins dead-end streets facing each other across water | water mask + level |
 | Ground | `grading.grade`: under a surface 0.3 m below it; beyond, the natural ground clipped by cut (1:1) / fill (1:2) batters from the surfaces; the first cell keeps the per-street plane cap | the built road and junction surfaces |
+| Planar network | `citynet.planarize` before anything is built: 21 street ends that lay on another road became T-junctions on it (the Dorothy Vaughan Boulevard ran through six downtown junctions), one near-duplicate junction merged, 13 collinear overlaps dropped; `validate.check_overlaps` on the built surfaces | the road graph |
+| Buildings clear of streets | the classic city (`--with-buildings`) goes through the same planar network; the Blender check (`mrs_junction_atlas.py --plan`) proves no house, garage, shop, warehouse, tower or public building footprint (0.5 m inset) stands on a road or junction surface (`validate.check_buildings`) | the gate before install |
+| Deep cuts | cut slope 1:1 for the first 6 m of rise, then 2:1 (rock cutting; the terrain shader draws slopes over 20 degrees as rock) | the grading |
 | Addresses | `city.frontage_plots`: a plot every 20 m on both sides of every street, behind the sidewalk, clear of junctions, other corridors and water, facing the street, unique addresses | the streets |
 
 Bugs found on the way (all in the tool, all fixed): the asset library's markings step cleared the collection, so

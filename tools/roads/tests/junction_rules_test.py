@@ -56,6 +56,14 @@ try:
     from mrs.nodes import mod_input_set
     for k in ("Bus Lane Forward", "Bus Lane Backward"): mod_input_set(objs["T_F"].modifiers["MRS_Road"], k, True)      # BUS in the stem's outer lanes
     mod_input_set(objs["T_A"].modifiers["MRS_Road"], "Centre Colour", "Yellow"); mod_input_set(objs["T_A"].modifiers["MRS_Road"], "Edge Lines", True)
+    # a lane added on T_P (2 -> 3 forward lanes over a 30 m taper: hatched triangle, merge arrow) and a worn surface on T_K
+    mp = objs["T_P"].modifiers["MRS_Road"]
+    for k_, v_ in (("Transition", True), ("Lanes Forward End", 3), ("Lanes Backward End", 2), ("Transition Start", 50.0), ("Taper Length", 30.0)): mod_input_set(mp, k_, v_)
+    mod_input_set(objs["T_K"].modifiers["MRS_Road"], "Asphalt Condition", "Worn")
+    # sidewalk surfaces: brick on all of TJ_4's roads (its corners follow), cobblestone / hexagon / gravel on TJ_3's
+    # minor roads (mixed with T_D's default: TJ_3's corners keep the default paving)
+    SURFACES = (("T_E", "Brick"), ("T_P", "Brick"), ("T_Q", "Brick"), ("T_G", "Cobblestone"), ("T_H", "Hexagon"), ("T_K", "Gravel"))
+    for r_, sf in SURFACES: mod_input_set(objs[r_].modifiers["MRS_Road"], "Sidewalk Surface", sf)
     for jid, at, rs, ctrl, crossing, main in JUNCTIONS:
         junction.build_junction(jid, city.B(at[0], at[1], Z), [objs[r] for r in rs], col, crosswalks=True, stop_lines=True, corner_radius=8.0,
                                 control=ctrl, crossing=crossing, snap=1.0, edge_depth=citynet.EDGE_DEPTH, z=Z, main_roads=main, box=(jid == "TJ_2"))
@@ -67,6 +75,17 @@ try:
     rep = placement.place_all(col, seed=3, style="avenue")
     placed = bpy.data.collections.get(col.name + "_Placed") or next((c for c in bpy.data.collections if c.name.startswith("MRS_Placed")), None)
     res = validate.validate(col, placed)
+    dg = bpy.context.evaluated_depsgraph_get(); surf_bad = []
+    for r_, sf in SURFACES:
+        ev = objs[r_].evaluated_get(dg); me_ = ev.to_mesh(); names = {m_.name for m_ in me_.materials if m_}; ev.to_mesh_clear()
+        if "MRS_Paving" + sf not in names: surf_bad.append("%s: no MRS_Paving%s on its sidewalks (%s)" % (r_, sf, sorted(names)))
+    jo = {o.name: o for o in col.all_objects if o.get("mrs_junction") and o.type == "MESH"}
+    for jid, want in (("TJ_4", "MRS_PavingBrick"), ("TJ_3", "MRS_Paving")):
+        got = jo[jid].data.materials[3].name
+        if got != want: surf_bad.append("%s: corner paving %s, want %s" % (jid, got, want))
+    for t in surf_bad: res["problems"].append({"check": "surface", "object": "", "message": t})
+    arrows = {o.name: dict(o["mrs_signal_head"]).get("arrow", 0) for o in bpy.data.objects if o.get("mrs_signal_head") and dict(o["mrs_signal_head"]).get("arrow", 0)}
+    print("ARROW_HEADS", json.dumps(arrows))
     os.makedirs(OUT, exist_ok=True)
     jmeta = {o.name: dict(o["mrs_junction"].to_dict() if hasattr(o["mrs_junction"], "to_dict") else o["mrs_junction"]) for o in col.all_objects if o.get("mrs_junction")}
     summary = {"validation": res, "junctions": {k: {"approaches": [{kk: a.get(kk) for kk in ("road", "end", "lanes_in", "mark_clear", "turns", "marking")} for a in v["approaches"]],
@@ -83,7 +102,11 @@ try:
                  ("j1_west", W(955, 997.5, 3.0), W(1000, 1003, 0.5), 32.0), ("j1_bike", W(970, 1010, 6.0), W(1000, 1000, 0), 28.0),
                  ("j2_stem", W(1203, 1050, 3.0), W(1196, 1000, 0.5), 32.0), ("j2_west", W(1150, 997, 3.0), W(1200, 1004, 1.5), 32.0),
                  ("j3_skew", W(1040, 1180, 8.0), W(1000, 1140, 0), 30.0), ("j3_stop", W(1000.5, 1158, 4.0), W(999.5, 1142, 0.0), 40.0),
-                 ("j4_top", W(1340, 1000, 55), W(1340, 1000.1, 0), 30.0), ("j4_minor", W(1343, 958, 3.0), W(1338, 1000, 0.5), 34.0)]
+                 ("j4_top", W(1340, 1000, 55), W(1340, 1000.1, 0), 30.0), ("j4_minor", W(1343, 958, 3.0), W(1338, 1000, 0.5), 34.0),
+                 ("taper", W(1405, 1000, 45), W(1405, 1000.1, 0), 30.0), ("worn", W(945, 1140.5, 3.0), W(990, 1141, 0.5), 34.0),
+                 ("arrows", W(1196, 1032, 5.5), W(1200, 1010, 6.0), 30.0),
+                 ("surf_cobble", W(1003, 1190, 2.0), W(1005.5, 1200, 0.1), 35.0), ("surf_hex", W(1036, 1184, 2.2), W(1041.5, 1188.5, 0.1), 35.0),
+                 ("surf_brick", W(1354, 984, 3.0), W(1347, 993, 0.1), 32.0)]
         for name, eye, tgt, lens in views:
             qa.render(os.path.join(OUT, name + ".png"), eye, tgt, lens, res=(1280, 800), samples=16, scene=sc)
             print("RENDER", name)

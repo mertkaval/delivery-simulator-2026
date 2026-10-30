@@ -140,9 +140,20 @@ Everything a junction paints or places is derived from its roads and its control
   yield and the minor roads of a priority junction -> dashed give-way line + triangles; the main road -> nothing.
   Signs follow the same control (placement).
 - **Signals**: a corner post per corner (vehicle + pedestrian head) and, for 2+ arriving lanes, a mast arm at the
-  stop line with a head and a lane-use sign over every lane (`signage.make_signal(arm_side, head_x)`).
+  stop line with a head and a lane-use sign over every lane (`signage.make_signal(arm_side, head_x, head_arrows)`);
+  a lane that may only turn left / right gets an arrow head (dark lenses, lit arrows: the same lens materials).
 - **Cycle crossings**: coloured bands with elephant feet through the junction between opposite cycle lanes.
 - **Yellow box** (`box=True`): border + hatching over the junction core.
+- **Taper hatching** (road): where a side's lane count changes (Transition), 45 degree bars fill the triangle the
+  dropped / added lane leaves; **Asphalt Condition** (road): Default / New / Worn / Wet / Patched surface;
+  **Sidewalk Surface** (road): Default / Tiles / Hexagon / Cobblestone / Brick / Gravel (`MRS_Paving<surface>`, the
+  PavingShader's Pattern); a junction's corners take its roads' surface when they agree. A buffered cycleway's
+  buffer carries instanced diagonal bars (Buffer Hatch Spacing).
+- **Network** (`citynet.planarize`, any road graph): roads only touch at shared nodes - a node in another road's
+  corridor becomes a T-junction on it, crossing segments split at a new junction, a road starting close to a
+  junction it overlaps joins it, collinear overlaps become duplicates; `validate.check_overlaps` proves it on the
+  built surfaces (1 m grid). A road that opens onto another road's edge (a back lane's mouth) lists it in
+  `mrs_mouths`: one row of cells across its width may overlap there.
 - Every build parameter is stored in the junction's metadata (`params`); `configure(obj, **changes)` /
   panel *Junction Settings* changes any of them and rebuilds. The auto-update hashes each road's curve and every
   input except the derived ones (no feedback loop) and, with *Auto-place*, re-places the street assets.
@@ -181,6 +192,7 @@ torus coordinates) for engines; `tools/roads/tests/materials_test.py` renders ev
    batters from the nearest surface (`Cut Slope` 1:1, `Fill Slope` 1:2), so it meets every edge and returns to its
    own shape; elevated decks and the roads' instances carry no `ground_surface` mark and are ignored. The roads'
    own embankment skirts and walls are switched off (the graded terrain replaces them).
+   A cut deeper than `Deep Cut` (6 m) steepens to `Deep Slope` (2:1) beyond it: a rock cutting half as wide.
 4. Heightfield terrains (any engine): `mrs.grading` (pure numpy) - `network_profiles` gives every road its
    vertical alignment from the natural ground (averaged, grade limited per class, shared node heights, decks
    clearing the water), `corridor_field` writes the corridors into the field, `grade` applies the same batters.
@@ -193,7 +205,7 @@ baked tiles (`materials.bake_tiles`) in an engine.
 ## Validation
 `mrs.validate.validate(roads_collection, placed)` (panel *Validate*) checks every road, junction and sign against
 the rules above: paint in clear zones, arrow kind / direction / count, junction inputs, end markings, cycle bands
-on zebras, signal heads and lane-use signs over the lanes, speed signs. Tests: `tools/roads/tests/
+on zebras, signal heads, arrow heads and lane-use signs over the lanes, speed signs, overlapping surfaces. Tests: `tools/roads/tests/
 junction_rules_test.py` (4 junction types, 0 problems), `responsive_test.py` (lanes / speed / cycle lanes edited ->
 everything follows), `terrain_conform_test.py` (batters on mesh terrains), `grading_test.py` (heightfields).
 `tools/roads/build_mrs.py` is the older smoke test: it rebuilds everything headless, asserts >= 25 roads and

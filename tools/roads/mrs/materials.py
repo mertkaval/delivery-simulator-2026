@@ -57,7 +57,16 @@ def _merge(base, over):
 
 
 MATERIAL_PRESETS = {name: _merge(_BASE, p) for name, p in _PRESETS.items()}
-MATERIAL_NAMES = ("Asphalt", "Paint", "PaintYellow", "Concrete", "BikeLane", "Structure", "Embankment", "Paving", "Tactile", "Cycleway", "PoleMetal")
+CONDITION_VARIANTS = ("AsphaltNew", "AsphaltWorn", "AsphaltWet", "AsphaltPatched", "PavingTiles", "PavingHexagon", "PavingCobblestone", "PavingBrick", "PavingGravel")
+MATERIAL_NAMES = ("Asphalt", "AsphaltNew", "AsphaltWorn", "AsphaltWet", "AsphaltPatched", "Paint", "PaintYellow", "Concrete", "BikeLane", "Structure", "Embankment", "Paving",
+                  "PavingTiles", "PavingHexagon", "PavingCobblestone", "PavingBrick", "PavingGravel", "Tactile", "Cycleway", "PoleMetal")
+# sidewalk surfaces (road input Sidewalk Surface): MRS_Paving<surface>, PavingShader settings, viewport colour
+SIDEWALK_VARIANTS = (("PavingTiles", {"Paving Size": 0.3, "Joint Width": 0.006, "Base Color": (0.52, 0.5, 0.47, 1), "Tone Variation": 0.12}, (0.52, 0.5, 0.47, 1)),
+                     ("PavingHexagon", {"Pattern": 1.0, "Paving Size": 0.25, "Joint Width": 0.008, "Base Color": (0.42, 0.41, 0.4, 1), "Tone Variation": 0.3}, (0.42, 0.41, 0.4, 1)),
+                     ("PavingCobblestone", {"Pattern": 2.0, "Paving Size": 0.2, "Brick Aspect": 0.7, "Joint Width": 0.02, "Base Color": (0.37, 0.35, 0.33, 1),
+                                            "Tone Variation": 0.5, "Chipping": 0.3, "Bump Strength": 0.7}, (0.34, 0.33, 0.31, 1)),
+                     ("PavingBrick", {"Pattern": 3.0, "Paving Size": 0.22, "Brick Aspect": 0.5, "Joint Width": 0.01, "Base Color": (0.42, 0.19, 0.12, 1), "Tone Variation": 0.35}, (0.42, 0.2, 0.13, 1)),
+                     ("PavingGravel", {"Pattern": 4.0, "Base Color": (0.45, 0.41, 0.35, 1), "Grime": 0.3, "Bump Strength": 0.6}, (0.45, 0.41, 0.35, 1)))
 WINDOW_INPUTS = (("Wear Along Start", "NodeSocketFloat", -FAR), ("Wear Along End", "NodeSocketFloat", FAR))
 UV_INPUTS = (("Use UV", "NodeSocketFloat", 0.0), ("Tile Size", "NodeSocketFloat", 4.0))
 
@@ -618,7 +627,9 @@ def _build_embankment():
 PAVING_INPUTS = (("Paving Size", "NodeSocketFloat", 0.6), ("Joint Width", "NodeSocketFloat", 0.009), ("Base Color", "NodeSocketColor", (0.46, 0.45, 0.43, 1)),
                  ("Tone Variation", "NodeSocketFloat", 0.2), ("Chipping", "NodeSocketFloat", 0.1), ("Grime", "NodeSocketFloat", 0.1),
                  ("Curb Dirt Width", "NodeSocketFloat", 0.8), ("Half Width", "NodeSocketFloat", 6.4), ("Wetness", "NodeSocketFloat", 0.0),
-                 ("Bump Strength", "NodeSocketFloat", 0.4), ("Scale", "NodeSocketFloat", 1.0), ("Use Drain", "NodeSocketFloat", 0.0)) + UV_INPUTS
+                 ("Bump Strength", "NodeSocketFloat", 0.4), ("Scale", "NodeSocketFloat", 1.0), ("Use Drain", "NodeSocketFloat", 0.0),
+                 ("Pattern", "NodeSocketFloat", 0.0), ("Brick Aspect", "NodeSocketFloat", 0.5)) + UV_INPUTS
+PAVING_PATTERNS = {"slabs": 0, "hexagon": 1, "setts": 2, "brick": 3, "gravel": 4}     # Pattern input values
 
 
 def _build_paving():
@@ -638,6 +649,39 @@ def _build_paving():
     ix = G.wrap(m("FLOOR", m("DIVIDE", gx, psz)), pn); iy = G.wrap(m("FLOOR", m("DIVIDE", gy, psz)), pn)
     ex = m("MULTIPLY", m("MINIMUM", fx, m("SUBTRACT", 1.0, fx)), psz); ey = m("MULTIPLY", m("MINIMUM", fy, m("SUBTRACT", 1.0, fy)), psz)
     edge = m("MINIMUM", ex, ey)                                                 # metres to the nearest joint
+    # ---- other patterns (Pattern): each gives the distance to its joints, a stone id and the local 0..1 coordinates
+    tile = G.gi.outputs["Tile Size"]
+    def is_(k): return m("COMPARE", I["Pattern"], float(k), 0.5)
+    hexm = is_(1); setts = is_(2); bond = m("ADD", setts, is_(3)); gravel = is_(4)
+    # running bond (brick, setts): stones Paving Size long, Brick Aspect x as deep; an even row count per tile;
+    # brick rows step half a stone, setts rows a random amount
+    bh0 = m("MULTIPLY", psz, I["Brick Aspect"])
+    bn_raw = m("MAXIMUM", m("MULTIPLY", m("ROUND", m("DIVIDE", tile, m("MULTIPLY", bh0, 2.0))), 2.0), 2.0)
+    bh = G.mixf(G.use, bh0, m("DIVIDE", tile, bn_raw)); bn = G.mixf(G.use, 1.0e6, bn_raw)
+    row = G.wrap(m("FLOOR", m("DIVIDE", gy, bh)), bn)
+    shift = G.mixf(setts, m("MULTIPLY", m("FLOORED_MODULO", row, 2.0), 0.5), G.white(G.tb.combine(row, 7.0, 0.0)))
+    bx = m("ADD", m("DIVIDE", gx, psz), shift)
+    bfx = m("FRACT", bx); bfy = m("FRACT", m("DIVIDE", gy, bh)); bix = G.wrap(m("FLOOR", bx), pn)
+    bedge = m("MINIMUM", m("MULTIPLY", m("MINIMUM", bfx, m("SUBTRACT", 1.0, bfx)), psz), m("MULTIPLY", m("MINIMUM", bfy, m("SUBTRACT", 1.0, bfy)), bh))
+    # hexagon pavers, Paving Size across the flats: the nearer of the two lattice centres (rows ky apart, squashed a
+    # little in UV mode so a whole number of rows fits the tile)
+    hrows = m("MAXIMUM", m("ROUND", m("DIVIDE", tile, m("MULTIPLY", psz, 1.7320508))), 1.0)
+    ky = G.mixf(G.use, 1.7320508, m("DIVIDE", tile, m("MULTIPLY", hrows, psz))); hn = G.mixf(G.use, 1.0e6, hrows)
+    ux = m("DIVIDE", gx, psz); uy = m("DIVIDE", gy, psz)
+    ax = m("FLOOR", ux); ay = m("FLOOR", m("DIVIDE", uy, ky))
+    hax = m("SUBTRACT", ux, m("ADD", ax, 0.5)); hay = m("SUBTRACT", uy, m("MULTIPLY", m("ADD", ay, 0.5), ky))
+    bxx = m("FLOOR", m("SUBTRACT", ux, 0.5)); byy = m("FLOOR", m("SUBTRACT", m("DIVIDE", uy, ky), 0.5))
+    hbx = m("SUBTRACT", ux, m("ADD", bxx, 1.0)); hby = m("SUBTRACT", uy, m("MULTIPLY", m("ADD", byy, 1.0), ky))
+    pick_b = m("LESS_THAN", m("ADD", m("MULTIPLY", hbx, hbx), m("MULTIPLY", hby, hby)), m("ADD", m("MULTIPLY", hax, hax), m("MULTIPLY", hay, hay)))
+    hx = m("ABSOLUTE", G.mixf(pick_b, hax, hbx)); hy = m("ABSOLUTE", G.mixf(pick_b, hay, hby))
+    hix = G.mixf(pick_b, G.wrap(ax, pn), m("ADD", G.wrap(bxx, pn), 0.5)); hiy = G.mixf(pick_b, G.wrap(ay, hn), m("ADD", G.wrap(byy, hn), 0.5))
+    dd = m("SQRT", m("ADD", 0.25, m("MULTIPLY", m("MULTIPLY", ky, ky), 0.25)))                 # centre to diagonal neighbour
+    proj = m("DIVIDE", m("ADD", m("MULTIPLY", hx, 0.5), m("MULTIPLY", hy, m("MULTIPLY", ky, 0.5))), dd)
+    hedge = m("MULTIPLY", m("MINIMUM", m("SUBTRACT", 0.5, hx), m("SUBTRACT", m("MULTIPLY", dd, 0.5), proj)), psz)
+    hfx = m("ADD", G.mixf(pick_b, hax, hbx), 0.5); hfy = m("ADD", m("DIVIDE", G.mixf(pick_b, hay, hby), ky), 0.5)
+    edge = G.mixf(gravel, G.mixf(bond, G.mixf(hexm, edge, hedge), bedge), 1.0)               # gravel: no joints
+    ix = G.mixf(bond, G.mixf(hexm, ix, hix), bix); iy = G.mixf(bond, G.mixf(hexm, iy, hiy), row)
+    fx = G.mixf(bond, G.mixf(hexm, fx, hfx), bfx); fy = G.mixf(bond, G.mixf(hexm, fy, hfy), bfy)
     half_j = m("MULTIPLY", I["Joint Width"], 0.5)
     joint = G.ramp(edge, m("ADD", half_j, 0.002), half_j)
     chamfer = G.ramp(edge, m("ADD", half_j, 0.025), half_j)
@@ -668,6 +712,14 @@ def _build_paving():
     rough = m("ADD", m("ADD", 0.78, m("MULTIPLY", m("SUBTRACT", fine, 0.5), 0.14)), m("ADD", m("MULTIPLY", joint, 0.15), m("MULTIPLY", grime, 0.1)))
     height = m("ADD", m("ADD", 0.5, tilt), m("ADD", m("MULTIPLY", fine, 0.15), m("MULTIPLY", sand, 0.08)))
     height = m("SUBTRACT", height, m("ADD", m("ADD", m("MULTIPLY", chamfer, 0.5), m("MULTIPLY", joint, 0.6)), m("ADD", m("MULTIPLY", bite, 0.6), m("MULTIPLY", pores, 0.3))))
+    # setts: domed stone tops; gravel: packed pebbles (Base Color) in a dusty fine fill, no slabs
+    height = m("ADD", height, m("MULTIPLY", m("MULTIPLY", G.ramp(edge, half_j, m("ADD", half_j, 0.04)), 0.45), setts))
+    peb = G.voronoi(42.0, "F1", label="pebbles"); pd = peb.outputs["Distance"]; ptone = G.cell_rand(peb)[0]
+    gcol = G.scale_col(I["Base Color"], m("MULTIPLY", m("ADD", 0.6, m("MULTIPLY", ptone, 0.8)), m("ADD", 0.85, m("MULTIPLY", broad, 0.3))))
+    gcol = G.mixc(m("MULTIPLY", G.ramp(pd, 0.3, 0.65), 0.75), gcol, G.scale_col(I["Base Color"], 0.45))
+    col = G.mixc(gravel, col, gcol)
+    rough = G.mixf(gravel, rough, m("ADD", 0.86, m("MULTIPLY", fine, 0.1)))
+    height = G.mixf(gravel, height, m("ADD", m("MULTIPLY", G.ramp(pd, 0.6, 0.05), 0.8), m("MULTIPLY", fine, 0.2)))
     col, rough, fade, coat = G.wet(col, rough, height, I["Wetness"], broad, G.local_wet())
     G.finish(col, rough, height, I["Bump Strength"], 0.015, coat=coat, bump_fade=fade)
     return g
@@ -797,6 +849,12 @@ def build_materials():
         mats[name] = _group_material(name, grp)
     mats["Asphalt"].diffuse_color = (0.12, 0.12, 0.13, 1); mats["Paint"].diffuse_color = (0.85, 0.85, 0.8, 1); mats["Concrete"].diffuse_color = (0.5, 0.5, 0.48, 1)
     mats["PaintYellow"] = _group_material("PaintYellow", "PaintShader", Yellow=1.0); mats["PaintYellow"].diffuse_color = (0.82, 0.58, 0.08, 1)
+    # asphalt conditions (road input Asphalt Condition)
+    for nm, vals, col in (("AsphaltNew", {"Color Variation": 0.1, "Cracks": 0.0, "Tire Wear": 0.05, "Patch Amount": 0.0, "Base Color": (0.05, 0.05, 0.055, 1)}, (0.08, 0.08, 0.09, 1)),
+                          ("AsphaltWorn", {"Color Variation": 0.4, "Cracks": 0.55, "Tire Wear": 0.6, "Patch Amount": 0.25, "Base Color": (0.1, 0.1, 0.1, 1)}, (0.16, 0.16, 0.16, 1)),
+                          ("AsphaltWet", {"Wetness": 0.75, "Tire Wear": 0.3}, (0.07, 0.07, 0.08, 1)),
+                          ("AsphaltPatched", {"Patch Amount": 0.85, "Cracks": 0.3, "Color Variation": 0.35}, (0.13, 0.13, 0.13, 1))):
+        mats[nm] = _group_material(nm, "AsphaltShader", **vals); mats[nm].diffuse_color = col
     street_materials()
     return mats
 
@@ -806,6 +864,8 @@ def street_materials():
     for grp in ("PavingShader", "TactileShader", "CyclewayShader", "MetalShader"):
         if MRS + grp not in bpy.data.node_groups: build_materials(); break
     paving = _group_material("Paving", "PavingShader"); paving.diffuse_color = (0.46, 0.45, 0.43, 1)
+    for nm, vals, col in SIDEWALK_VARIANTS:                      # road input Sidewalk Surface
+        _group_material(nm, "PavingShader", **vals).diffuse_color = col
     tactile = _group_material("Tactile", "TactileShader"); tactile.diffuse_color = (0.8, 0.55, 0.06, 1)
     cycle = _group_material("Cycleway", "CyclewayShader"); cycle.diffuse_color = (0.5, 0.1, 0.06, 1)
     metal = _group_material("PoleMetal", "MetalShader"); metal.diffuse_color = (0.56, 0.57, 0.58, 1); metal.metallic = 1.0; metal.roughness = 0.35
@@ -839,6 +899,7 @@ def apply_material_preset(name):
     overrides = preset.get("overrides", {})
     for mat, node in mrs_nodes():
         suffix = mat.name[len(MRS):]
+        if suffix in CONDITION_VARIANTS: continue          # the asphalt conditions keep their own look
         vals = {k: v for k, v in preset.items() if k != "overrides"}
         vals.update(overrides.get(suffix, {}))
         for k, v in vals.items():

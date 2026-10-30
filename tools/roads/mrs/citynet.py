@@ -103,7 +103,7 @@ class _UF:
 
 TINY = 10.0           # links shorter than this always merge their two nodes
 MIN_RADIUS = 3.0      # corner radius floor when a short link needs room
-GAP = 2.0             # road left between two junction trims (m)
+CROSSING = (0.6, 2.5)  # stop setback, crossing width of the city's junctions (city.py builds them so)
 
 
 def build(city, heights, region=None, natural=None, profiles=None):
@@ -131,57 +131,60 @@ def build(city, heights, region=None, natural=None, profiles=None):
     return net
 
 
-def _fillet_reach(at, a, b, R):
-    """Station along approach a (from `at`) of the corner tangent point between a's left edge and b's right
-    edge, as junction._fillet computes it (radius clamped to 12 m tangent); None for a straight-on corner."""
-    da, db = a["d"], b["d"]
-    span = (_ang(db) - _ang(da)) % 360.0
-    if span > 150.0: return 0.0
-    la = (da[1], -da[0]); lb = (db[1], -db[0])
-    pa = (at[0] - la[0] * a["half"], at[1] - la[1] * a["half"]); pb = (at[0] + lb[0] * b["half"], at[1] + lb[1] * b["half"])
-    den = da[0] * db[1] - da[1] * db[0]
-    if abs(den) < 1e-9: return None
-    s = ((pb[0] - pa[0]) * db[1] - (pb[1] - pa[1]) * db[0]) / den
-    C = (pa[0] + da[0] * s, pa[1] + da[1] * s)
-    theta = math.acos(max(-1.0, min(1.0, da[0] * db[0] + da[1] * db[1])))
-    if theta < 1e-3 or abs(math.pi - theta) < 1e-3: return None
-    r = min(R, 12.0 * math.tan(theta / 2.0)); t = r / math.tan(theta / 2.0)
-    return (C[0] - at[0]) * da[0] + (C[1] - at[1]) * da[1] + t
+def layer_offsets(rd):
+    """(half, curb, sidewalk) of a plan road from its class profile (the profile fills the right of way: carriageway =
+    width, then kerb + sidewalk)."""
+    _, v = profile(rd["cls"], bool(rd.get("bridge")))
+    sw = v.get("Sidewalk Width Left", 0.0) if v.get("Sidewalk Left", True) else 0.0
+    return rd["width"] / 2.0, v.get("Curb Width", 0.25), sw
 
 
 def junction_trims(j, roads_by_id):
-    """{(road id, end): trim} for a junction dict (approach directions from the road polylines)."""
+    """{(road id, end): trim} for a junction dict: the same corner rule as the junction builder (junction._corner_rings:
+    the asphalt fillet and, at acute corners, where the kerb / sidewalk-back edges cross), from the class profiles."""
+    from mathutils import Vector
+    from .junction import _corner_rings
     at = j["pos"]; aps = []
     for rid, end in j["approaches"]:
         rd = roads_by_id[rid]; pts = rd["pts"] if end == "start" else rd["pts"][::-1]
         far = next((p for p in pts[1:] if _d(p, at) > 3.0), pts[-1])
-        aps.append({"key": (rid, end), "d": _unit((far[0] - at[0], far[1] - at[1])), "half": rd["width"] / 2.0})
-    aps.sort(key=lambda a: _ang(a["d"]))
-    n = len(aps); out = {}
-    for i, a in enumerate(aps):
-        reach = 0.0
-        for c, dd in (((aps[i - 1], a), 1), ((a, aps[(i + 1) % n]), 0)):
-            r = _fillet_reach(at, c[0], c[1], j["corner_radius"]) if dd == 0 else _fillet_reach_b(at, c[0], c[1], j["corner_radius"])
-            if r is not None: reach = max(reach, r)
-        out[a["key"]] = max(reach + 0.3, a["half"] + 1.0)
+        d = _unit((far[0] - at[0], far[1] - at[1])); half, curb, sw = layer_offsets(rd)
+        aps.append({"key": (rid, end), "d": Vector((d[0], d[1], 0.0)), "half": half, "half_l": half, "half_r": half, "curb": curb, "swl": sw, "swr": sw})
+    aps.sort(key=lambda a: math.atan2(a["d"].y, a["d"].x))
+    n = len(aps); out = {}; c = Vector((at[0], at[1], 0.0))
+    reach = [0.0] * n
+    if n >= 2:
+        for i in range(n):
+            a, b = aps[i], aps[(i + 1) % n]
+            _, _, rings = _corner_rings(c, a, b, j["corner_radius"])
+            for pts, _C, _t in rings:
+                for p in pts:
+                    reach[i] = max(reach[i], (p - c).dot(a["d"])); reach[(i + 1) % n] = max(reach[(i + 1) % n], (p - c).dot(b["d"]))
+    for i, a in enumerate(aps): out[a["key"]] = max(reach[i] + 0.3, a["half"] + 1.0)
     return out
 
 
-def _fillet_reach_b(at, a, b, R):
-    """Station along b (the CCW-later approach) of the tangent point of the corner (a, b)."""
-    da, db = a["d"], b["d"]
-    span = (_ang(db) - _ang(da)) % 360.0
-    if span > 150.0: return 0.0
-    la = (da[1], -da[0]); lb = (db[1], -db[0])
-    pa = (at[0] - la[0] * a["half"], at[1] - la[1] * a["half"]); pb = (at[0] + lb[0] * b["half"], at[1] + lb[1] * b["half"])
-    den = da[0] * db[1] - da[1] * db[0]
-    if abs(den) < 1e-9: return None
-    s = ((pb[0] - pa[0]) * db[1] - (pb[1] - pa[1]) * db[0]) / den
-    C = (pa[0] + da[0] * s, pa[1] + da[1] * s)
-    theta = math.acos(max(-1.0, min(1.0, da[0] * db[0] + da[1] * db[1])))
-    if theta < 1e-3 or abs(math.pi - theta) < 1e-3: return None
-    r = min(R, 12.0 * math.tan(theta / 2.0)); t = r / math.tan(theta / 2.0)
-    return (C[0] - at[0]) * db[0] + (C[1] - at[1]) * db[1] + t
+from .junction import ZONE_MARGIN  # noqa: E402
+
+
+def junction_control(j):
+    """The MRS junction control of a plan junction: 2 arms none, signal -> signals, stop -> stop, an uncontrolled T ->
+    priority, else none (city.py builds the junctions with it)."""
+    c = j["control"]; n = len(j["approaches"])
+    if n == 2: return "none"
+    if c == "signal": return "signals"
+    if c == "stop": return "stop"
+    if c == "uncontrolled" and n == 3: return "priority"
+    return "none"
+
+
+def end_zone_of(j, rd):
+    """The paint zone a junction claims on a road's end (junction.end_zone): its crossing and the end marking its
+    control paints (the widest one when it depends on the road's priority)."""
+    from .junction import end_zone
+    if j is None or j.get("kind") != "junction": return 0.0
+    marking = {"signals": "line", "stop": "stop", "priority": "give_way"}.get(junction_control(j))
+    return end_zone(True, marking, CROSSING[0], CROSSING[1])
 
 
 def _short_roads(net):
@@ -191,7 +194,9 @@ def _short_roads(net):
         if j["kind"] == "junction": trims.update(junction_trims(j, by))
     out = []
     for rd in net["roads"]:
-        need = trims.get((rd["id"], "start"), 0.0) + trims.get((rd["id"], "end"), 0.0) + GAP
+        # between its trims a road keeps both ends' paint zones (the junction builder's rule, junction.end_zone)
+        zones = sum(end_zone_of(J.get("PH_" + rd[e]), rd) for e in ("start", "end")) * (1.0 + ZONE_MARGIN)
+        need = trims.get((rd["id"], "start"), 0.0) + trims.get((rd["id"], "end"), 0.0) + zones
         rd["trims"] = (round(trims.get((rd["id"], "start"), 0.0), 2), round(trims.get((rd["id"], "end"), 0.0), 2))
         if rd["length"] < need and rd["start"] != rd["end"]:
             out.append((rd, J["PH_" + rd["start"]], J["PH_" + rd["end"]], rd["length"], need))
@@ -427,6 +432,108 @@ def _build_once(city, heights, region, forced, radius_override, natural=None, pr
                       "angle_drops": len(rep["angle_drops"]), "bend_junctions": len(rep["bend_junctions"]), "fillets": len(rep["bends"]),
                       "road_km": round(sum(r["length"] for r in out_roads) / 1000.0, 2), "lane_km": round(sum(l["length"] for l in out_lanes) / 1000.0, 2)}
     return {"junctions": out_j, "roads": out_roads, "lanes": out_lanes, "report": rep}
+
+
+def planarize(city, margin=1.0, min_split=6.0, max_rounds=200):
+    """Make the road graph planar before anything is built (in place; returns a report): roads only touch where they
+    share a node. A node lying in another road's corridor (within its half width + sidewalk + `margin`, off its ends)
+    splits that road there and moves onto it (a T-junction); two segments crossing in plan (neither a bridge) split
+    at a new node. Collinear overlapping edges become duplicates between the same nodes (build drops them). Without
+    this a boulevard ran straight through six downtown junctions it was not part of."""
+    nodes = {n["id"]: n for n in city["nodes"]}; roads = {r["id"]: r for r in city["roads"]}
+    rep = {"snapped": [], "crossings": [], "conflicts": []}
+    fixed = set()                                  # nodes already moved onto a road: they never move again
+    next_node = max(nodes) + 1; k_road = [0]
+
+    def corridor(r): return r["width"] / 2.0 + WALK + margin
+
+    def split(r, nid):
+        """r (a -> b) becomes a -> nid and a new road nid -> b."""
+        nonlocal roads
+        k_road[0] += 1; rid = "%s_s%d" % (r["id"], k_road[0])
+        r2 = dict(r, id=rid, a=nid, profile=[], heights=[])
+        b = r["b"]; r["b"] = nid; r["profile"] = []; r["heights"] = []
+        nodes[b]["edges"] = [rid if e == r["id"] else e for e in nodes[b]["edges"]]
+        nodes[nid]["edges"] += [r["id"], rid]
+        roads[rid] = r2; city["roads"].append(r2)
+        return r2
+
+    def project(p, a, b):
+        dx, dy = b[0] - a[0], b[1] - a[1]; L2 = dx * dx + dy * dy
+        if L2 < 1e-9: return None
+        t = ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / L2
+        q = (a[0] + dx * t, a[1] + dy * t)
+        return t, q, math.sqrt(L2), _d(p, q)
+
+    for _ in range(max_rounds):
+        changed = False
+        # 1. a node in another road's corridor: split that road at the node's projection and move the node onto it
+        for nid, n in list(nodes.items()):
+            if not n["edges"]: continue
+            for r in list(roads.values()):
+                if r.get("bridge") or nid in (r["a"], r["b"]): continue
+                if any(roads[e].get("bridge") for e in n["edges"] if e in roads): continue
+                pa, pb = nodes[r["a"]]["pos"], nodes[r["b"]]["pos"]
+                pr = project(n["pos"], pa, pb)
+                if pr is None: continue
+                t, q, L, d = pr
+                if d > corridor(r) or t * L < min_split or (1.0 - t) * L < min_split: continue
+                if nid in fixed and d > 2.0:
+                    if (nid, r["id"]) not in {(c_["node"], c_["road"]) for c_ in rep["conflicts"]}:
+                        rep["conflicts"].append({"node": nid, "road": r["id"], "distance": round(d, 2)})
+                    continue
+                rep["snapped"].append({"node": nid, "road": r["id"], "moved": round(d, 2)}); fixed.add(nid)
+                n["pos"] = [round(q[0], 3), round(q[1], 3)]
+                split(r, nid)
+                if n.get("control", "none") == "none": n["control"] = "uncontrolled"
+                changed = True; break
+        # 2. segments crossing in plan: a new node at the crossing, both split
+        rl = [r for r in roads.values() if not r.get("bridge")]
+        for i in range(len(rl)):
+            for j in range(i + 1, len(rl)):
+                r1, r2 = rl[i], rl[j]
+                if {r1["a"], r1["b"]} & {r2["a"], r2["b"]}: continue
+                a, b = nodes[r1["a"]]["pos"], nodes[r1["b"]]["pos"]; c_, d_ = nodes[r2["a"]]["pos"], nodes[r2["b"]]["pos"]
+                den = (b[0] - a[0]) * (d_[1] - c_[1]) - (b[1] - a[1]) * (d_[0] - c_[0])
+                if abs(den) < 1e-9: continue
+                t = ((c_[0] - a[0]) * (d_[1] - c_[1]) - (c_[1] - a[1]) * (d_[0] - c_[0])) / den
+                u = ((c_[0] - a[0]) * (b[1] - a[1]) - (c_[1] - a[1]) * (b[0] - a[0])) / den
+                L1, L2 = _d(a, b), _d(c_, d_)
+                if not (min_split / L1 < t < 1 - min_split / L1 and min_split / L2 < u < 1 - min_split / L2): continue
+                p = [round(a[0] + (b[0] - a[0]) * t, 3), round(a[1] + (b[1] - a[1]) * t, 3)]
+                major = RANK[r1["cls"]] >= 3 and RANK[r2["cls"]] >= 3
+                nodes[next_node] = {"id": next_node, "pos": p, "h": None, "control": "signal" if major else "uncontrolled", "edges": []}
+                city["nodes"].append(nodes[next_node])
+                split(r1, next_node); split(r2, next_node)
+                rep["crossings"].append({"node": next_node, "roads": [r1["id"], r2["id"]], "at": p})
+                next_node += 1; changed = True
+                break
+            if changed: break
+        if not changed: break
+    # 3. a road whose corridor still runs over a junction it does not join, starting / ending close to it: its near end
+    #    joins that junction (one junction where there were two overlapping ones)
+    for cf in list(rep["conflicts"]):
+        f, r = cf["node"], roads.get(cf["road"])
+        if r is None: continue
+        near = min((r["a"], r["b"]), key=lambda e: _d(nodes[e]["pos"], nodes[f]["pos"]))
+        if _d(nodes[near]["pos"], nodes[f]["pos"]) > 1.6 * corridor(r) or near == f: continue
+        for e in list(nodes[near]["edges"]):
+            rr = roads.get(e)
+            if rr is None: continue
+            if f in (rr["a"], rr["b"]):                 # the short link between the two: gone
+                other = rr["b"] if rr["a"] == f else rr["a"]
+                nodes[f]["edges"].remove(e); nodes[other]["edges"] = [x for x in nodes[other]["edges"] if x != e]
+                city["roads"].remove(rr); del roads[e]; continue
+            if rr["a"] == near: rr["a"] = f
+            if rr["b"] == near: rr["b"] = f
+            rr["profile"] = []; rr["heights"] = []
+            nodes[f]["edges"].append(e)
+        nodes[near]["edges"] = []
+        rep["merged"] = rep.get("merged", []) + [{"node": near, "into": f}]
+        rep["conflicts"].remove(cf)
+    for n in nodes.values():                       # new nodes: heights from their roads' ends (h is informational)
+        if n.get("h") is None: n["h"] = 0.0
+    return rep
 
 
 def bridge_gaps(city, natural, max_span=160.0, aligned=0.95, probe=40.0):

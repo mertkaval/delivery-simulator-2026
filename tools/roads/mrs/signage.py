@@ -415,7 +415,20 @@ def _plate(bm, pts, zc, mi, post=True, y=PLATE_Y, x_post=0.0, rails=None):
 
 # ============================================================================== signal heads (origin = top centre of the housing, face -Y)
 # raw indices while building a head: 0 housing, 1 dark window, 2 retroreflective border, 3 black back plate / visor inside, 4.. lenses
-def _head_vehicle(bm, lens_size, mi_house, mi_glass, mi_reflect, mi_lenses):
+ARROW_LANES = (1, 4)      # lane uses that get arrow lenses: a lane that may only turn left (1) / right (4)
+
+
+def _arrow_lens(bm, yf, zc, r, code, mi, depth=0.035):
+    """A turn arrow in lens material on a dark lens face (front at yf - depth): pointing -X for a left turn (code 1),
+    +X for a right turn (4)."""
+    head = [(0.05 * r, -0.55 * r), (0.8 * r, 0.0), (0.05 * r, 0.55 * r)]
+    shaft = [(-0.75 * r, -0.17 * r), (0.1 * r, -0.17 * r), (0.1 * r, 0.17 * r), (-0.75 * r, 0.17 * r)]
+    for poly in (head, shaft):
+        pts = [(x, zc + z) for x, z in poly] if code == 4 else [(-x, zc + z) for x, z in poly[::-1]]
+        _prism(bm, pts, yf - depth - 0.004, yf - depth + 0.002, mi)
+
+
+def _head_vehicle(bm, lens_size, mi_house, mi_glass, mi_reflect, mi_lenses, arrow=0):
     D = lens_size; pitch = 1.5 * D; w = 1.6 * D; d = 1.25 * D; n = len(mi_lenses); h = n * pitch + 0.03
     _box(bm, -w / 2, -d / 2, -h, w / 2, d / 2, 0.0, mi_house)                                   # housing
     for z in (-h * 0.25, -h * 0.75): _box(bm, w / 2, -0.02, z - 0.03, w / 2 + 0.008, 0.02, z + 0.03, mi_house)   # door hinges
@@ -427,7 +440,10 @@ def _head_vehicle(bm, lens_size, mi_house, mi_glass, mi_reflect, mi_lenses):
     _band(bm, plate, _inset(plate, 0.025), yf + 0.0, yf + 0.004, mi_reflect)
     for i, mi in enumerate(mi_lenses):
         zc = -0.015 - pitch * (i + 0.5)
-        _lens_disc(bm, 0.0, yf, zc, D / 2, mi, mi_house)
+        if arrow in ARROW_LANES:                                                                # dark lens, lit arrow
+            _lens_disc(bm, 0.0, yf, zc, D / 2, mi_glass, mi_house); _arrow_lens(bm, yf, zc, D / 2, arrow, mi)
+        else:
+            _lens_disc(bm, 0.0, yf, zc, D / 2, mi, mi_house)
         _hood(bm, 0.0, yf - 0.002, zc, D / 2 + 0.03, 0.95 * D, mi_house, mi_in=CELL0 + HW.CID["black_plastic"])
     _cyl(bm, 0, 0, 0.0, 0.07, 0.03, 0.03, 10, mi_house)                                          # mount stubs
     _cyl(bm, 0, 0, -h - 0.05, -h, 0.03, 0.03, 10, mi_house)
@@ -492,29 +508,30 @@ HEAD_HEIGHT = {"vehicle": lambda D: 3 * 1.5 * D + 0.03, "pedestrian": lambda D: 
 HEAD_DEPTH = {"vehicle": lambda D: 1.25 * D, "pedestrian": lambda D: 0.9 * D, "bicycle": lambda D: 1.1 * 0.75 * D}
 
 
-def _make_head(name, kind, lens_size, mats_house, col, parent, at):
-    lenses = HEAD_LENSES[kind]
+def _make_head(name, kind, lens_size, mats_house, col, parent, at, arrow=0):
+    lenses = HEAD_LENSES[kind]; arrow = arrow if kind == "vehicle" and arrow in ARROW_LANES else 0
     hinfo = {}
     house = mats_house["housing"]; custom = house.name != HW.HOUSING
     lens_mats = [SM["lens"][k] for k in lenses]
 
     def build(bm):
         hinfo["h"] = HEAD_BUILDERS[kind](bm, lens_size, CELL0 + HW.CID["housing"], CELL0 + HW.CID["glass_dark"], CELL0 + HW.CID["yellow_refl"],
-                                         list(range(4, 4 + len(lenses))))
+                                         list(range(4, 4 + len(lenses))), **({"arrow": arrow} if arrow else {}))
     slot = [None] * 4 + lens_mats
     o = _mesh_obj(name, build, slot, 0.004, col, parent, at, atlas=house)
-    o["mrs_signal_head"] = {"kind": kind, "lenses": lenses, "lens_materials": [MRS + "Lens_" + k for k in lenses], "faces": "-Y"}
+    o["mrs_signal_head"] = {"kind": kind, "lenses": lenses, "lens_materials": [MRS + "Lens_" + k for k in lenses], "faces": "-Y", "arrow": arrow}
     return o, hinfo["h"]
 
 
 # ============================================================================== signals
 def make_signal(name, style="post", pole_height=4.0, arm_length=0.0, heads=("vehicle",), setback=0.0, lens_size=0.2,
-                housing_color=(0.08, 0.08, 0.08), collection=None, arm_side=1.0, head_x=None):
+                housing_color=(0.08, 0.08, 0.08), collection=None, arm_side=1.0, head_x=None, head_arrows=None):
     """Signal pole `name` (origin at the base, +Z up, heads facing -Y) with child head objects `<name>_head<i>`.
     style: post | mast_arm (arm along +X, or -X with arm_side = -1; `arm_length`) | pedestrian | bicycle | combined
     (vehicle + pedestrian head). `head_x`: distances along the arm of the hanging vehicle heads (one per lane: over
-    the lane centres); default every 2.4 m back from the tip. `setback` shifts the pole +Y behind the origin (kerb
-    reference point). Returns the pole object."""
+    the lane centres); default every 2.4 m back from the tip. `head_arrows`: each hanging vehicle head's lane use
+    (junction.lane_use); a left-only (1) / right-only (4) lane's head shows arrow lenses. `setback` shifts the pole +Y
+    behind the origin (kerb reference point). Returns the pole object."""
     if style not in SIGNAL_STYLES: raise ValueError("style %r not in %s" % (style, SIGNAL_STYLES))
     if not _sm_alive(): _materials()
     heads = tuple(heads)
@@ -528,6 +545,7 @@ def make_signal(name, style="post", pole_height=4.0, arm_length=0.0, heads=("veh
     H = pole_height; D = lens_size; sy = setback
     r0, r1 = {"post": (0.075, 0.055), "combined": (0.075, 0.055), "mast_arm": (0.16, 0.11), "pedestrian": (0.06, 0.05), "bicycle": (0.06, 0.05)}[style]
     mounts = []   # (kind, (x, y, z) head origin, bracket geometry callback)
+    arrows = {}   # mount index -> lane use of an arrow head
 
     # ---- plan the heads
     if style == "mast_arm":
@@ -541,6 +559,7 @@ def make_signal(name, style="post", pole_height=4.0, arm_length=0.0, heads=("veh
             else:
                 x = L - 0.7 - 2.4 * k
                 if x < 1.2: x = 1.2 + 0.4 * k
+            if head_arrows is not None and k < len(head_arrows) and int(head_arrows[k]) in ARROW_LANES: arrows[len(mounts)] = int(head_arrows[k])
             k += 1
             mounts.append((kind, (x * xs, sy, z_arm(x) - 0.085 - 0.22), "hang"))
     else:
@@ -596,9 +615,9 @@ def make_signal(name, style="post", pole_height=4.0, arm_length=0.0, heads=("veh
     head_info = []
     for i, (kind, at, how) in enumerate(mounts):
         hname = "%s_head%d" % (name, i)
-        ho, hh = _make_head(hname, kind, D, mats_house, col, pole_o, at)
+        ho, hh = _make_head(hname, kind, D, mats_house, col, pole_o, at, arrows.get(i, 0))
         head_info.append({"kind": kind, "lenses": HEAD_LENSES[kind], "mesh_names": [ho.data.name], "object": ho.name,
-                          "lens_materials": [MRS + "Lens_" + k for k in HEAD_LENSES[kind]], "mount": how})
+                          "lens_materials": [MRS + "Lens_" + k for k in HEAD_LENSES[kind]], "mount": how, "arrow": arrows.get(i, 0)})
     pole_o["mrs_signal"] = {"style": style, "pole_height": H, "arm_length": arm_length if style == "mast_arm" else 0.0, "arm_side": xs, "setback": sy,
                             "lens_size": D, "faces": "-Y", "housing": house.name, "heads": head_info}
     return pole_o

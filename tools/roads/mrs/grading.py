@@ -184,16 +184,19 @@ def corridor_field(field, roads, feather=10.0):
     return np.where(m, h * (1 - blend) + (acc / np.maximum(wsum, 1e-12)) * blend, h)
 
 
-def grade(h0, own, surface, cell, slope=0.5, sink=0.3, water=None, max_passes=400, cut_slope=None):
+def grade(h0, own, surface, cell, slope=0.5, sink=0.3, water=None, max_passes=400, cut_slope=None, deep_cut=6.0, deep_slope=None):
     """The terrain graded to built road surfaces. own: cells under a surface; surface: its height there. Under a
     surface the ground is `sink` below it; elsewhere the natural height is clipped between the batter bounds
     (surface + cut_slope * distance above, surface - slope * distance below, from the nearest surface cell), so
     cuts and fills meet the roads at their batters (rise / run; a cut stands steeper than a fill: default
-    2 * slope) and blend into the natural ground. Wet cells stay as they are. Returns the graded heights."""
+    2 * slope) and blend into the natural ground. A cut deeper than `deep_cut` m steepens to `deep_slope` beyond
+    it (a rock cutting: default 2 * cut_slope), half as wide as a cut at one slope. Wet cells stay as they are.
+    Returns the graded heights."""
     cut_slope = 2.0 * slope if cut_slope is None else cut_slope
+    deep_slope = 2.0 * cut_slope if deep_slope is None else deep_slope
     h0 = np.asarray(h0, dtype=np.float64)
     big = 1e9
-    hi = np.where(own, surface, big); lo = np.where(own, surface, -big)
+    hi = np.where(own, surface, big); lo = np.where(own, surface, -big); D = np.where(own, 0.0, big)
     steps = [(0, 1, 1.0), (1, 0, 1.0), (1, 1, math.sqrt(2.0)), (1, -1, math.sqrt(2.0))]
     ny, nx = hi.shape
     for _ in range(max_passes):          # each pass carries the bounds one cell further (8 directions)
@@ -204,10 +207,14 @@ def grade(h0, own, surface, cell, slope=0.5, sink=0.3, water=None, max_passes=40
                 ys = slice(max(0, sj), ny + min(0, sj)); yd = slice(max(0, -sj), ny + min(0, -sj))
                 xs = slice(max(0, si), nx + min(0, si)); xd = slice(max(0, -si), nx + min(0, -si))
                 nh = np.minimum(hi[yd, xd], hi[ys, xs] + d_cut); nl = np.maximum(lo[yd, xd], lo[ys, xs] - d_fill)
-                if not changed and (np.any(nh < hi[yd, xd]) or np.any(nl > lo[yd, xd])): changed = True
-                hi[yd, xd] = nh; lo[yd, xd] = nl
+                nd = np.minimum(D[yd, xd], D[ys, xs] + dist * cell)
+                if not changed and (np.any(nh < hi[yd, xd]) or np.any(nl > lo[yd, xd]) or np.any(nd < D[yd, xd])): changed = True
+                hi[yd, xd] = nh; lo[yd, xd] = nl; D[yd, xd] = nd
         if not changed: break
     hi = np.where(hi >= big * 0.5, np.inf, hi); lo = np.where(lo <= -big * 0.5, -np.inf, lo)
+    # beyond deep_cut of rise the cut steepens: the extra allowance over the single-slope bound
+    d1 = deep_cut / cut_slope
+    hi = hi + np.maximum(np.where(D >= big * 0.5, 0.0, D) - d1, 0.0) * (deep_slope - cut_slope)
     conflict = lo > hi                                  # two roads at different heights closer than their batters allow
     mid = np.where(conflict, 0.5 * (np.where(np.isfinite(lo), lo, 0) + np.where(np.isfinite(hi), hi, 0)), 0.0)
     g = np.where(conflict, mid, np.clip(h0, lo, hi))

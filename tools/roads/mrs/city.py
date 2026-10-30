@@ -21,7 +21,7 @@ CF_REPLACED = ("lamp", "traffic_light", "bus_stop", "hydrant", "bench", "stop_si
 CF_KEPT = {"vending_machine": 0.7, "post_box": 0.5, "phone_box": 0.8, "ad_column": 0.8, "cesme": 1.0, "cafe_set": 1.6, "utility_pole": 0.5}
 
 
-BASE_VERSION = 15          # bump when tools/roads/mrs changes the node groups or the asset library
+BASE_VERSION = 22          # bump when tools/roads/mrs changes the node groups or the asset library
 
 
 def ensure_base(path, rebuild=False, log=print):
@@ -123,12 +123,7 @@ def _road_object(rd, col, probe=None):
 
 
 def _control(j, objs):
-    c = j["control"]; n = len(j["approaches"])
-    if n == 2: return "none"
-    if c == "signal": return "signals"
-    if c == "stop": return "stop"
-    if c == "uncontrolled" and n == 3: return "priority"
-    return "none"
+    return citynet.junction_control(j)
 
 
 def _main_roads(j, objs, net_by):
@@ -169,6 +164,8 @@ def build(plan_dir, region=None, seed=7, place=True, log=print):
     """Build the city's MRS streets in the context scene. Returns the network dict (citynet) + stats."""
     t0 = time.time(); tm = {}
     city, H = load_plan(plan_dir)
+    tm["planar"] = citynet.planarize(city)            # roads only touch at shared nodes (no road through a junction)
+    log("PLANAR", json.dumps({k: len(v) for k, v in tm["planar"].items()}))
     nat = load_natural(plan_dir, STATE.get("terrain")) if ROADS_ONLY else None
     if nat is not None:
         tm["bridges_added"] = citynet.bridge_gaps(city, nat)          # streets cut by water on both banks get a bridge
@@ -200,7 +197,10 @@ def build(plan_dir, region=None, seed=7, place=True, log=print):
             c, out = e["along_pos"], e["out"]
             e["pos"] = (c[0] - out[0] * back, c[1] - out[1] * back)
             p_ = ln["pts"][k]; ln["pts"][k] = (e["pos"][0], e["pos"][1], p_[2])
-    for ln in net["lanes"]: objs[ln["id"]] = _road_object(ln, col)
+    for ln in net["lanes"]:
+        objs[ln["id"]] = _road_object(ln, col)
+        # the streets this lane opens onto (its end runs under their sidewalk: validate.check_overlaps allows the seam)
+        objs[ln["id"]]["mrs_mouths"] = sorted({e["street"] for e in ln["ends"] if e.get("street") in objs and e.get("out")})
     tm["roads"] = round(time.time() - t, 1)
     # junctions
     t = time.time(); net_by = {r["id"]: r for r in net["roads"]}; fails = []; built = 0
@@ -235,6 +235,7 @@ def load_state(plan_dir, region=None):
     """STATE for a saved build (.blend from mrs_streets.py --blend): plan, heights and the (deterministic) network,
     so export() / write_plan() can rerun without rebuilding the streets."""
     city, H = load_plan(plan_dir)
+    citynet.planarize(city)
     nat = load_natural(plan_dir, STATE.get("terrain")) if ROADS_ONLY else None
     if nat is not None:
         citynet.bridge_gaps(city, nat)

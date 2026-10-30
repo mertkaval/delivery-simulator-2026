@@ -2,7 +2,8 @@
 mrs.validate over every road, junction and speed sign (report JSON), the back-lane mouths checked for their dropped
 kerb, and a top-down render of every junction on labelled contact sheets (failing junctions marked).
 
-    blender --background <city.blend> --python tools/cityforge/mrs_junction_atlas.py -- <out_dir> [--no-render] [--size 384]"""
+    blender --background <city.blend> --python tools/cityforge/mrs_junction_atlas.py -- <out_dir> [--no-render] [--size 384]
+        [--plan <city.json>]   (the plan's buildings: none may stand on a street surface)"""
 import bpy, json, math, os, sys, time
 from mathutils import Vector
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -18,7 +19,21 @@ from mrs import qa, lighting, validate, structures
 from mrs.placement import _project, RoadModel
 sc = bpy.context.scene
 col = bpy.data.collections["PH_Roads"]; placed = bpy.data.collections.get("PH_Roads_Placed")
-rep = validate.validate(col, placed)
+def footprints(plan_path):
+    """The plan's buildings as world footprints [(id, corners, ground z)] (plan metres -> Blender: city.B)."""
+    from mrs import city
+    plan = json.load(open(plan_path)); out = []
+    def rect(bid, pos, w, d, yaw, z):
+        c, s_ = math.cos(yaw), math.sin(yaw); p = city.B(pos[0], pos[1])
+        out.append((bid, [(p.x + lx * c - ly * s_, p.y + lx * s_ + ly * c) for lx, ly in ((-w / 2, -d / 2), (w / 2, -d / 2), (w / 2, d / 2), (-w / 2, d / 2))], z))
+    for k in ("houses", "shops", "warehouses", "public"):
+        for b in plan.get(k, []): rect(b["id"], b["pos"], b["size"][0], b["size"][1], b.get("yaw", 0.0), b.get("h"))
+    for b in plan.get("garages", []): rect(b["id"], b["pos"], 6.4, 6.4, b.get("yaw", 0.0), b.get("h"))
+    for t in plan.get("towers", []): rect(t["id"], t["pos"], t["podium"][0] - 4.0, t["podium"][0] - 4.0, math.radians(t["angle"]), t.get("h"))
+    return out
+FOOT = footprints(argv[argv.index("--plan") + 1]) if "--plan" in argv else None
+rep = validate.validate(col, placed, footprints=FOOT)
+rep["buildings_checked"] = len(FOOT or [])
 # back-lane mouths: every lane end that opens onto a street has a driveway (dropped kerb) on that street there
 mouths = []; bad_mouths = []
 STREETS = [(r, RoadModel(r), [pt for _a, pt in structures.centre_line(r)]) for r in col.objects

@@ -1,0 +1,81 @@
+{
+ "id": "4XV2aqDHDtY",
+ "title": "How to Use City Road Maker 2.1 – Full Blender Tutorial",
+ "channel": "3Dz",
+ "uploader": "3Dz",
+ "upload_date": "20251218",
+ "duration": 2592,
+ "description": "In this tutorial, you’ll learn how to use City Road Maker 2.1 in Blender, from setup to workflow.\n\nCRM2.1: https://superhivemarket.com/products/city-road-maker---geonode/?ref=4270\n\nBuildings you see in the intro have made using: BuildIt https://superhivemarket.com/products/buildit/?ref=4270\n\n#blender #geometrynodes #blender3d #tutorial #procedural \n\n0:00 Intro\n0:25 Installing Asset Library\n4:57 Road Setup\n10:51 Junction Setup\n18:31 Extension Feature\n19:27 Extension / Bus Stop\n21:25 Extension / Rounded End-road\n22:52 Extension / Roundabout\n26:31 Extension / Parking Space\n30:35 Custom Sign\n35:33 Tunnel / Bridge\n36:35 Mountain Road",
+ "webpage_url": "https://www.youtube.com/watch?v=4XV2aqDHDtY",
+ "chapters": [
+  {
+   "start_time": 0,
+   "title": "Intro",
+   "end_time": 25
+  },
+  {
+   "start_time": 25,
+   "title": "Installing Asset Library",
+   "end_time": 297
+  },
+  {
+   "start_time": 297,
+   "title": "Road Setup",
+   "end_time": 651
+  },
+  {
+   "start_time": 651,
+   "title": "Junction Setup",
+   "end_time": 1111
+  },
+  {
+   "start_time": 1111,
+   "title": "Extension Feature",
+   "end_time": 1167
+  },
+  {
+   "start_time": 1167,
+   "title": "Extension / Bus Stop",
+   "end_time": 1285
+  },
+  {
+   "start_time": 1285,
+   "title": "Extension / Rounded End-road",
+   "end_time": 1372
+  },
+  {
+   "start_time": 1372,
+   "title": "Extension / Roundabout",
+   "end_time": 1591
+  },
+  {
+   "start_time": 1591,
+   "title": "Extension / Parking Space",
+   "end_time": 1835
+  },
+  {
+   "start_time": 1835,
+   "title": "Custom Sign",
+   "end_time": 2133
+  },
+  {
+   "start_time": 2133,
+   "title": "Tunnel / Bridge",
+   "end_time": 2195
+  },
+  {
+   "start_time": 2195,
+   "title": "Mountain Road",
+   "end_time": 2592
+  }
+ ],
+ "format": {
+  "format_id": "137",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "vcodec": "avc1.640028",
+  "filesize": 159359538
+ },
+ "retrieved": "2026-10-29, yt-dlp 2026.10.26 (format 137: 1920x1080 30 fps, video only)"
+}

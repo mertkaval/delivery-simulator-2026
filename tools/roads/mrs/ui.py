@@ -235,14 +235,88 @@ class MRS_OT_structure(bpy.types.Operator):
 
 
 class MRS_OT_custom_sign(bpy.types.Operator):
-    """A sign post with your text at the 3D cursor"""
+    """A parametric sign (MRS_CustomSign) at the 3D cursor: panel, post, texts, images and lines stay editable in the
+    Modifier panel"""
     bl_idname = "mrs.custom_sign"; bl_label = "Custom Sign at Cursor"; bl_options = {"REGISTER", "UNDO"}
-    text: bpy.props.StringProperty(default="MAIN STREET"); circle: bpy.props.BoolProperty(default=False)
+    preset: bpy.props.EnumProperty(items=[("CRM 2.1", "Blue Info", "Blue panel, two lines of text and a bar"), ("Stop", "Stop", "Red octagon")], default="CRM 2.1")
+    text: bpy.props.StringProperty(default="MAIN STREET", description="First text line (empty: the preset's own text)")
 
     def execute(self, ctx):
+        from . import customsign
         c = ctx.scene.cursor.location
-        structures.text_sign(self.text, (c.x, c.y, c.z), 0.0, _roads_collection(ctx), "circle" if self.circle else "rect",
-                             (0.8, 0.05, 0.05) if self.circle else (0.02, 0.22, 0.09))
+        extra = {"L1 T1 Text": self.text} if self.text else {}
+        o = customsign.add_custom_sign("Custom Sign", (c.x, c.y, c.z), self.preset, _roads_collection(ctx), **extra)
+        ctx.view_layer.objects.active = o
+        return {"FINISHED"}
+
+
+def _collection_named(ctx, name):
+    c = bpy.data.collections.get(name)
+    if c is None:
+        c = bpy.data.collections.new(name); ctx.scene.collection.children.link(c)
+    return c
+
+
+class MRS_OT_set_tongues(bpy.types.Operator):
+    """Leave the first / last metres of every selected road as a tongue: a footprint an area junction builds over"""
+    bl_idname = "mrs.set_tongues"; bl_label = "Set Tongues"; bl_options = {"REGISTER", "UNDO"}
+    start: bpy.props.FloatProperty(name="Start", default=10.0, min=0.0, max=200.0, unit="LENGTH")
+    end: bpy.props.FloatProperty(name="End", default=10.0, min=0.0, max=200.0, unit="LENGTH")
+
+    def execute(self, ctx):
+        n = 0
+        for o in _selected_roads(ctx):
+            mod = o.modifiers["MRS_Road"]; mod_input_set(mod, "Tongue Start", self.start); mod_input_set(mod, "Tongue End", self.end); o.update_tag(); n += 1
+        self.report({"INFO"}, "tongues on %d roads" % n)
+        return {"FINISHED"}
+
+
+class MRS_OT_add_area_junction(bpy.types.Operator):
+    """An area junction at the 3D cursor: every tongue and extension of the Roads collection within Range becomes one
+    junction mesh (the selected roads and extensions are moved into Roads)"""
+    bl_idname = "mrs.add_area_junction"; bl_label = "Area Junction at Cursor"; bl_options = {"REGISTER", "UNDO"}
+    distance: bpy.props.FloatProperty(name="Range", default=40.0, min=1.0, max=1000.0, unit="LENGTH")
+
+    def execute(self, ctx):
+        from . import areajunction
+        rc = _collection_named(ctx, "Roads"); jc = _collection_named(ctx, "Junctions")
+        for o in ctx.selected_objects:
+            if any(m.type == "NODES" and m.node_group and m.node_group.name in ("MRS_Road", "MRS_ExtensionMesh", "MRS_ExtensionCurve") for m in o.modifiers):
+                for c in list(o.users_collection): c.objects.unlink(o)
+                rc.objects.link(o)
+        o = areajunction.add_area_junction("Area Junction", tuple(ctx.scene.cursor.location), rc, jc, Distance=self.distance)
+        ctx.view_layer.objects.active = o
+        return {"FINISHED"}
+
+
+class MRS_OT_add_extension(bpy.types.Operator):
+    """An extension (a free-form road area: bus bay, car park, cul-de-sac, roundabout) at the 3D cursor"""
+    bl_idname = "mrs.add_extension"; bl_label = "Add Extension"; bl_options = {"REGISTER", "UNDO"}
+    kind: bpy.props.EnumProperty(items=[("square", "Square", ""), ("round", "Round", ""), ("curve", "Curve", ""), ("island", "Island", "")])
+    size: bpy.props.FloatProperty(name="Size", default=10.0, min=1.0, max=200.0, unit="LENGTH")
+
+    def execute(self, ctx):
+        from . import areajunction
+        rc = _collection_named(ctx, "Roads"); c = ctx.scene.cursor.location
+        if self.kind == "curve":
+            o = areajunction.add_extension("Extension", "curve", rc, points=[(c.x - self.size / 2, c.y, c.z), (c.x + self.size / 2, c.y, c.z)])
+        else:
+            o = areajunction.add_extension("Extension", "round" if self.kind in ("round", "island") else "square", rc, tuple(c), (self.size, self.size),
+                                           **({"Island": True} if self.kind == "island" else {}))
+        ctx.view_layer.objects.active = o
+        return {"FINISHED"}
+
+
+class MRS_OT_add_marking_lines(bpy.types.Operator):
+    """Painted lines along a new curve at the 3D cursor (add an Array modifier for parking bays)"""
+    bl_idname = "mrs.add_marking_lines"; bl_label = "Marking Lines at Cursor"; bl_options = {"REGISTER", "UNDO"}
+    length: bpy.props.FloatProperty(name="Length", default=10.0, min=0.5, max=500.0, unit="LENGTH")
+
+    def execute(self, ctx):
+        from . import markinglines
+        c = ctx.scene.cursor.location
+        o = markinglines.add_marking_lines("Marking Lines", [(c.x, c.y, c.z), (c.x, c.y + self.length, c.z)], _roads_collection(ctx))
+        ctx.view_layer.objects.active = o
         return {"FINISHED"}
 
 
@@ -301,6 +375,11 @@ class MRS_PT_panel(bpy.types.Panel):
         row = box.row(align=True); row.operator("mrs.rebuild_junctions")
         row.operator("mrs.auto_update", text="Auto: " + ("on" if ctx.scene.get("mrs_auto") else "off"), depress=bool(ctx.scene.get("mrs_auto")))
         box.operator("mrs.junction_settings", icon="PREFERENCES")
+        box = L.box(); box.label(text="Area junctions (tongues)", icon="SNAP_FACE")
+        box.operator("mrs.set_tongues"); box.operator("mrs.add_area_junction")
+        row = box.row(align=True)
+        for k, t in (("square", "Square"), ("round", "Round"), ("curve", "Curve"), ("island", "Island")): row.operator("mrs.add_extension", text=t).kind = k
+        box.operator("mrs.add_marking_lines")
         box = L.box(); box.label(text="Street assets + checks", icon="CHECKMARK")
         row = box.row(align=True); row.operator("mrs.place")
         row.operator("mrs.auto_place", text="Auto: " + ("on" if ctx.scene.get("mrs_auto_place") else "off"), depress=bool(ctx.scene.get("mrs_auto_place")))
@@ -312,7 +391,7 @@ class MRS_PT_panel(bpy.types.Panel):
         box = L.box(); box.label(text="Structures", icon="MOD_BUILD")
         row = box.row(align=True)
         for k, t in (("gantry", "Gantry"), ("bus", "Bus Stop"), ("stays", "Stays"), ("tunnel", "Tunnel")): row.operator("mrs.structure", text=t).kind = k
-        box.operator("mrs.custom_sign")
+        box.operator_menu_enum("mrs.custom_sign", "preset", text="Custom Sign at Cursor")
         box = L.box(); box.label(text="Materials", icon="MATERIAL")
         names = list(materials.MATERIAL_PRESETS)
         for i in range(0, len(names), 3):
@@ -327,7 +406,8 @@ class MRS_PT_panel(bpy.types.Panel):
 
 
 CLASSES = (MRS_OT_add_road, MRS_OT_apply_preset, MRS_OT_set_terrain, MRS_OT_conform_terrain, MRS_OT_demo_terrain, MRS_OT_add_junction, MRS_OT_add_roundabout,
-           MRS_OT_add_dead_end, MRS_OT_rebuild_junctions, MRS_OT_auto_update, MRS_OT_junction_settings, MRS_OT_place, MRS_OT_auto_place, MRS_OT_validate, MRS_OT_structure, MRS_OT_custom_sign, MRS_OT_material_preset, MRS_OT_export,
+           MRS_OT_add_dead_end, MRS_OT_rebuild_junctions, MRS_OT_auto_update, MRS_OT_junction_settings, MRS_OT_place, MRS_OT_auto_place, MRS_OT_validate, MRS_OT_structure, MRS_OT_custom_sign, MRS_OT_set_tongues, MRS_OT_add_area_junction, MRS_OT_add_extension,
+           MRS_OT_add_marking_lines, MRS_OT_material_preset, MRS_OT_export,
            MRS_OT_export_ready, MRS_PT_panel)
 
 

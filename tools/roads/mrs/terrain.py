@@ -82,6 +82,8 @@ def build_terrain_conform_group():
          "under a bending road between two vertices (the roads' edge skirts hide the step)"),
         ("Cut Slope", "NodeSocketFloat", 1.0, 0.05, 10.0, "Steepest cut beside a road (rise / run: 1 = 45 deg)"),
         ("Fill Slope", "NodeSocketFloat", 0.5, 0.05, 10.0, "Steepest fill beside a road (rise / run: 0.5 = 1 : 2)"),
+        ("Deep Cut", "NodeSocketFloat", 6.0, 0.5, 100.0, "A cut deeper than this (m) steepens to Deep Slope beyond it: a rock cutting"),
+        ("Deep Slope", "NodeSocketFloat", 2.0, 0.05, 20.0, "Cut slope past Deep Cut (rise / run)"),
         ("Raise", "NodeSocketBool", True, None, None, "Fill up to the roads too (off: the terrain is only ever lowered)"),
         ("Max Rise", "NodeSocketFloat", 30.0, 0.0, 200.0, "Surfaces more than this above the terrain are ignored (m)"),
         ("Reach", "NodeSocketFloat", 80.0, 0.0, 500.0, "No change beyond this distance from the roads (m)"),
@@ -128,7 +130,10 @@ def build_terrain_conform_group():
     nz = tb.math("SUBTRACT", nz0, I("Sink"))
     dh = tb.vmath("LENGTH", tb.combine(tb.math("SUBTRACT", px, nx), tb.math("SUBTRACT", py, ny), 0.0))
     run = tb.math("MAXIMUM", tb.math("SUBTRACT", dh, I("Edge Band")), 0.0)          # the batters start beyond the edge band
-    hi = tb.math("ADD", nz, tb.math("MULTIPLY", I("Cut Slope"), run)); lo = tb.math("SUBTRACT", nz, tb.math("MULTIPLY", I("Fill Slope"), run))
+    d1 = tb.math("DIVIDE", I("Deep Cut"), tb.math("MAXIMUM", I("Cut Slope"), 0.01))          # run of the first, gentler part
+    cut_rise = tb.math("ADD", tb.math("MULTIPLY", I("Cut Slope"), tb.math("MINIMUM", run, d1)),
+                       tb.math("MULTIPLY", I("Deep Slope"), tb.math("MAXIMUM", tb.math("SUBTRACT", run, d1), 0.0)))
+    hi = tb.math("ADD", nz, cut_rise); lo = tb.math("SUBTRACT", nz, tb.math("MULTIPLY", I("Fill Slope"), run))
     clipped = tb.math("MINIMUM", tb.math("MAXIMUM", pz, lo), hi)
     z_side = tb.switch(I("Raise"), tb.math("MINIMUM", pz, clipped), clipped, "FLOAT")
     beside = tb.boolean("AND", tb.compare("LESS_THAN", dh, I("Reach")), tb.compare("LESS_THAN", tb.math("SUBTRACT", nz, pz), I("Max Rise")))

@@ -55,8 +55,12 @@ for j in range(n):
         dist = abs(y - 320.0) - 5.0
         k = int(np.argmin(np.abs(P[:, 0] - x)))
         if dist <= 0: continue
-        d_up = max(d_up, (g[j, i] - Z[k]) - 1.0 * (dist + cell)); d_dn = max(d_dn, (Z[k] - g[j, i]) - 0.5 * (dist + cell))
-check(d_up <= 1e-6 and d_dn <= 1e-6, "cut (1:1) and fill (1:2) batters hold beside the road (%.3f, %.3f)" % (d_up, d_dn))
+        run = dist + cell; cut_allow = 1.0 * min(run, 6.0) + 2.0 * max(run - 6.0, 0.0)
+        d_up = max(d_up, (g[j, i] - Z[k]) - cut_allow); d_dn = max(d_dn, (Z[k] - g[j, i]) - 0.5 * run)
+check(d_up <= 1e-6 and d_dn <= 1e-6, "cut (1:1, 2:1 past 6 m) and fill (1:2) batters hold beside the road (%.3f, %.3f)" % (d_up, d_dn))
+deep = max((h0[j, i] - Z[int(np.argmin(np.abs(P[:, 0] - i * cell)))]) for j in range(n) for i in range(n) if 470 <= i * cell <= 570 and abs(j * cell - 320) < 40)
+wide1 = sum(1 for j in range(n) if abs(j * cell - 320) > 5 and abs(g[j, 130] - h0[j, 130]) > 0.01) * cell
+print("   deepest natural ground over the road %.1f m, graded width at x=520: %.0f m" % (deep, wide1))
 check(np.allclose(g[water & ~own], h0[water & ~own]), "the river bed keeps its height")
 far = (np.abs(yy - 320.0) > 120.0)
 check(np.allclose(g[far], h0[far]), "the terrain far from the road is untouched")

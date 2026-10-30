@@ -60,7 +60,7 @@ if [ "$MRS" = 1 ]; then
   "$BLENDER" --background "$WORK/mrs_out/port_halden_streets.blend" --python tools/cityforge/assemble_map.py -- "$BUILD/port_halden.blend" "$WORK/port_halden_map.blend" | grep -E "^MAP|Error|Traceback" || true
   echo "== check (Blender)"
   rm -rf "$WORK/atlas"
-  "$BLENDER" --background "$WORK/port_halden_map.blend" --python tools/cityforge/mrs_junction_atlas.py -- "$WORK/atlas" | grep -E "^ATLAS|Traceback" || true
+  "$BLENDER" --background "$WORK/port_halden_map.blend" --python tools/cityforge/mrs_junction_atlas.py -- "$WORK/atlas" --plan "$PLAN/city.json" | grep -E "^ATLAS|Traceback" || true
   [ -f "$WORK/atlas/sheet_manifest.json" ] && python -I tools/cityforge/contact_sheet.py "$WORK/atlas/sheet_manifest.json" | tail -1
   FORCE=0; for arg in "$@"; do [ "$arg" = "--force" ] && FORCE=1; done
   if ! python -I -c "import json,sys; r=json.load(open(sys.argv[1])); sys.exit(1 if r['problems'] or r['lane_mouths_without_kerb'] else 0)" "$WORK/atlas/validation.json"; then

@@ -10,7 +10,8 @@ import bpy
 from . import nodes, materials, props, road, terrain
 
 MODULES = ("nodes", "materials", "props", "road", "terrain", "roads", "qa", "junction", "structures", "assets", "trees", "signage", "furniture", "game_trees", "lighting",
-           "footbridge", "placement", "routes", "movements", "street_model", "ui", "export", "samples", "citynet", "city", "validate")
+           "footbridge", "placement", "routes", "movements", "street_model", "ui", "export", "samples", "citynet", "city", "validate",
+           "areajunction", "customsign", "markinglines", "limits")
 
 
 def reload():
@@ -49,6 +50,9 @@ def build_all(verbose=True):
     if pl and hasattr(pl, "ensure_scatter_group"): step("scatter", pl.ensure_scatter_group)
     step("road group", road.build_road_group)                                  # after the collections exist: pick indices follow sorted names
     step("terrain", terrain.build_terrain_conform_group)
+    for nm, fn in (("areajunction", "build_all"), ("customsign", "build_custom_sign"), ("markinglines", "build_marking_lines")):
+        m = globals().get(nm)
+        if m and hasattr(m, fn): step(nm, getattr(m, fn))                     # the area junction workflow (CRM 2.1 reconstruction)
     step("refresh", roads.refresh_all)
 
 
@@ -59,6 +63,6 @@ def register():
 
 from .nodes import MRS, mod_input_set, mod_input_get  # noqa: E402
 for _m in ("roads", "qa", "junction", "structures", "assets", "trees", "signage", "furniture", "game_trees", "lighting", "footbridge", "placement", "routes",
-           "movements", "street_model", "ui", "export", "samples", "citynet", "city"):
+           "movements", "street_model", "ui", "export", "samples", "citynet", "city", "areajunction", "customsign", "markinglines"):
     try: globals()[_m] = importlib.import_module(__name__ + "." + _m)
     except ModuleNotFoundError: pass

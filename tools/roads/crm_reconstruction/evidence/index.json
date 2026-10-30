@@ -1,0 +1,1438 @@
+[
+ {
+  "id": "E01",
+  "time": "0:44",
+  "seconds": 44.0,
+  "chapter": "Installing Asset Library",
+  "action": "Edit > Preferences > File Paths: add the CRM 2.1.1 folder as an asset library",
+  "result": "asset library entry added (method 1)",
+  "class": "B",
+  "frame_after": "frames/E01_0m44_after.jpg",
+  "frame_before": "frames/E01_0m44_before.jpg",
+  "crops": []
+ },
+ {
+  "id": "E02",
+  "time": "1:02",
+  "seconds": 62.0,
+  "chapter": "Installing Asset Library",
+  "action": "asset browser on library CRM 2.1.1, drag 'Simple road *GN' in",
+  "result": "catalogs 01. Roads ... 10. Markings; the road object appears",
+  "class": "A",
+  "frame_after": "frames/E02_1m02_after.jpg",
+  "frame_before": "frames/E02_1m02_before.jpg",
+  "crops": [
+   {
+    "name": "assets",
+    "file": "crops/E02_1m02_assets.png",
+    "bounds_xywh": [
+     0,
+     610,
+     1525,
+     370
+    ],
+    "source": "frames/E02_1m02_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E03",
+  "time": "1:24",
+  "seconds": 84.0,
+  "chapter": "Installing Asset Library",
+  "action": "Blender 4.3 / 4.5: drag-and-drop a road",
+  "result": "every drop brings object references again (import issue)",
+  "class": "B",
+  "frame_after": "frames/E03_1m24_after.jpg",
+  "frame_before": "frames/E03_1m24_before.jpg",
+  "crops": []
+ },
+ {
+  "id": "E04",
+  "time": "1:52",
+  "seconds": 112.0,
+  "chapter": "Installing Asset Library",
+  "action": "Blender 5: asset browser, Import Settings 'Pack'",
+  "result": "no duplicated references",
+  "class": "A",
+  "frame_after": "frames/E04_1m52_after.jpg",
+  "frame_before": "frames/E04_1m52_before.jpg",
+  "crops": [
+   {
+    "name": "assets",
+    "file": "crops/E04_1m52_assets.png",
+    "bounds_xywh": [
+     0,
+     610,
+     1525,
+     370
+    ],
+    "source": "frames/E04_1m52_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E05",
+  "time": "2:59",
+  "seconds": 179.0,
+  "chapter": "Installing Asset Library",
+  "action": "drag the 'simple intersection' sample (a collection of collections)",
+  "result": "some collections come in packed: geometry node inputs not editable",
+  "class": "B",
+  "frame_after": "frames/E05_2m59_after.jpg",
+  "frame_before": "frames/E05_2m59_before.jpg",
+  "crops": []
+ },
+ {
+  "id": "E06",
+  "time": "3:40",
+  "seconds": 220.0,
+  "chapter": "Installing Asset Library",
+  "action": "File > Append > CRM 2.1.1.blend > Collection, select all, append (method 2, recommended)",
+  "result": "CRM collections in the current file",
+  "class": "A",
+  "frame_after": "frames/E06_3m40_after.jpg",
+  "frame_before": "frames/E06_3m40_before.jpg",
+  "crops": []
+ },
+ {
+  "id": "E07",
+  "time": "4:47",
+  "seconds": 287.0,
+  "chapter": "Installing Asset Library",
+  "action": "copy the two catalog files into the project directory",
+  "result": "Current File asset view shows the categories",
+  "class": "B",
+  "frame_after": "frames/E07_4m47_after.jpg",
+  "frame_before": "frames/E07_4m47_before.jpg",
+  "crops": []
+ },
+ {
+  "id": "E08",
+  "time": "5:08",
+  "seconds": 308.0,
+  "chapter": "Road Setup",
+  "action": "select the road: modifier 'GeometryNodes' with node group '01. CRM Road'",
+  "result": "panels Curve, Road, RoadSide, Road Median, Start Point, End Point, Extend, Manage",
+  "class": "A",
+  "frame_after": "frames/E08_5m08_after.jpg",
+  "frame_before": "frames/E08_5m08_before.jpg",
+  "crops": [
+   {
+    "name": "panel",
+    "file": "crops/E08_5m08_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E08_5m08_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E09",
+  "time": "5:47",
+  "seconds": 347.0,
+  "chapter": "Road Setup",
+  "action": "Tab into edit mode on a packed/linked road",
+  "result": "error asking to make the data local; Object > Make Local fixes it",
+  "class": "A",
+  "frame_after": "frames/E09_5m47_after.jpg",
+  "frame_before": "frames/E09_5m47_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E09_5m47_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E09_5m47_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E10",
+  "time": "6:09",
+  "seconds": 369.0,
+  "chapter": "Road Setup",
+  "action": "edit mode: scale / extrude the curve points (never scale in object mode)",
+  "result": "the road follows the drawn curve (red tongues at both ends)",
+  "class": "A",
+  "frame_after": "frames/E10_6m09_after.jpg",
+  "frame_before": "frames/E10_6m09_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E10_6m09_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E10_6m09_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E11",
+  "time": "6:15",
+  "seconds": 375.0,
+  "chapter": "Road Setup",
+  "action": "Curve panel",
+  "result": "Resolution 24, Pull Terrain, Export Ready",
+  "class": "A",
+  "frame_after": "frames/E11_6m15_after.jpg",
+  "frame_before": "frames/E11_6m15_before.jpg",
+  "crops": [
+   {
+    "name": "panel",
+    "file": "crops/E11_6m15_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E11_6m15_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E12",
+  "time": "6:39",
+  "seconds": 399.0,
+  "chapter": "Road Setup",
+  "action": "Road panel: shoulders, Double Lanes, Asphalt Type, marking lines",
+  "result": "Asphalt Type 'New'; Edge / Center / Lane Markings with Line 1 / Line 2 patterns, Width 0.12 m",
+  "class": "A",
+  "frame_after": "frames/E12_6m39_after.jpg",
+  "frame_before": "frames/E12_6m39_before.jpg",
+  "crops": [
+   {
+    "name": "panel",
+    "file": "crops/E12_6m39_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E12_6m39_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E13",
+  "time": "6:46",
+  "seconds": 406.0,
+  "chapter": "Road Setup",
+  "action": "Road panel: Bicycle Lane, Patches, Wet Asphalt, Manholes",
+  "result": "Wet* puddles 0.4 wetness 0.2; Patches density / size min-max / seed",
+  "class": "A",
+  "frame_after": "frames/E13_6m46_after.jpg",
+  "frame_before": "frames/E13_6m46_before.jpg",
+  "crops": [
+   {
+    "name": "panel",
+    "file": "crops/E13_6m46_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E13_6m46_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E14",
+  "time": "6:53",
+  "seconds": 413.0,
+  "chapter": "Road Setup",
+  "action": "RoadSide panel: Type 'Unpaved*'",
+  "result": "roadside type menu, curb, outer curb, manholes, wet",
+  "class": "A",
+  "frame_after": "frames/E14_6m53_after.jpg",
+  "frame_before": "frames/E14_6m53_before.jpg",
+  "crops": [
+   {
+    "name": "panel",
+    "file": "crops/E14_6m53_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E14_6m53_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E15",
+  "time": "8:06",
+  "seconds": 486.0,
+  "chapter": "Road Setup",
+  "action": "File > External Data > Unpack Resources (textures for export)",
+  "result": "menu shown",
+  "class": "A",
+  "frame_after": "frames/E15_8m06_after.jpg",
+  "frame_before": "frames/E15_8m06_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E15_8m06_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E15_8m06_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E16",
+  "time": "8:47",
+  "seconds": 527.0,
+  "chapter": "Road Setup",
+  "action": "Double Lanes on; Road Median panel",
+  "result": "median road with its own roadside-like settings; centre marking",
+  "class": "A",
+  "frame_after": "frames/E16_8m47_after.jpg",
+  "frame_before": "frames/E16_8m47_before.jpg",
+  "crops": [
+   {
+    "name": "panel",
+    "file": "crops/E16_8m47_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E16_8m47_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E17",
+  "time": "8:52",
+  "seconds": 532.0,
+  "chapter": "Road Setup",
+  "action": "Road panel: Parking Lane",
+  "result": "Order Bicycle-Parking, Left / Right Parking, Divider Line 5.5 m, Hatched Area",
+  "class": "A",
+  "frame_after": "frames/E17_8m52_after.jpg",
+  "frame_before": "frames/E17_8m52_before.jpg",
+  "crops": [
+   {
+    "name": "panel",
+    "file": "crops/E17_8m52_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E17_8m52_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E18",
+  "time": "9:41",
+  "seconds": 581.0,
+  "chapter": "Road Setup",
+  "action": "RoadSide: My Props collection + Random Collection 'Rocks'",
+  "result": "props every Spacing (10 m) left / right; rocks scattered (Density Factor 0.1)",
+  "class": "A",
+  "frame_after": "frames/E18_9m41_after.jpg",
+  "frame_before": "frames/E18_9m41_before.jpg",
+  "crops": [
+   {
+    "name": "panel",
+    "file": "crops/E18_9m41_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E18_9m41_after.jpg"
+   },
+   {
+    "name": "view",
+    "file": "crops/E18_9m41_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E18_9m41_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E19",
+  "time": "10:45",
+  "seconds": 645.0,
+  "chapter": "Road Setup",
+  "action": "Start Point: Tongue Size, Crosswalk Zebra, End Line, End Marking Stop, Traffic Lights",
+  "result": "crosswalk, STOP and a signal at the road start; red tongue beyond",
+  "class": "A",
+  "frame_after": "frames/E19_10m45_after.jpg",
+  "frame_before": "frames/E19_10m45_before.jpg",
+  "crops": [
+   {
+    "name": "panel",
+    "file": "crops/E19_10m45_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E19_10m45_after.jpg"
+   },
+   {
+    "name": "view",
+    "file": "crops/E19_10m45_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E19_10m45_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E20",
+  "time": "10:28",
+  "seconds": 628.0,
+  "chapter": "Road Setup",
+  "action": "Extend panel",
+  "result": "Start / End Point Offset with Edge / Center / Lane Marking, Median / Roadside Props, Parking, Bus/Bicycle, Bridge Piers",
+  "class": "A",
+  "frame_after": "frames/E20_10m28_after.jpg",
+  "frame_before": "frames/E20_10m28_before.jpg",
+  "crops": [
+   {
+    "name": "panel",
+    "file": "crops/E20_10m28_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E20_10m28_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E21",
+  "time": "11:06",
+  "seconds": 666.0,
+  "chapter": "Junction Setup",
+  "action": "four roads ending at a crossing, drag 'Custum junction' in",
+  "result": "red cross of road tongues; nothing converts yet",
+  "class": "A",
+  "frame_after": "frames/E21_11m06_after.jpg",
+  "frame_before": "frames/E21_11m06_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E21_11m06_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E21_11m06_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E22",
+  "time": "11:22",
+  "seconds": 682.0,
+  "chapter": "Junction Setup",
+  "action": "junction modifier '02. CRM Junctions'",
+  "result": "Roads collection empty; Show, Range 40 m, Inner Radius 2 m, Resolution 10",
+  "class": "A",
+  "frame_after": "frames/E22_11m22_after.jpg",
+  "frame_before": "frames/E22_11m22_before.jpg",
+  "crops": [
+   {
+    "name": "panel",
+    "file": "crops/E22_11m22_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E22_11m22_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E23",
+  "time": "11:57",
+  "seconds": 717.0,
+  "chapter": "Junction Setup",
+  "action": "collections 'Roads' and 'Junctions'; set the junction's Roads",
+  "result": "tongues inside the range become one junction mesh",
+  "class": "A",
+  "frame_after": "frames/E23_11m57_after.jpg",
+  "frame_before": "frames/E23_11m57_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E23_11m57_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E23_11m57_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E24",
+  "time": "12:21",
+  "seconds": 741.0,
+  "chapter": "Junction Setup",
+  "action": "Alt + click RoadSide on all selected roads",
+  "result": "every road gets its roadside; junction corners yellow",
+  "class": "A",
+  "frame_after": "frames/E24_12m21_after.jpg",
+  "frame_before": "frames/E24_12m21_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E24_12m21_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E24_12m21_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E25",
+  "time": "12:27",
+  "seconds": 747.0,
+  "chapter": "Junction Setup",
+  "action": "junction RoadSide on; Show off / on",
+  "result": "red part -> road, yellow part -> roadside",
+  "class": "A",
+  "frame_after": "frames/E25_12m27_after.jpg",
+  "frame_before": "frames/E25_12m27_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E25_12m27_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E25_12m27_after.jpg"
+   },
+   {
+    "name": "panel",
+    "file": "crops/E25_12m27_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E25_12m27_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E26",
+  "time": "13:03",
+  "seconds": 783.0,
+  "chapter": "Junction Setup",
+  "action": "tongues must overlap slightly; a too long tongue",
+  "result": "merging issues",
+  "class": "A",
+  "frame_after": "frames/E26_13m03_after.jpg",
+  "frame_before": "frames/E26_13m03_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E26_13m03_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E26_13m03_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E27",
+  "time": "13:30",
+  "seconds": 810.0,
+  "chapter": "Junction Setup",
+  "action": "tongues must share one global height",
+  "result": "misaligned tongues avoided",
+  "class": "B",
+  "frame_after": "frames/E27_13m30_after.jpg",
+  "frame_before": "frames/E27_13m30_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E27_13m30_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E27_13m30_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E28",
+  "time": "15:54",
+  "seconds": 954.0,
+  "chapter": "Junction Setup",
+  "action": "downhill road: Make Local + single user, last three points level (global Z)",
+  "result": "aligned tongue on a slope; junction clean after moving the point back",
+  "class": "A",
+  "frame_after": "frames/E28_15m54_after.jpg",
+  "frame_before": "frames/E28_15m54_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E28_15m54_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E28_15m54_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E29",
+  "time": "16:18",
+  "seconds": 978.0,
+  "chapter": "Junction Setup",
+  "action": "do not rotate / scale the junction in object mode",
+  "result": "range circle",
+  "class": "B",
+  "frame_after": "frames/E29_16m18_after.jpg",
+  "frame_before": "frames/E29_16m18_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E29_16m18_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E29_16m18_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E30",
+  "time": "17:00",
+  "seconds": 1020.0,
+  "chapter": "Junction Setup",
+  "action": "edit mode: scale the junction's cube",
+  "result": "everything inside the volume converts",
+  "class": "A",
+  "frame_after": "frames/E30_17m00_after.jpg",
+  "frame_before": "frames/E30_17m00_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E30_17m00_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E30_17m00_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E31",
+  "time": "17:45",
+  "seconds": 1065.0,
+  "chapter": "Junction Setup",
+  "action": "Range 1000 m",
+  "result": "every intersection in the scene converted by one junction object",
+  "class": "A",
+  "frame_after": "frames/E31_17m45_after.jpg",
+  "frame_before": "frames/E31_17m45_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E31_17m45_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E31_17m45_after.jpg"
+   },
+   {
+    "name": "panel",
+    "file": "crops/E31_17m45_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E31_17m45_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E32",
+  "time": "18:21",
+  "seconds": 1101.0,
+  "chapter": "Junction Setup",
+  "action": "overlapping junctions",
+  "result": "double meshes: black effect in Cycles",
+  "class": "A",
+  "frame_after": "frames/E32_18m21_after.jpg",
+  "frame_before": "frames/E32_18m21_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E32_18m21_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E32_18m21_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E33",
+  "time": "18:42",
+  "seconds": 1122.0,
+  "chapter": "Extension Feature",
+  "action": "Extensions catalog",
+  "result": "three extensions: two mesh-based, one curve-based, red / yellow like tongues",
+  "class": "A",
+  "frame_after": "frames/E33_18m42_after.jpg",
+  "frame_before": "frames/E33_18m42_before.jpg",
+  "crops": [
+   {
+    "name": "assets",
+    "file": "crops/E33_18m42_assets.png",
+    "bounds_xywh": [
+     0,
+     610,
+     1525,
+     370
+    ],
+    "source": "frames/E33_18m42_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E34",
+  "time": "19:16",
+  "seconds": 1156.0,
+  "chapter": "Extension Feature",
+  "action": "square extension in the Roads collection inside the junction",
+  "result": "converted to road mesh",
+  "class": "A",
+  "frame_after": "frames/E34_19m16_after.jpg",
+  "frame_before": "frames/E34_19m16_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E34_19m16_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E34_19m16_after.jpg"
+   },
+   {
+    "name": "panel",
+    "file": "crops/E34_19m16_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E34_19m16_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E35",
+  "time": "20:48",
+  "seconds": 1248.0,
+  "chapter": "Extension / Bus Stop",
+  "action": "square extension at the road edge, Make Local, scale in edit mode",
+  "result": "bus bay notch in the roadside",
+  "class": "A",
+  "frame_after": "frames/E35_20m48_after.jpg",
+  "frame_before": "frames/E35_20m48_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E35_20m48_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E35_20m48_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E36",
+  "time": "21:33",
+  "seconds": 1293.0,
+  "chapter": "Extension / Bus Stop",
+  "action": "bus stop asset + BUS / STOP markings (at level 1 like the roads)",
+  "result": "furnished bus bay",
+  "class": "A",
+  "frame_after": "frames/E36_21m33_after.jpg",
+  "frame_before": "frames/E36_21m33_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E36_21m33_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E36_21m33_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E37",
+  "time": "22:48",
+  "seconds": 1368.0,
+  "chapter": "Extension / Rounded End-road",
+  "action": "round extension at a road end, smaller, roadside smaller",
+  "result": "cul-de-sac bulb",
+  "class": "A",
+  "frame_after": "frames/E37_22m48_after.jpg",
+  "frame_before": "frames/E37_22m48_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E37_22m48_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E37_22m48_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E38",
+  "time": "24:30",
+  "seconds": 1470.0,
+  "chapter": "Extension / Roundabout",
+  "action": "round extension at a crossing + 'sidewalk round' + greenery",
+  "result": "roundabout",
+  "class": "A",
+  "frame_after": "frames/E38_24m30_after.jpg",
+  "frame_before": "frames/E38_24m30_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E38_24m30_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E38_24m30_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E39",
+  "time": "26:02",
+  "seconds": 1562.0,
+  "chapter": "Extension / Roundabout",
+  "action": "alternative: tongues + sidewalk round only",
+  "result": "roundabout without the big rounded asphalt",
+  "class": "A",
+  "frame_after": "frames/E39_26m02_after.jpg",
+  "frame_before": "frames/E39_26m02_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E39_26m02_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E39_26m02_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E40",
+  "time": "27:51",
+  "seconds": 1671.0,
+  "chapter": "Extension / Parking Space",
+  "action": "big square extension + small square entrance (apply scale)",
+  "result": "parking area with an entrance",
+  "class": "A",
+  "frame_after": "frames/E40_27m51_after.jpg",
+  "frame_before": "frames/E40_27m51_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E40_27m51_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E40_27m51_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E41",
+  "time": "28:45",
+  "seconds": 1725.0,
+  "chapter": "Extension / Parking Space",
+  "action": "Marking Lines curve ('03. CRM Marking Lines'), Array modifier",
+  "result": "parking bay lines",
+  "class": "A",
+  "frame_after": "frames/E41_28m45_after.jpg",
+  "frame_before": "frames/E41_28m45_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E41_28m45_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E41_28m45_after.jpg"
+   },
+   {
+    "name": "panel",
+    "file": "crops/E41_28m45_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E41_28m45_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E42",
+  "time": "30:13",
+  "seconds": 1813.0,
+  "chapter": "Extension / Parking Space",
+  "action": "curve extension ('10. CRM Extension'), junction range increased to cover the tongues",
+  "result": "a junction made of extensions",
+  "class": "A",
+  "frame_after": "frames/E42_30m13_after.jpg",
+  "frame_before": "frames/E42_30m13_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E42_30m13_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E42_30m13_after.jpg"
+   },
+   {
+    "name": "panel",
+    "file": "crops/E42_30m13_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E42_30m13_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E43",
+  "time": "31:06",
+  "seconds": 1866.0,
+  "chapter": "Custom Sign",
+  "action": "Custom Sign: Panel shape / colour, Back Post shape / struts / poles",
+  "result": "sign panel and post",
+  "class": "A",
+  "frame_after": "frames/E43_31m06_after.jpg",
+  "frame_before": "frames/E43_31m06_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E43_31m06_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E43_31m06_after.jpg"
+   },
+   {
+    "name": "panel",
+    "file": "crops/E43_31m06_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E43_31m06_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E44",
+  "time": "31:45",
+  "seconds": 1905.0,
+  "chapter": "Custom Sign",
+  "action": "Text Line 1..3: three texts each (colour, size, X, Y)",
+  "result": "up to nine texts",
+  "class": "A",
+  "frame_after": "frames/E44_31m45_after.jpg",
+  "frame_before": "frames/E44_31m45_before.jpg",
+  "crops": [
+   {
+    "name": "panel",
+    "file": "crops/E44_31m45_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E44_31m45_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E45",
+  "time": "32:47",
+  "seconds": 1967.0,
+  "chapter": "Custom Sign",
+  "action": "node editor: '13. CRM Custom Sign' > 'Panel Text' > String to Curves font",
+  "result": "the font is chosen inside the group",
+  "class": "A",
+  "frame_after": "frames/E45_32m47_after.jpg",
+  "frame_before": "frames/E45_32m47_before.jpg",
+  "crops": [
+   {
+    "name": "nodes",
+    "file": "crops/E45_32m47_nodes.png",
+    "bounds_xywh": [
+     0,
+     470,
+     1575,
+     435
+    ],
+    "source": "frames/E45_32m47_after.jpg"
+   },
+   {
+    "name": "panel",
+    "file": "crops/E45_32m47_panel.png",
+    "bounds_xywh": [
+     1628,
+     330,
+     290,
+     650
+    ],
+    "source": "frames/E45_32m47_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E46",
+  "time": "33:22",
+  "seconds": 2002.0,
+  "chapter": "Custom Sign",
+  "action": "Images: material + size / X / Y (three)",
+  "result": "image on the sign from a material",
+  "class": "A",
+  "frame_after": "frames/E46_33m22_after.jpg",
+  "frame_before": "frames/E46_33m22_before.jpg",
+  "crops": [
+   {
+    "name": "panel",
+    "file": "crops/E46_33m22_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E46_33m22_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E47",
+  "time": "34:57",
+  "seconds": 2097.0,
+  "chapter": "Custom Sign",
+  "action": "a stop sign built with the custom sign (Octagon, Red, outline)",
+  "result": "stop sign",
+  "class": "A",
+  "frame_after": "frames/E47_34m57_after.jpg",
+  "frame_before": "frames/E47_34m57_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E47_34m57_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E47_34m57_after.jpg"
+   },
+   {
+    "name": "panel",
+    "file": "crops/E47_34m57_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E47_34m57_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E48",
+  "time": "35:17",
+  "seconds": 2117.0,
+  "chapter": "Custom Sign",
+  "action": "Lines Shap: up to three lines (colour, length, width, rotation, X, Y)",
+  "result": "lines on the panel",
+  "class": "A",
+  "frame_after": "frames/E48_35m17_after.jpg",
+  "frame_before": "frames/E48_35m17_before.jpg",
+  "crops": [
+   {
+    "name": "panel",
+    "file": "crops/E48_35m17_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E48_35m17_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E49",
+  "time": "36:04",
+  "seconds": 2164.0,
+  "chapter": "Tunnel / Bridge",
+  "action": "tunnel ('12. CRM_Tunnel') comes without a road: duplicate its curve, add Geometry Nodes '01. CRM Road'",
+  "result": "road exactly under the tunnel",
+  "class": "A",
+  "frame_after": "frames/E49_36m04_after.jpg",
+  "frame_before": "frames/E49_36m04_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E49_36m04_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E49_36m04_after.jpg"
+   },
+   {
+    "name": "panel",
+    "file": "crops/E49_36m04_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E49_36m04_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E50",
+  "time": "36:21",
+  "seconds": 2181.0,
+  "chapter": "Tunnel / Bridge",
+  "action": "cable-stayed bridge ('15. CRM Cable-Stayed'): the same",
+  "result": "road on the bridge",
+  "class": "A",
+  "frame_after": "frames/E50_36m21_after.jpg",
+  "frame_before": "frames/E50_36m21_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E50_36m21_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E50_36m21_after.jpg"
+   },
+   {
+    "name": "panel",
+    "file": "crops/E50_36m21_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E50_36m21_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E51",
+  "time": "36:52",
+  "seconds": 2212.0,
+  "chapter": "Mountain Road",
+  "action": "terrain ('16. CRM Terrain'), view clip end 10000",
+  "result": "terrain object",
+  "class": "A",
+  "frame_after": "frames/E51_36m52_after.jpg",
+  "frame_before": "frames/E51_36m52_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E51_36m52_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E51_36m52_after.jpg"
+   },
+   {
+    "name": "panel",
+    "file": "crops/E51_36m52_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E51_36m52_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E52",
+  "time": "37:47",
+  "seconds": 2267.0,
+  "chapter": "Mountain Road",
+  "action": "draw a road on it, Pull Terrain on, terrain Roads = 'Roads'",
+  "result": "terrain pulled to the road",
+  "class": "A",
+  "frame_after": "frames/E52_37m47_after.jpg",
+  "frame_before": "frames/E52_37m47_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E52_37m47_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E52_37m47_after.jpg"
+   },
+   {
+    "name": "panel",
+    "file": "crops/E52_37m47_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E52_37m47_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E53",
+  "time": "39:13",
+  "seconds": 2353.0,
+  "chapter": "Mountain Road",
+  "action": "Flatting Size 32.5 m, Smoothness 3; fix the road's rotation",
+  "result": "flattened corridor",
+  "class": "A",
+  "frame_after": "frames/E53_39m13_after.jpg",
+  "frame_before": "frames/E53_39m13_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E53_39m13_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E53_39m13_after.jpg"
+   },
+   {
+    "name": "panel",
+    "file": "crops/E53_39m13_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E53_39m13_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E54",
+  "time": "41:03",
+  "seconds": 2463.0,
+  "chapter": "Mountain Road",
+  "action": "bridge segment: Pull Terrain off, Bridge, Bridge Barrier, Piers, Pier Height",
+  "result": "bridge over the valley",
+  "class": "A",
+  "frame_after": "frames/E54_41m03_after.jpg",
+  "frame_before": "frames/E54_41m03_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E54_41m03_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E54_41m03_after.jpg"
+   },
+   {
+    "name": "panel",
+    "file": "crops/E54_41m03_panel.png",
+    "bounds_xywh": [
+     1558,
+     310,
+     360,
+     690
+    ],
+    "source": "frames/E54_41m03_after.jpg"
+   }
+  ]
+ },
+ {
+  "id": "E55",
+  "time": "42:44",
+  "seconds": 2564.0,
+  "chapter": "Mountain Road",
+  "action": "bridge abutment assets at both ends (rotation Z 180)",
+  "result": "finished mountain road",
+  "class": "A",
+  "frame_after": "frames/E55_42m44_after.jpg",
+  "frame_before": "frames/E55_42m44_before.jpg",
+  "crops": [
+   {
+    "name": "view",
+    "file": "crops/E55_42m44_view.png",
+    "bounds_xywh": [
+     0,
+     60,
+     1525,
+     545
+    ],
+    "source": "frames/E55_42m44_after.jpg"
+   }
+  ]
+ }
+]
