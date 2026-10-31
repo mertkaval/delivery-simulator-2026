@@ -26,6 +26,12 @@ func _initialize() -> void: call_deferred("run")
 
 func run() -> void:
 	root.size = Vector2i(640, 360)
+	# bake the city a new player gets (the settings defaults), not the classic city scripted runs fall back to
+	var city := str(GameSettings.DEFAULTS.get("city", "classic"))
+	CedarNeighborhood.city_override = city
+	if city == "port_halden":
+		var roads := str(GameSettings.DEFAULTS.get("city_build", "")) == "roads" and ResourceLoader.exists(CityForgeWorld.ROADS_DIR + "city.json")
+		CityForgeWorld.use_city(CityForgeWorld.ROADS_DIR if roads else CityForgeWorld.CLASSIC_DIR)
 	var game: Node = load("res://app/app_root.tscn").instantiate()
 	game.set("save_enabled", false)
 	root.add_child(game)
