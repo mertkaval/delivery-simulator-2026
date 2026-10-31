@@ -897,6 +897,10 @@ def intruded(city, net, kind, tol=0.5):
 SINK = 0.30                  # the fitted ground under a street surface (m below it; the edge skirt is 1.2 m)
 NEAR_MARGIN = 0.15           # next to a street: under its extended plane by this much more (the height-map collider
                              # and the terrain mesh split each 4 m cell into triangles, not bilinearly)
+# next to a street, at most this far under its extended (sunk) plane: a street edge lies anywhere inside a grid cell,
+# so a batter that falls away from the neighbouring grid point would open a gap under the edge deeper than the edge
+# skirt. Capping the drop keeps the ground at the edge within the skirt less a margin; the batter starts a cell out.
+EDGE_FLOOR = citynet.EDGE_DEPTH - SINK - NEAR_MARGIN
 
 
 def _building_mask(city, shape, cell, pad=-1.5):
@@ -1110,7 +1114,8 @@ def write_plan(plan_out, ground_meshes, log=print):
             if not groups: continue
             # one plane per street surface round the point (never one plane through a road and a higher cross
             # street), the lowest of them caps it
-            new_gh[jj, ii] = min(base_gh[jj, ii], min(_plane_cap(np, pts) for pts in groups.values()) - NEAR_MARGIN)
+            cap = min(_plane_cap(np, pts) for pts in groups.values())
+            new_gh[jj, ii] = min(max(base_gh[jj, ii], cap - EDGE_FLOOR), cap - NEAR_MARGIN)
         diff = new_gh - gh
         changed = int(np.count_nonzero(np.abs(diff) > 0.01)); lowered = int(np.count_nonzero(diff < -0.01)); raised = int(np.count_nonzero(diff > 0.01))
         out["max_lowered"] = round(float(-diff.min()), 2); out["max_raised"] = round(float(diff.max()), 2)

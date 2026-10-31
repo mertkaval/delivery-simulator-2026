@@ -18,6 +18,9 @@ func check(ok: bool, text: String) -> void:
 
 func run() -> void:
 	CedarNeighborhood.city_override = "port_halden"
+	# a city build's folder as the first argument (-- res://assets/cityforge_roads/); default: the classic city
+	var city_args := OS.get_cmdline_user_args()
+	if city_args.size() > 0 and str(city_args[0]).begins_with("res://"): CityForgeWorld.use_city(str(city_args[0]))
 	var game: GameApp = load("res://app/app_root.tscn").instantiate()
 	game.saves = MemorySave.new()
 	root.add_child(game)

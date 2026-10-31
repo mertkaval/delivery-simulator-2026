@@ -120,7 +120,9 @@ Rules the tool enforces:
 - **Street trees** (Place Street Assets) stand in a square guard of steel posts and rails, sized to their bed: in a paved
   sidewalk on a tree-pit grate, in a planting strip of 1.2 m or more inside a square concrete edging with a soil bed, in a
   narrower strip on a mulch ring. The tree reserves its whole surround: benches, lights and signs keep clear of it. A
-  tree is only planted where its whole bed lies on the surface (never hanging past a strip's end).
+  tree is only planted where its whole bed lies on the surface (never hanging past a strip's end). Only species whose
+  trunk stands straight are used: the placer measures each tree model's trunk lean (bark rings near the ground against
+  rings up the trunk) and skips a species leaning more than 12 degrees.
 - **Driveways.** Nothing optional (benches, bins, trees, lights) is placed across a road's driveways (its Driveways
   input, the dropped kerb and apron), whether they come from MRS_Driveway anchors or straight from a city plan.
 - **Slopes.** Posts, poles, signs, hydrants and trees are set into the ground at the lowest point under them; benches,
@@ -132,6 +134,11 @@ Rules the tool enforces:
   - Lights win over trees, and trees win over props, within **Object Clearance**.
   - Scatter keeps half that distance from them.
   - Gullies and manholes stay on the carriageway.
+- **Flush items** (drain grates, manhole covers) lie on the surface plane under them: the placer samples the road
+  and junction surfaces at their corners and tilts them to the cross-fall and grade, so they sit neither under nor over
+  the asphalt. A spot steeper than 1:4 is skipped.
+- **Bus stop text** ("BUS STOP" on the carriageway) goes in the outermost traffic lane and is scaled to fit that lane's
+  width less 0.3 m each side.
 - **Custom Sign at Cursor** places a live parametric sign: panel shape and colour, border, post, nine text slots,
   images, lines. Edit it in its Modifier panel.
 
@@ -178,6 +185,13 @@ Never export with problems: fix the parameter the message names.
 - **A whole city** (Port Halden): run `bash tools/cityforge/build.sh tmp/cityforge_roads`. It builds the streets,
   terrain and water, writes the map file, and validates everything in Blender. It installs into Godot only when
   validation is clean, then reimports and runs the Godot checks.
+- **Ground next to a street.** The game's ground is a 4 m height grid. Under a street it lies 0.3 m below the
+  surface; at a grid point next to a street it stays between 0.15 m and 0.75 m under the street's extended plane.
+  That keeps the ground at any street edge inside the 1.2 m edge skirt, so cut and fill batters start one grid cell
+  out and no gap opens under a sidewalk.
+- **In the game.** Port Halden plays the roads-only city by default (main menu: "New streets, roads only"). The
+  Godot test suite (`tests/run_tests.ps1`) runs the Port Halden tests on both builds: the classic city and the
+  roads-only city.
 
 ## 8. When something is wrong
 

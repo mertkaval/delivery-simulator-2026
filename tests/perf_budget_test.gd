@@ -1,6 +1,7 @@
 extends SceneTree
 ## Frame-time, boot and memory budgets on the reference machine (RTX 3070 laptop), rendered:
-##   godot --path . --script res://tests/perf_budget_test.gd
+##   godot --path . --script res://tests/perf_budget_test.gd [-- res://assets/cityforge_roads/]
+## With a Port Halden build's folder it rides that city instead (the courier's start past the first delivery doors).
 ## Boots the real game (no save writes), starts a new game and rides the courier at bicycle speed
 ## past the first delivery addresses for RIDE_S seconds. Fails when a budget is exceeded, so
 ## regressions (a HUD redrawing every frame, uncompressed textures, a heavy NPC) are caught the day
@@ -24,6 +25,11 @@ func _initialize() -> void: call_deferred("run")
 
 func run() -> void:
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+	var city_args := OS.get_cmdline_user_args()
+	var port_dir := str(city_args[0]) if city_args.size() > 0 and str(city_args[0]).begins_with("res://") else ""
+	if port_dir != "":
+		CedarNeighborhood.city_override = "port_halden"
+		CityForgeWorld.use_city(port_dir)
 	var t0 := Time.get_ticks_usec()
 	var app: Node = (load("res://app/app_root.tscn") as PackedScene).instantiate()
 	app.set("save_enabled", false)
@@ -36,9 +42,15 @@ func run() -> void:
 	for i in 60: await process_frame
 	var player: Node3D = app.get("player")
 	var route: Array[Vector3] = [player.global_position]
-	for i in 6:
-		var lot: Dictionary = ResidentialLayout.delivery_lot(i)
-		route.append(Vector3(lot.front) + Vector3(lot.facing) * 6.0)
+	var port: CityForgeWorld = null
+	if port_dir != "":
+		port = (app.get("world") as Node).get("port")
+		var doors: Array = (app.get("world") as Node).get("doors")
+		for i in 6: route.append(doors[i])
+	else:
+		for i in 6:
+			var lot: Dictionary = ResidentialLayout.delivery_lot(i)
+			route.append(Vector3(lot.front) + Vector3(lot.facing) * 6.0)
 	var times: Array[float] = []
 	var pos: Vector3 = route[0]
 	var seg := 0
@@ -56,7 +68,7 @@ func run() -> void:
 		var step := SPEED * minf(ms, 100.0) / 1000.0
 		if flat.length() <= step: seg = (seg + 1) % (route.size() - 1)
 		else: pos += flat.normalized() * step
-		player.global_position = Vector3(pos.x, 0.2, pos.z)
+		player.global_position = Vector3(pos.x, (port.ground_height(pos) if port != null else 0.0) + 0.2, pos.z)
 		if flat.length() > 0.1: player.look_at(player.global_position + flat.normalized(), Vector3.UP)
 	times = times.slice(5)
 	times.sort()
@@ -68,5 +80,5 @@ func run() -> void:
 	check(median <= BUDGET.median_ms, "ride median frame %.1f ms <= %.0f ms" % [median, BUDGET.median_ms])
 	check(p95 <= BUDGET.p95_ms, "ride p95 frame %.1f ms <= %.0f ms" % [p95, BUDGET.p95_ms])
 	check(vram <= BUDGET.vram_mb, "video memory %.0f MB <= %.0f MB" % [vram, BUDGET.vram_mb])
-	print("PERF BUDGET %s: %d checks, %d failures" % ["PASS" if failures == 0 else "FAIL", checks, failures])
+	print("PERF BUDGET %s: %d checks, %d failures%s" % ["PASS" if failures == 0 else "FAIL", checks, failures, (" (" + port_dir + ")") if port_dir != "" else ""])
 	quit(1 if failures else 0)

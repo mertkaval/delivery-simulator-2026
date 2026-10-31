@@ -12,6 +12,17 @@ foreach ($testFile in @('asset_budget_test.gd', 'economy_smoke.gd', 'dispatch_te
     }
 }
 
+# The same Port Halden suites on the roads-only city (assets/cityforge_roads: the city the game plays by default)
+$roadsCity = 'res://assets/cityforge_roads/'
+foreach ($testFile in @('cityforge_test.gd', 'port_halden_game_test.gd')) {
+    $result = & $Godot --headless --path $projectPath --quit-after 30000 --script "res://tests/$testFile" -- $roadsCity 2>&1
+    $status = $LASTEXITCODE
+    $result | Write-Output
+    if ($status -ne 0 -or ($result -match 'SCRIPT ERROR|ERROR:|FAIL:') -or -not ($result -match ': [0-9]+ checks, 0 failures')) {
+        throw "Test failed: $testFile (roads city)"
+    }
+}
+
 if ($HeadlessOnly) {
     Write-Output 'HEADLESS SUITES PASS'
     return
@@ -39,12 +50,21 @@ foreach ($testFile in @('port_halden_streets_test.gd')) {
     }
 }
 
-# Frame-time / boot / video-memory budgets of the real game on the reference machine (rendered).
-foreach ($testFile in @('perf_budget_test.gd')) {
-    $result = & $Godot --path $projectPath --quit-after 6000 --script "res://tests/$testFile" 2>&1
+# ... and on the roads-only city
+$result = & $Godot --path $projectPath --quit-after 6000 --script "res://tests/port_halden_streets_test.gd" -- $roadsCity 2>&1
+$status = $LASTEXITCODE
+$result | Write-Output
+if ($status -ne 0 -or ($result -match 'SCRIPT ERROR|FAIL:') -or -not ($result -match 'PORT_HALDEN_STREETS: [0-9]+ checks, 0 failures')) {
+    throw "Test failed: port_halden_streets_test.gd (roads city)"
+}
+
+# Frame-time / boot / video-memory budgets of the real game on the reference machine (rendered): the classic city,
+# then the roads-only Port Halden the game plays by default.
+foreach ($cityArgs in @(@(), @('--', $roadsCity))) {
+    $result = & $Godot --path $projectPath --quit-after 6000 --script "res://tests/perf_budget_test.gd" @cityArgs 2>&1
     $status = $LASTEXITCODE
     $result | Write-Output
     if ($status -ne 0 -or ($result -match 'SCRIPT ERROR|FAIL:') -or -not ($result -match 'PERF BUDGET PASS')) {
-        throw "Test failed: $testFile"
+        throw "Test failed: perf_budget_test.gd $cityArgs"
     }
 }
