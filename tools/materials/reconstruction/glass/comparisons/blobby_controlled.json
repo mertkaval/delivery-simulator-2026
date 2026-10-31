@@ -1,0 +1,47 @@
+{
+ "none": {
+  "GlassVoronoi": {
+   "hf": 0.0234,
+   "mean": 0.746
+  },
+  "GlassBlobby": {
+   "hf": 0.0108,
+   "mean": 0.749
+  },
+  "noglass": {
+   "hf": 0.0,
+   "mean": 0.169
+  },
+  "ratio_blobby_voronoi": 0.462
+ },
+ "checker": {
+  "GlassVoronoi": {
+   "hf": 0.2066,
+   "mean": 0.602
+  },
+  "GlassBlobby": {
+   "hf": 0.0709,
+   "mean": 0.695
+  },
+  "noglass": {
+   "hf": 0.1474,
+   "mean": 0.499
+  },
+  "ratio_blobby_voronoi": 0.343
+ },
+ "brightspot": {
+  "GlassVoronoi": {
+   "hf": 0.0611,
+   "mean": 0.62
+  },
+  "GlassBlobby": {
+   "hf": 0.0276,
+   "mean": 0.634
+  },
+  "noglass": {
+   "hf": 0.003,
+   "mean": 0.566
+  },
+  "ratio_blobby_voronoi": 0.452
+ }
+}

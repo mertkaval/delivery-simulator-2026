@@ -1,0 +1,2998 @@
+{
+ "video": {
+  "id": "Eofg9SBcdBY",
+  "title": "Procedural Asphalt Material (Blender Tutorial)",
+  "author": "Ryan King Art",
+  "upload_date": "2022-06-30",
+  "duration": "27:08",
+  "url": "https://www.youtube.com/watch?v=Eofg9SBcdBY",
+  "source_file": "tmp/materials_video/Eofg9SBcdBY.webm (2560x1440 VP9 60 fps)",
+  "chapters": {
+   "Intro": "0:00",
+   "3d Setup": "0:36",
+   "Procedural Setup": "2:00-26:35",
+   "Closing": "26:35"
+  }
+ },
+ "segment": {
+  "name": "all",
+  "start": "00:00",
+  "end": "27:08"
+ },
+ "blender_version": {
+  "value": "3.2.0",
+  "class": "A",
+  "evidence": [
+   "02:40 status bar '... | 3.2.0'",
+   "26:38 status bar '3.2.0'"
+  ]
+ },
+ "evidence_classes": {
+  "A": "directly observed in a frame",
+  "B": "narration / recipe-repo only",
+  "C": "our inference / implementation",
+  "D": "unresolved"
+ },
+ "evidence_index": "tools/materials/reconstruction/asphalt/evidence/all/index.json",
+ "scene": {
+  "engine": {
+   "value": "CYCLES",
+   "feature_set": "SUPPORTED",
+   "device": "GPU Compute",
+   "class": "A",
+   "evidence": [
+    "00:03 Render Properties",
+    "01:08 Render Properties"
+   ]
+  },
+  "viewport_samples": {
+   "value": 10,
+   "class": "A",
+   "evidence": "viewport overlay 'Sample 9/10' (18:11), 'Sample 5/10' (25:39)"
+  },
+  "render_samples": {
+   "value": null,
+   "class": "D",
+   "note": "Sampling panel collapsed in every frame"
+  },
+  "render_settings_visible": {
+   "motion_blur": true,
+   "simplify": false,
+   "freestyle": false,
+   "class": "A",
+   "evidence": "00:03, 01:08 (irrelevant for a still)"
+  },
+  "color_management": {
+   "value": null,
+   "class": "D",
+   "assumed": "Filmic / None look (Blender 3.2 default)",
+   "note": "panel collapsed; 5.x default is AgX"
+  },
+  "film_transparent": {
+   "value": true,
+   "class": "C",
+   "evidence": "rendered viewport background is a checkerboard (e.g. 21:24, 25:30); final render shows black around the sphere (26:38)"
+  },
+  "resolution": {
+   "aspect": "1:1",
+   "class": "A",
+   "pixels": null,
+   "pixels_class": "D",
+   "evidence": "26:38 Render Result is square"
+  },
+  "geometry": {
+   "object": "Icosphere",
+   "mesh": "Icosphere",
+   "material_slot": "Slot 1 'Asphalt'",
+   "class": "A",
+   "creation": "Shift+A Icosphere, 'subdivided so that it's very nice and smooth' (00:38-00:47, B)",
+   "scene_stats": "Verts 10,327 | Faces 20,545 | Tris 20,610 | Objects 4 (A, status bar)",
+   "subdivisions": {
+    "value": 6,
+    "class": "C",
+    "note": "icosphere s=6 = 10,242 v / 20,480 f; the remaining 85 v / 65 f match the two emitters"
+   },
+   "radius_m": {
+    "value": 1.0,
+    "class": "C",
+    "note": "not shown; Add Icosphere default radius 1 m -> ~2 m object; object scale D"
+   },
+   "modifiers": {
+    "value": null,
+    "class": "D"
+   },
+   "shading": {
+    "value": "smooth (likely)",
+    "class": "D"
+   }
+  },
+  "camera": {
+   "class": "A",
+   "note": "camera added and aimed at the sphere (00:48-00:51, B); visible at 00:58/01:08 (A); the sphere fills ~95 % of the square frame height (26:38, A)",
+   "focal_length": null,
+   "transform": null,
+   "unknown_class": "D"
+  },
+  "lighting": {
+   "key": {
+    "object": "Lighting",
+    "mesh": "Plane",
+    "material": "Material",
+    "shader": "Emission",
+    "color": "white",
+    "strength": 100.0,
+    "class": "A",
+    "evidence": "01:08",
+    "shape": "seen as a white ellipse/disc above-right of the sphere; exact size/shape D"
+   },
+   "rim": {
+    "object": "Lighting.001",
+    "mesh": "Plane.001",
+    "material": "Material.001",
+    "shader": "Emission",
+    "color": "white",
+    "strength": 5.0,
+    "class": "A",
+    "evidence": "00:58",
+    "shape": "long thin strip behind/beside the sphere ('rim light on the back side', B); size D"
+   },
+   "world": {
+    "name": "World.001",
+    "node": "Background <- Environment Texture",
+    "image": "machine_shop_02_1k.hdr (Poly Haven, 'machine shop 02 1K')",
+    "color_space": "Linear",
+    "projection": "Equirectangular",
+    "source": "Single Image",
+    "alpha": "Premultiplied",
+    "vector": "Default (no mapping)",
+    "strength": 1.0,
+    "class": "A",
+    "evidence": "01:20"
+   },
+   "library_substitute": {
+    "value": "bundled studiolights/world HDRI (e.g. interior.exr or studio.exr) per DECISIONS D6",
+    "class": "C"
+   }
+  },
+  "coordinates": {
+   "value": "Texture Coordinate -> Object for every texture (4 reroutes); no Mapping node; no UV/Generated",
+   "class": "A",
+   "evidence": [
+    "02:34 Mapping deleted",
+    "02:40",
+    "26:32"
+   ],
+   "units_note": "values are in the icosphere's object space (radius ~1 m assumed, C): base cells ~0.1 m (Scale 10), pebbles ~9 mm (Scale 110)"
+  },
+  "displacement": {
+   "value": "bump only: Material Output Displacement unlinked; four chained Bump nodes into Principled Normal",
+   "class": "A",
+   "material_settings": "Settings panel never shown: displacement method D (3.2 default Bump Only)"
+  },
+  "viewport_render_region": {
+   "value": "Ctrl+B render region used at 24:46 (close-up) and reset to the whole camera at 25:16",
+   "class": "A",
+   "note": "viewport only"
+  },
+  "addons": {
+   "value": "Node Wrangler (Ctrl+Shift+click preview, Ctrl+T, Ctrl+0 merge-mix)",
+   "class": "A",
+   "evidence": "01:48 preferences"
+  }
+ },
+ "materials": [
+  {
+   "name": "Asphalt",
+   "class": "A",
+   "evidence": [
+    "01:57-02:00",
+    "breadcrumb Icosphere > Icosphere > Asphalt"
+   ],
+   "groups": [],
+   "groups_note": "No node group is created in the video (no Ctrl+G); the whole graph is top level. 'suggested_interface' lists controls the video explicitly tunes (class C) for the PM_Asphalt group.",
+   "top_level": {
+    "nodes": [
+     {
+      "id": "texcoord",
+      "type": "ShaderNodeTexCoord",
+      "label": "Texture Coordinate",
+      "frame": null,
+      "settings": {
+       "object": null,
+       "from_instancer": false
+      },
+      "inputs": {},
+      "outputs_used": [
+       "Object"
+      ],
+      "class": "A",
+      "evidence": [
+       "02:22-02:28 added by Ctrl+T",
+       "02:40",
+       "26:32"
+      ],
+      "note": "Object output feeds every texture (via 4 reroutes); Object field empty = the material's own object; the Mapping node Ctrl+T added was deleted at 02:34",
+      "layout_hint": {
+       "overview_px": [
+        593,
+        508
+       ],
+       "blender_xy_approx": [
+        6,
+        -16
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "rr_color",
+      "type": "NodeReroute",
+      "label": "",
+      "frame": "frame_color",
+      "settings": {},
+      "inputs": {},
+      "class": "A",
+      "evidence": [
+       "08:41-08:56",
+       "26:32"
+      ],
+      "note": "layout only: merges Object->Noise Vector and Object->Linear Light Color1",
+      "layout_hint": {
+       "overview_px": [
+        783,
+        382
+       ],
+       "blender_xy_approx": [
+        376,
+        230
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "rr_cracks",
+      "type": "NodeReroute",
+      "label": "",
+      "frame": "frame_cracks",
+      "settings": {},
+      "inputs": {},
+      "class": "A",
+      "evidence": [
+       "08:58-09:06",
+       "26:32"
+      ],
+      "note": "layout only: merges the two cracks noise Vector wires",
+      "layout_hint": {
+       "overview_px": [
+        807,
+        565
+       ],
+       "blender_xy_approx": [
+        423,
+        -127
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "rr_damage",
+      "type": "NodeReroute",
+      "label": "",
+      "frame": "frame_damage",
+      "settings": {},
+      "inputs": {},
+      "class": "A",
+      "evidence": [
+       "12:18-12:27",
+       "14:12",
+       "26:32"
+      ],
+      "note": "layout only: feeds damage warp noise, Linear Light Color1 and the damage mask noise",
+      "layout_hint": {
+       "overview_px": [
+        815,
+        833
+       ],
+       "blender_xy_approx": [
+        439,
+        -649
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "rr_bump",
+      "type": "NodeReroute",
+      "label": "",
+      "frame": null,
+      "settings": {},
+      "inputs": {},
+      "class": "A",
+      "evidence": [
+       "19:05-19:15",
+       "26:32"
+      ],
+      "note": "layout only: long wire down to the bump noise",
+      "layout_hint": {
+       "overview_px": [
+        767,
+        1015
+       ],
+       "blender_xy_approx": [
+        345,
+        -1004
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "color_noise",
+      "type": "ShaderNodeTexNoise",
+      "label": "Noise Texture",
+      "frame": "frame_color",
+      "settings": {
+       "noise_dimensions": "3D"
+      },
+      "inputs": {
+       "Vector": "linked",
+       "Scale": 18.0,
+       "Detail": 15.0,
+       "Roughness": 0.6,
+       "Distortion": 0.0
+      },
+      "outputs_used": [
+       "Color"
+      ],
+      "class": "A",
+      "evidence": [
+       "03:22-03:49",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeTexNoise",
+       "noise_dimensions": "3D",
+       "noise_type": "FBM",
+       "normalize": true,
+       "inputs": {
+        "Lacunarity": 2.0
+       },
+       "note": "5.x defaults reproduce the 3.2 fBm noise (C)"
+      },
+      "layout_hint": {
+       "overview_px": [
+        785,
+        303
+       ],
+       "blender_xy_approx": [
+        380,
+        384
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "color_warp_mix",
+      "type": "ShaderNodeMixRGB",
+      "label": "Linear Light (header shows blend name)",
+      "frame": "frame_color",
+      "settings": {
+       "blend_type": "LINEAR_LIGHT",
+       "use_clamp": false,
+       "use_alpha": false
+      },
+      "inputs": {
+       "Fac": 0.1,
+       "Color1": "linked (Object coords)",
+       "Color2": "linked (Noise Color)"
+      },
+      "class": "A",
+      "evidence": [
+       "03:55-04:49",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeMix",
+       "data_type": "RGBA",
+       "blend_type": "LINEAR_LIGHT",
+       "factor_mode": "UNIFORM",
+       "clamp_factor": true,
+       "clamp_result": false,
+       "socket_map": {
+        "Fac": "Factor (identifier Factor_Float, inputs[0])",
+        "Color1": "A (identifier A_Color, inputs[6])",
+        "Color2": "B (identifier B_Color, inputs[7])",
+        "Color": "Result (identifier Result_Color, outputs[2])"
+       },
+       "inputs": {
+        "Factor": 0.1
+       },
+       "note": "ShaderNodeMixRGB still exists in 5.2 but is legacy; ShaderNodeMix(RGBA) has the same blend maths. 3.2 MixRGB always clamped Fac to 0..1 (clamp_factor True); 'Clamp' unchecked = clamp_result False"
+      },
+      "note": "use_alpha is not visible in 3.2 (sidebar option); default False assumed (C). Result = Object + 0.1*(2*NoiseColor-1): a +-0.1 domain warp that does not slide the pattern",
+      "layout_hint": {
+       "overview_px": [
+        902,
+        337
+       ],
+       "blender_xy_approx": [
+        608,
+        318
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "color_voronoi",
+      "type": "ShaderNodeTexVoronoi",
+      "label": "Voronoi Texture",
+      "frame": "frame_color",
+      "settings": {
+       "voronoi_dimensions": "3D",
+       "feature": "SMOOTH_F1",
+       "distance": "MINKOWSKI"
+      },
+      "inputs": {
+       "Vector": "linked",
+       "Scale": 10.0,
+       "Smoothness": 1.0,
+       "Exponent": 32.0,
+       "Randomness": 1.0
+      },
+      "outputs_used": [
+       "Distance"
+      ],
+      "class": "A",
+      "evidence": [
+       "02:48-03:10",
+       "05:06-05:12 Scale 10",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeTexVoronoi",
+       "normalize": false,
+       "inputs": {
+        "Detail": 0.0,
+        "Roughness": 0.5,
+        "Lacunarity": 2.0
+       },
+       "note": "5.x fractal inputs at their defaults (Detail 0) reproduce the 3.2 single-octave Voronoi (C)"
+      },
+      "note": "Distance output drives three things: base colour ramp, Bump 2 Height and the roughness ramp",
+      "layout_hint": {
+       "overview_px": [
+        997,
+        275
+       ],
+       "blender_xy_approx": [
+        794,
+        439
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "color_ramp",
+      "type": "ShaderNodeValToRGB",
+      "label": "ColorRamp",
+      "frame": "frame_color",
+      "settings": {
+       "color_mode": "RGB",
+       "interpolation": "LINEAR",
+       "elements": [
+        {
+         "position": 0.0,
+         "color_hex_srgb": "1A1817",
+         "color_linear_rgba": [
+          0.01033,
+          0.009134,
+          0.008568,
+          1.0
+         ],
+         "class": "A",
+         "evidence": [
+          "06:12 caption 'Hex: 1A1817'"
+         ]
+        },
+        {
+         "position": 1.0,
+         "color_hex_srgb": "4D4D4D",
+         "color_linear_rgba": [
+          0.074214,
+          0.074214,
+          0.074214,
+          1.0
+         ],
+         "class": "A",
+         "evidence": [
+          "06:28 caption 'Hex: 4D4D4D'",
+          "26:32 'Pos 1.000'"
+         ]
+        }
+       ]
+      },
+      "inputs": {
+       "Fac": "linked"
+      },
+      "class": "A",
+      "evidence": [
+       "05:25-06:30",
+       "26:32"
+      ],
+      "layout_hint": {
+       "overview_px": [
+        1108,
+        285
+       ],
+       "blender_xy_approx": [
+        1010,
+        419
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "cracks_mask_noise",
+      "type": "ShaderNodeTexNoise",
+      "label": "Noise Texture",
+      "frame": "frame_cracks",
+      "settings": {
+       "noise_dimensions": "3D"
+      },
+      "inputs": {
+       "Vector": "linked",
+       "Scale": 4.5,
+       "Detail": 15.0,
+       "Roughness": 0.5,
+       "Distortion": 0.0
+      },
+      "outputs_used": [
+       "Fac"
+      ],
+      "class": "A",
+      "evidence": [
+       "08:29-08:41 duplicate",
+       "10:20-10:28 Scale 4.5",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeTexNoise",
+       "noise_dimensions": "3D",
+       "noise_type": "FBM",
+       "normalize": true,
+       "inputs": {
+        "Lacunarity": 2.0
+       },
+       "note": "5.x defaults reproduce the 3.2 fBm noise (C)"
+      },
+      "layout_hint": {
+       "overview_px": [
+        848,
+        468
+       ],
+       "blender_xy_approx": [
+        503,
+        62
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "cracks_mask_ramp",
+      "type": "ShaderNodeValToRGB",
+      "label": "ColorRamp",
+      "frame": "frame_cracks",
+      "settings": {
+       "color_mode": "RGB",
+       "interpolation": "LINEAR",
+       "elements": [
+        {
+         "position": 0.499,
+         "color_hex_srgb": "000000",
+         "color_linear_rgba": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+         ],
+         "class": "A",
+         "evidence": [
+          "09:38 'Pos 0.499'",
+          "17:08 restored",
+          "26:32"
+         ]
+        },
+        {
+         "position": 1.0,
+         "color_hex_srgb": "FFFFFF",
+         "color_linear_rgba": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "class": "A",
+         "evidence": [
+          "26:32 marker at the right end (default stop)"
+         ]
+        }
+       ]
+      },
+      "inputs": {
+       "Fac": "linked"
+      },
+      "class": "A",
+      "evidence": [
+       "09:18-09:33",
+       "26:32"
+      ],
+      "note": "crack-amount control: 16:52-17:06 the black stop was dragged 0.231-0.548 as a demonstration, back at 0.499 by 17:08",
+      "layout_hint": {
+       "overview_px": [
+        947,
+        469
+       ],
+       "blender_xy_approx": [
+        696,
+        60
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "cracks_warp_noise",
+      "type": "ShaderNodeTexNoise",
+      "label": "Noise Texture",
+      "frame": "frame_cracks",
+      "settings": {
+       "noise_dimensions": "3D"
+      },
+      "inputs": {
+       "Vector": "linked",
+       "Scale": 2.5,
+       "Detail": 15.0,
+       "Roughness": 0.5,
+       "Distortion": 0.0
+      },
+      "outputs_used": [
+       "Color"
+      ],
+      "class": "A",
+      "evidence": [
+       "07:46-08:09",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeTexNoise",
+       "noise_dimensions": "3D",
+       "noise_type": "FBM",
+       "normalize": true,
+       "inputs": {
+        "Lacunarity": 2.0
+       },
+       "note": "5.x defaults reproduce the 3.2 fBm noise (C)"
+      },
+      "note": "its Color goes DIRECTLY into the cracks Voronoi Vector (no mix): the Voronoi is evaluated in noise-colour space",
+      "layout_hint": {
+       "overview_px": [
+        848,
+        586
+       ],
+       "blender_xy_approx": [
+        503,
+        -168
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "cracks_voronoi",
+      "type": "ShaderNodeTexVoronoi",
+      "label": "Voronoi Texture",
+      "frame": "frame_cracks",
+      "settings": {
+       "voronoi_dimensions": "3D",
+       "feature": "DISTANCE_TO_EDGE",
+       "distance": "EUCLIDEAN"
+      },
+      "inputs": {
+       "Vector": "linked",
+       "Scale": 5.0,
+       "Randomness": 1.0
+      },
+      "outputs_used": [
+       "Distance"
+      ],
+      "class": "A",
+      "evidence": [
+       "07:15-07:34",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeTexVoronoi",
+       "normalize": false,
+       "inputs": {
+        "Detail": 0.0,
+        "Roughness": 0.5,
+        "Lacunarity": 2.0
+       },
+       "note": "5.x fractal inputs at their defaults (Detail 0) reproduce the 3.2 single-octave Voronoi (C)"
+      },
+      "note": "distance metric is hidden for Distance to Edge and never changed (EUCLIDEAN default, C)",
+      "layout_hint": {
+       "overview_px": [
+        978,
+        591
+       ],
+       "blender_xy_approx": [
+        757,
+        -177
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "cracks_mix",
+      "type": "ShaderNodeMixRGB",
+      "label": "Mix",
+      "frame": "frame_cracks",
+      "settings": {
+       "blend_type": "MIX",
+       "use_clamp": false,
+       "use_alpha": false
+      },
+      "inputs": {
+       "Fac": "linked (mask ramp Color)",
+       "Color1": "linked (Voronoi Distance)",
+       "Color2": {
+        "hex_srgb": "FFFFFF",
+        "linear_rgba": [
+         1.0,
+         1.0,
+         1.0,
+         1.0
+        ]
+       }
+      },
+      "class": "A",
+      "evidence": [
+       "09:41-10:06",
+       "10:05 'Hex: FFFFFF'",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeMix",
+       "data_type": "RGBA",
+       "blend_type": "MIX",
+       "factor_mode": "UNIFORM",
+       "clamp_factor": true,
+       "clamp_result": false,
+       "socket_map": {
+        "Fac": "Factor (identifier Factor_Float, inputs[0])",
+        "Color1": "A (identifier A_Color, inputs[6])",
+        "Color2": "B (identifier B_Color, inputs[7])",
+        "Color": "Result (identifier Result_Color, outputs[2])"
+       },
+       "inputs": {},
+       "note": "ShaderNodeMixRGB still exists in 5.2 but is legacy; ShaderNodeMix(RGBA) has the same blend maths. 3.2 MixRGB always clamped Fac to 0..1 (clamp_factor True); 'Clamp' unchecked = clamp_result False"
+      },
+      "note": "white where the mask ramp is white = cracks removed there",
+      "layout_hint": {
+       "overview_px": [
+        1111,
+        503
+       ],
+       "blender_xy_approx": [
+        1016,
+        -6
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "damage_warp_noise",
+      "type": "ShaderNodeTexNoise",
+      "label": "Noise Texture",
+      "frame": "frame_damage",
+      "settings": {
+       "noise_dimensions": "3D"
+      },
+      "inputs": {
+       "Vector": "linked",
+       "Scale": 20.0,
+       "Detail": 15.0,
+       "Roughness": 0.6,
+       "Distortion": 0.0
+      },
+      "outputs_used": [
+       "Fac"
+      ],
+      "class": "A",
+      "evidence": [
+       "11:53-12:59",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeTexNoise",
+       "noise_dimensions": "3D",
+       "noise_type": "FBM",
+       "normalize": true,
+       "inputs": {
+        "Lacunarity": 2.0
+       },
+       "note": "5.x defaults reproduce the 3.2 fBm noise (C)"
+      },
+      "note": "its scalar Fac (not Color) feeds Linear Light Color2: the warp offset is equal on X, Y and Z",
+      "layout_hint": {
+       "overview_px": [
+        841,
+        762
+       ],
+       "blender_xy_approx": [
+        489,
+        -511
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "damage_warp_mix",
+      "type": "ShaderNodeMixRGB",
+      "label": "Linear Light",
+      "frame": "frame_damage",
+      "settings": {
+       "blend_type": "LINEAR_LIGHT",
+       "use_clamp": false,
+       "use_alpha": false
+      },
+      "inputs": {
+       "Fac": 0.02,
+       "Color1": "linked (Object coords via rr_damage)",
+       "Color2": "linked (Noise Fac)"
+      },
+      "class": "A",
+      "evidence": [
+       "12:06-13:30",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeMix",
+       "data_type": "RGBA",
+       "blend_type": "LINEAR_LIGHT",
+       "factor_mode": "UNIFORM",
+       "clamp_factor": true,
+       "clamp_result": false,
+       "socket_map": {
+        "Fac": "Factor (identifier Factor_Float, inputs[0])",
+        "Color1": "A (identifier A_Color, inputs[6])",
+        "Color2": "B (identifier B_Color, inputs[7])",
+        "Color": "Result (identifier Result_Color, outputs[2])"
+       },
+       "inputs": {
+        "Factor": 0.02
+       },
+       "note": "ShaderNodeMixRGB still exists in 5.2 but is legacy; ShaderNodeMix(RGBA) has the same blend maths. 3.2 MixRGB always clamped Fac to 0..1 (clamp_factor True); 'Clamp' unchecked = clamp_result False"
+      },
+      "layout_hint": {
+       "overview_px": [
+        930,
+        741
+       ],
+       "blender_xy_approx": [
+        663,
+        -470
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "damage_voronoi",
+      "type": "ShaderNodeTexVoronoi",
+      "label": "Voronoi Texture",
+      "frame": "frame_damage",
+      "settings": {
+       "voronoi_dimensions": "4D",
+       "feature": "DISTANCE_TO_EDGE",
+       "distance": "EUCLIDEAN"
+      },
+      "inputs": {
+       "Vector": "linked",
+       "W": 0.0,
+       "Scale": 110.0,
+       "Randomness": 1.0
+      },
+      "outputs_used": [
+       "Distance"
+      ],
+      "class": "A",
+      "evidence": [
+       "10:58-11:38",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeTexVoronoi",
+       "normalize": false,
+       "inputs": {
+        "Detail": 0.0,
+        "Roughness": 0.5,
+        "Lacunarity": 2.0
+       },
+       "note": "5.x fractal inputs at their defaults (Detail 0) reproduce the 3.2 single-octave Voronoi (C)"
+      },
+      "note": "pebbles / chunks under the asphalt; 4D with W = 0 (a 3D slice of 4D Voronoi, different cells than 3D)",
+      "layout_hint": {
+       "overview_px": [
+        1011,
+        736
+       ],
+       "blender_xy_approx": [
+        821,
+        -460
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "damage_mask_noise",
+      "type": "ShaderNodeTexNoise",
+      "label": "Noise Texture",
+      "frame": "frame_damage",
+      "settings": {
+       "noise_dimensions": "3D"
+      },
+      "inputs": {
+       "Vector": "linked",
+       "Scale": 3.5,
+       "Detail": 15.0,
+       "Roughness": 0.5,
+       "Distortion": 0.0
+      },
+      "outputs_used": [
+       "Fac"
+      ],
+      "class": "A",
+      "evidence": [
+       "13:45-14:12 (Ctrl+Shift+D keeps the input wire)",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeTexNoise",
+       "noise_dimensions": "3D",
+       "noise_type": "FBM",
+       "normalize": true,
+       "inputs": {
+        "Lacunarity": 2.0
+       },
+       "note": "5.x defaults reproduce the 3.2 fBm noise (C)"
+      },
+      "layout_hint": {
+       "overview_px": [
+        848,
+        877
+       ],
+       "blender_xy_approx": [
+        503,
+        -735
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "damage_mask_ramp",
+      "type": "ShaderNodeValToRGB",
+      "label": "ColorRamp",
+      "frame": "frame_damage",
+      "settings": {
+       "color_mode": "RGB",
+       "interpolation": "LINEAR",
+       "elements": [
+        {
+         "position": 0.35,
+         "color_hex_srgb": "000000",
+         "color_linear_rgba": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+         ],
+         "class": "C",
+         "evidence": [
+          "14:56.5 last legible 'Pos 0.343' (A) before a jump cut at ~14:57.1",
+          "after the cut the bar measures 0.350 +-0.005 (14:57.4, 26:32)"
+         ],
+         "note": "final value not legible: 0.343 (A, pre-cut) vs 0.350 measured; spec uses 0.35, see UNRESOLVED U1"
+        },
+        {
+         "position": 0.442,
+         "color_hex_srgb": "FFFFFF",
+         "color_linear_rgba": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "class": "A",
+         "evidence": [
+          "14:57.4 'Pos 0.442'",
+          "26:32 'Pos 0.442'"
+         ]
+        }
+       ]
+      },
+      "inputs": {
+       "Fac": "linked"
+      },
+      "class": "A",
+      "evidence": [
+       "14:17-14:57",
+       "26:32"
+      ],
+      "note": "damage-amount control (14:43-14:52 narration): stops far apart = more damage",
+      "layout_hint": {
+       "overview_px": [
+        956,
+        842
+       ],
+       "blender_xy_approx": [
+        714,
+        -667
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "damage_lighten",
+      "type": "ShaderNodeMixRGB",
+      "label": "Lighten",
+      "frame": "frame_damage",
+      "settings": {
+       "blend_type": "LIGHTEN",
+       "use_clamp": false,
+       "use_alpha": false
+      },
+      "inputs": {
+       "Fac": 1.0,
+       "Color1": "linked (pebble Voronoi Distance)",
+       "Color2": "linked (damage mask ramp)"
+      },
+      "class": "A",
+      "evidence": [
+       "15:05-15:30",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeMix",
+       "data_type": "RGBA",
+       "blend_type": "LIGHTEN",
+       "factor_mode": "UNIFORM",
+       "clamp_factor": true,
+       "clamp_result": false,
+       "socket_map": {
+        "Fac": "Factor (identifier Factor_Float, inputs[0])",
+        "Color1": "A (identifier A_Color, inputs[6])",
+        "Color2": "B (identifier B_Color, inputs[7])",
+        "Color": "Result (identifier Result_Color, outputs[2])"
+       },
+       "inputs": {
+        "Factor": 1.0
+       },
+       "note": "ShaderNodeMixRGB still exists in 5.2 but is legacy; ShaderNodeMix(RGBA) has the same blend maths. 3.2 MixRGB always clamped Fac to 0..1 (clamp_factor True); 'Clamp' unchecked = clamp_result False"
+      },
+      "note": "= max(pebbles, mask): pebbles only survive where the mask is black",
+      "layout_hint": {
+       "overview_px": [
+        1107,
+        745
+       ],
+       "blender_xy_approx": [
+        1008,
+        -478
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "darken_cracks",
+      "type": "ShaderNodeMixRGB",
+      "label": "Darken",
+      "frame": null,
+      "settings": {
+       "blend_type": "DARKEN",
+       "use_clamp": false,
+       "use_alpha": false
+      },
+      "inputs": {
+       "Fac": 1.0,
+       "Color1": "linked (base colour ramp)",
+       "Color2": "linked (cracks Mix)"
+      },
+      "class": "A",
+      "evidence": [
+       "16:11-16:47",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeMix",
+       "data_type": "RGBA",
+       "blend_type": "DARKEN",
+       "factor_mode": "UNIFORM",
+       "clamp_factor": true,
+       "clamp_result": false,
+       "socket_map": {
+        "Fac": "Factor (identifier Factor_Float, inputs[0])",
+        "Color1": "A (identifier A_Color, inputs[6])",
+        "Color2": "B (identifier B_Color, inputs[7])",
+        "Color": "Result (identifier Result_Color, outputs[2])"
+       },
+       "inputs": {
+        "Factor": 1.0
+       },
+       "note": "ShaderNodeMixRGB still exists in 5.2 but is legacy; ShaderNodeMix(RGBA) has the same blend maths. 3.2 MixRGB always clamped Fac to 0..1 (clamp_factor True); 'Clamp' unchecked = clamp_result False"
+      },
+      "layout_hint": {
+       "overview_px": [
+        1287,
+        359
+       ],
+       "blender_xy_approx": [
+        1359,
+        275
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "damage_dark_ramp",
+      "type": "ShaderNodeValToRGB",
+      "label": "ColorRamp",
+      "frame": null,
+      "settings": {
+       "color_mode": "RGB",
+       "interpolation": "LINEAR",
+       "elements": [
+        {
+         "position": 0.338,
+         "color_hex_srgb": "000000",
+         "color_linear_rgba": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+         ],
+         "class": "A",
+         "evidence": [
+          "18:11 'Pos 0.338'",
+          "26:32 'Pos 0.338'"
+         ]
+        },
+        {
+         "position": 1.0,
+         "color_hex_srgb": "FFFFFF",
+         "color_linear_rgba": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "class": "A",
+         "evidence": [
+          "26:32 marker at the right end (default stop)"
+         ]
+        }
+       ]
+      },
+      "inputs": {
+       "Fac": "linked"
+      },
+      "class": "A",
+      "evidence": [
+       "17:52-18:11",
+       "26:32"
+      ],
+      "note": "darkens the damaged patches before they enter Darken #2",
+      "layout_hint": {
+       "overview_px": [
+        1271,
+        553
+       ],
+       "blender_xy_approx": [
+        1328,
+        -103
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "darken_damage",
+      "type": "ShaderNodeMixRGB",
+      "label": "Darken",
+      "frame": null,
+      "settings": {
+       "blend_type": "DARKEN",
+       "use_clamp": false,
+       "use_alpha": false
+      },
+      "inputs": {
+       "Fac": 1.0,
+       "Color1": "linked (Darken #1)",
+       "Color2": "linked (damage dark ramp)"
+      },
+      "class": "A",
+      "evidence": [
+       "17:15-17:29",
+       "18:22",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeMix",
+       "data_type": "RGBA",
+       "blend_type": "DARKEN",
+       "factor_mode": "UNIFORM",
+       "clamp_factor": true,
+       "clamp_result": false,
+       "socket_map": {
+        "Fac": "Factor (identifier Factor_Float, inputs[0])",
+        "Color1": "A (identifier A_Color, inputs[6])",
+        "Color2": "B (identifier B_Color, inputs[7])",
+        "Color": "Result (identifier Result_Color, outputs[2])"
+       },
+       "inputs": {
+        "Factor": 1.0
+       },
+       "note": "ShaderNodeMixRGB still exists in 5.2 but is legacy; ShaderNodeMix(RGBA) has the same blend maths. 3.2 MixRGB always clamped Fac to 0..1 (clamp_factor True); 'Clamp' unchecked = clamp_result False"
+      },
+      "layout_hint": {
+       "overview_px": [
+        1421,
+        429
+       ],
+       "blender_xy_approx": [
+        1620,
+        138
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "bump_noise",
+      "type": "ShaderNodeTexNoise",
+      "label": "Noise Texture",
+      "frame": null,
+      "settings": {
+       "noise_dimensions": "3D"
+      },
+      "inputs": {
+       "Vector": "linked",
+       "Scale": 60.0,
+       "Detail": 15.0,
+       "Roughness": 0.4,
+       "Distortion": 0.0
+      },
+      "outputs_used": [
+       "Fac"
+      ],
+      "class": "A",
+      "evidence": [
+       "18:42-19:46",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeTexNoise",
+       "noise_dimensions": "3D",
+       "noise_type": "FBM",
+       "normalize": true,
+       "inputs": {
+        "Lacunarity": 2.0
+       },
+       "note": "5.x defaults reproduce the 3.2 fBm noise (C)"
+      },
+      "layout_hint": {
+       "overview_px": [
+        1213,
+        948
+       ],
+       "blender_xy_approx": [
+        1215,
+        -874
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "bump1",
+      "type": "ShaderNodeBump",
+      "label": "Bump",
+      "frame": null,
+      "settings": {
+       "invert": false
+      },
+      "inputs": {
+       "Strength": 0.1,
+       "Distance": 1.0,
+       "Height": "linked (bump noise Fac)",
+       "Normal": "unlinked"
+      },
+      "class": "A",
+      "evidence": [
+       "20:20-20:44",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeBump",
+       "invert": false,
+       "inputs": {
+        "Distance": 1.0,
+        "Filter Width": 0.1
+       },
+       "note": "5.2 creates Bump with Distance 0.001: set 1.0 explicitly. 'Filter Width' does not exist in 3.2 (see UNRESOLVED U13)"
+      },
+      "layout_hint": {
+       "overview_px": [
+        1317,
+        900
+       ],
+       "blender_xy_approx": [
+        1418,
+        -780
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "bump2",
+      "type": "ShaderNodeBump",
+      "label": "Bump",
+      "frame": null,
+      "settings": {
+       "invert": false
+      },
+      "inputs": {
+       "Strength": 0.2,
+       "Distance": 1.0,
+       "Height": "linked (Color-frame Voronoi Distance)",
+       "Normal": "linked (Bump 1)"
+      },
+      "class": "A",
+      "evidence": [
+       "20:58-21:40",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeBump",
+       "invert": false,
+       "inputs": {
+        "Distance": 1.0,
+        "Filter Width": 0.1
+       },
+       "note": "5.2 creates Bump with Distance 0.001: set 1.0 explicitly. 'Filter Width' does not exist in 3.2 (see UNRESOLVED U13)"
+      },
+      "note": "Height comes from the BASE (Color-frame, Smooth F1) Voronoi, not from the pebble Voronoi as the recipe repo says (see UNRESOLVED U16)",
+      "layout_hint": {
+       "overview_px": [
+        1414,
+        844
+       ],
+       "blender_xy_approx": [
+        1607,
+        -671
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "crack_bump_ramp",
+      "type": "ShaderNodeValToRGB",
+      "label": "ColorRamp",
+      "frame": null,
+      "settings": {
+       "color_mode": "RGB",
+       "interpolation": "LINEAR",
+       "elements": [
+        {
+         "position": 0.0,
+         "color_hex_srgb": "000000",
+         "color_linear_rgba": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+         ],
+         "class": "A",
+         "evidence": [
+          "26:32 marker at the left end (default stop, never moved)"
+         ]
+        },
+        {
+         "position": 0.094,
+         "color_hex_srgb": "FFFFFF",
+         "color_linear_rgba": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "class": "A",
+         "evidence": [
+          "23:27 'Pos 0.094'",
+          "24:22",
+          "26:32 'Pos 0.094'"
+         ]
+        }
+       ]
+      },
+      "inputs": {
+       "Fac": "linked"
+      },
+      "class": "A",
+      "evidence": [
+       "22:45-23:28",
+       "26:32"
+      ],
+      "note": "flattens everything except the thin crack lines; white stop tried 0.899 -> 0.109 -> 0.042 -> 0.057 -> 0.083 -> 0.094 (final)",
+      "layout_hint": {
+       "overview_px": [
+        1279,
+        674
+       ],
+       "blender_xy_approx": [
+        1344,
+        -339
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "bump3",
+      "type": "ShaderNodeBump",
+      "label": "Bump",
+      "frame": null,
+      "settings": {
+       "invert": false
+      },
+      "inputs": {
+       "Strength": 0.3,
+       "Distance": 1.0,
+       "Height": "linked (crack bump ramp)",
+       "Normal": "linked (Bump 2)"
+      },
+      "class": "A",
+      "evidence": [
+       "21:52-22:20",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeBump",
+       "invert": false,
+       "inputs": {
+        "Distance": 1.0,
+        "Filter Width": 0.1
+       },
+       "note": "5.2 creates Bump with Distance 0.001: set 1.0 explicitly. 'Filter Width' does not exist in 3.2 (see UNRESOLVED U13)"
+      },
+      "layout_hint": {
+       "overview_px": [
+        1514,
+        789
+       ],
+       "blender_xy_approx": [
+        1802,
+        -564
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "bump4",
+      "type": "ShaderNodeBump",
+      "label": "Bump",
+      "frame": null,
+      "settings": {
+       "invert": false
+      },
+      "inputs": {
+       "Strength": 0.4,
+       "Distance": 1.0,
+       "Height": "linked (Lighten)",
+       "Normal": "linked (Bump 3)"
+      },
+      "class": "A",
+      "evidence": [
+       "24:04-24:40",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeBump",
+       "invert": false,
+       "inputs": {
+        "Distance": 1.0,
+        "Filter Width": 0.1
+       },
+       "note": "5.2 creates Bump with Distance 0.001: set 1.0 explicitly. 'Filter Width' does not exist in 3.2 (see UNRESOLVED U13)"
+      },
+      "layout_hint": {
+       "overview_px": [
+        1621,
+        732
+       ],
+       "blender_xy_approx": [
+        2010,
+        -452
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "rough_ramp",
+      "type": "ShaderNodeValToRGB",
+      "label": "ColorRamp",
+      "frame": null,
+      "settings": {
+       "color_mode": "RGB",
+       "interpolation": "LINEAR",
+       "elements": [
+        {
+         "position": 0.0,
+         "color_hex_srgb": "ABABAB",
+         "color_linear_rgba": [
+          0.40724,
+          0.40724,
+          0.40724,
+          1.0
+         ],
+         "class": "A",
+         "evidence": [
+          "26:00 'Pos 0.000'",
+          "26:22 caption 'Hex: ABABAB'"
+         ]
+        },
+        {
+         "position": 1.0,
+         "color_hex_srgb": "FFFFFF",
+         "color_linear_rgba": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "class": "A",
+         "evidence": [
+          "26:28 'Pos 1.000' picker 'Hex: FFFFFF'"
+         ]
+        }
+       ]
+      },
+      "inputs": {
+       "Fac": "linked"
+      },
+      "class": "A",
+      "evidence": [
+       "25:47-26:29",
+       "26:32"
+      ],
+      "note": "linear roughness 0.407 (cell edges) to 1.0 (cell centres)",
+      "layout_hint": {
+       "overview_px": [
+        1585,
+        608
+       ],
+       "blender_xy_approx": [
+        1940,
+        -211
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "principled",
+      "type": "ShaderNodeBsdfPrincipled",
+      "label": "Principled BSDF",
+      "frame": null,
+      "settings": {
+       "distribution": "GGX",
+       "subsurface_method": "RANDOM_WALK"
+      },
+      "inputs": {
+       "Base Color": "linked",
+       "Subsurface": 0.0,
+       "Subsurface Radius": "default (1.0, 0.2, 0.1) - collapsed, not read (C)",
+       "Subsurface Color": "default (0.8, 0.8, 0.8) - swatch only (C)",
+       "Subsurface IOR": 1.4,
+       "Subsurface Anisotropy": 0.0,
+       "Metallic": 0.0,
+       "Specular": 0.5,
+       "Specular Tint": 0.0,
+       "Roughness": "linked",
+       "Anisotropic": 0.0,
+       "Anisotropic Rotation": 0.0,
+       "Sheen": 0.0,
+       "Sheen Tint": 0.5,
+       "Clearcoat": 0.0,
+       "Clearcoat Roughness": 0.03,
+       "IOR": 1.45,
+       "Transmission": 0.0,
+       "Transmission Roughness": 0.0,
+       "Emission": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ],
+       "Emission Strength": 1.0,
+       "Alpha": 1.0,
+       "Normal": "linked",
+       "Clearcoat Normal": "unlinked",
+       "Tangent": "unlinked"
+      },
+      "class": "A",
+      "evidence": [
+       "06:43",
+       "18:22",
+       "26:32"
+      ],
+      "build_5x": {
+       "type": "ShaderNodeBsdfPrincipled",
+       "distribution": "GGX",
+       "subsurface_method": "RANDOM_WALK",
+       "inputs": {
+        "Metallic": 0.0,
+        "IOR": 1.5,
+        "Specular IOR Level": 0.5,
+        "Subsurface Weight": 0.0,
+        "Coat Weight": 0.0,
+        "Sheen Weight": 0.0,
+        "Transmission Weight": 0.0,
+        "Emission Strength": 0.0,
+        "Alpha": 1.0
+       },
+       "note": "3.2 Specular 0.5 = F0 0.04 for dielectrics = 5.x IOR 1.5 with Specular IOR Level 0.5 (C). 3.2 IOR 1.45 only drove transmission. 5.x default distribution is MULTI_GGX: set GGX to match the frame"
+      },
+      "layout_hint": {
+       "overview_px": [
+        1736,
+        497
+       ],
+       "blender_xy_approx": [
+        2235,
+        6
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "output",
+      "type": "ShaderNodeOutputMaterial",
+      "label": "Material Output",
+      "frame": null,
+      "settings": {
+       "target": "ALL"
+      },
+      "inputs": {
+       "Surface": "linked",
+       "Volume": "unlinked",
+       "Displacement": "unlinked"
+      },
+      "class": "A",
+      "evidence": [
+       "01:57",
+       "26:32"
+      ],
+      "layout_hint": {
+       "overview_px": [
+        1881,
+        503
+       ],
+       "blender_xy_approx": [
+        2517,
+        -6
+       ],
+       "class": "C",
+       "note": "header position at 26:32; 1 display px ~ 1.95 node-editor units (Noise node ~72 px wide)"
+      }
+     },
+     {
+      "id": "frame_color",
+      "type": "NodeFrame",
+      "label": "Color",
+      "class": "A",
+      "evidence": [
+       "06:46-07:05 Ctrl+J, F2",
+       "26:32"
+      ],
+      "members": [
+       "rr_color",
+       "color_noise",
+       "color_warp_mix",
+       "color_voronoi",
+       "color_ramp"
+      ]
+     },
+     {
+      "id": "frame_cracks",
+      "type": "NodeFrame",
+      "label": "Cracks",
+      "class": "A",
+      "evidence": [
+       "10:34-10:51",
+       "26:32"
+      ],
+      "members": [
+       "rr_cracks",
+       "cracks_mask_noise",
+       "cracks_mask_ramp",
+       "cracks_warp_noise",
+       "cracks_voronoi",
+       "cracks_mix"
+      ]
+     },
+     {
+      "id": "frame_damage",
+      "type": "NodeFrame",
+      "label": "Damage",
+      "class": "A",
+      "evidence": [
+       "15:41-15:56",
+       "26:32"
+      ],
+      "members": [
+       "rr_damage",
+       "damage_warp_noise",
+       "damage_warp_mix",
+       "damage_voronoi",
+       "damage_mask_noise",
+       "damage_mask_ramp",
+       "damage_lighten"
+      ]
+     }
+    ],
+    "links": [
+     {
+      "from_node": "texcoord",
+      "from_socket": "Object",
+      "to_node": "rr_color",
+      "to_socket": "Input",
+      "t": "08:41-08:56",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t0856_reroute_color_frame.jpg",
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+      ]
+     },
+     {
+      "from_node": "rr_color",
+      "from_socket": "Output",
+      "to_node": "color_noise",
+      "to_socket": "Vector",
+      "t": "03:22-03:31 (via reroute since 08:56)",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t0350_noise_18_15_06.jpg",
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t0856_reroute_color_frame.jpg"
+      ]
+     },
+     {
+      "from_node": "rr_color",
+      "from_socket": "Output",
+      "to_node": "color_warp_mix",
+      "to_socket": "Color1",
+      "t": "04:04-04:10 (via reroute since 08:56)",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t0450_linear_light_fac01.jpg",
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t0856_reroute_color_frame.jpg"
+      ]
+     },
+     {
+      "from_node": "color_noise",
+      "from_socket": "Color",
+      "to_node": "color_warp_mix",
+      "to_socket": "Color2",
+      "t": "04:10-04:15",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t0450_linear_light_fac01.jpg"
+      ]
+     },
+     {
+      "from_node": "color_warp_mix",
+      "from_socket": "Color",
+      "to_node": "color_voronoi",
+      "to_socket": "Vector",
+      "t": "03:55-04:04 (mix dropped on the Noise->Voronoi wire)",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t0450_linear_light_fac01.jpg"
+      ]
+     },
+     {
+      "from_node": "color_voronoi",
+      "from_socket": "Distance",
+      "to_node": "color_ramp",
+      "to_socket": "Fac",
+      "t": "05:30-05:38",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t0643_ramp_to_base_color.jpg"
+      ]
+     },
+     {
+      "from_node": "color_voronoi",
+      "from_socket": "Distance",
+      "to_node": "bump2",
+      "to_socket": "Height",
+      "t": "21:18-21:30",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2122_color_voronoi_to_bump2.jpg",
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2124_color_voronoi_wire_drag.jpg",
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2128_wire_lands_bump2_height.jpg"
+      ],
+      "note": "repo says pebble Voronoi; frames show the Color-frame Voronoi (U16)"
+     },
+     {
+      "from_node": "color_voronoi",
+      "from_socket": "Distance",
+      "to_node": "rough_ramp",
+      "to_socket": "Fac",
+      "t": "25:26-25:39 (to Roughness), ramp inserted 25:47-25:55",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2530_roughness_wire_from_color_voronoi.jpg",
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2539_wire_into_roughness.jpg",
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2551_roughness_ramp_inserted.jpg"
+      ]
+     },
+     {
+      "from_node": "color_ramp",
+      "from_socket": "Color",
+      "to_node": "darken_cracks",
+      "to_socket": "Color1",
+      "t": "16:37-16:41",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1648_darken_cracks.jpg"
+      ]
+     },
+     {
+      "from_node": "texcoord",
+      "from_socket": "Object",
+      "to_node": "rr_cracks",
+      "to_socket": "Input",
+      "t": "08:58-09:06",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t0904_reroute_cracks.jpg",
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+      ]
+     },
+     {
+      "from_node": "rr_cracks",
+      "from_socket": "Output",
+      "to_node": "cracks_mask_noise",
+      "to_socket": "Vector",
+      "t": "08:37-08:41 (via reroute since 09:04)",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t0904_reroute_cracks.jpg"
+      ]
+     },
+     {
+      "from_node": "rr_cracks",
+      "from_socket": "Output",
+      "to_node": "cracks_warp_noise",
+      "to_socket": "Vector",
+      "t": "07:46-07:52 (via reroute since 09:04)",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t0812_cracks_noise_25.jpg",
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t0904_reroute_cracks.jpg"
+      ]
+     },
+     {
+      "from_node": "cracks_mask_noise",
+      "from_socket": "Fac",
+      "to_node": "cracks_mask_ramp",
+      "to_socket": "Fac",
+      "t": "09:18-09:26",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t0938_mask_ramp_0499.jpg"
+      ],
+      "note": "Fac, not Color (crop c_t0938_mask_noise_fac_to_ramp)"
+     },
+     {
+      "from_node": "cracks_warp_noise",
+      "from_socket": "Color",
+      "to_node": "cracks_voronoi",
+      "to_socket": "Vector",
+      "t": "07:52-07:58",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t0812_cracks_noise_25.jpg"
+      ]
+     },
+     {
+      "from_node": "cracks_mask_ramp",
+      "from_socket": "Color",
+      "to_node": "cracks_mix",
+      "to_socket": "Fac",
+      "t": "09:54-09:58",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1009_cracks_mix_links.jpg"
+      ]
+     },
+     {
+      "from_node": "cracks_voronoi",
+      "from_socket": "Distance",
+      "to_node": "cracks_mix",
+      "to_socket": "Color1",
+      "t": "09:58-10:02",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1009_cracks_mix_links.jpg"
+      ]
+     },
+     {
+      "from_node": "cracks_mix",
+      "from_socket": "Color",
+      "to_node": "darken_cracks",
+      "to_socket": "Color2",
+      "t": "16:41-16:45",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1648_darken_cracks.jpg"
+      ]
+     },
+     {
+      "from_node": "cracks_mix",
+      "from_socket": "Color",
+      "to_node": "crack_bump_ramp",
+      "to_socket": "Fac",
+      "t": "22:06-22:12 (to Bump 3 Height), ramp inserted 22:45-22:57",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2210_cracks_mix_to_bump3.jpg",
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2300_crack_bump_ramp_inserted.jpg"
+      ]
+     },
+     {
+      "from_node": "texcoord",
+      "from_socket": "Object",
+      "to_node": "rr_damage",
+      "to_socket": "Input",
+      "t": "12:18-12:27",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1330_damage_linear_light_002.jpg",
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1412_damage_mask_noise_35.jpg"
+      ]
+     },
+     {
+      "from_node": "rr_damage",
+      "from_socket": "Output",
+      "to_node": "damage_warp_noise",
+      "to_socket": "Vector",
+      "t": "11:53-12:04 (via reroute since 12:27)",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1412_damage_mask_noise_35.jpg"
+      ]
+     },
+     {
+      "from_node": "rr_damage",
+      "from_socket": "Output",
+      "to_node": "damage_warp_mix",
+      "to_socket": "Color1",
+      "t": "12:28-12:33",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1330_damage_linear_light_002.jpg"
+      ]
+     },
+     {
+      "from_node": "rr_damage",
+      "from_socket": "Output",
+      "to_node": "damage_mask_noise",
+      "to_socket": "Vector",
+      "t": "13:45-13:52 (Ctrl+Shift+D keeps the input wire)",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1412_damage_mask_noise_35.jpg"
+      ]
+     },
+     {
+      "from_node": "damage_warp_noise",
+      "from_socket": "Fac",
+      "to_node": "damage_warp_mix",
+      "to_socket": "Color2",
+      "t": "12:33-12:38",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1330_damage_linear_light_002.jpg"
+      ],
+      "note": "Fac, not Color (crop c_t1330_damage_noise_fac_to_color2)"
+     },
+     {
+      "from_node": "damage_warp_mix",
+      "from_socket": "Color",
+      "to_node": "damage_voronoi",
+      "to_socket": "Vector",
+      "t": "12:06-12:17 (mix dropped on the Noise->Voronoi wire)",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1330_damage_linear_light_002.jpg"
+      ]
+     },
+     {
+      "from_node": "damage_mask_noise",
+      "from_socket": "Fac",
+      "to_node": "damage_mask_ramp",
+      "to_socket": "Fac",
+      "t": "14:17-14:24",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1456_damage_ramp_black_0343.jpg",
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+      ]
+     },
+     {
+      "from_node": "damage_voronoi",
+      "from_socket": "Distance",
+      "to_node": "damage_lighten",
+      "to_socket": "Color1",
+      "t": "15:23-15:26",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1533_lighten.jpg"
+      ]
+     },
+     {
+      "from_node": "damage_mask_ramp",
+      "from_socket": "Color",
+      "to_node": "damage_lighten",
+      "to_socket": "Color2",
+      "t": "15:25-15:28",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1533_lighten.jpg"
+      ]
+     },
+     {
+      "from_node": "damage_lighten",
+      "from_socket": "Color",
+      "to_node": "damage_dark_ramp",
+      "to_socket": "Fac",
+      "t": "17:23-17:27 (to Darken #2 Color2), ramp inserted 17:52-18:00",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1811_damage_dark_ramp_0338.jpg"
+      ]
+     },
+     {
+      "from_node": "damage_lighten",
+      "from_socket": "Color",
+      "to_node": "bump4",
+      "to_socket": "Height",
+      "t": "24:18-24:27",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2422_lighten_to_bump4.jpg",
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2444_bump4_04.jpg"
+      ]
+     },
+     {
+      "from_node": "darken_cracks",
+      "from_socket": "Color",
+      "to_node": "darken_damage",
+      "to_socket": "Color1",
+      "t": "17:27-17:29",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1822_darken_to_base_color.jpg"
+      ]
+     },
+     {
+      "from_node": "damage_dark_ramp",
+      "from_socket": "Color",
+      "to_node": "darken_damage",
+      "to_socket": "Color2",
+      "t": "17:52-18:00",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1811_damage_dark_ramp_0338.jpg",
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1822_darken_to_base_color.jpg"
+      ]
+     },
+     {
+      "from_node": "darken_damage",
+      "from_socket": "Color",
+      "to_node": "principled",
+      "to_socket": "Base Color",
+      "t": "18:17-18:24",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1822_darken_to_base_color.jpg"
+      ]
+     },
+     {
+      "from_node": "texcoord",
+      "from_socket": "Object",
+      "to_node": "rr_bump",
+      "to_socket": "Input",
+      "t": "19:05-19:15",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+      ]
+     },
+     {
+      "from_node": "rr_bump",
+      "from_socket": "Output",
+      "to_node": "bump_noise",
+      "to_socket": "Vector",
+      "t": "18:55-19:02 (via reroute since 19:15)",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t1946_bump_noise_60.jpg",
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+      ]
+     },
+     {
+      "from_node": "bump_noise",
+      "from_socket": "Fac",
+      "to_node": "bump1",
+      "to_socket": "Height",
+      "t": "20:20-20:33",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2045_bump1_01.jpg"
+      ]
+     },
+     {
+      "from_node": "bump1",
+      "from_socket": "Normal",
+      "to_node": "bump2",
+      "to_socket": "Normal",
+      "t": "20:58-21:10",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2128_wire_lands_bump2_height.jpg"
+      ]
+     },
+     {
+      "from_node": "bump2",
+      "from_socket": "Normal",
+      "to_node": "bump3",
+      "to_socket": "Normal",
+      "t": "21:52-21:58",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2224_bump3_03.jpg"
+      ]
+     },
+     {
+      "from_node": "crack_bump_ramp",
+      "from_socket": "Color",
+      "to_node": "bump3",
+      "to_socket": "Height",
+      "t": "22:45-22:57",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2300_crack_bump_ramp_inserted.jpg",
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2327_crack_bump_ramp_0094.jpg"
+      ]
+     },
+     {
+      "from_node": "bump3",
+      "from_socket": "Normal",
+      "to_node": "bump4",
+      "to_socket": "Normal",
+      "t": "24:04-24:12",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2422_lighten_to_bump4.jpg"
+      ]
+     },
+     {
+      "from_node": "bump4",
+      "from_socket": "Normal",
+      "to_node": "principled",
+      "to_socket": "Normal",
+      "t": "24:04-24:12 (end of the chain; Bump 1 -> Normal since 20:33)",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2444_bump4_04.jpg"
+      ]
+     },
+     {
+      "from_node": "rough_ramp",
+      "from_socket": "Color",
+      "to_node": "principled",
+      "to_socket": "Roughness",
+      "t": "25:47-25:55",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2551_roughness_ramp_inserted.jpg",
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2622_roughness_hex_ABABAB.jpg"
+      ]
+     },
+     {
+      "from_node": "principled",
+      "from_socket": "BSDF",
+      "to_node": "output",
+      "to_socket": "Surface",
+      "t": "01:57 (default material)",
+      "class": "A",
+      "verified_final": "26:32",
+      "evidence_frames": [
+       "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+      ]
+     }
+    ],
+    "links_collapsed_without_reroutes": [
+     {
+      "from_node": "texcoord",
+      "from_socket": "Object",
+      "to_node": "color_noise",
+      "to_socket": "Vector"
+     },
+     {
+      "from_node": "texcoord",
+      "from_socket": "Object",
+      "to_node": "color_warp_mix",
+      "to_socket": "Color1"
+     },
+     {
+      "from_node": "color_noise",
+      "from_socket": "Color",
+      "to_node": "color_warp_mix",
+      "to_socket": "Color2"
+     },
+     {
+      "from_node": "color_warp_mix",
+      "from_socket": "Color",
+      "to_node": "color_voronoi",
+      "to_socket": "Vector"
+     },
+     {
+      "from_node": "color_voronoi",
+      "from_socket": "Distance",
+      "to_node": "color_ramp",
+      "to_socket": "Fac"
+     },
+     {
+      "from_node": "color_voronoi",
+      "from_socket": "Distance",
+      "to_node": "bump2",
+      "to_socket": "Height"
+     },
+     {
+      "from_node": "color_voronoi",
+      "from_socket": "Distance",
+      "to_node": "rough_ramp",
+      "to_socket": "Fac"
+     },
+     {
+      "from_node": "color_ramp",
+      "from_socket": "Color",
+      "to_node": "darken_cracks",
+      "to_socket": "Color1"
+     },
+     {
+      "from_node": "texcoord",
+      "from_socket": "Object",
+      "to_node": "cracks_mask_noise",
+      "to_socket": "Vector"
+     },
+     {
+      "from_node": "texcoord",
+      "from_socket": "Object",
+      "to_node": "cracks_warp_noise",
+      "to_socket": "Vector"
+     },
+     {
+      "from_node": "cracks_mask_noise",
+      "from_socket": "Fac",
+      "to_node": "cracks_mask_ramp",
+      "to_socket": "Fac"
+     },
+     {
+      "from_node": "cracks_warp_noise",
+      "from_socket": "Color",
+      "to_node": "cracks_voronoi",
+      "to_socket": "Vector"
+     },
+     {
+      "from_node": "cracks_mask_ramp",
+      "from_socket": "Color",
+      "to_node": "cracks_mix",
+      "to_socket": "Fac"
+     },
+     {
+      "from_node": "cracks_voronoi",
+      "from_socket": "Distance",
+      "to_node": "cracks_mix",
+      "to_socket": "Color1"
+     },
+     {
+      "from_node": "cracks_mix",
+      "from_socket": "Color",
+      "to_node": "darken_cracks",
+      "to_socket": "Color2"
+     },
+     {
+      "from_node": "cracks_mix",
+      "from_socket": "Color",
+      "to_node": "crack_bump_ramp",
+      "to_socket": "Fac"
+     },
+     {
+      "from_node": "texcoord",
+      "from_socket": "Object",
+      "to_node": "damage_warp_noise",
+      "to_socket": "Vector"
+     },
+     {
+      "from_node": "texcoord",
+      "from_socket": "Object",
+      "to_node": "damage_warp_mix",
+      "to_socket": "Color1"
+     },
+     {
+      "from_node": "texcoord",
+      "from_socket": "Object",
+      "to_node": "damage_mask_noise",
+      "to_socket": "Vector"
+     },
+     {
+      "from_node": "damage_warp_noise",
+      "from_socket": "Fac",
+      "to_node": "damage_warp_mix",
+      "to_socket": "Color2"
+     },
+     {
+      "from_node": "damage_warp_mix",
+      "from_socket": "Color",
+      "to_node": "damage_voronoi",
+      "to_socket": "Vector"
+     },
+     {
+      "from_node": "damage_mask_noise",
+      "from_socket": "Fac",
+      "to_node": "damage_mask_ramp",
+      "to_socket": "Fac"
+     },
+     {
+      "from_node": "damage_voronoi",
+      "from_socket": "Distance",
+      "to_node": "damage_lighten",
+      "to_socket": "Color1"
+     },
+     {
+      "from_node": "damage_mask_ramp",
+      "from_socket": "Color",
+      "to_node": "damage_lighten",
+      "to_socket": "Color2"
+     },
+     {
+      "from_node": "damage_lighten",
+      "from_socket": "Color",
+      "to_node": "damage_dark_ramp",
+      "to_socket": "Fac"
+     },
+     {
+      "from_node": "damage_lighten",
+      "from_socket": "Color",
+      "to_node": "bump4",
+      "to_socket": "Height"
+     },
+     {
+      "from_node": "darken_cracks",
+      "from_socket": "Color",
+      "to_node": "darken_damage",
+      "to_socket": "Color1"
+     },
+     {
+      "from_node": "damage_dark_ramp",
+      "from_socket": "Color",
+      "to_node": "darken_damage",
+      "to_socket": "Color2"
+     },
+     {
+      "from_node": "darken_damage",
+      "from_socket": "Color",
+      "to_node": "principled",
+      "to_socket": "Base Color"
+     },
+     {
+      "from_node": "texcoord",
+      "from_socket": "Object",
+      "to_node": "bump_noise",
+      "to_socket": "Vector"
+     },
+     {
+      "from_node": "bump_noise",
+      "from_socket": "Fac",
+      "to_node": "bump1",
+      "to_socket": "Height"
+     },
+     {
+      "from_node": "bump1",
+      "from_socket": "Normal",
+      "to_node": "bump2",
+      "to_socket": "Normal"
+     },
+     {
+      "from_node": "bump2",
+      "from_socket": "Normal",
+      "to_node": "bump3",
+      "to_socket": "Normal"
+     },
+     {
+      "from_node": "crack_bump_ramp",
+      "from_socket": "Color",
+      "to_node": "bump3",
+      "to_socket": "Height"
+     },
+     {
+      "from_node": "bump3",
+      "from_socket": "Normal",
+      "to_node": "bump4",
+      "to_socket": "Normal"
+     },
+     {
+      "from_node": "bump4",
+      "from_socket": "Normal",
+      "to_node": "principled",
+      "to_socket": "Normal"
+     },
+     {
+      "from_node": "rough_ramp",
+      "from_socket": "Color",
+      "to_node": "principled",
+      "to_socket": "Roughness"
+     },
+     {
+      "from_node": "principled",
+      "from_socket": "BSDF",
+      "to_node": "output",
+      "to_socket": "Surface"
+     }
+    ]
+   },
+   "counts": {
+    "shader_nodes": 28,
+    "reroutes": 4,
+    "frames": 3,
+    "links_with_reroutes": 42,
+    "links_collapsed": 38
+   },
+   "suggested_interface": [
+    {
+     "name": "Crack Amount",
+     "socket_type": "NodeSocketFloat",
+     "default": 0.499,
+     "min": 0.0,
+     "max": 1.0,
+     "internal_destination": "cracks_mask_ramp element 0 position",
+     "visible_effect": "higher = more crack regions (noise below the black stop keeps its cracks; demo 0.231-0.548 at 17:00-17:06)",
+     "class": "C",
+     "evidence": "16:52-17:08 narration (B) + demo frames (A)"
+    },
+    {
+     "name": "Crack Width",
+     "socket_type": "NodeSocketFloat",
+     "default": 0.094,
+     "min": 0.0,
+     "max": 1.0,
+     "internal_destination": "crack_bump_ramp element 1 position",
+     "visible_effect": "lower = thinner recessed crack lines (tried 0.042-0.109)",
+     "class": "C",
+     "evidence": "22:59-23:30 (A values, B effect)"
+    },
+    {
+     "name": "Damage Amount",
+     "socket_type": "NodeSocketFloat",
+     "default": 0.35,
+     "min": 0.0,
+     "max": 1.0,
+     "internal_destination": "damage_mask_ramp element 0 (0.35) and element 1 (0.442) positions, keep the 0.092 gap",
+     "visible_effect": "stops further right = more/larger damaged patches",
+     "class": "C",
+     "evidence": "14:43-14:52 narration (B)"
+    },
+    {
+     "name": "Damage Darkness",
+     "socket_type": "NodeSocketFloat",
+     "default": 0.338,
+     "min": 0.0,
+     "max": 1.0,
+     "internal_destination": "damage_dark_ramp element 0 position",
+     "visible_effect": "higher = darker damaged patches",
+     "class": "C",
+     "evidence": "18:02-18:11"
+    },
+    {
+     "name": "Roughness Min",
+     "socket_type": "NodeSocketFloat",
+     "default": 0.407,
+     "min": 0.0,
+     "max": 1.0,
+     "internal_destination": "rough_ramp element 0 colour (linear grey; ABABAB sRGB = 0.407 linear)",
+     "visible_effect": "lower = shinier / wet look",
+     "class": "C",
+     "evidence": "25:57-26:22 narration (B), value A"
+    },
+    {
+     "name": "Color Dark",
+     "socket_type": "NodeSocketColor",
+     "default": "1A1817 sRGB (0.0103, 0.0091, 0.0086)",
+     "min": null,
+     "max": null,
+     "internal_destination": "color_ramp element 0 colour",
+     "visible_effect": "asphalt dark tone",
+     "class": "C",
+     "evidence": "06:12 (A value)"
+    },
+    {
+     "name": "Color Light",
+     "socket_type": "NodeSocketColor",
+     "default": "4D4D4D sRGB (0.0742)",
+     "min": null,
+     "max": null,
+     "internal_destination": "color_ramp element 1 colour",
+     "visible_effect": "asphalt light tone",
+     "class": "C",
+     "evidence": "06:28 (A value)"
+    },
+    {
+     "name": "Bump Strength (x4)",
+     "socket_type": "NodeSocketFloat",
+     "default": "0.1 / 0.2 / 0.3 / 0.4",
+     "min": 0.0,
+     "max": 1.0,
+     "internal_destination": "bump1..bump4 Strength",
+     "visible_effect": "grain / cell undulation / crack depth / damage relief",
+     "class": "C",
+     "evidence": "20:44, 21:40, 22:20, 24:40 (A values)"
+    },
+    {
+     "name": "Aggregate Size (m)",
+     "socket_type": "NodeSocketFloat",
+     "default": "derived: scales 18/10/2.5/4.5/5/20/110/3.5/60 on a ~1 m-radius object",
+     "min": null,
+     "max": null,
+     "internal_destination": "all texture Scale inputs (common factor), per DECISIONS D4",
+     "visible_effect": "texel scale in metres",
+     "class": "C",
+     "evidence": "library contract (not in video)"
+    },
+    {
+     "name": "Use UV / Tile Size",
+     "socket_type": "NodeSocketFloat",
+     "default": "0 / builder",
+     "min": null,
+     "max": null,
+     "internal_destination": "coordinate source (Object vs UV torus), per DECISIONS D2",
+     "visible_effect": "library contract",
+     "class": "C",
+     "evidence": "DECISIONS D2 (not in video)"
+    }
+   ]
+  }
+ ],
+ "blender_5x_socket_notes": {
+  "ShaderNodeValToRGB": "input 'Fac' is named 'Factor' in 5.x (identifier 'Fac'); outputs 'Color', 'Alpha'",
+  "ShaderNodeTexNoise": "output 'Fac' is named 'Factor' in 5.x (identifier 'Fac'); 'Color'",
+  "ShaderNodeTexVoronoi": "outputs 'Distance', 'Color', 'Position' (+ 'W', 'Radius' hidden)",
+  "ShaderNodeMix(RGBA)": "Factor inputs[0], A inputs[6], B inputs[7], Result outputs[2]",
+  "ShaderNodeBump": "inputs 'Strength', 'Distance', 'Filter Width' (5.x only), 'Height', 'Normal'; output 'Normal'",
+  "ShaderNodeBsdfPrincipled": "'Base Color', 'Roughness', 'Normal' unchanged; output 'BSDF'"
+ },
+ "math_notes": {
+  "LINEAR_LIGHT": "result = A + Fac * (2*B - 1)  (B = noise in 0..1 -> offset +-Fac, no sliding)",
+  "DARKEN (Fac 1)": "min(A, B) per channel",
+  "LIGHTEN (Fac 1)": "max(A, B) per channel",
+  "MIX": "A*(1-Fac) + B*Fac",
+  "colour->float": "ramps and mixes here are grey, so the implicit colour-to-float conversion (Height, Fac, Roughness) is the grey value",
+  "hex": "Blender hex fields are gamma-corrected sRGB; ramp colours are stored linear (color_linear_rgba)"
+ },
+ "recipe_repo_cross_check": [
+  {
+   "item": "Base ColorRamp stop 0",
+   "repo": "#1A1A1A (procedure + program)",
+   "frame": "Hex 1A1817 (06:12 caption)",
+   "verdict": "CONFLICT - frame wins (U15)"
+  },
+  {
+   "item": "Base ColorRamp stop 1",
+   "repo": "#4D4D4D",
+   "frame": "Hex 4D4D4D (06:28)",
+   "verdict": "agree"
+  },
+  {
+   "item": "Colour Noise",
+   "repo": "18 / 15 / 0.6 / 0",
+   "frame": "18 / 15 / 0.6 / 0",
+   "verdict": "agree"
+  },
+  {
+   "item": "Colour warp MixRGB",
+   "repo": "Linear Light 0.10, Object->Color1, Noise Color->Color2",
+   "frame": "same",
+   "verdict": "agree"
+  },
+  {
+   "item": "Base Voronoi",
+   "repo": "Smooth F1, Minkowski, Smoothness 1, Exponent 32, Scale 10",
+   "frame": "same (+ Randomness 1, 3D)",
+   "verdict": "agree"
+  },
+  {
+   "item": "Cracks warp Noise",
+   "repo": "2.5 / 15 / 0.5 / 0, Color->Voronoi Vector",
+   "frame": "same",
+   "verdict": "agree"
+  },
+  {
+   "item": "Cracks Voronoi",
+   "repo": "Distance to Edge (scale not given)",
+   "frame": "Distance to Edge, Scale 5, Randomness 1",
+   "verdict": "agree (repo default)"
+  },
+  {
+   "item": "Cracks mask Noise",
+   "repo": "4.5 / 15 / 0.5 / 0, Fac->ramp",
+   "frame": "same",
+   "verdict": "agree"
+  },
+  {
+   "item": "Cracks mask ramp",
+   "repo": "'black stop toward the centre' (no number); per-frame notes ~0.48-0.49",
+   "frame": "black 0.499 (09:38, 26:32)",
+   "verdict": "frame gives the number"
+  },
+  {
+   "item": "Cracks Mix",
+   "repo": "Fac=mask ramp, Color1=Voronoi, Color2=white",
+   "frame": "same, blend Mix, Clamp off",
+   "verdict": "agree"
+  },
+  {
+   "item": "Pebble warp",
+   "repo": "Noise 20/15/0.6/0, Fac->Color2, Linear Light 0.02",
+   "frame": "same",
+   "verdict": "agree"
+  },
+  {
+   "item": "Pebble Voronoi",
+   "repo": "Distance to Edge, 4D, Scale 110, Randomness 1",
+   "frame": "same, W 0",
+   "verdict": "agree"
+  },
+  {
+   "item": "Damage mask Noise",
+   "repo": "3.5 / 15 / 0.5 / 0",
+   "frame": "same",
+   "verdict": "agree"
+  },
+  {
+   "item": "Damage mask ramp",
+   "repo": "'stops close together' (no number); per-frame notes 0.27-0.31 / 0.37-0.42 (OCR)",
+   "frame": "black 0.343 legible pre-cut (~0.35 after), white 0.442",
+   "verdict": "frame gives the numbers (U1)"
+  },
+  {
+   "item": "Lighten",
+   "repo": "Fac 1, Color1 = pebbles, Color2 = mask ramp",
+   "frame": "same",
+   "verdict": "agree"
+  },
+  {
+   "item": "Darken #1 / #2",
+   "repo": "Fac 1; base ramp + cracks mix; combined + damage-dark ramp",
+   "frame": "same",
+   "verdict": "agree"
+  },
+  {
+   "item": "Damage dark ramp",
+   "repo": "'black stop to the right' (no number)",
+   "frame": "black 0.338 (18:11, 26:32)",
+   "verdict": "frame gives the number"
+  },
+  {
+   "item": "Bump noise",
+   "repo": "60 / 15 / 0.4 / 0",
+   "frame": "same",
+   "verdict": "agree"
+  },
+  {
+   "item": "Bump 1",
+   "repo": "Strength 0.10",
+   "frame": "Strength 0.1, Distance 1.0",
+   "verdict": "agree (repo omits Distance)"
+  },
+  {
+   "item": "Bump 2 Height",
+   "repo": "Voronoi('pebbles') Distance",
+   "frame": "Color-frame (base, Smooth F1) Voronoi Distance (21:22-21:28, 26:32)",
+   "verdict": "CONFLICT - frame wins (U16)"
+  },
+  {
+   "item": "Bump 3",
+   "repo": "ramp(cracks mix) -> Height, 0.30",
+   "frame": "same; white stop 0.094",
+   "verdict": "agree"
+  },
+  {
+   "item": "Bump 4",
+   "repo": "Damage Lighten -> Height, 0.40 -> Normal",
+   "frame": "same",
+   "verdict": "agree"
+  },
+  {
+   "item": "Roughness ramp",
+   "repo": "#ABABAB -> #FFFFFF, base Voronoi Distance",
+   "frame": "ABABAB (26:22) -> FFFFFF (26:28), base Voronoi Distance",
+   "verdict": "agree"
+  }
+ ],
+ "reference_frames": [
+  {
+   "path": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0003_intro_final_render.jpg",
+   "t": "00:03.5",
+   "what": "intro overlay of the finished render: camera view, whole sphere, Cycles, key emitter 100 + rim strip 5 + machine_shop_02_1k HDRI, black background",
+   "crop": {
+    "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0003_intro_render_overlay.png",
+    "bounds": [
+     538,
+     0,
+     2022,
+     1440
+    ],
+    "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0003_intro_final_render.jpg"
+   }
+  },
+  {
+   "path": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2638_final_render.jpg",
+   "t": "26:38.5",
+   "what": "F12 Render Result of the finished material, same camera and lighting, square image",
+   "crop": {
+    "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2638_final_render.png",
+    "bounds": [
+     630,
+     99,
+     1930,
+     1398
+    ],
+    "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2638_final_render.jpg"
+   }
+  },
+  {
+   "path": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2510_viewport_closeup_reference.jpg",
+   "t": "25:10.5",
+   "what": "Cycles viewport close-up (render region, 10 samples) of a damaged patch with pebbles, recessed edges and cracks; roughness ramp not yet connected (constant 0.5)",
+   "crop": {
+    "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2510_viewport_closeup_reference.png",
+    "bounds": [
+     0,
+     384,
+     659,
+     1088
+    ],
+    "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2510_viewport_closeup_reference.jpg"
+   }
+  },
+  {
+   "path": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg",
+   "t": "26:32.5",
+   "what": "final node graph fully visible + camera-view viewport of the final material (render region)"
+  }
+ ],
+ "unresolved": [
+  {
+   "id": "U1",
+   "class": "D",
+   "item": "Damage mask ramp: final black-stop position",
+   "detail": "Last legible value 0.343 (index 0 selected, 14:56.5-14:57.1). A jump cut follows at ~14:57.1; from 14:57.2 on stop 1 (0.442) is selected and stop 0 is never shown numerically again. Pixel measurement of the ramp bar after the cut (dashed active-stop line used as a scale reference: 0.442 measured at 0.444) puts the black stop at 0.350 (14:57.4, bar 384 px) and 0.353 (26:32, bar 127 px). The same method on a pre-cut frame with the black stop at 0.351 measured 0.348. Recipe per-frame notes (OCR) list 0.27-0.31 and are not reliable.",
+   "resolution": "spec uses 0.35 (class C); 0.343 is the last frame-legible value. Visually negligible (mask threshold); exposed as 'Damage Amount' in the suggested interface."
+  },
+  {
+   "id": "U2",
+   "class": "D",
+   "item": "Final render samples, denoiser, light paths, clamping",
+   "detail": "Sampling / Light Paths panels collapsed in every frame; the viewport overlay shows 10 viewport samples ('Sample 9/10').",
+   "resolution": "builder chooses; report in renders."
+  },
+  {
+   "id": "U3",
+   "class": "D",
+   "item": "Colour management (view transform, look, exposure, gamma)",
+   "detail": "Color Management panel collapsed (00:03, 01:08). Blender 3.2 default is Filmic / None; 5.x default is AgX.",
+   "resolution": "assume Filmic for comparisons against the reference frames (C)."
+  },
+  {
+   "id": "U4",
+   "class": "D",
+   "item": "Output resolution in pixels",
+   "detail": "Render Result at 26:38 is square (A) but its size is not displayed.",
+   "resolution": "use any square resolution."
+  },
+  {
+   "id": "U5",
+   "class": "D",
+   "item": "Camera focal length, sensor and transform",
+   "detail": "Camera seen only as a viewport gizmo (00:58, 01:08); no camera properties shown.",
+   "resolution": "frame the sphere to ~95 % of a square image height as at 26:38 (C)."
+  },
+  {
+   "id": "U6",
+   "class": "D",
+   "item": "Emitter geometry, sizes, positions, rotations",
+   "detail": "Key emitter ('Lighting', mesh 'Plane', Emission 100) appears as a white ellipse/disc; rim emitter ('Lighting.001', 'Plane.001', Emission 5) is a long strip with grid lines. Scene stats (85 v / 65 f left after an s=6 icosphere) fit a 4-vertex plane plus an 81-vertex/64-face object, but which one is which is ambiguous.",
+   "resolution": "lighting is reported separately from the material (DECISIONS D6)."
+  },
+  {
+   "id": "U7",
+   "class": "D",
+   "item": "Icosphere radius, object scale, modifiers, shading",
+   "detail": "Never shown. Subdivisions 6 inferred from the scene stats (C); radius 1 m (Add Icosphere default) assumed (C).",
+   "resolution": "metre conversion of texture scales assumes radius 1 m (C)."
+  },
+  {
+   "id": "U8",
+   "class": "D",
+   "item": "Material Settings (displacement method, blend mode)",
+   "detail": "Material properties tab never opened. Output Displacement is unlinked (A), so the method does not matter for the shading.",
+   "resolution": "keep 5.x default 'BUMP'."
+  },
+  {
+   "id": "U9",
+   "class": "C",
+   "item": "Film > Transparent",
+   "detail": "Rendered viewport background is a checkerboard (A), which indicates transparent film; the Render Result shows black around the sphere.",
+   "resolution": "render on black or transparent; does not affect the material."
+  },
+  {
+   "id": "U10",
+   "class": "D",
+   "item": "Principled Subsurface Radius / Subsurface Color numeric values",
+   "detail": "Radius is a collapsed vector, colour only a light-grey swatch; Subsurface weight is 0 so they have no effect.",
+   "resolution": "defaults (1, 0.2, 0.1) / 0.8 grey (C)."
+  },
+  {
+   "id": "U11",
+   "class": "D",
+   "item": "MixRGB 'Use Alpha' option",
+   "detail": "Only in the sidebar (N panel), never shown.",
+   "resolution": "default off (C)."
+  },
+  {
+   "id": "U12",
+   "class": "D",
+   "item": "HDRI file",
+   "detail": "machine_shop_02_1k.hdr (A) is a Poly Haven download; downloads are not allowed (DECISIONS D6).",
+   "resolution": "substitute a bundled studio-light HDRI; compare lighting separately."
+  },
+  {
+   "id": "U13",
+   "class": "D",
+   "item": "Bump 'Filter Width' (5.x only) and Bump 'Distance' default",
+   "detail": "Blender 5.2.3 creates ShaderNodeBump with Distance 0.001 and a new 'Filter Width' input (0.1); 3.2 had Distance 1.0 (A, all four bumps) and no filter width.",
+   "resolution": "set Distance 1.0 explicitly; keep Filter Width 0.1 and compare against 1.0 in a test render (C)."
+  },
+  {
+   "id": "U14",
+   "class": "C",
+   "item": "3.2 -> 5.x Principled and node-version mapping",
+   "detail": "3.2 'Specular 0.5' + 'IOR 1.45' (transmission only) vs 5.x IOR-driven F0; 5.x default distribution MULTI_GGX vs GGX in the frame; MixRGB legacy vs ShaderNodeMix(RGBA).",
+   "resolution": "5.x: IOR 1.5, Specular IOR Level 0.5, distribution GGX, ShaderNodeMix RGBA with clamp_result False (C)."
+  },
+  {
+   "id": "U15",
+   "class": "B/A",
+   "item": "Recipe repo conflict: base ramp stop 0",
+   "detail": "Repo procedure/program: #1A1A1A. Frame 06:12: on-screen caption and picker 'Hex: 1A1817' (narration '1 ... 1817').",
+   "resolution": "RESOLVED: frame wins, 1A1817."
+  },
+  {
+   "id": "U16",
+   "class": "B/A",
+   "item": "Recipe repo conflict: Bump #2 Height source",
+   "detail": "Repo: pebble Voronoi Distance. Frames 21:22-21:28: the wire starts at the Color-frame Voronoi (Smooth F1, Minkowski, Scale 10, Exponent 32) Distance and lands on Bump #2 Height; the preview at 20:54 shows the Smooth F1 cells; final overview 26:32 shows three wires leaving that Distance socket.",
+   "resolution": "RESOLVED: frame wins, base Voronoi Distance -> Bump #2 Height."
+  },
+  {
+   "id": "U17",
+   "class": "A",
+   "item": "Garbled narration",
+   "detail": "'a hex value of 1 ... 1817' (06:09) and 'aby ... white' (26:20-26:29, transcript gap) are resolved by on-screen captions 1A1817 (06:12) and ABABAB (26:22) and the picker FFFFFF (26:28).",
+   "resolution": "RESOLVED."
+  },
+  {
+   "id": "U18",
+   "class": "C",
+   "item": "Hidden nodes outside the final overview",
+   "detail": "The 26:32 overview shows the whole tree from Texture Coordinate to Material Output; the Node Wrangler 'Viewer' seen earlier (e.g. 18:22) is gone after the Principled preview.",
+   "resolution": "assume no other nodes (C)."
+  },
+  {
+   "id": "U19",
+   "class": "C",
+   "item": "Exact creation instants of some links",
+   "detail": "Several links were made while the view was panning; times are given as windows (+-3 s). The final topology is verified on the 26:32 overview, not on the creation frames.",
+   "resolution": "no effect on the graph."
+  }
+ ]
+}

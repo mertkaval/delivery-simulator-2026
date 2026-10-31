@@ -1,0 +1,26 @@
+{
+ "PM_GlassCircles": {
+  "file": "C:\\GodotProjects\\delivery-simulator-2026\\tools\\materials\\reconstruction\\glass\\renders\\PM_GlassCircles_road.png",
+  "seconds": 4.6
+ },
+ "PM_GlassVoronoi": {
+  "file": "C:\\GodotProjects\\delivery-simulator-2026\\tools\\materials\\reconstruction\\glass\\renders\\PM_GlassVoronoi_road.png",
+  "seconds": 3.7
+ },
+ "PM_GlassCells": {
+  "file": "C:\\GodotProjects\\delivery-simulator-2026\\tools\\materials\\reconstruction\\glass\\renders\\PM_GlassCells_road.png",
+  "seconds": 4.2
+ },
+ "PM_GlassWavy": {
+  "file": "C:\\GodotProjects\\delivery-simulator-2026\\tools\\materials\\reconstruction\\glass\\renders\\PM_GlassWavy_road.png",
+  "seconds": 4.7
+ },
+ "PM_GlassBlobby": {
+  "file": "C:\\GodotProjects\\delivery-simulator-2026\\tools\\materials\\reconstruction\\glass\\renders\\PM_GlassBlobby_road.png",
+  "seconds": 4.7
+ },
+ "PM_GlassFrosted": {
+  "file": "C:\\GodotProjects\\delivery-simulator-2026\\tools\\materials\\reconstruction\\glass\\renders\\PM_GlassFrosted_road.png",
+  "seconds": 3.1
+ }
+}

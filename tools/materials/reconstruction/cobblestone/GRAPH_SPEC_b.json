@@ -1,0 +1,3342 @@
+{
+ "video": {
+  "id": "30vbbpy9zwg",
+  "title": "Procedural Cobblestone Ground Material (Blender Tutorial)",
+  "author": "Ryan King Art",
+  "date": "2026-01-12",
+  "duration": "40:41",
+  "resolution": "2560x1440 VP9 60 fps"
+ },
+ "segment": {
+  "id": "b",
+  "range": "26:10-40:41",
+  "chapters": {
+   "Node Group": "26:10-40:12",
+   "Closing": "40:12-40:41"
+  },
+  "also_reviewed": "0:00-3:36 (intro, Customizable Node)"
+ },
+ "blender_version": "5.0.1",
+ "evidence_classes": {
+  "A": "directly observed in a frame",
+  "B": "narration / recipe repo only",
+  "C": "our inference / measurement",
+  "D": "unresolved"
+ },
+ "time_base": "Event times are video times. Review frames were extracted at 1 fps with ffmpeg's fps filter, which samples t = N + 0.5 s; every evidence frame below was re-extracted at the exact time in 'frames' (seconds) and verified against the reviewed frame. File names use the floor second (t<mmss>).",
+ "scene": {
+  "object": {
+   "value": "Icosphere (mesh) in 'Collection'; viewport stats 642 verts / 1,280 faces / 1,280 tris",
+   "class": "A",
+   "evidence": [
+    "26:46",
+    "40:12",
+    "tools/materials/reconstruction/cobblestone/evidence/b/frames/t4012_final_group_node.jpg"
+   ]
+  },
+  "subdivisions": {
+   "value": "narration 'subdivisions up to six' (4:17) but stats 642/1,280 = Blender icosphere subdivisions 4",
+   "class": "D"
+  },
+  "size": {
+   "value": "scaled to 0.5 and applied (Ctrl+A) -> ~1 m diameter sphere (narration 4:45-4:53)",
+   "class": "B"
+  },
+  "shading": {
+   "value": "Shade Smooth (4:20)",
+   "class": "B"
+  },
+  "modifiers": {
+   "value": "Subdivision Surface, Levels Viewport 0, Render 3 (4:55-5:05)",
+   "class": "B"
+  },
+  "camera": {
+   "value": "viewport in 'Camera Perspective'; camera aimed at the object, focal length 80 mm (5:23); resolution 2560x2560 (5:28)",
+   "class": "A (view) / B (values)"
+  },
+  "lighting": {
+   "value": "Sun strength 15, temperature 6000 K (5:36-5:42); Area light shape Disk, 300 W, slightly yellow, behind the object as a rim light (5:50-6:02); World: Environment Texture 'fish_hoek_beach' 1K HDR from Poly Haven (6:07-6:38)",
+   "class": "B",
+   "project_note": "D6: no download; use a bundled studio-light HDRI and report lighting differences separately"
+  },
+  "render_engine": {
+   "value": "Cycles",
+   "class": "C",
+   "evidence": [
+    "26:51 Cycles-only material settings (Emission Sampling, Volume Sampling/Interpolation)",
+    "viewport 'Sample n/10'"
+   ]
+  },
+  "samples": {
+   "value": "viewport 10 ('Sample 5/10' at 40:14); final render samples not shown",
+   "class": "A / D"
+  },
+  "film": {
+   "value": "Transparent (6:40)",
+   "class": "B"
+  },
+  "color_management": {
+   "value": "View 'Filmic', Look 'Very High Contrast' (6:47-6:51)",
+   "class": "B"
+  },
+  "displacement": {
+   "value": "material Displacement = 'Displacement and Bump' (true displacement + bump); Displacement node Object Space, Midlevel 0.000, Scale 0.020 (exposed as Displacement Strength)",
+   "class": "A",
+   "evidence": [
+    "26:10",
+    "26:51"
+   ]
+  },
+  "texture_coordinates": {
+   "value": "Texture Coordinate 'Object' output (no object assigned) -> Mapping (Point) -> every texture vector, except the two cell Voronoi textures, which take the Linear Light result (Mapping vector distorted by a Noise texture)",
+   "class": "A"
+  },
+  "mapping": {
+   "value": "Location 0,0,0 m; Rotation 0,0,0 deg; Scale <- Material Scale (default 1.0, uniform)",
+   "class": "A"
+  },
+  "blender_version": {
+   "value": "5.0.1",
+   "class": "A",
+   "evidence": [
+    "status bar 26:44-40:12"
+   ]
+  },
+  "units_note": {
+   "value": "Object space of a ~1 m sphere, so the tutorial scales are already close to metres: Voronoi scale 7 -> stones ~0.14 m, dirt noise 20, moss noises 15-25",
+   "class": "C"
+  }
+ },
+ "materials": [
+  {
+   "name": "Cobblestone Ground",
+   "settings": {
+    "Name": {
+     "value": "Cobblestone Ground",
+     "bpy_hint": "material.name",
+     "class": "A",
+     "evidence": [
+      "26:46 header",
+      "40:12"
+     ]
+    },
+    "Settings > Pass Index": {
+     "value": 0,
+     "bpy_hint": "material.pass_index",
+     "class": "A",
+     "evidence": [
+      "26:51"
+     ]
+    },
+    "Surface > Displacement": {
+     "value": "Displacement and Bump",
+     "bpy_hint": "material.displacement_method = 'BOTH' (C; read the enum at build time)",
+     "class": "A",
+     "evidence": [
+      "26:51"
+     ]
+    },
+    "Surface > Emission Sampling": {
+     "value": "Auto",
+     "bpy_hint": "Cycles material setting (C)",
+     "class": "A",
+     "evidence": [
+      "26:51"
+     ]
+    },
+    "Surface > Transparent Shadows": {
+     "value": true,
+     "bpy_hint": "Cycles material setting (C)",
+     "class": "A",
+     "evidence": [
+      "26:51"
+     ]
+    },
+    "Surface > Bump Map Correction": {
+     "value": true,
+     "bpy_hint": "Cycles material setting, property name not verified (C)",
+     "class": "A",
+     "evidence": [
+      "26:51"
+     ]
+    },
+    "Volume > Sampling": {
+     "value": "Multiple Importance",
+     "bpy_hint": "Cycles material setting (C)",
+     "class": "A",
+     "evidence": [
+      "26:51"
+     ]
+    },
+    "Volume > Interpolation": {
+     "value": "Linear",
+     "bpy_hint": "Cycles material setting (C)",
+     "class": "A",
+     "evidence": [
+      "26:51"
+     ]
+    }
+   },
+   "groups": [
+    {
+     "name": "Cobblestone Ground",
+     "bl_idname": "ShaderNodeTree",
+     "panels": [
+      "Rock Distortion",
+      "Dirt & Moss",
+      "Cobblestone Chunks",
+      "Rocks and Moss",
+      "Cobblestone Rocks"
+     ],
+     "interface": [
+      {
+       "name": "Shader",
+       "in_out": "OUTPUT",
+       "panel": null,
+       "socket_type": "NodeSocketShader",
+       "subtype": null,
+       "default": null,
+       "min": null,
+       "max": null,
+       "description_seen": "",
+       "internal_destinations": [
+        "<- Mix Shader 'Mix Rocks & Dirt' (final_mix).Shader"
+       ],
+       "visible_effect": "final surface shader -> Material Output Surface",
+       "class": "A",
+       "evidence": [
+        "26:32",
+        "35:50",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t2632_group_node_cobblestone_ground.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3550_mix_rocks_dirt_displacement.jpg"
+       ]
+      },
+      {
+       "name": "Displacement",
+       "in_out": "OUTPUT",
+       "panel": null,
+       "socket_type": "NodeSocketVector",
+       "subtype": "NONE",
+       "default": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "min": null,
+       "max": null,
+       "description_seen": "(empty)",
+       "internal_destinations": [
+        "<- Displacement node (displacement).Displacement"
+       ],
+       "visible_effect": "displacement vector -> Material Output Displacement",
+       "class": "A",
+       "evidence": [
+        "38:54",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3854_displacement_output_props.jpg"
+       ]
+      },
+      {
+       "name": "Material Scale",
+       "in_out": "INPUT",
+       "panel": null,
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.0,
+       "min": "-inf",
+       "max": "inf",
+       "description_seen": "The amount ...ng each axis",
+       "internal_destinations": [
+        "mapping.Scale (float -> uniform vector)"
+       ],
+       "visible_effect": "scales the whole material (all textures share the Mapping node)",
+       "class": "A",
+       "evidence": [
+        "26:46",
+        "26:58",
+        "27:04",
+        "27:17",
+        "28:08",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t2646_groupinput_scale_to_mapping.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t2658_scale_socket_vector_xyz.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t2704_socket_type_menu_float.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t2717_material_scale_float_default1.jpg"
+       ]
+      },
+      {
+       "name": "Distortion Scale",
+       "in_out": "INPUT",
+       "panel": "Rock Distortion",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 2.0,
+       "min": -1000.0,
+       "max": 1000.0,
+       "description_seen": "Scale of t...ise octave",
+       "internal_destinations": [
+        "dist_noise.Scale"
+       ],
+       "visible_effect": "size of the edge distortion: high = chunky/random stones, low = round/smooth (0:44)",
+       "class": "A",
+       "evidence": [
+        "27:28",
+        "28:36",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t2742_distortion_all_four_linked.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t2836_distortion_scale_props.jpg"
+       ]
+      },
+      {
+       "name": "Distortion Detail 1",
+       "in_out": "INPUT",
+       "panel": "Rock Distortion",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 7.0,
+       "min": 0.0,
+       "max": 15.0,
+       "description_seen": "The number of noise ...",
+       "internal_destinations": [
+        "dist_noise.Detail"
+       ],
+       "visible_effect": "more / less distorted stone edges (0:33)",
+       "class": "A",
+       "evidence": [
+        "27:32",
+        "28:16",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t2816_distortion_detail1_props.jpg"
+       ]
+      },
+      {
+       "name": "Distortion Detail 2",
+       "in_out": "INPUT",
+       "panel": "Rock Distortion",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 0.5,
+       "min": 0.0,
+       "max": 1.0,
+       "description_seen": "Blend fact...zero detail",
+       "internal_destinations": [
+        "dist_noise.Roughness"
+       ],
+       "visible_effect": "affects the edges of the stones a lot (0:37)",
+       "class": "A",
+       "evidence": [
+        "27:36",
+        "28:24",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t2824_distortion_detail2_props.jpg"
+       ]
+      },
+      {
+       "name": "Distortion Strength",
+       "in_out": "INPUT",
+       "panel": "Rock Distortion",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 0.2,
+       "min": 0.0,
+       "max": 1.0,
+       "description_seen": "Amount of mixing bet...",
+       "internal_destinations": [
+        "dist_mix (Linear Light).Factor"
+       ],
+       "visible_effect": "0 = smooth round stones, higher = randomly shaped, chunky (0:54)",
+       "class": "A",
+       "evidence": [
+        "27:40",
+        "28:30",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t2830_distortion_strength_props.jpg"
+       ]
+      },
+      {
+       "name": "Dirt Scale",
+       "in_out": "INPUT",
+       "panel": "Dirt & Moss",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 20.0,
+       "min": -1000.0,
+       "max": 1000.0,
+       "description_seen": "Scale of the base noise ...",
+       "internal_destinations": [
+        "dirt_noise.Scale"
+       ],
+       "visible_effect": "scale of the dirt (1:41)",
+       "class": "A",
+       "evidence": [
+        "31:27",
+        "32:18",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3146_dirt_noise_scale_detail_links.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3218_dirt_scale_props.jpg"
+       ]
+      },
+      {
+       "name": "Dirt Moss Scale",
+       "in_out": "INPUT",
+       "panel": "Dirt & Moss",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 25.0,
+       "min": -1000.0,
+       "max": 1000.0,
+       "description_seen": "Scale of t...ise octave",
+       "internal_destinations": [
+        "dmoss_noise.Scale"
+       ],
+       "visible_effect": "scale of the moss on the dirt (1:43)",
+       "class": "A",
+       "evidence": [
+        "30:00",
+        "30:06",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t2959_dirt_moss_noise_scale_drag.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3006_dirt_moss_scale_props.jpg"
+       ]
+      },
+      {
+       "name": "Dirt Color 1",
+       "in_out": "INPUT",
+       "panel": "Dirt & Moss",
+       "socket_type": "NodeSocketColor",
+       "subtype": null,
+       "default": "#332C24",
+       "min": null,
+       "max": null,
+       "description_seen": "Value of the first color in...",
+       "internal_destinations": [
+        "dirt_color_mix.A"
+       ],
+       "visible_effect": "first dirt colour (1:22)",
+       "class": "B+A",
+       "evidence": [
+        "30:48",
+        "31:16",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3054_dirt_color_A_B_linked.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3116_dirt_color1_props.jpg"
+       ],
+       "observed_swatch": "#312D24",
+       "default_linear_rgba": [
+        0.0331,
+        0.02519,
+        0.01764,
+        1.0
+       ],
+       "default_note": "hex is Blender's gamma-corrected hex (sRGB) as narrated in segment a; the observed UI swatch (video pixel sample, about +-3 levels) agrees; linear RGBA computed (class C)"
+      },
+      {
+       "name": "Dirt Color 2",
+       "in_out": "INPUT",
+       "panel": "Dirt & Moss",
+       "socket_type": "NodeSocketColor",
+       "subtype": null,
+       "default": "#19140F",
+       "min": null,
+       "max": null,
+       "description_seen": "Value of the second colo...",
+       "internal_destinations": [
+        "dirt_color_mix.B"
+       ],
+       "visible_effect": "second (darker) dirt colour (1:27)",
+       "class": "B+A",
+       "evidence": [
+        "30:50",
+        "31:40",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3054_dirt_color_A_B_linked.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3140_dirt_color2_props.jpg"
+       ],
+       "observed_swatch": "#18150E",
+       "default_linear_rgba": [
+        0.00972,
+        0.007,
+        0.00478,
+        1.0
+       ],
+       "default_note": "hex is Blender's gamma-corrected hex (sRGB) as narrated in segment a; the observed UI swatch (video pixel sample, about +-3 levels) agrees; linear RGBA computed (class C)"
+      },
+      {
+       "name": "Dirt Moss Color",
+       "in_out": "INPUT",
+       "panel": "Dirt & Moss",
+       "socket_type": "NodeSocketColor",
+       "subtype": null,
+       "default": "#232511",
+       "min": null,
+       "max": null,
+       "description_seen": "Value of the second colo...",
+       "internal_destinations": [
+        "dirt_moss_mix.B"
+       ],
+       "visible_effect": "colour of the moss on the dirt (1:32)",
+       "class": "B+A",
+       "evidence": [
+        "31:01",
+        "31:08",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3108_dirt_moss_color_props.jpg"
+       ],
+       "observed_swatch": "#232710",
+       "default_linear_rgba": [
+        0.01681,
+        0.0185,
+        0.00561,
+        1.0
+       ],
+       "default_note": "hex is Blender's gamma-corrected hex (sRGB) as narrated in segment a; the observed UI swatch (video pixel sample, about +-3 levels) agrees; linear RGBA computed (class C)"
+      },
+      {
+       "name": "Dirt Roughness",
+       "in_out": "INPUT",
+       "panel": "Dirt & Moss",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 2.0,
+       "description_seen": "Value shift. ...e it brighter",
+       "internal_destinations": [
+        "dirt_rough_hsv.Value"
+       ],
+       "visible_effect": "more rough / more shiny dirt (32:04)",
+       "class": "A",
+       "evidence": [
+        "32:07",
+        "32:10",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3210_dirt_roughness_props.jpg"
+       ]
+      },
+      {
+       "name": "Dirt Detail 1",
+       "in_out": "INPUT",
+       "panel": "Dirt & Moss",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 10.0,
+       "min": 0.0,
+       "max": 15.0,
+       "description_seen": "The number o...e render time",
+       "internal_destinations": [
+        "dirt_noise.Detail"
+       ],
+       "visible_effect": "dirt noise detail (31:39; not in the product file)",
+       "class": "A",
+       "evidence": [
+        "31:40",
+        "40:04",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3146_dirt_noise_scale_detail_links.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t4004_final_dirt_and_moss_order.jpg"
+       ]
+      },
+      {
+       "name": "Dirt Detail 2",
+       "in_out": "INPUT",
+       "panel": "Dirt & Moss",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 0.55,
+       "min": 0.0,
+       "max": 1.0,
+       "description_seen": "Blend factor...o zero detail",
+       "internal_destinations": [
+        "dirt_noise.Roughness"
+       ],
+       "visible_effect": "dirt noise roughness (31:42; not in the product file)",
+       "class": "A",
+       "evidence": [
+        "31:42",
+        "31:56",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3156_dirt_detail2_props.jpg"
+       ]
+      },
+      {
+       "name": "Dirt Moss Detail 1",
+       "in_out": "INPUT",
+       "panel": "Dirt & Moss",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 9.0,
+       "min": 0.0,
+       "max": 15.0,
+       "description_seen": "The number of noise...",
+       "internal_destinations": [
+        "dmoss_noise.Detail"
+       ],
+       "visible_effect": "detail of the moss on the dirt (1:09)",
+       "class": "A",
+       "evidence": [
+        "29:28",
+        "29:32",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t2932_dirt_moss_detail1_props.jpg"
+       ]
+      },
+      {
+       "name": "Dirt Moss Detail 2",
+       "in_out": "INPUT",
+       "panel": "Dirt & Moss",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 0.5,
+       "min": 0.0,
+       "max": 1.0,
+       "description_seen": "Blend factor...o zero detail",
+       "internal_destinations": [
+        "dmoss_noise.Roughness"
+       ],
+       "visible_effect": "second detail of the moss on the dirt (1:13)",
+       "class": "A",
+       "evidence": [
+        "29:30",
+        "31:58",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3158_dirt_moss_detail2_props.jpg"
+       ]
+      },
+      {
+       "name": "Dirt Moss Visibility",
+       "in_out": "INPUT",
+       "panel": "Dirt & Moss",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 2.0,
+       "description_seen": "Value shift. ...e it brighter",
+       "internal_destinations": [
+        "dmoss_hsv.Value"
+       ],
+       "visible_effect": "up = lots of moss on the dirt, down = none (1:15)",
+       "class": "A",
+       "evidence": [
+        "30:19",
+        "30:26",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3019_dirt_moss_noise_factor_to_hsv.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3026_dirt_moss_visibility_props.jpg"
+       ]
+      },
+      {
+       "name": "Dirt Bump Strength",
+       "in_out": "INPUT",
+       "panel": "Dirt & Moss",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "description_seen": "Strength of th...ump mapping",
+       "internal_destinations": [
+        "dirt_bump.Strength"
+       ],
+       "visible_effect": "bump of the dirt (1:46)",
+       "class": "A",
+       "evidence": [
+        "32:23",
+        "32:50",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3236_dirt_bumps_wiring.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3250_dirt_moss_panel_order.jpg"
+       ]
+      },
+      {
+       "name": "Dirt Moss Bump Strength",
+       "in_out": "INPUT",
+       "panel": "Dirt & Moss",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "description_seen": "Strength of ...p mapping",
+       "internal_destinations": [
+        "dmoss_bump.Strength"
+       ],
+       "visible_effect": "bump of the moss on the dirt (1:48; 'Moss Bump Strength' in the product)",
+       "class": "A",
+       "evidence": [
+        "32:31",
+        "32:36",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3236_dirt_moss_bump_strength_props.jpg"
+       ]
+      },
+      {
+       "name": "Cobblestone Scale",
+       "in_out": "INPUT",
+       "panel": "Cobblestone Chunks",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 7.0,
+       "min": -1000.0,
+       "max": 1000.0,
+       "description_seen": "(empty)",
+       "internal_destinations": [
+        "cell_vor_smooth.Scale",
+        "cell_vor_f1.Scale"
+       ],
+       "visible_effect": "bigger / smaller cobblestones (1:55)",
+       "class": "A",
+       "evidence": [
+        "33:26",
+        "33:33",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3330_cobblestone_mask_voronoi_difference.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3333_cobblestone_scale_props.jpg"
+       ]
+      },
+      {
+       "name": "Cobblestone Cracks",
+       "in_out": "INPUT",
+       "panel": "Cobblestone Chunks",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 0.0,
+       "min": 0.0,
+       "max": 15.0,
+       "description_seen": "The number o... layers to sum",
+       "internal_destinations": [
+        "cell_vor_smooth.Detail",
+        "cell_vor_f1.Detail"
+       ],
+       "visible_effect": "adds little cracks / chunks to the stones; ~1 recommended, high looks wrong (2:00)",
+       "class": "A",
+       "evidence": [
+        "34:06",
+        "34:12",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3352_temp_value_node_detail.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3412_cobblestone_cracks_props.jpg"
+       ]
+      },
+      {
+       "name": "Cobblestone Visibility",
+       "in_out": "INPUT",
+       "panel": "Cobblestone Chunks",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "description_seen": "Amount of mi... and B inputs",
+       "internal_destinations": [
+        "cell_diff (Difference).Factor"
+       ],
+       "visible_effect": "down = stones sink back into the dirt (2:17, 34:24)",
+       "class": "A",
+       "evidence": [
+        "34:31",
+        "34:33",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3433_cobblestone_visibility_props.jpg"
+       ]
+      },
+      {
+       "name": "Cobblestone Alignment",
+       "in_out": "INPUT",
+       "panel": "Cobblestone Chunks",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "description_seen": "(empty)",
+       "internal_destinations": [
+        "cell_vor_smooth.Randomness",
+        "cell_vor_f1.Randomness"
+       ],
+       "visible_effect": "Voronoi randomness: higher = more random layout, lower = more aligned, road-like rows (2:22, 34:51)",
+       "class": "A",
+       "evidence": [
+        "34:58",
+        "35:06",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3446_temp_value_node_randomness.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3506_cobblestone_alignment_props.jpg"
+       ]
+      },
+      {
+       "name": "Cobblestone Individual Size",
+       "in_out": "INPUT",
+       "panel": "Cobblestone Chunks",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 0.6,
+       "min": 0.0,
+       "max": 1.0,
+       "description_seen": "(empty)",
+       "internal_destinations": [
+        "cell_vor_smooth.Smoothness (Smooth F1 Voronoi only)"
+       ],
+       "visible_effect": "makes each stone bigger / smaller, i.e. wider or narrower dirt joints (2:31, 35:10); 'Cobblestone Size' in the product",
+       "class": "A",
+       "evidence": [
+        "35:25",
+        "35:30",
+        "36:36",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3528_individual_size_smoothness_link.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3636_rock_moss_scale_link_individual_size_props.jpg"
+       ]
+      },
+      {
+       "name": "Displacement Strength",
+       "in_out": "INPUT",
+       "panel": "Cobblestone Chunks",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 0.02,
+       "min": 0.0,
+       "max": 1000.0,
+       "description_seen": "Increase or d... displacement",
+       "internal_destinations": [
+        "displacement.Scale"
+       ],
+       "visible_effect": "how far the stones pop out of the mesh (2:37)",
+       "class": "A",
+       "evidence": [
+        "35:53",
+        "35:56",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3550_mix_rocks_dirt_displacement.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3556_displacement_strength_props.jpg"
+       ]
+      },
+      {
+       "name": "Rock Moss Scale",
+       "in_out": "INPUT",
+       "panel": "Rocks and Moss",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 15.0,
+       "min": -1000.0,
+       "max": 1000.0,
+       "description_seen": "Scale of the base noise octa...",
+       "internal_destinations": [
+        "rmmask_noise.Scale (Moss & Rock Mask)"
+       ],
+       "visible_effect": "scale of the moss patches on the stones (2:49)",
+       "class": "A",
+       "evidence": [
+        "36:34",
+        "36:38",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3638_rock_moss_scale_props.jpg"
+       ]
+      },
+      {
+       "name": "Rock Moss Visibility",
+       "in_out": "INPUT",
+       "panel": "Rocks and Moss",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 2.0,
+       "description_seen": "Value shift. 0 ...ake it brighter",
+       "internal_destinations": [
+        "rmmask_hsv.Value"
+       ],
+       "visible_effect": "up = moss covers the stones, down = no moss (3:04)",
+       "class": "A",
+       "evidence": [
+        "37:00",
+        "37:08",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3702_mask_noise_hsv_wiring.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3708_rock_moss_visibility_props.jpg"
+       ]
+      },
+      {
+       "name": "Rock Moss Color",
+       "in_out": "INPUT",
+       "panel": "Rocks and Moss",
+       "socket_type": "NodeSocketColor",
+       "subtype": null,
+       "default": "#222812",
+       "min": null,
+       "max": null,
+       "description_seen": "Color of the m... transmission",
+       "internal_destinations": [
+        "rmoss_bsdf.Base Color"
+       ],
+       "visible_effect": "colour of the moss on the stones (2:51)",
+       "class": "B+A",
+       "evidence": [
+        "37:26",
+        "37:32",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3728_rock_moss_color_roughness_linked.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3732_rock_moss_color_props.jpg"
+       ],
+       "observed_swatch": "#212B12",
+       "default_linear_rgba": [
+        0.016,
+        0.02122,
+        0.00605,
+        1.0
+       ],
+       "default_note": "hex is Blender's gamma-corrected hex (sRGB) as narrated in segment a; the observed UI swatch (video pixel sample, about +-3 levels) agrees; linear RGBA computed (class C)"
+      },
+      {
+       "name": "Rock Moss Roughness",
+       "in_out": "INPUT",
+       "panel": "Rocks and Moss",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 0.65,
+       "min": 0.0,
+       "max": 1.0,
+       "description_seen": "Specifies micr...pletely rough)",
+       "internal_destinations": [
+        "rmoss_bsdf.Roughness"
+       ],
+       "visible_effect": "roughness of the moss on the stones (2:58)",
+       "class": "A",
+       "evidence": [
+        "37:28",
+        "38:24",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3824_rock_moss_roughness_props.jpg"
+       ]
+      },
+      {
+       "name": "Rock Moss Detail 2",
+       "in_out": "INPUT",
+       "panel": "Rocks and Moss",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 0.7,
+       "min": 0.0,
+       "max": 1.0,
+       "description_seen": "Blend factor b... to zero detail",
+       "internal_destinations": [
+        "rmoss_noise.Roughness (Rock Moss Material)"
+       ],
+       "visible_effect": "moss detail (3:00); product default 0.704",
+       "class": "A",
+       "evidence": [
+        "37:54",
+        "38:06",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3806_rock_moss_detail2_props.jpg"
+       ]
+      },
+      {
+       "name": "Rock Moss Detail 1",
+       "in_out": "INPUT",
+       "panel": "Rocks and Moss",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 15.0,
+       "min": 0.0,
+       "max": 15.0,
+       "description_seen": "The number o...e render time",
+       "internal_destinations": [
+        "rmoss_noise.Detail (Rock Moss Material)"
+       ],
+       "visible_effect": "moss detail (3:00)",
+       "class": "A",
+       "evidence": [
+        "37:52",
+        "37:57",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3756_rock_moss_noise_links.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3757_rock_moss_detail1_props.jpg"
+       ]
+      },
+      {
+       "name": "Rock Moss Bump Strength",
+       "in_out": "INPUT",
+       "panel": "Rocks and Moss",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "description_seen": "Strength of th...ump mapping",
+       "internal_destinations": [
+        "rmoss_bump.Strength"
+       ],
+       "visible_effect": "bump of the moss on the stones (3:13)",
+       "class": "A",
+       "evidence": [
+        "38:12",
+        "38:20",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3812_rock_moss_bump_link.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3820_rocks_and_moss_order.jpg"
+       ]
+      },
+      {
+       "name": "Rock Color 1",
+       "in_out": "INPUT",
+       "panel": "Cobblestone Rocks",
+       "socket_type": "NodeSocketColor",
+       "subtype": null,
+       "default": "#343534",
+       "min": null,
+       "max": null,
+       "description_seen": "Value of the first color input",
+       "internal_destinations": [
+        "rock_color_mix.A"
+       ],
+       "visible_effect": "first stone colour, greyish (3:21)",
+       "class": "B+A",
+       "evidence": [
+        "38:36",
+        "38:42",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3836_rock_colors_link.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3842_rock_color1_props.jpg"
+       ],
+       "observed_swatch": "#343434",
+       "default_linear_rgba": [
+        0.03434,
+        0.0356,
+        0.03434,
+        1.0
+       ],
+       "default_note": "hex is Blender's gamma-corrected hex (sRGB) as narrated in segment a; the observed UI swatch (video pixel sample, about +-3 levels) agrees; linear RGBA computed (class C)"
+      },
+      {
+       "name": "Rock Color 2",
+       "in_out": "INPUT",
+       "panel": "Cobblestone Rocks",
+       "socket_type": "NodeSocketColor",
+       "subtype": null,
+       "default": "#292524",
+       "min": null,
+       "max": null,
+       "description_seen": "Value of the second color in...",
+       "internal_destinations": [
+        "rock_color_mix.B"
+       ],
+       "visible_effect": "second stone colour, brownish (3:24)",
+       "class": "B+A",
+       "evidence": [
+        "38:38",
+        "39:10",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3910_rock_color2_props.jpg"
+       ],
+       "observed_swatch": "#282421",
+       "default_linear_rgba": [
+        0.02217,
+        0.0185,
+        0.01764,
+        1.0
+       ],
+       "default_note": "hex is Blender's gamma-corrected hex (sRGB) as narrated in segment a; the observed UI swatch (video pixel sample, about +-3 levels) agrees; linear RGBA computed (class C)"
+      },
+      {
+       "name": "Rock Roughness",
+       "in_out": "INPUT",
+       "panel": "Cobblestone Rocks",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 0.65,
+       "min": 0.0,
+       "max": 1.0,
+       "description_seen": "Specifies micr...pletely rough)",
+       "internal_destinations": [
+        "rock_bsdf.Roughness"
+       ],
+       "visible_effect": "roughness of the stones (3:29)",
+       "class": "A",
+       "evidence": [
+        "39:13",
+        "39:14",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3912_rock_material_wiring.jpg",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3914_rock_roughness_props.jpg"
+       ]
+      },
+      {
+       "name": "Rock Detail",
+       "in_out": "INPUT",
+       "panel": "Cobblestone Rocks",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 10.0,
+       "min": 0.0,
+       "max": 15.0,
+       "description_seen": "The number o...e render time",
+       "internal_destinations": [
+        "rock_noise.Detail",
+        "rock_vor.Detail"
+       ],
+       "visible_effect": "detail of the stone surface (3:31)",
+       "class": "A",
+       "evidence": [
+        "39:28",
+        "39:36",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3936_rock_detail_props.jpg"
+       ]
+      },
+      {
+       "name": "Rock Bump Strength",
+       "in_out": "INPUT",
+       "panel": "Cobblestone Rocks",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "description_seen": "Strength of th...ump mapping",
+       "internal_destinations": [
+        "rock_bump_noise.Strength",
+        "rock_bump_vor.Strength"
+       ],
+       "visible_effect": "bump strength of the stones (3:34)",
+       "class": "A",
+       "evidence": [
+        "39:52",
+        "39:58",
+        "tools/materials/reconstruction/cobblestone/evidence/b/frames/t3958_rock_bump_strength_props.jpg"
+       ]
+      }
+     ],
+     "nodes": [
+      {
+       "id": "group_input",
+       "type": "NodeGroupInput",
+       "label": "Group Input",
+       "frame": "(8 UI copies, see ui_instances)",
+       "settings": {},
+       "inputs": {},
+       "class": "A",
+       "evidence": [
+        "26:46",
+        "40:10"
+       ],
+       "note": "The tutorial duplicates the Group Input into every frame (Shift+D, F, Ctrl+H to hide unused sockets). Functionally one Group Input node is equivalent."
+      },
+      {
+       "id": "group_output",
+       "type": "NodeGroupOutput",
+       "label": "Group Output",
+       "frame": null,
+       "settings": {
+        "is_active_output": true
+       },
+       "inputs": {
+        "Shader": "<- link final_mix.Shader",
+        "Displacement": "<- link displacement.Displacement"
+       },
+       "class": "A",
+       "evidence": [
+        "35:50",
+        "36:12"
+       ]
+      },
+      {
+       "id": "tex_coord",
+       "type": "ShaderNodeTexCoord",
+       "label": "Texture Coordinate",
+       "frame": "Mapping",
+       "settings": {
+        "object": null,
+        "from_instancer": false
+       },
+       "inputs": {},
+       "class": "A",
+       "evidence": [
+        "26:42"
+       ],
+       "outputs_used": [
+        "Object"
+       ]
+      },
+      {
+       "id": "mapping",
+       "type": "ShaderNodeMapping",
+       "label": "Mapping",
+       "frame": "Mapping",
+       "settings": {
+        "vector_type": "POINT"
+       },
+       "inputs": {
+        "Vector": "<- link tex_coord.Object",
+        "Location": [
+         0.0,
+         0.0,
+         0.0
+        ],
+        "Rotation": [
+         0.0,
+         0.0,
+         0.0
+        ],
+        "Scale": "<- link Material Scale (was 1,1,1)"
+       },
+       "class": "A",
+       "evidence": [
+        "26:42",
+        "26:46"
+       ],
+       "outputs_used": [
+        "Vector"
+       ]
+      },
+      {
+       "id": "dist_noise",
+       "type": "ShaderNodeTexNoise",
+       "label": "Noise Texture",
+       "frame": "Cobblestone Distortion",
+       "settings": {
+        "noise_dimensions": "3D",
+        "noise_type": "FBM",
+        "normalize": true
+       },
+       "inputs": {
+        "Vector": "<- link mapping.Vector",
+        "Scale": "2.0 <- link Distortion Scale",
+        "Detail": "7.0 <- link Distortion Detail 1",
+        "Roughness": "0.5 <- link Distortion Detail 2",
+        "Lacunarity": 2.0,
+        "Distortion": 0.0
+       },
+       "class": "A",
+       "evidence": [
+        "26:42",
+        "27:42"
+       ],
+       "outputs_used": [
+        "Color"
+       ]
+      },
+      {
+       "id": "dist_mix",
+       "type": "ShaderNodeMix",
+       "label": "Linear Light",
+       "frame": "Cobblestone Distortion",
+       "settings": {
+        "data_type": "RGBA",
+        "clamp_factor": true,
+        "clamp_result": false,
+        "blend_type": "LINEAR_LIGHT"
+       },
+       "inputs": {
+        "Factor": "0.2 <- link Distortion Strength",
+        "A (RGBA, inputs[6])": "<- link mapping.Vector",
+        "B (RGBA, inputs[7])": "<- link dist_noise.Color"
+       },
+       "class": "A",
+       "evidence": [
+        "26:42",
+        "27:42"
+       ],
+       "outputs_used": [
+        "Result (RGBA, outputs[2])"
+       ]
+      },
+      {
+       "id": "cell_vor_smooth",
+       "type": "ShaderNodeTexVoronoi",
+       "label": "Voronoi Texture",
+       "frame": "Cobblestone Mask",
+       "settings": {
+        "voronoi_dimensions": "3D",
+        "feature": "SMOOTH_F1",
+        "distance": "EUCLIDEAN",
+        "normalize": false
+       },
+       "inputs": {
+        "Vector": "<- link dist_mix.Result (via reroute)",
+        "Scale": "7.0 <- link Cobblestone Scale",
+        "Detail": "0.0 <- link Cobblestone Cracks",
+        "Roughness": 0.5,
+        "Lacunarity": 2.0,
+        "Smoothness": "0.6 <- link Cobblestone Individual Size",
+        "Randomness": "1.0 <- link Cobblestone Alignment"
+       },
+       "class": "A",
+       "evidence": [
+        "33:30",
+        "35:28"
+       ],
+       "outputs_used": [
+        "Distance"
+       ]
+      },
+      {
+       "id": "cell_vor_f1",
+       "type": "ShaderNodeTexVoronoi",
+       "label": "Voronoi Texture",
+       "frame": "Cobblestone Mask",
+       "settings": {
+        "voronoi_dimensions": "3D",
+        "feature": "F1",
+        "distance": "EUCLIDEAN",
+        "normalize": false
+       },
+       "inputs": {
+        "Vector": "<- link dist_mix.Result (via reroute)",
+        "Scale": "7.0 <- link Cobblestone Scale",
+        "Detail": "0.0 <- link Cobblestone Cracks",
+        "Roughness": 0.5,
+        "Lacunarity": 2.0,
+        "Randomness": "1.0 <- link Cobblestone Alignment"
+       },
+       "class": "A",
+       "evidence": [
+        "33:30"
+       ],
+       "outputs_used": [
+        "Distance"
+       ]
+      },
+      {
+       "id": "cell_diff",
+       "type": "ShaderNodeMix",
+       "label": "Difference",
+       "frame": "Cobblestone Mask",
+       "settings": {
+        "data_type": "RGBA",
+        "clamp_factor": true,
+        "clamp_result": false,
+        "blend_type": "DIFFERENCE"
+       },
+       "inputs": {
+        "Factor": "1.0 <- link Cobblestone Visibility",
+        "A (RGBA)": "<- link cell_vor_smooth.Distance",
+        "B (RGBA)": "<- link cell_vor_f1.Distance"
+       },
+       "class": "A",
+       "evidence": [
+        "33:30",
+        "34:31"
+       ],
+       "outputs_used": [
+        "Result"
+       ]
+      },
+      {
+       "id": "cell_ramp",
+       "type": "ShaderNodeValToRGB",
+       "label": "Color Ramp",
+       "frame": "Cobblestone Mask",
+       "settings": {
+        "color_ramp.color_mode": "RGB",
+        "color_ramp.interpolation": "LINEAR",
+        "elements": [
+         {
+          "index": 0,
+          "position": 0.0,
+          "position_class": "A",
+          "color_hex": "#989898",
+          "color_class": "A (UI field sample; narration '6 9' incomplete -> exact hex D)"
+         },
+         {
+          "index": 1,
+          "position": 0.02,
+          "position_class": "C (gradient width measured on the bar at 34:26 and 40:08: about 0.015-0.025; exact D)",
+          "color_hex": "#000000",
+          "color_class": "A"
+         }
+        ]
+       },
+       "inputs": {
+        "Fac": "<- link cell_diff.Result"
+       },
+       "class": "A/C/D",
+       "evidence": [
+        "34:26",
+        "40:08"
+       ],
+       "outputs_used": [
+        "Color"
+       ],
+       "note": "Inverted ramp: stone interiors (difference ~0) -> grey 0.31 linear, joints -> black. Feeds both the dirt/rock mask ramp and the Displacement height."
+      },
+      {
+       "id": "dirt_noise",
+       "type": "ShaderNodeTexNoise",
+       "label": "Noise Texture",
+       "frame": "Dirt Material",
+       "settings": {
+        "noise_dimensions": "3D",
+        "noise_type": "FBM",
+        "normalize": true
+       },
+       "inputs": {
+        "Vector": "<- link mapping.Vector",
+        "Scale": "20.0 <- link Dirt Scale",
+        "Detail": "10.0 <- link Dirt Detail 1",
+        "Roughness": "0.55 <- link Dirt Detail 2",
+        "Lacunarity": 2.0,
+        "Distortion": 0.0
+       },
+       "class": "A",
+       "evidence": [
+        "30:44",
+        "31:46"
+       ],
+       "outputs_used": [
+        "Fac (Factor)"
+       ]
+      },
+      {
+       "id": "dirt_color_ramp",
+       "type": "ShaderNodeValToRGB",
+       "label": "Color Ramp",
+       "frame": "Dirt Material",
+       "settings": {
+        "color_ramp.color_mode": "RGB",
+        "color_ramp.interpolation": "LINEAR",
+        "elements": [
+         {
+          "index": 0,
+          "position": 0.155,
+          "position_class": "C (measured from the bar; calibrated by stop 1: read 0.549 vs 0.553)",
+          "color_hex": "#000000",
+          "color_class": "A"
+         },
+         {
+          "index": 1,
+          "position": 0.553,
+          "position_class": "A",
+          "color_hex": "#FFFFFF",
+          "color_class": "A"
+         }
+        ]
+       },
+       "inputs": {
+        "Fac": "<- link dirt_noise.Fac"
+       },
+       "class": "A/C",
+       "evidence": [
+        "30:44",
+        "32:36"
+       ],
+       "outputs_used": [
+        "Color"
+       ]
+      },
+      {
+       "id": "dirt_color_mix",
+       "type": "ShaderNodeMix",
+       "label": "Mix",
+       "frame": "Dirt Material",
+       "settings": {
+        "data_type": "RGBA",
+        "clamp_factor": true,
+        "clamp_result": false,
+        "blend_type": "MIX"
+       },
+       "inputs": {
+        "Factor": "<- link dirt_color_ramp.Color",
+        "A (RGBA)": "<- link Dirt Color 1",
+        "B (RGBA)": "<- link Dirt Color 2"
+       },
+       "class": "A",
+       "evidence": [
+        "30:44",
+        "30:54"
+       ],
+       "outputs_used": [
+        "Result"
+       ]
+      },
+      {
+       "id": "dirt_rough_ramp",
+       "type": "ShaderNodeValToRGB",
+       "label": "Color Ramp",
+       "frame": "Dirt Material",
+       "settings": {
+        "color_ramp.color_mode": "RGB",
+        "color_ramp.interpolation": "LINEAR",
+        "elements": [
+         {
+          "index": 0,
+          "position": 0.0,
+          "position_class": "A",
+          "color_hex": "#D2D2D2",
+          "color_class": "B (narration 9:32) + A (UI field #D1D1D1)"
+         },
+         {
+          "index": 1,
+          "position": 1.0,
+          "position_class": "C (marker at the right end)",
+          "color_hex": "#FFFFFF",
+          "color_class": "C"
+         }
+        ]
+       },
+       "inputs": {
+        "Fac": "<- link dirt_noise.Fac"
+       },
+       "class": "A/B/C",
+       "evidence": [
+        "32:36"
+       ],
+       "outputs_used": [
+        "Color"
+       ]
+      },
+      {
+       "id": "dirt_rough_hsv",
+       "type": "ShaderNodeHueSaturation",
+       "label": "Hue/Saturation/Value",
+       "frame": "Dirt Material",
+       "settings": {},
+       "inputs": {
+        "Hue": 0.5,
+        "Saturation": 1.0,
+        "Value": "1.0 <- link Dirt Roughness",
+        "Fac": 1.0,
+        "Color": "<- link dirt_rough_ramp.Color"
+       },
+       "class": "A",
+       "evidence": [
+        "32:02",
+        "32:07"
+       ],
+       "outputs_used": [
+        "Color"
+       ]
+      },
+      {
+       "id": "dmoss_sharp_ramp",
+       "type": "ShaderNodeValToRGB",
+       "label": "Color Ramp",
+       "frame": "Dirt Material",
+       "settings": {
+        "color_ramp.color_mode": "RGB",
+        "color_ramp.interpolation": "LINEAR",
+        "elements": [
+         {
+          "index": 0,
+          "position": 0.0,
+          "position_class": "A",
+          "color_hex": "#000000",
+          "color_class": "A"
+         },
+         {
+          "index": 1,
+          "position": 0.314,
+          "position_class": "C (measured from the bar)",
+          "color_hex": "#FFFFFF",
+          "color_class": "A"
+         }
+        ]
+       },
+       "inputs": {
+        "Fac": "<- link dmoss_ramp.Color"
+       },
+       "class": "A/C",
+       "evidence": [
+        "32:36"
+       ],
+       "outputs_used": [
+        "Color"
+       ],
+       "note": "Sharpens the moss mask for the colour only; the bump uses the softer dmoss_ramp (narration 11:59-12:12)."
+      },
+      {
+       "id": "dirt_moss_mix",
+       "type": "ShaderNodeMix",
+       "label": "Mix",
+       "frame": "Dirt Material",
+       "settings": {
+        "data_type": "RGBA",
+        "clamp_factor": true,
+        "clamp_result": false,
+        "blend_type": "MIX"
+       },
+       "inputs": {
+        "Factor": "<- link dmoss_sharp_ramp.Color",
+        "A (RGBA)": "<- link dirt_color_mix.Result",
+        "B (RGBA)": "<- link Dirt Moss Color"
+       },
+       "class": "A",
+       "evidence": [
+        "31:00",
+        "32:36"
+       ],
+       "outputs_used": [
+        "Result"
+       ]
+      },
+      {
+       "id": "dirt_bump",
+       "type": "ShaderNodeBump",
+       "label": "Bump",
+       "frame": "Dirt Material",
+       "settings": {
+        "invert": false
+       },
+       "inputs": {
+        "Strength": "1.0 <- link Dirt Bump Strength",
+        "Distance": 0.02,
+        "Filter Width": 0.1,
+        "Height": "<- link dirt_noise.Fac",
+        "Normal": "(unlinked)"
+       },
+       "class": "A",
+       "evidence": [
+        "32:23",
+        "32:36"
+       ],
+       "outputs_used": [
+        "Normal"
+       ]
+      },
+      {
+       "id": "dmoss_bump",
+       "type": "ShaderNodeBump",
+       "label": "Bump",
+       "frame": "Dirt Material",
+       "settings": {
+        "invert": false
+       },
+       "inputs": {
+        "Strength": "1.0 <- link Dirt Moss Bump Strength",
+        "Distance": 0.005,
+        "Filter Width": 0.1,
+        "Height": "<- link dmoss_ramp.Color",
+        "Normal": "<- link dirt_bump.Normal"
+       },
+       "class": "A",
+       "evidence": [
+        "32:31",
+        "32:36"
+       ],
+       "outputs_used": [
+        "Normal"
+       ]
+      },
+      {
+       "id": "dirt_bsdf",
+       "type": "ShaderNodeBsdfPrincipled",
+       "label": "Principled BSDF",
+       "frame": "Dirt Material",
+       "settings": {
+        "distribution": "MULTI_GGX (default, C)",
+        "subsurface_method": "RANDOM_WALK (default, C)"
+       },
+       "inputs": {
+        "Base Color": "<- link dirt_moss_mix.Result",
+        "Metallic": "0.0 (C, overview frame too small)",
+        "Roughness": "<- link dirt_rough_hsv.Color",
+        "IOR": "1.5 (C default)",
+        "Alpha": "1.0 (C default)",
+        "Normal": "<- link dmoss_bump.Normal"
+       },
+       "class": "A/C",
+       "evidence": [
+        "31:00",
+        "40:10"
+       ],
+       "outputs_used": [
+        "BSDF"
+       ]
+      },
+      {
+       "id": "dmoss_noise",
+       "type": "ShaderNodeTexNoise",
+       "label": "Noise Texture",
+       "frame": "Dirt Moss Texture",
+       "settings": {
+        "noise_dimensions": "3D",
+        "noise_type": "FBM",
+        "normalize": true
+       },
+       "inputs": {
+        "Vector": "<- link mapping.Vector",
+        "Scale": "25.0 <- link Dirt Moss Scale",
+        "Detail": "9.0 <- link Dirt Moss Detail 1",
+        "Roughness": "0.5 <- link Dirt Moss Detail 2",
+        "Lacunarity": 3.0,
+        "Distortion": 0.0
+       },
+       "class": "A",
+       "evidence": [
+        "29:59",
+        "30:19"
+       ],
+       "outputs_used": [
+        "Fac (Factor)"
+       ]
+      },
+      {
+       "id": "dmoss_hsv",
+       "type": "ShaderNodeHueSaturation",
+       "label": "Hue/Saturation/Value",
+       "frame": "Dirt Moss Texture",
+       "settings": {},
+       "inputs": {
+        "Hue": 0.5,
+        "Saturation": 1.0,
+        "Value": "1.0 <- link Dirt Moss Visibility",
+        "Fac": 1.0,
+        "Color": "<- link dmoss_noise.Fac"
+       },
+       "class": "A",
+       "evidence": [
+        "30:19"
+       ],
+       "outputs_used": [
+        "Color"
+       ]
+      },
+      {
+       "id": "dmoss_ramp",
+       "type": "ShaderNodeValToRGB",
+       "label": "Color Ramp",
+       "frame": "Dirt Moss Texture",
+       "settings": {
+        "color_ramp.color_mode": "RGB",
+        "color_ramp.interpolation": "LINEAR",
+        "elements": [
+         {
+          "index": 0,
+          "position": 0.469,
+          "position_class": "C (measured from the bar)",
+          "color_hex": "#000000",
+          "color_class": "A"
+         },
+         {
+          "index": 1,
+          "position": 1.0,
+          "position_class": "A",
+          "color_hex": "#FFFFFF",
+          "color_class": "A"
+         }
+        ]
+       },
+       "inputs": {
+        "Fac": "<- link dmoss_hsv.Color"
+       },
+       "class": "A/C",
+       "evidence": [
+        "32:36"
+       ],
+       "outputs_used": [
+        "Color"
+       ]
+      },
+      {
+       "id": "rock_noise",
+       "type": "ShaderNodeTexNoise",
+       "label": "Noise Texture",
+       "frame": "Cobblestone Rock Material",
+       "settings": {
+        "noise_dimensions": "3D",
+        "noise_type": "FBM",
+        "normalize": true
+       },
+       "inputs": {
+        "Vector": "<- link mapping.Vector",
+        "Scale": 20.0,
+        "Detail": "10.0 <- link Rock Detail",
+        "Roughness": 0.5,
+        "Lacunarity": 2.0,
+        "Distortion": 0.0
+       },
+       "class": "A",
+       "evidence": [
+        "38:36",
+        "39:36"
+       ],
+       "outputs_used": [
+        "Fac (Factor)"
+       ]
+      },
+      {
+       "id": "rock_color_mix",
+       "type": "ShaderNodeMix",
+       "label": "Mix",
+       "frame": "Cobblestone Rock Material",
+       "settings": {
+        "data_type": "RGBA",
+        "clamp_factor": true,
+        "clamp_result": false,
+        "blend_type": "MIX"
+       },
+       "inputs": {
+        "Factor": "<- link rock_noise.Fac",
+        "A (RGBA)": "<- link Rock Color 1",
+        "B (RGBA)": "<- link Rock Color 2"
+       },
+       "class": "A",
+       "evidence": [
+        "38:36",
+        "39:36"
+       ],
+       "outputs_used": [
+        "Result"
+       ]
+      },
+      {
+       "id": "rock_vor",
+       "type": "ShaderNodeTexVoronoi",
+       "label": "Voronoi Texture",
+       "frame": "Cobblestone Rock Material",
+       "settings": {
+        "voronoi_dimensions": "3D",
+        "feature": "SMOOTH_F1",
+        "distance": "EUCLIDEAN",
+        "normalize": false
+       },
+       "inputs": {
+        "Vector": "<- link mapping.Vector",
+        "Scale": 12.0,
+        "Detail": "10.0 <- link Rock Detail",
+        "Roughness": 0.5,
+        "Lacunarity": 2.0,
+        "Smoothness": 1.0,
+        "Randomness": 1.0
+       },
+       "class": "A",
+       "evidence": [
+        "36:26",
+        "39:36"
+       ],
+       "outputs_used": [
+        "Distance"
+       ]
+      },
+      {
+       "id": "rock_bump_noise",
+       "type": "ShaderNodeBump",
+       "label": "Bump",
+       "frame": "Cobblestone Rock Material",
+       "settings": {
+        "invert": false
+       },
+       "inputs": {
+        "Strength": "1.0 <- link Rock Bump Strength",
+        "Distance": 0.007,
+        "Filter Width": 0.1,
+        "Height": "<- link rock_noise.Fac",
+        "Normal": "(unlinked)"
+       },
+       "class": "A",
+       "evidence": [
+        "38:36",
+        "39:12"
+       ],
+       "outputs_used": [
+        "Normal"
+       ],
+       "note": "Narration (14:34) says 'a 0.7'; the field reads 0.007 (A wins)."
+      },
+      {
+       "id": "rock_bump_vor",
+       "type": "ShaderNodeBump",
+       "label": "Bump",
+       "frame": "Cobblestone Rock Material",
+       "settings": {
+        "invert": false
+       },
+       "inputs": {
+        "Strength": "1.0 <- link Rock Bump Strength",
+        "Distance": 0.015,
+        "Filter Width": 0.1,
+        "Height": "<- link rock_vor.Distance",
+        "Normal": "<- link rock_bump_noise.Normal"
+       },
+       "class": "A",
+       "evidence": [
+        "39:12"
+       ],
+       "outputs_used": [
+        "Normal"
+       ]
+      },
+      {
+       "id": "rock_bsdf",
+       "type": "ShaderNodeBsdfPrincipled",
+       "label": "Principled BSDF",
+       "frame": "Cobblestone Rock Material",
+       "settings": {},
+       "inputs": {
+        "Base Color": "<- link rock_color_mix.Result",
+        "Metallic": 0.0,
+        "Roughness": "0.65 <- link Rock Roughness",
+        "IOR": 1.5,
+        "Alpha": 1.0,
+        "Normal": "<- link rock_bump_vor.Normal"
+       },
+       "class": "A",
+       "evidence": [
+        "39:12"
+       ],
+       "outputs_used": [
+        "BSDF"
+       ]
+      },
+      {
+       "id": "rmmask_noise",
+       "type": "ShaderNodeTexNoise",
+       "label": "Noise Texture",
+       "frame": "Moss & Rock Mask",
+       "settings": {
+        "noise_dimensions": "3D",
+        "noise_type": "FBM",
+        "normalize": true
+       },
+       "inputs": {
+        "Vector": "<- link mapping.Vector",
+        "Scale": "15.0 <- link Rock Moss Scale",
+        "Detail": 10.0,
+        "Roughness": 0.8,
+        "Lacunarity": 2.0,
+        "Distortion": 0.0
+       },
+       "class": "A",
+       "evidence": [
+        "36:30",
+        "37:02"
+       ],
+       "outputs_used": [
+        "Fac (Factor)"
+       ]
+      },
+      {
+       "id": "rmmask_hsv",
+       "type": "ShaderNodeHueSaturation",
+       "label": "Hue/Saturation/Value",
+       "frame": "Moss & Rock Mask",
+       "settings": {},
+       "inputs": {
+        "Hue": 0.5,
+        "Saturation": 1.0,
+        "Value": "1.0 <- link Rock Moss Visibility",
+        "Fac": 1.0,
+        "Color": "<- link rmmask_noise.Fac"
+       },
+       "class": "A",
+       "evidence": [
+        "37:02"
+       ],
+       "outputs_used": [
+        "Color"
+       ]
+      },
+      {
+       "id": "rmmask_ramp",
+       "type": "ShaderNodeValToRGB",
+       "label": "Color Ramp",
+       "frame": "Moss & Rock Mask",
+       "settings": {
+        "color_ramp.color_mode": "RGB",
+        "color_ramp.interpolation": "LINEAR",
+        "elements": [
+         {
+          "index": 0,
+          "position": 0.407,
+          "position_class": "A",
+          "color_hex": "#000000",
+          "color_class": "A"
+         },
+         {
+          "index": 1,
+          "position": 0.645,
+          "position_class": "C (measured from the bar, calibrated with stop 0)",
+          "color_hex": "#FFFFFF",
+          "color_class": "C"
+         }
+        ]
+       },
+       "inputs": {
+        "Fac": "<- link rmmask_hsv.Color"
+       },
+       "class": "A/C",
+       "evidence": [
+        "37:20"
+       ],
+       "outputs_used": [
+        "Color"
+       ]
+      },
+      {
+       "id": "rmoss_noise",
+       "type": "ShaderNodeTexNoise",
+       "label": "Noise Texture",
+       "frame": "Rock Moss Material",
+       "settings": {
+        "noise_dimensions": "3D",
+        "noise_type": "FBM",
+        "normalize": true
+       },
+       "inputs": {
+        "Vector": "<- link mapping.Vector",
+        "Scale": 17.0,
+        "Detail": "15.0 <- link Rock Moss Detail 1",
+        "Roughness": "0.7 <- link Rock Moss Detail 2",
+        "Lacunarity": 2.0,
+        "Distortion": 0.0
+       },
+       "class": "A",
+       "evidence": [
+        "37:50",
+        "37:56"
+       ],
+       "outputs_used": [
+        "Fac (Factor)"
+       ]
+      },
+      {
+       "id": "rmoss_bump",
+       "type": "ShaderNodeBump",
+       "label": "Bump",
+       "frame": "Rock Moss Material",
+       "settings": {
+        "invert": false
+       },
+       "inputs": {
+        "Strength": "1.0 <- link Rock Moss Bump Strength",
+        "Distance": 0.01,
+        "Filter Width": 0.1,
+        "Height": "<- link rmoss_noise.Fac",
+        "Normal": "(unlinked)"
+       },
+       "class": "A",
+       "evidence": [
+        "37:56",
+        "38:12"
+       ],
+       "outputs_used": [
+        "Normal"
+       ]
+      },
+      {
+       "id": "rmoss_bsdf",
+       "type": "ShaderNodeBsdfPrincipled",
+       "label": "Principled BSDF",
+       "frame": "Rock Moss Material",
+       "settings": {},
+       "inputs": {
+        "Base Color": "<- link Rock Moss Color",
+        "Metallic": 0.0,
+        "Roughness": "0.65 <- link Rock Moss Roughness",
+        "IOR": 1.5,
+        "Alpha": 1.0,
+        "Normal": "<- link rmoss_bump.Normal"
+       },
+       "class": "A",
+       "evidence": [
+        "37:28",
+        "38:12"
+       ],
+       "outputs_used": [
+        "BSDF"
+       ]
+      },
+      {
+       "id": "rock_moss_mix",
+       "type": "ShaderNodeMixShader",
+       "label": "Mix Shader",
+       "frame": null,
+       "settings": {},
+       "inputs": {
+        "Fac": "<- link rmmask_ramp.Color",
+        "Shader (inputs[1])": "<- link rock_bsdf.BSDF",
+        "Shader (inputs[2])": "<- link rmoss_bsdf.BSDF"
+       },
+       "class": "A",
+       "evidence": [
+        "36:22"
+       ],
+       "outputs_used": [
+        "Shader"
+       ]
+      },
+      {
+       "id": "final_ramp",
+       "type": "ShaderNodeValToRGB",
+       "label": "Color Ramp",
+       "frame": "Mix Rocks & Dirt",
+       "settings": {
+        "color_ramp.color_mode": "RGB",
+        "color_ramp.interpolation": "LINEAR",
+        "elements": [
+         {
+          "index": 0,
+          "position": 0.0,
+          "position_class": "C (marker at the left end)",
+          "color_hex": "#000000",
+          "color_class": "A"
+         },
+         {
+          "index": 1,
+          "position": 0.03,
+          "position_class": "A",
+          "color_hex": "#FFFFFF",
+          "color_class": "A"
+         }
+        ]
+       },
+       "inputs": {
+        "Fac": "<- link cell_ramp.Color (via reroute)"
+       },
+       "class": "A/C",
+       "evidence": [
+        "26:10",
+        "35:50"
+       ],
+       "outputs_used": [
+        "Color"
+       ]
+      },
+      {
+       "id": "final_mix",
+       "type": "ShaderNodeMixShader",
+       "label": "Mix Shader",
+       "frame": "Mix Rocks & Dirt",
+       "settings": {},
+       "inputs": {
+        "Fac": "<- link final_ramp.Color",
+        "Shader (inputs[1])": "<- link dirt_bsdf.BSDF",
+        "Shader (inputs[2])": "<- link rock_moss_mix.Shader"
+       },
+       "class": "A",
+       "evidence": [
+        "35:50"
+       ],
+       "outputs_used": [
+        "Shader"
+       ]
+      },
+      {
+       "id": "displacement",
+       "type": "ShaderNodeDisplacement",
+       "label": "Displacement",
+       "frame": "Mix Rocks & Dirt",
+       "settings": {
+        "space": "OBJECT"
+       },
+       "inputs": {
+        "Height": "<- link cell_ramp.Color (via reroute)",
+        "Midlevel": 0.0,
+        "Scale": "0.02 <- link Displacement Strength",
+        "Normal": "(unlinked)"
+       },
+       "class": "A",
+       "evidence": [
+        "26:10",
+        "35:50"
+       ],
+       "outputs_used": [
+        "Displacement"
+       ]
+      }
+     ],
+     "links": [
+      {
+       "from_node": "tex_coord",
+       "from_socket": "Object",
+       "to_node": "mapping",
+       "to_socket": "Vector",
+       "t": "26:42",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Material Scale",
+       "to_node": "mapping",
+       "to_socket": "Scale",
+       "t": "26:46",
+       "class": "A"
+      },
+      {
+       "from_node": "mapping",
+       "from_socket": "Vector",
+       "to_node": "dist_noise",
+       "to_socket": "Vector",
+       "t": "26:42",
+       "class": "A"
+      },
+      {
+       "from_node": "mapping",
+       "from_socket": "Vector",
+       "to_node": "dist_mix",
+       "to_socket": "A (RGBA, inputs[6])",
+       "t": "26:42",
+       "class": "A"
+      },
+      {
+       "from_node": "dist_noise",
+       "from_socket": "Color",
+       "to_node": "dist_mix",
+       "to_socket": "B (RGBA, inputs[7])",
+       "t": "26:42",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Distortion Scale",
+       "to_node": "dist_noise",
+       "to_socket": "Scale",
+       "t": "27:28",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Distortion Detail 1",
+       "to_node": "dist_noise",
+       "to_socket": "Detail",
+       "t": "27:32",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Distortion Detail 2",
+       "to_node": "dist_noise",
+       "to_socket": "Roughness",
+       "t": "27:36",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Distortion Strength",
+       "to_node": "dist_mix",
+       "to_socket": "Factor (inputs[0])",
+       "t": "27:40",
+       "class": "A"
+      },
+      {
+       "from_node": "dist_mix",
+       "from_socket": "Result (RGBA, outputs[2])",
+       "to_node": "cell_vor_smooth",
+       "to_socket": "Vector",
+       "t": "33:30",
+       "class": "A"
+      },
+      {
+       "from_node": "dist_mix",
+       "from_socket": "Result (RGBA, outputs[2])",
+       "to_node": "cell_vor_f1",
+       "to_socket": "Vector",
+       "t": "33:30",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Cobblestone Scale",
+       "to_node": "cell_vor_smooth",
+       "to_socket": "Scale",
+       "t": "33:26",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Cobblestone Scale",
+       "to_node": "cell_vor_f1",
+       "to_socket": "Scale",
+       "t": "33:29",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Cobblestone Cracks",
+       "to_node": "cell_vor_smooth",
+       "to_socket": "Detail",
+       "t": "34:06",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Cobblestone Cracks",
+       "to_node": "cell_vor_f1",
+       "to_socket": "Detail",
+       "t": "34:09",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Cobblestone Alignment",
+       "to_node": "cell_vor_smooth",
+       "to_socket": "Randomness",
+       "t": "34:58",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Cobblestone Alignment",
+       "to_node": "cell_vor_f1",
+       "to_socket": "Randomness",
+       "t": "35:00",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Cobblestone Individual Size",
+       "to_node": "cell_vor_smooth",
+       "to_socket": "Smoothness",
+       "t": "35:25",
+       "class": "A"
+      },
+      {
+       "from_node": "cell_vor_smooth",
+       "from_socket": "Distance",
+       "to_node": "cell_diff",
+       "to_socket": "A (RGBA, inputs[6])",
+       "t": "33:30",
+       "class": "A"
+      },
+      {
+       "from_node": "cell_vor_f1",
+       "from_socket": "Distance",
+       "to_node": "cell_diff",
+       "to_socket": "B (RGBA, inputs[7])",
+       "t": "33:30",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Cobblestone Visibility",
+       "to_node": "cell_diff",
+       "to_socket": "Factor (inputs[0])",
+       "t": "34:31",
+       "class": "A"
+      },
+      {
+       "from_node": "cell_diff",
+       "from_socket": "Result (RGBA, outputs[2])",
+       "to_node": "cell_ramp",
+       "to_socket": "Fac",
+       "t": "34:26",
+       "class": "A"
+      },
+      {
+       "from_node": "mapping",
+       "from_socket": "Vector",
+       "to_node": "dirt_noise",
+       "to_socket": "Vector",
+       "t": "31:46",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Dirt Scale",
+       "to_node": "dirt_noise",
+       "to_socket": "Scale",
+       "t": "31:27",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Dirt Detail 1",
+       "to_node": "dirt_noise",
+       "to_socket": "Detail",
+       "t": "31:40",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Dirt Detail 2",
+       "to_node": "dirt_noise",
+       "to_socket": "Roughness",
+       "t": "31:42",
+       "class": "A"
+      },
+      {
+       "from_node": "dirt_noise",
+       "from_socket": "Fac",
+       "to_node": "dirt_color_ramp",
+       "to_socket": "Fac",
+       "t": "30:44",
+       "class": "A"
+      },
+      {
+       "from_node": "dirt_noise",
+       "from_socket": "Fac",
+       "to_node": "dirt_rough_ramp",
+       "to_socket": "Fac",
+       "t": "30:44",
+       "class": "A"
+      },
+      {
+       "from_node": "dirt_noise",
+       "from_socket": "Fac",
+       "to_node": "dirt_bump",
+       "to_socket": "Height",
+       "t": "32:36",
+       "class": "A"
+      },
+      {
+       "from_node": "dirt_color_ramp",
+       "from_socket": "Color",
+       "to_node": "dirt_color_mix",
+       "to_socket": "Factor (inputs[0])",
+       "t": "30:44",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Dirt Color 1",
+       "to_node": "dirt_color_mix",
+       "to_socket": "A (RGBA, inputs[6])",
+       "t": "30:48",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Dirt Color 2",
+       "to_node": "dirt_color_mix",
+       "to_socket": "B (RGBA, inputs[7])",
+       "t": "30:50",
+       "class": "A"
+      },
+      {
+       "from_node": "dirt_color_mix",
+       "from_socket": "Result (RGBA, outputs[2])",
+       "to_node": "dirt_moss_mix",
+       "to_socket": "A (RGBA, inputs[6])",
+       "t": "31:00",
+       "class": "A"
+      },
+      {
+       "from_node": "dmoss_sharp_ramp",
+       "from_socket": "Color",
+       "to_node": "dirt_moss_mix",
+       "to_socket": "Factor (inputs[0])",
+       "t": "32:36",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Dirt Moss Color",
+       "to_node": "dirt_moss_mix",
+       "to_socket": "B (RGBA, inputs[7])",
+       "t": "31:01",
+       "class": "A"
+      },
+      {
+       "from_node": "dirt_moss_mix",
+       "from_socket": "Result (RGBA, outputs[2])",
+       "to_node": "dirt_bsdf",
+       "to_socket": "Base Color",
+       "t": "31:00",
+       "class": "A"
+      },
+      {
+       "from_node": "dirt_rough_ramp",
+       "from_socket": "Color",
+       "to_node": "dirt_rough_hsv",
+       "to_socket": "Color",
+       "t": "32:02",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Dirt Roughness",
+       "to_node": "dirt_rough_hsv",
+       "to_socket": "Value",
+       "t": "32:07",
+       "class": "A"
+      },
+      {
+       "from_node": "dirt_rough_hsv",
+       "from_socket": "Color",
+       "to_node": "dirt_bsdf",
+       "to_socket": "Roughness",
+       "t": "31:00",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Dirt Bump Strength",
+       "to_node": "dirt_bump",
+       "to_socket": "Strength",
+       "t": "32:23",
+       "class": "A"
+      },
+      {
+       "from_node": "dirt_bump",
+       "from_socket": "Normal",
+       "to_node": "dmoss_bump",
+       "to_socket": "Normal",
+       "t": "32:36",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Dirt Moss Bump Strength",
+       "to_node": "dmoss_bump",
+       "to_socket": "Strength",
+       "t": "32:31",
+       "class": "A"
+      },
+      {
+       "from_node": "dmoss_ramp",
+       "from_socket": "Color",
+       "to_node": "dmoss_bump",
+       "to_socket": "Height",
+       "t": "32:36",
+       "class": "A"
+      },
+      {
+       "from_node": "dmoss_bump",
+       "from_socket": "Normal",
+       "to_node": "dirt_bsdf",
+       "to_socket": "Normal",
+       "t": "32:36",
+       "class": "A"
+      },
+      {
+       "from_node": "mapping",
+       "from_socket": "Vector",
+       "to_node": "dmoss_noise",
+       "to_socket": "Vector",
+       "t": "29:59",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Dirt Moss Scale",
+       "to_node": "dmoss_noise",
+       "to_socket": "Scale",
+       "t": "30:00",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Dirt Moss Detail 1",
+       "to_node": "dmoss_noise",
+       "to_socket": "Detail",
+       "t": "29:28",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Dirt Moss Detail 2",
+       "to_node": "dmoss_noise",
+       "to_socket": "Roughness",
+       "t": "29:30",
+       "class": "A"
+      },
+      {
+       "from_node": "dmoss_noise",
+       "from_socket": "Fac",
+       "to_node": "dmoss_hsv",
+       "to_socket": "Color",
+       "t": "30:19",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Dirt Moss Visibility",
+       "to_node": "dmoss_hsv",
+       "to_socket": "Value",
+       "t": "30:19",
+       "class": "A"
+      },
+      {
+       "from_node": "dmoss_hsv",
+       "from_socket": "Color",
+       "to_node": "dmoss_ramp",
+       "to_socket": "Fac",
+       "t": "32:36",
+       "class": "A"
+      },
+      {
+       "from_node": "dmoss_ramp",
+       "from_socket": "Color",
+       "to_node": "dmoss_sharp_ramp",
+       "to_socket": "Fac",
+       "t": "32:36",
+       "class": "A"
+      },
+      {
+       "from_node": "mapping",
+       "from_socket": "Vector",
+       "to_node": "rock_noise",
+       "to_socket": "Vector",
+       "t": "38:36",
+       "class": "A"
+      },
+      {
+       "from_node": "mapping",
+       "from_socket": "Vector",
+       "to_node": "rock_vor",
+       "to_socket": "Vector",
+       "t": "38:36",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Rock Detail",
+       "to_node": "rock_noise",
+       "to_socket": "Detail",
+       "t": "39:28",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Rock Detail",
+       "to_node": "rock_vor",
+       "to_socket": "Detail",
+       "t": "39:30",
+       "class": "A"
+      },
+      {
+       "from_node": "rock_noise",
+       "from_socket": "Fac",
+       "to_node": "rock_color_mix",
+       "to_socket": "Factor (inputs[0])",
+       "t": "39:36",
+       "class": "A"
+      },
+      {
+       "from_node": "rock_noise",
+       "from_socket": "Fac",
+       "to_node": "rock_bump_noise",
+       "to_socket": "Height",
+       "t": "39:36",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Rock Color 1",
+       "to_node": "rock_color_mix",
+       "to_socket": "A (RGBA, inputs[6])",
+       "t": "38:36",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Rock Color 2",
+       "to_node": "rock_color_mix",
+       "to_socket": "B (RGBA, inputs[7])",
+       "t": "38:38",
+       "class": "A"
+      },
+      {
+       "from_node": "rock_color_mix",
+       "from_socket": "Result (RGBA, outputs[2])",
+       "to_node": "rock_bsdf",
+       "to_socket": "Base Color",
+       "t": "39:12",
+       "class": "A"
+      },
+      {
+       "from_node": "rock_vor",
+       "from_socket": "Distance",
+       "to_node": "rock_bump_vor",
+       "to_socket": "Height",
+       "t": "39:12",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Rock Bump Strength",
+       "to_node": "rock_bump_noise",
+       "to_socket": "Strength",
+       "t": "39:52",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Rock Bump Strength",
+       "to_node": "rock_bump_vor",
+       "to_socket": "Strength",
+       "t": "39:54",
+       "class": "A"
+      },
+      {
+       "from_node": "rock_bump_noise",
+       "from_socket": "Normal",
+       "to_node": "rock_bump_vor",
+       "to_socket": "Normal",
+       "t": "39:12",
+       "class": "A"
+      },
+      {
+       "from_node": "rock_bump_vor",
+       "from_socket": "Normal",
+       "to_node": "rock_bsdf",
+       "to_socket": "Normal",
+       "t": "39:12",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Rock Roughness",
+       "to_node": "rock_bsdf",
+       "to_socket": "Roughness",
+       "t": "39:13",
+       "class": "A"
+      },
+      {
+       "from_node": "mapping",
+       "from_socket": "Vector",
+       "to_node": "rmmask_noise",
+       "to_socket": "Vector",
+       "t": "36:30",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Rock Moss Scale",
+       "to_node": "rmmask_noise",
+       "to_socket": "Scale",
+       "t": "36:34",
+       "class": "A"
+      },
+      {
+       "from_node": "rmmask_noise",
+       "from_socket": "Fac",
+       "to_node": "rmmask_hsv",
+       "to_socket": "Color",
+       "t": "37:02",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Rock Moss Visibility",
+       "to_node": "rmmask_hsv",
+       "to_socket": "Value",
+       "t": "37:00",
+       "class": "A"
+      },
+      {
+       "from_node": "rmmask_hsv",
+       "from_socket": "Color",
+       "to_node": "rmmask_ramp",
+       "to_socket": "Fac",
+       "t": "37:02",
+       "class": "A"
+      },
+      {
+       "from_node": "rmmask_ramp",
+       "from_socket": "Color",
+       "to_node": "rock_moss_mix",
+       "to_socket": "Fac",
+       "t": "36:22",
+       "class": "A"
+      },
+      {
+       "from_node": "mapping",
+       "from_socket": "Vector",
+       "to_node": "rmoss_noise",
+       "to_socket": "Vector",
+       "t": "37:50",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Rock Moss Detail 1",
+       "to_node": "rmoss_noise",
+       "to_socket": "Detail",
+       "t": "37:52",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Rock Moss Detail 2",
+       "to_node": "rmoss_noise",
+       "to_socket": "Roughness",
+       "t": "37:54",
+       "class": "A"
+      },
+      {
+       "from_node": "rmoss_noise",
+       "from_socket": "Fac",
+       "to_node": "rmoss_bump",
+       "to_socket": "Height",
+       "t": "37:56",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Rock Moss Bump Strength",
+       "to_node": "rmoss_bump",
+       "to_socket": "Strength",
+       "t": "38:12",
+       "class": "A"
+      },
+      {
+       "from_node": "rmoss_bump",
+       "from_socket": "Normal",
+       "to_node": "rmoss_bsdf",
+       "to_socket": "Normal",
+       "t": "38:12",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Rock Moss Color",
+       "to_node": "rmoss_bsdf",
+       "to_socket": "Base Color",
+       "t": "37:26",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Rock Moss Roughness",
+       "to_node": "rmoss_bsdf",
+       "to_socket": "Roughness",
+       "t": "37:28",
+       "class": "A"
+      },
+      {
+       "from_node": "rock_bsdf",
+       "from_socket": "BSDF",
+       "to_node": "rock_moss_mix",
+       "to_socket": "Shader (inputs[1])",
+       "t": "36:22",
+       "class": "A"
+      },
+      {
+       "from_node": "rmoss_bsdf",
+       "from_socket": "BSDF",
+       "to_node": "rock_moss_mix",
+       "to_socket": "Shader (inputs[2])",
+       "t": "36:22",
+       "class": "A"
+      },
+      {
+       "from_node": "cell_ramp",
+       "from_socket": "Color",
+       "to_node": "final_ramp",
+       "to_socket": "Fac",
+       "t": "35:50",
+       "class": "A"
+      },
+      {
+       "from_node": "cell_ramp",
+       "from_socket": "Color",
+       "to_node": "displacement",
+       "to_socket": "Height",
+       "t": "35:50",
+       "class": "A"
+      },
+      {
+       "from_node": "final_ramp",
+       "from_socket": "Color",
+       "to_node": "final_mix",
+       "to_socket": "Fac",
+       "t": "35:50",
+       "class": "A"
+      },
+      {
+       "from_node": "dirt_bsdf",
+       "from_socket": "BSDF",
+       "to_node": "final_mix",
+       "to_socket": "Shader (inputs[1])",
+       "t": "35:50",
+       "class": "A"
+      },
+      {
+       "from_node": "rock_moss_mix",
+       "from_socket": "Shader",
+       "to_node": "final_mix",
+       "to_socket": "Shader (inputs[2])",
+       "t": "35:50",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Displacement Strength",
+       "to_node": "displacement",
+       "to_socket": "Scale",
+       "t": "35:53",
+       "class": "A"
+      },
+      {
+       "from_node": "final_mix",
+       "from_socket": "Shader",
+       "to_node": "group_output",
+       "to_socket": "Shader",
+       "t": "35:50",
+       "class": "A"
+      },
+      {
+       "from_node": "displacement",
+       "from_socket": "Displacement",
+       "to_node": "group_output",
+       "to_socket": "Displacement",
+       "t": "35:50",
+       "class": "A"
+      }
+     ],
+     "frames_ui": [
+      {
+       "label": "Mapping",
+       "nodes": [
+        "tex_coord",
+        "mapping"
+       ]
+      },
+      {
+       "label": "Cobblestone Distortion",
+       "nodes": [
+        "dist_noise",
+        "dist_mix"
+       ]
+      },
+      {
+       "label": "Cobblestone Mask",
+       "nodes": [
+        "cell_vor_smooth",
+        "cell_vor_f1",
+        "cell_diff",
+        "cell_ramp"
+       ]
+      },
+      {
+       "label": "Dirt Material",
+       "nodes": [
+        "dirt_noise",
+        "dirt_color_ramp",
+        "dirt_color_mix",
+        "dirt_rough_ramp",
+        "dirt_rough_hsv",
+        "dmoss_sharp_ramp",
+        "dirt_moss_mix",
+        "dirt_bump",
+        "dmoss_bump",
+        "dirt_bsdf"
+       ]
+      },
+      {
+       "label": "Dirt Moss Texture",
+       "nodes": [
+        "dmoss_noise",
+        "dmoss_hsv",
+        "dmoss_ramp"
+       ]
+      },
+      {
+       "label": "Cobblestone Rock Material",
+       "nodes": [
+        "rock_noise",
+        "rock_color_mix",
+        "rock_vor",
+        "rock_bump_noise",
+        "rock_bump_vor",
+        "rock_bsdf"
+       ]
+      },
+      {
+       "label": "Moss & Rock Mask",
+       "nodes": [
+        "rmmask_noise",
+        "rmmask_hsv",
+        "rmmask_ramp"
+       ]
+      },
+      {
+       "label": "Rock Moss Material",
+       "nodes": [
+        "rmoss_noise",
+        "rmoss_bump",
+        "rmoss_bsdf"
+       ]
+      },
+      {
+       "label": "Mix Rocks & Dirt",
+       "nodes": [
+        "final_ramp",
+        "final_mix",
+        "displacement"
+       ]
+      }
+     ],
+     "group_input_ui_instances": [
+      {
+       "frame": "Mapping",
+       "sockets": [
+        "Material Scale",
+        "Distortion Scale",
+        "Distortion Detail 1",
+        "Distortion Detail 2",
+        "Distortion Strength"
+       ],
+       "class": "A",
+       "evidence": [
+        "40:10",
+        "33:30"
+       ]
+      },
+      {
+       "frame": "Dirt Moss Texture",
+       "sockets": [
+        "Dirt Moss Scale",
+        "Dirt Moss Detail 1",
+        "Dirt Moss Detail 2",
+        "Dirt Moss Visibility"
+       ],
+       "class": "A",
+       "evidence": [
+        "40:10"
+       ]
+      },
+      {
+       "frame": "Dirt Material",
+       "sockets": [
+        "Dirt Scale",
+        "Dirt Color 1",
+        "Dirt Color 2",
+        "Dirt Moss Color",
+        "Dirt Roughness",
+        "Dirt Detail 1",
+        "Dirt Detail 2",
+        "Dirt Bump Strength",
+        "Dirt Moss Bump Strength"
+       ],
+       "class": "C",
+       "evidence": [
+        "40:10 (text too small; subset inferred from links)"
+       ]
+      },
+      {
+       "frame": "Cobblestone Mask",
+       "sockets": [
+        "Cobblestone Scale",
+        "Cobblestone Cracks",
+        "Cobblestone Visibility",
+        "Cobblestone Alignment",
+        "Cobblestone Individual Size"
+       ],
+       "class": "A",
+       "evidence": [
+        "40:10"
+       ]
+      },
+      {
+       "frame": "Mix Rocks & Dirt",
+       "sockets": [
+        "Displacement Strength"
+       ],
+       "class": "A",
+       "evidence": [
+        "36:14"
+       ]
+      },
+      {
+       "frame": "Moss & Rock Mask",
+       "sockets": [
+        "Rock Moss Scale",
+        "Rock Moss Visibility"
+       ],
+       "class": "A",
+       "evidence": [
+        "40:10"
+       ]
+      },
+      {
+       "frame": "Rock Moss Material",
+       "sockets": [
+        "Rock Moss Color",
+        "Rock Moss Roughness",
+        "Rock Moss Detail 2",
+        "Rock Moss Detail 1",
+        "Rock Moss Bump Strength"
+       ],
+       "class": "A",
+       "evidence": [
+        "40:10"
+       ]
+      },
+      {
+       "frame": "Cobblestone Rock Material",
+       "sockets": [
+        "Rock Color 1",
+        "Rock Color 2",
+        "Rock Roughness",
+        "Rock Detail",
+        "Rock Bump Strength"
+       ],
+       "class": "A",
+       "evidence": [
+        "40:10"
+       ]
+      }
+     ],
+     "reroutes": {
+      "note": "Reroute nodes (Shift+right-drag) sit on several wires: Linear Light Result -> both cell Voronoi vectors, cell mask ramp -> Mix Rocks & Dirt ramp + Displacement Height, and long Mapping / shader wires. They are functionally transparent; count and positions not reconstructed.",
+      "class": "A (presence) / D (count)"
+     },
+     "graph_changes_while_grouping": [
+      {
+       "t": "26:16-26:22",
+       "change": "Ctrl+G on every node except Material Output; the two links that crossed the selection became the group outputs 'Shader' (from the Mix Rocks & Dirt Mix Shader) and 'Displacement' (from the Displacement node).",
+       "class": "A"
+      },
+      {
+       "t": "26:28-26:30",
+       "change": "Node tree renamed 'Cobblestone Ground' (material name pasted; first paste failed with 'The internal clipboard is empty').",
+       "class": "A"
+      },
+      {
+       "t": "26:46-27:17",
+       "change": "First input created from Mapping.Scale as a Vector (XYZ, 1,1,1), converted to Float (subtype None) with default 1.0; the group node's own value had to be set to 1 by hand.",
+       "class": "A"
+      },
+      {
+       "t": "27:20-40:02",
+       "change": "35 more inputs created by dragging internal node inputs onto the Group Input's empty socket (default/min/max/subtype/description copied from the node socket); where two node inputs share a control the second one was dragged onto the existing socket (Cobblestone Scale, Cobblestone Cracks, Cobblestone Alignment, Rock Detail, Rock Bump Strength).",
+       "class": "A"
+      },
+      {
+       "t": "27:43-38:58",
+       "change": "Five panels: Rock Distortion, Dirt & Moss, Cobblestone Chunks, Rocks and Moss, Cobblestone Rocks (Material Scale stays outside panels).",
+       "class": "A"
+      },
+      {
+       "t": "33:49-34:04 and 34:44-34:56",
+       "change": "Temporary Value nodes for demos; deleted, not part of the result.",
+       "class": "A"
+      },
+      {
+       "t": "29:57, 32:04, 32:20, 34:24, 34:42, 36:33",
+       "change": "Demo drags (dirt moss noise scale, roughness HSV value, dirt bump strength, Difference factor, Voronoi randomness, mask noise scale); all socket defaults show the original values, so no internal value changed.",
+       "class": "A"
+      },
+      {
+       "t": "28:57-40:06",
+       "change": "Group Input duplicated into each frame and Ctrl+H used to hide unused sockets (8 copies, UI only).",
+       "class": "A"
+      },
+      {
+       "t": "-",
+       "change": "No node type, link or internal value was changed while grouping; the internal graph equals the material built in 7:22-26:10 (Displacement Midlevel 0 / Scale 0.02 set at 26:01-26:07).",
+       "class": "A/C"
+      }
+     ]
+    }
+   ],
+   "top_level": {
+    "nodes": [
+     {
+      "id": "cobblestone_group",
+      "type": "ShaderNodeGroup",
+      "label": "Cobblestone Ground",
+      "settings": {
+       "node_tree": "Cobblestone Ground"
+      },
+      "inputs": {
+       "Material Scale": 1.0,
+       "(all panel sockets)": "interface defaults (panels collapsed at 40:12, values not visible: C)"
+      },
+      "class": "A",
+      "evidence": [
+       "26:32",
+       "40:12"
+      ]
+     },
+     {
+      "id": "material_output",
+      "type": "ShaderNodeOutputMaterial",
+      "label": "Material Output",
+      "settings": {
+       "target": "ALL",
+       "is_active_output": true
+      },
+      "inputs": {},
+      "class": "A",
+      "evidence": [
+       "26:32",
+       "40:12"
+      ]
+     }
+    ],
+    "links": [
+     {
+      "from_node": "cobblestone_group",
+      "from_socket": "Shader",
+      "to_node": "material_output",
+      "to_socket": "Surface",
+      "t": "26:32",
+      "class": "A"
+     },
+     {
+      "from_node": "cobblestone_group",
+      "from_socket": "Displacement",
+      "to_node": "material_output",
+      "to_socket": "Displacement",
+      "t": "26:32",
+      "class": "A"
+     }
+    ]
+   }
+  }
+ ],
+ "product_variant_intro": {
+  "where": "0:09-0:11 (intro, the purchasable file; values before the 0:25-3:36 demo)",
+  "panels": {
+   "(top)": [
+    [
+     "Material Scale",
+     1.0
+    ]
+   ],
+   "Rock Distortion": [
+    [
+     "Distortion Detail 2",
+     0.5
+    ],
+    [
+     "Distortion Detail 1",
+     7.0
+    ],
+    [
+     "Distortion Scale",
+     2.0
+    ],
+    [
+     "Distortion Strength",
+     0.2
+    ]
+   ],
+   "Dirt & Moss": [
+    [
+     "Dirt Moss Detail 1",
+     9.0
+    ],
+    [
+     "Dirt Moss Detail 2",
+     0.5
+    ],
+    [
+     "Dirt Moss Visibility",
+     1.0
+    ],
+    [
+     "Dirt Color 1",
+     "#312D24 (swatch)"
+    ],
+    [
+     "Dirt Color 2",
+     "#18150E (swatch)"
+    ],
+    [
+     "Dirt Moss Color",
+     "#232710 (swatch)"
+    ],
+    [
+     "Dirt Scale",
+     20.0
+    ],
+    [
+     "Dirt Moss Scale",
+     25.0
+    ],
+    [
+     "Dirt Roughness",
+     1.0
+    ],
+    [
+     "Dirt Bump Strength",
+     1.0
+    ],
+    [
+     "Moss Bump Strength",
+     1.0
+    ]
+   ],
+   "Cobblestone Chunks": [
+    [
+     "Cobblestone Scale",
+     7.0
+    ],
+    [
+     "Cobblestone Cracks",
+     0.0
+    ],
+    [
+     "Cobblestone Visibility",
+     1.0
+    ],
+    [
+     "Cobblestone Alignment",
+     1.0
+    ],
+    [
+     "Cobblestone Size",
+     0.6
+    ],
+    [
+     "Displacement Strength",
+     0.02
+    ]
+   ],
+   "Rocks and Moss": [
+    [
+     "Rock Moss Scale",
+     15.0
+    ],
+    [
+     "Rock Moss Color",
+     "#222B12 (swatch)"
+    ],
+    [
+     "Rock Moss Roughness",
+     0.65
+    ],
+    [
+     "Rock Moss Detail 1",
+     15.0
+    ],
+    [
+     "Rock Moss Detail 2",
+     0.704
+    ],
+    [
+     "Rock Moss Visibility",
+     1.0
+    ],
+    [
+     "Rock Moss Bump Strength",
+     1.0
+    ]
+   ],
+   "Cobblestone Rocks": [
+    [
+     "Rock Color 1",
+     "#343434 (swatch)"
+    ],
+    [
+     "Rock Color 2",
+     "#282421 (swatch)"
+    ],
+    [
+     "Rock Roughness",
+     0.65
+    ],
+    [
+     "Rock Detail",
+     10.0
+    ],
+    [
+     "Rock Bump Strength",
+     1.0
+    ]
+   ]
+  },
+  "differences_vs_tutorial_final": [
+   "product has no 'Dirt Detail 1' / 'Dirt Detail 2' (the tutorial exposes the dirt noise Detail and Roughness)",
+   "'Cobblestone Size' (product) = 'Cobblestone Individual Size' (tutorial)",
+   "'Moss Bump Strength' (product) = 'Dirt Moss Bump Strength' (tutorial)",
+   "Rock Moss Detail 2 default 0.704 (product) vs 0.700 (tutorial)",
+   "socket order inside Rock Distortion, Dirt & Moss and Rocks and Moss differs (see tables)"
+  ],
+  "class": "A",
+  "evidence": [
+   "tools/materials/reconstruction/cobblestone/evidence/b/frames/t0009_product_interface_lower.jpg",
+   "tools/materials/reconstruction/cobblestone/evidence/b/frames/t0011_product_interface_upper.jpg"
+  ]
+ },
+ "reference_frames": [
+  {
+   "t": "0:01",
+   "path": "tools/materials/reconstruction/cobblestone/evidence/b/frames/t0001_intro_final_render.jpg",
+   "what": "finished look (product file): rendered camera view (Cycles viewport) of the ~1 m icosphere, sun + disk rim light + fish_hoek_beach HDRI, Filmic Very High Contrast; moss on stones and dirt, displaced stones"
+  },
+  {
+   "t": "0:09",
+   "path": "tools/materials/reconstruction/cobblestone/evidence/b/frames/t0009_product_interface_lower.jpg",
+   "what": "product group: Cobblestone Chunks, Rocks and Moss, Cobblestone Rocks defaults"
+  },
+  {
+   "t": "0:11",
+   "path": "tools/materials/reconstruction/cobblestone/evidence/b/frames/t0011_product_interface_upper.jpg",
+   "what": "product group: Material Scale, Rock Distortion, Dirt & Moss defaults"
+  },
+  {
+   "t": "40:10",
+   "path": "tools/materials/reconstruction/cobblestone/evidence/b/frames/t4010_graph_overview.jpg",
+   "what": "zoomed-out final internal graph (9 frames)"
+  },
+  {
+   "t": "40:12",
+   "path": "tools/materials/reconstruction/cobblestone/evidence/b/frames/t4012_final_group_node.jpg",
+   "what": "final group node in the material with Material Output (All)"
+  },
+  {
+   "t": "40:16",
+   "path": "tools/materials/reconstruction/cobblestone/evidence/b/frames/t4016_closing_render.jpg",
+   "what": "closing render of the tutorial-built material, same camera, object and lighting as 0:01"
+  }
+ ],
+ "evidence_index": "tools/materials/reconstruction/cobblestone/evidence/b/index.json",
+ "builder_notes": [
+  "Socket names are the UI labels. The Noise output and the ColorRamp / Hue-Saturation / Mix Shader factor inputs have the identifier 'Fac' (label 'Factor'); look sockets up by identifier or index, not by label.",
+  "ShaderNodeMix in RGBA mode: Factor = inputs[0], A = inputs[6], B = inputs[7], Result = outputs[2].",
+  "ShaderNodeMixShader: Fac = inputs[0], first Shader = inputs[1] (shown on top), second Shader = inputs[2].",
+  "Colour defaults: hex values are Blender's gamma-corrected hex; use default_linear_rgba for socket default_value.",
+  "Interface min -inf/inf for Material Scale: use -3.4028234663852886e38 / 3.4028234663852886e38.",
+  "Bump nodes: set Distance explicitly (0.020 / 0.005 / 0.007 / 0.015 / 0.010) and Filter Width 0.1; the video shows the Filter Width input (Blender 5.0.1).",
+  "The mapping of this spec onto the PM_ contract (D2-D5: Use UV / Tile Size, metres, 4D torus) is the builder's job; nothing here is adapted."
+ ]
+}

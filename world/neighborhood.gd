@@ -149,7 +149,12 @@ static func chosen_city() -> String:
 	var loop := Engine.get_main_loop()
 	if loop != null and loop.get_script() != null: return "classic"
 	GameSettings.load_settings()
-	return str(GameSettings.get_value("city"))
+	var chosen := str(GameSettings.get_value("city"))
+	if chosen == "port_halden":
+		# which Port Halden build (setting city_build): the roads-only city when it is installed, else the full one
+		var roads := str(GameSettings.get_value("city_build")) == "roads" and ResourceLoader.exists(CityForgeWorld.ROADS_DIR + "city.json")
+		CityForgeWorld.use_city(CityForgeWorld.ROADS_DIR if roads else CityForgeWorld.CLASSIC_DIR)
+	return chosen
 
 func _ready() -> void:
 	if chosen_city() == "port_halden":

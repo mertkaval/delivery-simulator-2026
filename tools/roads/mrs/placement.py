@@ -64,6 +64,8 @@ DEFAULT = {"bench": ((1.8, 0.65), {"front": 0.9}), "bench_backless": ((1.9, 0.5)
            "drain": ((0.6, 0.45), {}), "cover": ((0.7, 0.7), {}), "light": ((0.4, 0.4), {}), "sign": ((0.3, 0.3), {}), "signal": ((0.5, 0.5), {}), "tree": ((0.7, 0.7), {}),
            "column": ((0.9, 0.9), {})}
 FLUSH = {"pit_grate", "drain", "cover", "pad"}
+FLUSH_PROBE = 0.9                  # a flush item's surface plane is sampled this far out of its half size (_lay_on_surface)
+FLUSH_MAX_SLOPE = 0.25             # ...and followed up to this slope; steeper means a step under it (it stays level)
 # how an object meets sloping ground (by library kind; everything else is embedded: poles, posts, signs, hydrants and
 # trees are set into the ground at the lowest point under their base)
 FREE_STANDING = {"bench", "bench_backless", "bin", "bin_recycling", "rack", "rack1", "planter", "barrier"}   # need near-level ground
@@ -71,6 +73,9 @@ ON_PLINTH = {"shelter", "cabinet"}             # built on a level concrete plint
 FREE_RISE = 0.10                               # free-standing furniture: at most this rise across its base (m)
 TREE_GUARD = 1.2                               # the tree guard's nominal side (m): scaled to the bed it surrounds
 TREE_GUARD_SCALE = (0.85, 1.25)                # ... within this
+TREE_MAX_LEAN = math.tan(math.radians(12.0))   # a street tree's trunk leans at most this (tan): a crooked trunk over a sidewalk reads as wrong
+TREE_LEAN_AT = 2.0                             # ...measured between the ground and this height (m, under the crown)
+BUS_TEXT_MARGIN = 0.3                          # the BUS STOP lane text keeps this far inside its lane's edges (m)
 TREE_EDGING_MIN_STRIP = 1.2                    # a planting strip this wide gets a square concrete edging round the tree (m)
 TREE_EDGING_W, TREE_EDGING_H = 0.08, 0.06      # edging width and height above the strip (m)
 PLINTH_MARGIN = 0.10                           # a plinth reaches this far beyond the base (m)
@@ -263,6 +268,28 @@ def _place(lib, name, pos, yaw, col, scale=1.0, kind=None, meta=None):
         c2 = bpy.data.objects.new(name + ch.name[len(src.name):], ch.data); col.objects.link(c2)
         c2.parent = o; c2.matrix_parent_inverse = ch.matrix_parent_inverse.copy(); c2.location = ch.location; c2.rotation_euler = ch.rotation_euler; c2.scale = ch.scale
     return o
+
+
+def _lay_on_surface(m, o, src, lift=0.0):
+    """A flush item (drain grate, access cover, pit grate) on the plane of the surface under it: the surface is sampled
+    at the middle of each side of its plan (local +-X, +-Y, FLUSH_PROBE of its half size in), and the item takes that
+    plane's height at its centre and its slope along and across. It used to lie level at the height under its centre,
+    so on a graded street (up to 12 %) or a cross slope one end sank under the asphalt and the other stood out of it."""
+    if src.type != "MESH" or not src.data.vertices: return
+    xs = [v.co.x for v in src.data.vertices]; ys = [v.co.y for v in src.data.vertices]
+    hx = (max(xs) - min(xs)) / 2 * o.scale.x * FLUSH_PROBE; hy = (max(ys) - min(ys)) / 2 * o.scale.y * FLUSH_PROBE
+    if hx < 0.02 or hy < 0.02: return
+    yaw = o.rotation_euler.z; ex = Vector((math.cos(yaw), math.sin(yaw), 0.0)); ey = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
+    c = o.location.copy()
+    zs = _ground_z(m, [c + ex * hx, c - ex * hx, c + ey * hy, c - ey * hy], c.z)
+    if any(z is None for z in zs): return
+    gx = (zs[0] - zs[1]) / (2 * hx); gy = (zs[2] - zs[3]) / (2 * hy)
+    if abs(gx) > FLUSH_MAX_SLOPE or abs(gy) > FLUSH_MAX_SLOPE: return       # over a step (a kerb), not a slope: leave it level
+    X = (ex + Vector((0, 0, gx))).normalized(); Y = (ey + Vector((0, 0, gy)))
+    Y = (Y - X * Y.dot(X)).normalized(); Z = X.cross(Y)
+    from mathutils import Matrix
+    R = Matrix((X, Y, Z)).transposed()
+    o.matrix_world = Matrix.Translation(Vector((c.x, c.y, sum(zs) / 4 + 0.002 + lift))) @ R.to_4x4() @ Matrix.Diagonal(o.scale.to_4d())
 
 
 def clear_placed(roads_col):
@@ -497,6 +524,7 @@ def _put(ctx, m, s, a, d, kind, lib_kind=None, f_dir=None, lift=0.0, cat=None, o
         if not quiet: _skip(ctx, m, kind, a, why)
         return None
     o = _place(src, owner, pos, _yaw(fv), ctx["col"], scale, kind, dict(meta or {}, mrs_road=m.name, mrs_side=s, mrs_along=round(a, 2)))
+    if lib_kind in FLUSH and o is not None: _lay_on_surface(m, o, src, lift)
     if plinth is not None: _plinth(ctx, owner + "_plinth", foot, plinth[1], plinth[0], bpy.data.materials.get(MRS + "Concrete"))
     ctx["occ"].add(foot, accs, owner, lib_kind)
     ctx["rep"]["placed"].append((m.name, kind, s, round(a, 1), src.name))
@@ -828,11 +856,17 @@ def _bus_stop(ctx, st):
     try:
         from .structures import _text_mesh
         p, t, r = m.frame(a); sgn = 1.0 if s == "r" else -1.0
-        q = p + r * sgn * (m.half(a, s) - 1.7); q.z = surface_z(m.road, a, sgn * (m.half(a, s) - 1.7)) + 0.006
+        # in the lane the bus stops in (the outermost traffic lane), fitted inside it: placed a fixed 1.7 m in from the
+        # asphalt's edge it lay across a kerbside cycle lane's line and half on the carriageway
+        w = m.w_at(a); lw = w["lw"]; lat = w["carr_" + s] - lw / 2
+        q = p + r * sgn * lat; q.z = surface_z(m.road, a, sgn * lat) + 0.006
         tm = _text_mesh("BUS STOP", 1.1, 0.002); tm.name = "MRS_PL_bustext"
+        ys = [v.co.y for v in tm.vertices]
+        fit = min(1.0, max(lw - 2 * BUS_TEXT_MARGIN, 0.1) / max(max(ys) - min(ys), 1e-3)) if ys else 1.0
         if bpy.data.materials.get(MRS + "Paint"): tm.materials.append(bpy.data.materials[MRS + "Paint"])
         to = bpy.data.objects.new("%s_busstop_text" % m.name, tm); ctx["col"].objects.link(to)
         to.location = q; to.rotation_euler = (0, 0, math.atan2(t.y, t.x) - math.pi / 2 + (math.pi / 2 if sgn > 0 else -math.pi / 2))
+        to.scale = (fit, fit, 1.0)
         to["mrs_placed"] = "bus_text"; to["mrs_kind"] = "marking"
     except Exception as e:
         _skip(ctx, m, "bus_marking", a, "text error %s" % e)
@@ -1085,9 +1119,29 @@ def _furniture(ctx, m):
 
 
 # ============================================================================ 4. trees
+_LEANS = {}
+
+
+def trunk_lean(o):
+    """How far a tree model's trunk leans: the horizontal offset of its bark (material 'bark' / 'trunk' / 'wood') between
+    the ground (0-0.3 m) and eye height (TREE_LEAN_AT, at most 0.6 of the crown base, under the first branches), per
+    metre of height (tan of the lean angle). None when the model has no bark ring at either height."""
+    key = (o.name, len(o.data.vertices))
+    if key in _LEANS: return _LEANS[key]
+    me = o.data; bark = {i for i, mt in enumerate(me.materials) if mt and any(k in mt.name.lower() for k in ("bark", "trunk", "wood"))}
+    top = min(TREE_LEAN_AT, 0.6 * float(o.get("mrs_crown_base", 3.0)))
+    def ring(z0, z1):
+        pts = [me.vertices[i].co.xy for f in me.polygons if f.material_index in bark for i in f.vertices if z0 <= me.vertices[i].co.z <= z1]
+        return sum(pts, Vector((0.0, 0.0))) / len(pts) if pts else None
+    c0, c1 = ring(0.0, 0.3), ring(top - 0.15, top + 0.15)
+    _LEANS[key] = (c1 - c0).length / max(top - 0.15, 0.1) if c0 is not None and c1 is not None and top > 0.45 else None
+    return _LEANS[key]
+
+
 def _tree_lib(sid):
     o = bpy.data.objects.get(MRS + "GTree_" + sid)
-    if o is not None: return o, {"height": o.get("mrs_tree_height", 10.0), "reach": o.get("mrs_crown_reach", 4.0), "base": o.get("mrs_crown_base", 3.0), "trunk": o.get("mrs_trunk_radius", 0.25)}
+    if o is not None: return o, {"height": o.get("mrs_tree_height", 10.0), "reach": o.get("mrs_crown_reach", 4.0), "base": o.get("mrs_crown_base", 3.0),
+                                 "trunk": o.get("mrs_trunk_radius", 0.25), "lean": trunk_lean(o) if o.type == "MESH" else None}
     return None, None
 
 
@@ -1130,6 +1184,8 @@ def _trees(ctx, m):
             for sid in order:
                 src, info = _tree_lib(sid)
                 if src is None: reasons.append("%s missing" % sid); continue
+                if info["lean"] is not None and info["lean"] > TREE_MAX_LEAN:
+                    reasons.append("%s: its trunk leans %.0f deg (street trees at most %.0f)" % (sid, math.degrees(math.atan(info["lean"])), math.degrees(math.atan(TREE_MAX_LEAN)))); continue
                 for sc in (R["tree_scale"][1], (R["tree_scale"][0] + R["tree_scale"][1]) / 2, R["tree_scale"][0]):
                     for sh in (0.0, 1.5, -1.5):
                         why = _tree_check(ctx, m, s, a + sh, d_tree, info, sc, heads, signs, signals)

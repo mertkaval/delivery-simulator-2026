@@ -1,0 +1,58 @@
+{
+ "default": {
+  "file": "C:\\GodotProjects\\delivery-simulator-2026\\tmp\\materials_glass\\r4\\video_full.png",
+  "seconds": 32.8,
+  "hdri": "sunset",
+  "rotation": 270.0,
+  "strength": 0.5,
+  "view": [
+   "Filmic",
+   "Very High Contrast"
+  ],
+  "samples": 100,
+  "res": [
+   2560,
+   1440
+  ],
+  "pane_boxes": {
+   "PM_GlassCircles": [
+    259,
+    56,
+    900,
+    698
+   ],
+   "PM_GlassVoronoi": [
+    959,
+    56,
+    1601,
+    698
+   ],
+   "PM_GlassCells": [
+    1660,
+    56,
+    2301,
+    698
+   ],
+   "PM_GlassWavy": [
+    259,
+    742,
+    900,
+    1384
+   ],
+   "PM_GlassBlobby": [
+    959,
+    742,
+    1601,
+    1384
+   ],
+   "PM_GlassFrosted": [
+    1660,
+    742,
+    2301,
+    1384
+   ]
+  },
+  "gpu": true,
+  "denoise": false
+ }
+}

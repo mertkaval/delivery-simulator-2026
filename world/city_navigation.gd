@@ -112,13 +112,17 @@ static func places(world: Node) -> Array[Dictionary]:
 	for id in ShopCatalog.LOCATIONS:
 		var detail: String = {"equipment": "Gear & upgrades", "bikes": "Bicycles", "cars": "Cars · Jetta GLI $0", "scooters": "E-scooters"}.get(id, "")
 		list.append({"name": ShopCatalog.TITLES[id], "kind": "store", "at": ShopCatalog.LOCATIONS[id] + Vector3(0, 0, 8), "detail": detail})
-	list.append({"name": "Public WC · Water", "kind": "public", "at": Vector3(-40, 0, 40), "detail": "Washroom & drinking water"})
-	for centre in StreetNames.PARKS:
-		list.append({"name": StreetNames.PARKS[centre], "kind": "park", "at": Vector3(centre.x, 0, centre.y + 15), "detail": "Park"})
-	for site in CivicCampus.SITES:
-		var kind: String = {"hospital": "hospital", "school": "school", "fire_station": "fire"}.get(site.asset, "public")
-		list.append({"name": site.name, "kind": kind, "at": site.at, "detail": "Civic campus"})
-	list.append({"name": "Home", "kind": "home", "at": CedarNeighborhood.CEDAR_HOME_ORIGIN + Vector3(0, 0, 6), "detail": "Rest and save"})
+	# Port Halden (a generated city: the world has its own road graph) has none of the classic city's fixed places
+	var generated := world != null and world.has_meta("map_roads")
+	if not generated:
+		list.append({"name": "Public WC · Water", "kind": "public", "at": Vector3(-40, 0, 40), "detail": "Washroom & drinking water"})
+		for centre in StreetNames.PARKS:
+			list.append({"name": StreetNames.PARKS[centre], "kind": "park", "at": Vector3(centre.x, 0, centre.y + 15), "detail": "Park"})
+		for site in CivicCampus.SITES:
+			var kind: String = {"hospital": "hospital", "school": "school", "fire_station": "fire"}.get(site.asset, "public")
+			list.append({"name": site.name, "kind": kind, "at": site.at, "detail": "Civic campus"})
+	var home_at: Vector3 = GamePersistence.START if generated else CedarNeighborhood.CEDAR_HOME_ORIGIN + Vector3(0, 0, 6)
+	list.append({"name": "Home", "kind": "home", "at": home_at, "detail": "Rest and save"})
 	if world != null:
 		var signage = world.get("signage")
 		if signage != null and signage.monument_at != Vector3.ZERO:

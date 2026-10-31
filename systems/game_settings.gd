@@ -3,10 +3,12 @@ extends RefCounted
 ## Player options from the main menu, stored in user://settings.cfg and applied on start:
 ## audio bus volumes, mouse sensitivity, field of view, fullscreen and vsync, and the camera:
 ## third person (default) or first person (V) and the third-person camera distance (mouse wheel).
+## city: "port_halden" or "classic"; city_build: which Port Halden build, "roads" (the Mert Road Studio streets,
+## assets/cityforge_roads, the default) or "full" (the CityForge city with buildings, assets/cityforge).
 
 const PATH := "user://settings.cfg"
 const DEFAULTS := {"master": 0.85, "ambience": 0.8, "effects": 0.9, "sensitivity": 1.0, "fov": 78.0, "fullscreen": true, "vsync": true,
-	"third_person": true, "camera_distance": 3.2, "city": "port_halden"}
+	"third_person": true, "camera_distance": 3.2, "city": "port_halden", "city_build": "roads"}
 ## Where the options live (tests point this at a scratch file so they never touch the player's).
 static var path := PATH
 

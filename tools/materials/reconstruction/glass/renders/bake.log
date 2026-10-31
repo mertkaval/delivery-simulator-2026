@@ -1,0 +1,84 @@
+[glass] modules {"glass": "ok"}
+[glass] built 6 materials in 0.4s
+00:01.547  cycles           | WARNING HIPEW initialization failed: Error opening HIP dynamic library
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+[procmat.bake] PM_GlassCircles: 1024 px, tile 4 m, UV mode, GPU, {'albedo': 'PM_GlassCircles_albedo.png', 'normal': 'PM_GlassCircles_normal.png', 'roughness': 'PM_GlassCircles_roughness.png'}
+[bake] PM_GlassCircles tile 4 m 10.8s {'albedo': 'const', 'normal': 1.0136, 'roughness': 'const'}
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+[procmat.bake] PM_GlassCircles: 1024 px, tile 1 m, UV mode, GPU, {'albedo': 'PM_GlassCircles_albedo.png', 'normal': 'PM_GlassCircles_normal.png', 'roughness': 'PM_GlassCircles_roughness.png'}
+[bake] PM_GlassCircles tile 1 m 8.7s {'albedo': 'const', 'normal': 1.0085, 'roughness': 'const'}
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+[bake] periodicity PM_GlassCircles OK {"normal": {"mad": 0.00048, "corr": 0.99998, "mad_unrolled": 0.01309}}
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+[procmat.bake] PM_GlassVoronoi: 1024 px, tile 4 m, UV mode, GPU, {'albedo': 'PM_GlassVoronoi_albedo.png', 'normal': 'PM_GlassVoronoi_normal.png', 'roughness': 'PM_GlassVoronoi_roughness.png'}
+[bake] PM_GlassVoronoi tile 4 m 25.6s {'albedo': 'const', 'normal': 0.9944, 'roughness': 'const'}
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+[procmat.bake] PM_GlassVoronoi: 1024 px, tile 1 m, UV mode, GPU, {'albedo': 'PM_GlassVoronoi_albedo.png', 'normal': 'PM_GlassVoronoi_normal.png', 'roughness': 'PM_GlassVoronoi_roughness.png'}
+[bake] PM_GlassVoronoi tile 1 m 9.1s {'albedo': 'const', 'normal': 1.0079, 'roughness': 'const'}
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+[bake] periodicity PM_GlassVoronoi OK {"normal": {"mad": 0.00194, "corr": 0.99989, "mad_unrolled": 0.01865}}
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+[procmat.bake] PM_GlassCells: 1024 px, tile 4 m, UV mode, GPU, {'albedo': 'PM_GlassCells_albedo.png', 'normal': 'PM_GlassCells_normal.png', 'roughness': 'PM_GlassCells_roughness.png'}
+[bake] PM_GlassCells tile 4 m 3.0s {'albedo': 'const', 'normal': 1.0664, 'roughness': 0.9876}
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+[procmat.bake] PM_GlassCells: 1024 px, tile 1 m, UV mode, GPU, {'albedo': 'PM_GlassCells_albedo.png', 'normal': 'PM_GlassCells_normal.png', 'roughness': 'PM_GlassCells_roughness.png'}
+[bake] PM_GlassCells tile 1 m 3.3s {'albedo': 'const', 'normal': 0.9993, 'roughness': 0.9738}
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+[bake] periodicity PM_GlassCells OK {"normal": {"mad": 0.00091, "corr": 0.99996, "mad_unrolled": 0.01143}}
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+[procmat.bake] PM_GlassWavy: 1024 px, tile 4 m, UV mode, GPU, {'albedo': 'PM_GlassWavy_albedo.png', 'normal': 'PM_GlassWavy_normal.png', 'roughness': 'PM_GlassWavy_roughness.png'}
+[bake] PM_GlassWavy tile 4 m 5.9s {'albedo': 'const', 'normal': 0.9953, 'roughness': 'const'}
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+[procmat.bake] PM_GlassWavy: 1024 px, tile 1 m, UV mode, GPU, {'albedo': 'PM_GlassWavy_albedo.png', 'normal': 'PM_GlassWavy_normal.png', 'roughness': 'PM_GlassWavy_roughness.png'}
+[bake] PM_GlassWavy tile 1 m 6.1s {'albedo': 'const', 'normal': 0.7938, 'roughness': 'const'}
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+[bake] periodicity PM_GlassWavy OK {"normal": {"mad": 0.00014, "corr": 0.99999, "mad_unrolled": 0.00293}}
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+[procmat.bake] PM_GlassBlobby: 1024 px, tile 4 m, UV mode, GPU, {'albedo': 'PM_GlassBlobby_albedo.png', 'normal': 'PM_GlassBlobby_normal.png', 'roughness': 'PM_GlassBlobby_roughness.png'}
+[bake] PM_GlassBlobby tile 4 m 7.0s {'albedo': 'const', 'normal': 1.0126, 'roughness': 0.9915}
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+[procmat.bake] PM_GlassBlobby: 1024 px, tile 1 m, UV mode, GPU, {'albedo': 'PM_GlassBlobby_albedo.png', 'normal': 'PM_GlassBlobby_normal.png', 'roughness': 'PM_GlassBlobby_roughness.png'}
+[bake] PM_GlassBlobby tile 1 m 11.7s {'albedo': 'const', 'normal': 1.0365, 'roughness': 0.9759}
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+[bake] periodicity PM_GlassBlobby OK {"normal": {"mad": 0.00048, "corr": 0.99998, "mad_unrolled": 0.01172}}
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+[procmat.bake] PM_GlassFrosted: 1024 px, tile 4 m, UV mode, GPU, {'albedo': 'PM_GlassFrosted_albedo.png', 'normal': 'PM_GlassFrosted_normal.png', 'roughness': 'PM_GlassFrosted_roughness.png'}
+[bake] PM_GlassFrosted tile 4 m 2.8s {'albedo': 'const', 'normal': 0.0, 'roughness': 0.9793}
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+[procmat.bake] PM_GlassFrosted: 1024 px, tile 1 m, UV mode, GPU, {'albedo': 'PM_GlassFrosted_albedo.png', 'normal': 'PM_GlassFrosted_normal.png', 'roughness': 'PM_GlassFrosted_roughness.png'}
+[bake] PM_GlassFrosted tile 1 m 2.3s {'albedo': 'const', 'normal': 0.0, 'roughness': 0.9678}
+Info: Baking map saved to internal image, save it externally or pack it
+Info: Baking map saved to internal image, save it externally or pack it
+[bake] periodicity PM_GlassFrosted FAIL {"roughness": {"mad": 0.00259, "corr": 0.80097, "mad_unrolled": 0.00638}}
+[glass] mode bake FAIL 134.5s
+GLASS RUN FAIL
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)

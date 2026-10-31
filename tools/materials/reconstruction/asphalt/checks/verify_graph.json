@@ -1,0 +1,624 @@
+{
+ "PM_AsphaltTutorial": {
+  "links_ok": 38,
+  "links_total": 38,
+  "missing_nodes": [],
+  "links": [
+   {
+    "from_node": "texcoord",
+    "from_socket": "Object",
+    "to_node": "color_noise",
+    "to_socket": "Vector",
+    "ok": true,
+    "via": "Texture Coordinate.Object -> color_noise_3d.Vector; Texture Coordinate.Object -> color_noise_4d.Vector"
+   },
+   {
+    "from_node": "texcoord",
+    "from_socket": "Object",
+    "to_node": "color_warp_mix",
+    "to_socket": "Color1",
+    "ok": true,
+    "via": "Texture Coordinate.Object -> color_warp_mix.A_Color"
+   },
+   {
+    "from_node": "color_noise",
+    "from_socket": "Color",
+    "to_node": "color_warp_mix",
+    "to_socket": "Color2",
+    "ok": true,
+    "via": "color_noise_3d.Color -> color_warp_mix.B_Color"
+   },
+   {
+    "from_node": "color_warp_mix",
+    "from_socket": "Color",
+    "to_node": "color_voronoi",
+    "to_socket": "Vector",
+    "ok": true,
+    "via": "color_warp_mix.Result_Color -> color_voronoi_3d.Vector; color_warp_mix.Result_Color -> color_voronoi_4d.Vector"
+   },
+   {
+    "from_node": "color_voronoi",
+    "from_socket": "Distance",
+    "to_node": "color_ramp",
+    "to_socket": "Fac",
+    "ok": true,
+    "via": "color_voronoi_3d.Distance -> color_ramp.Fac"
+   },
+   {
+    "from_node": "color_voronoi",
+    "from_socket": "Distance",
+    "to_node": "bump2",
+    "to_socket": "Height",
+    "ok": true,
+    "via": "color_voronoi_3d.Distance -> bump2.Height"
+   },
+   {
+    "from_node": "color_voronoi",
+    "from_socket": "Distance",
+    "to_node": "rough_ramp",
+    "to_socket": "Fac",
+    "ok": true,
+    "via": "color_voronoi_3d.Distance -> rough_ramp.Fac"
+   },
+   {
+    "from_node": "color_ramp",
+    "from_socket": "Color",
+    "to_node": "darken_cracks",
+    "to_socket": "Color1",
+    "ok": true,
+    "via": "color_ramp.Color -> darken_cracks.A_Color"
+   },
+   {
+    "from_node": "texcoord",
+    "from_socket": "Object",
+    "to_node": "cracks_mask_noise",
+    "to_socket": "Vector",
+    "ok": true,
+    "via": "Texture Coordinate.Object -> cracks_mask_noise_3d.Vector; Texture Coordinate.Object -> cracks_mask_noise_4d.Vector"
+   },
+   {
+    "from_node": "texcoord",
+    "from_socket": "Object",
+    "to_node": "cracks_warp_noise",
+    "to_socket": "Vector",
+    "ok": true,
+    "via": "Texture Coordinate.Object -> cracks_warp_noise_3d.Vector; Texture Coordinate.Object -> cracks_warp_noise_4d.Vector"
+   },
+   {
+    "from_node": "cracks_mask_noise",
+    "from_socket": "Fac",
+    "to_node": "cracks_mask_ramp",
+    "to_socket": "Fac",
+    "ok": true,
+    "via": "cracks_mask_noise_3d.Fac -> cracks_mask_ramp.Fac"
+   },
+   {
+    "from_node": "cracks_warp_noise",
+    "from_socket": "Color",
+    "to_node": "cracks_voronoi",
+    "to_socket": "Vector",
+    "ok": true,
+    "via": "cracks_warp_noise_3d.Color -> cracks_voronoi.Vector"
+   },
+   {
+    "from_node": "cracks_mask_ramp",
+    "from_socket": "Color",
+    "to_node": "cracks_mix",
+    "to_socket": "Fac",
+    "ok": true,
+    "via": "cracks_mask_ramp.Color -> cracks_mix.Factor_Float"
+   },
+   {
+    "from_node": "cracks_voronoi",
+    "from_socket": "Distance",
+    "to_node": "cracks_mix",
+    "to_socket": "Color1",
+    "ok": true,
+    "via": "cracks_voronoi.Distance -> cracks_mix.A_Color"
+   },
+   {
+    "from_node": "cracks_mix",
+    "from_socket": "Color",
+    "to_node": "darken_cracks",
+    "to_socket": "Color2",
+    "ok": true,
+    "via": "cracks_mix.Result_Color -> darken_cracks.B_Color"
+   },
+   {
+    "from_node": "cracks_mix",
+    "from_socket": "Color",
+    "to_node": "crack_bump_ramp",
+    "to_socket": "Fac",
+    "ok": true,
+    "via": "cracks_mix.Result_Color -> crack_bump_ramp.Fac"
+   },
+   {
+    "from_node": "texcoord",
+    "from_socket": "Object",
+    "to_node": "damage_warp_noise",
+    "to_socket": "Vector",
+    "ok": true,
+    "via": "Texture Coordinate.Object -> damage_warp_noise_3d.Vector; Texture Coordinate.Object -> damage_warp_noise_4d.Vector"
+   },
+   {
+    "from_node": "texcoord",
+    "from_socket": "Object",
+    "to_node": "damage_warp_mix",
+    "to_socket": "Color1",
+    "ok": true,
+    "via": "Texture Coordinate.Object -> damage_warp_mix.A_Color"
+   },
+   {
+    "from_node": "texcoord",
+    "from_socket": "Object",
+    "to_node": "damage_mask_noise",
+    "to_socket": "Vector",
+    "ok": true,
+    "via": "Texture Coordinate.Object -> damage_mask_noise_3d.Vector; Texture Coordinate.Object -> damage_mask_noise_4d.Vector"
+   },
+   {
+    "from_node": "damage_warp_noise",
+    "from_socket": "Fac",
+    "to_node": "damage_warp_mix",
+    "to_socket": "Color2",
+    "ok": true,
+    "via": "damage_warp_noise_3d.Fac -> damage_warp_mix.B_Color"
+   },
+   {
+    "from_node": "damage_warp_mix",
+    "from_socket": "Color",
+    "to_node": "damage_voronoi",
+    "to_socket": "Vector",
+    "ok": true,
+    "via": "damage_warp_mix.Result_Color -> damage_voronoi.Vector"
+   },
+   {
+    "from_node": "damage_mask_noise",
+    "from_socket": "Fac",
+    "to_node": "damage_mask_ramp",
+    "to_socket": "Fac",
+    "ok": true,
+    "via": "damage_mask_noise_3d.Fac -> damage_mask_ramp.Fac"
+   },
+   {
+    "from_node": "damage_voronoi",
+    "from_socket": "Distance",
+    "to_node": "damage_lighten",
+    "to_socket": "Color1",
+    "ok": true,
+    "via": "damage_voronoi.Distance -> damage_lighten.A_Color"
+   },
+   {
+    "from_node": "damage_mask_ramp",
+    "from_socket": "Color",
+    "to_node": "damage_lighten",
+    "to_socket": "Color2",
+    "ok": true,
+    "via": "damage_mask_ramp.Color -> damage_lighten.B_Color"
+   },
+   {
+    "from_node": "damage_lighten",
+    "from_socket": "Color",
+    "to_node": "damage_dark_ramp",
+    "to_socket": "Fac",
+    "ok": true,
+    "via": "damage_lighten.Result_Color -> damage_dark_ramp.Fac"
+   },
+   {
+    "from_node": "damage_lighten",
+    "from_socket": "Color",
+    "to_node": "bump4",
+    "to_socket": "Height",
+    "ok": true,
+    "via": "damage_lighten.Result_Color -> bump4.Height"
+   },
+   {
+    "from_node": "darken_cracks",
+    "from_socket": "Color",
+    "to_node": "darken_damage",
+    "to_socket": "Color1",
+    "ok": true,
+    "via": "darken_cracks.Result_Color -> darken_damage.A_Color"
+   },
+   {
+    "from_node": "damage_dark_ramp",
+    "from_socket": "Color",
+    "to_node": "darken_damage",
+    "to_socket": "Color2",
+    "ok": true,
+    "via": "damage_dark_ramp.Color -> darken_damage.B_Color"
+   },
+   {
+    "from_node": "darken_damage",
+    "from_socket": "Color",
+    "to_node": "principled",
+    "to_socket": "Base Color",
+    "ok": true,
+    "via": "darken_damage.Result_Color -> principled.Base Color"
+   },
+   {
+    "from_node": "texcoord",
+    "from_socket": "Object",
+    "to_node": "bump_noise",
+    "to_socket": "Vector",
+    "ok": true,
+    "via": "Texture Coordinate.Object -> bump_noise_3d.Vector; Texture Coordinate.Object -> bump_noise_4d.Vector"
+   },
+   {
+    "from_node": "bump_noise",
+    "from_socket": "Fac",
+    "to_node": "bump1",
+    "to_socket": "Height",
+    "ok": true,
+    "via": "bump_noise_3d.Fac -> bump1.Height"
+   },
+   {
+    "from_node": "bump1",
+    "from_socket": "Normal",
+    "to_node": "bump2",
+    "to_socket": "Normal",
+    "ok": true,
+    "via": "bump1.Normal -> bump2.Normal"
+   },
+   {
+    "from_node": "bump2",
+    "from_socket": "Normal",
+    "to_node": "bump3",
+    "to_socket": "Normal",
+    "ok": true,
+    "via": "bump2.Normal -> bump3.Normal"
+   },
+   {
+    "from_node": "crack_bump_ramp",
+    "from_socket": "Color",
+    "to_node": "bump3",
+    "to_socket": "Height",
+    "ok": true,
+    "via": "crack_bump_ramp.Color -> bump3.Height"
+   },
+   {
+    "from_node": "bump3",
+    "from_socket": "Normal",
+    "to_node": "bump4",
+    "to_socket": "Normal",
+    "ok": true,
+    "via": "bump3.Normal -> bump4.Normal"
+   },
+   {
+    "from_node": "bump4",
+    "from_socket": "Normal",
+    "to_node": "principled",
+    "to_socket": "Normal",
+    "ok": true,
+    "via": "bump4.Normal -> principled.Normal"
+   },
+   {
+    "from_node": "rough_ramp",
+    "from_socket": "Color",
+    "to_node": "principled",
+    "to_socket": "Roughness",
+    "ok": true,
+    "via": "rough_ramp.Color -> principled.Roughness"
+   },
+   {
+    "from_node": "principled",
+    "from_socket": "BSDF",
+    "to_node": "output",
+    "to_socket": "Surface",
+    "ok": true,
+    "via": "principled.BSDF -> group output BSDF -> material output Surface (contract)"
+   }
+  ]
+ },
+ "PM_Asphalt": {
+  "links_ok": 38,
+  "links_total": 38,
+  "missing_nodes": [],
+  "links": [
+   {
+    "from_node": "texcoord",
+    "from_socket": "Object",
+    "to_node": "color_noise",
+    "to_socket": "Vector",
+    "ok": true,
+    "via": "Texture Coordinate.Object -> color_noise_3d.Vector; Texture Coordinate.Object -> color_noise_4d.Vector"
+   },
+   {
+    "from_node": "texcoord",
+    "from_socket": "Object",
+    "to_node": "color_warp_mix",
+    "to_socket": "Color1",
+    "ok": true,
+    "via": "Texture Coordinate.Object -> color_warp_mix.A_Color"
+   },
+   {
+    "from_node": "color_noise",
+    "from_socket": "Color",
+    "to_node": "color_warp_mix",
+    "to_socket": "Color2",
+    "ok": true,
+    "via": "color_noise_3d.Color -> color_warp_mix.B_Color"
+   },
+   {
+    "from_node": "color_warp_mix",
+    "from_socket": "Color",
+    "to_node": "color_voronoi",
+    "to_socket": "Vector",
+    "ok": true,
+    "via": "color_warp_mix.Result_Color -> color_voronoi_3d.Vector; color_warp_mix.Result_Color -> color_voronoi_4d.Vector"
+   },
+   {
+    "from_node": "color_voronoi",
+    "from_socket": "Distance",
+    "to_node": "color_ramp",
+    "to_socket": "Fac",
+    "ok": true,
+    "via": "color_voronoi_3d.Distance -> color_ramp.Factor_Float"
+   },
+   {
+    "from_node": "color_voronoi",
+    "from_socket": "Distance",
+    "to_node": "bump2",
+    "to_socket": "Height",
+    "ok": true,
+    "via": "color_voronoi_3d.Distance -> bump2.Height"
+   },
+   {
+    "from_node": "color_voronoi",
+    "from_socket": "Distance",
+    "to_node": "rough_ramp",
+    "to_socket": "Fac",
+    "ok": true,
+    "via": "color_voronoi_3d.Distance -> rough_ramp.Value"
+   },
+   {
+    "from_node": "color_ramp",
+    "from_socket": "Color",
+    "to_node": "darken_cracks",
+    "to_socket": "Color1",
+    "ok": true,
+    "via": "color_ramp.Result_Color -> darken_cracks.A_Color"
+   },
+   {
+    "from_node": "texcoord",
+    "from_socket": "Object",
+    "to_node": "cracks_mask_noise",
+    "to_socket": "Vector",
+    "ok": true,
+    "via": "Texture Coordinate.Object -> cracks_mask_noise_3d.Vector; Texture Coordinate.Object -> cracks_mask_noise_4d.Vector"
+   },
+   {
+    "from_node": "texcoord",
+    "from_socket": "Object",
+    "to_node": "cracks_warp_noise",
+    "to_socket": "Vector",
+    "ok": true,
+    "via": "Texture Coordinate.Object -> cracks_warp_noise_3d.Vector; Texture Coordinate.Object -> cracks_warp_noise_4d.Vector"
+   },
+   {
+    "from_node": "cracks_mask_noise",
+    "from_socket": "Fac",
+    "to_node": "cracks_mask_ramp",
+    "to_socket": "Fac",
+    "ok": true,
+    "via": "cracks_mask_noise_3d.Fac -> cracks_mask_ramp.Value"
+   },
+   {
+    "from_node": "cracks_warp_noise",
+    "from_socket": "Color",
+    "to_node": "cracks_voronoi",
+    "to_socket": "Vector",
+    "ok": true,
+    "via": "cracks_warp_noise_3d.Color -> cracks_voronoi.Vector"
+   },
+   {
+    "from_node": "cracks_mask_ramp",
+    "from_socket": "Color",
+    "to_node": "cracks_mix",
+    "to_socket": "Fac",
+    "ok": true,
+    "via": "cracks_mask_ramp.Result -> cracks_mix.Factor_Float"
+   },
+   {
+    "from_node": "cracks_voronoi",
+    "from_socket": "Distance",
+    "to_node": "cracks_mix",
+    "to_socket": "Color1",
+    "ok": true,
+    "via": "cracks_voronoi.Distance -> cracks_mix.A_Color"
+   },
+   {
+    "from_node": "cracks_mix",
+    "from_socket": "Color",
+    "to_node": "darken_cracks",
+    "to_socket": "Color2",
+    "ok": true,
+    "via": "cracks_mix.Result_Color -> darken_cracks.B_Color"
+   },
+   {
+    "from_node": "cracks_mix",
+    "from_socket": "Color",
+    "to_node": "crack_bump_ramp",
+    "to_socket": "Fac",
+    "ok": true,
+    "via": "cracks_mix.Result_Color -> crack_bump_ramp.Value"
+   },
+   {
+    "from_node": "texcoord",
+    "from_socket": "Object",
+    "to_node": "damage_warp_noise",
+    "to_socket": "Vector",
+    "ok": true,
+    "via": "Texture Coordinate.Object -> damage_warp_noise_3d.Vector; Texture Coordinate.Object -> damage_warp_noise_4d.Vector"
+   },
+   {
+    "from_node": "texcoord",
+    "from_socket": "Object",
+    "to_node": "damage_warp_mix",
+    "to_socket": "Color1",
+    "ok": true,
+    "via": "Texture Coordinate.Object -> damage_warp_mix.A_Color"
+   },
+   {
+    "from_node": "texcoord",
+    "from_socket": "Object",
+    "to_node": "damage_mask_noise",
+    "to_socket": "Vector",
+    "ok": true,
+    "via": "Texture Coordinate.Object -> damage_mask_noise_3d.Vector; Texture Coordinate.Object -> damage_mask_noise_4d.Vector"
+   },
+   {
+    "from_node": "damage_warp_noise",
+    "from_socket": "Fac",
+    "to_node": "damage_warp_mix",
+    "to_socket": "Color2",
+    "ok": true,
+    "via": "damage_warp_noise_3d.Fac -> damage_warp_mix.B_Color"
+   },
+   {
+    "from_node": "damage_warp_mix",
+    "from_socket": "Color",
+    "to_node": "damage_voronoi",
+    "to_socket": "Vector",
+    "ok": true,
+    "via": "damage_warp_mix.Result_Color -> damage_voronoi.Vector"
+   },
+   {
+    "from_node": "damage_mask_noise",
+    "from_socket": "Fac",
+    "to_node": "damage_mask_ramp",
+    "to_socket": "Fac",
+    "ok": true,
+    "via": "damage_mask_noise_3d.Fac -> damage_mask_ramp.Value"
+   },
+   {
+    "from_node": "damage_voronoi",
+    "from_socket": "Distance",
+    "to_node": "damage_lighten",
+    "to_socket": "Color1",
+    "ok": true,
+    "via": "damage_voronoi.Distance -> damage_lighten.A_Color"
+   },
+   {
+    "from_node": "damage_mask_ramp",
+    "from_socket": "Color",
+    "to_node": "damage_lighten",
+    "to_socket": "Color2",
+    "ok": true,
+    "via": "damage_mask_ramp.Result -> damage_lighten.B_Color"
+   },
+   {
+    "from_node": "damage_lighten",
+    "from_socket": "Color",
+    "to_node": "damage_dark_ramp",
+    "to_socket": "Fac",
+    "ok": true,
+    "via": "damage_lighten.Result_Color -> damage_dark_ramp.Value"
+   },
+   {
+    "from_node": "damage_lighten",
+    "from_socket": "Color",
+    "to_node": "bump4",
+    "to_socket": "Height",
+    "ok": true,
+    "via": "damage_lighten.Result_Color -> bump4.Height"
+   },
+   {
+    "from_node": "darken_cracks",
+    "from_socket": "Color",
+    "to_node": "darken_damage",
+    "to_socket": "Color1",
+    "ok": true,
+    "via": "darken_cracks.Result_Color -> darken_damage.A_Color"
+   },
+   {
+    "from_node": "damage_dark_ramp",
+    "from_socket": "Color",
+    "to_node": "darken_damage",
+    "to_socket": "Color2",
+    "ok": true,
+    "via": "damage_dark_ramp.Result -> darken_damage.B_Color"
+   },
+   {
+    "from_node": "darken_damage",
+    "from_socket": "Color",
+    "to_node": "principled",
+    "to_socket": "Base Color",
+    "ok": true,
+    "via": "darken_damage.Result_Color -> principled.Base Color"
+   },
+   {
+    "from_node": "texcoord",
+    "from_socket": "Object",
+    "to_node": "bump_noise",
+    "to_socket": "Vector",
+    "ok": true,
+    "via": "Texture Coordinate.Object -> bump_noise_3d.Vector; Texture Coordinate.Object -> bump_noise_4d.Vector"
+   },
+   {
+    "from_node": "bump_noise",
+    "from_socket": "Fac",
+    "to_node": "bump1",
+    "to_socket": "Height",
+    "ok": true,
+    "via": "bump_noise_3d.Fac -> bump1.Height"
+   },
+   {
+    "from_node": "bump1",
+    "from_socket": "Normal",
+    "to_node": "bump2",
+    "to_socket": "Normal",
+    "ok": true,
+    "via": "bump1.Normal -> bump2.Normal"
+   },
+   {
+    "from_node": "bump2",
+    "from_socket": "Normal",
+    "to_node": "bump3",
+    "to_socket": "Normal",
+    "ok": true,
+    "via": "bump2.Normal -> bump3.Normal"
+   },
+   {
+    "from_node": "crack_bump_ramp",
+    "from_socket": "Color",
+    "to_node": "bump3",
+    "to_socket": "Height",
+    "ok": true,
+    "via": "crack_bump_ramp.Result -> bump3.Height"
+   },
+   {
+    "from_node": "bump3",
+    "from_socket": "Normal",
+    "to_node": "bump4",
+    "to_socket": "Normal",
+    "ok": true,
+    "via": "bump3.Normal -> bump4.Normal"
+   },
+   {
+    "from_node": "bump4",
+    "from_socket": "Normal",
+    "to_node": "principled",
+    "to_socket": "Normal",
+    "ok": true,
+    "via": "bump4.Normal -> principled.Normal"
+   },
+   {
+    "from_node": "rough_ramp",
+    "from_socket": "Color",
+    "to_node": "principled",
+    "to_socket": "Roughness",
+    "ok": true,
+    "via": "rough_ramp.Result -> principled.Roughness"
+   },
+   {
+    "from_node": "principled",
+    "from_socket": "BSDF",
+    "to_node": "output",
+    "to_socket": "Surface",
+    "ok": true,
+    "via": "principled.BSDF -> group output BSDF -> material output Surface (contract)"
+   }
+  ]
+ }
+}

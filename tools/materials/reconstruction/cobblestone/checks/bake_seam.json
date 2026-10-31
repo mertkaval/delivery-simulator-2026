@@ -1,0 +1,38 @@
+{
+ "command": "run.py -- build cobblestone --bake DIR --tile 4.0 --bake-res 1024 --bake-samples 16 --periodicity",
+ "albedo": {
+  "ratio": 1.0944,
+  "ratio_x": 1.1364,
+  "ratio_y": 1.0525,
+  "outlier_x": 0.7766,
+  "outlier_y": 0.7914
+ },
+ "normal": {
+  "ratio": 1.0033,
+  "ratio_x": 1.0189,
+  "ratio_y": 0.9879,
+  "outlier_x": 0.8561,
+  "outlier_y": 0.8541
+ },
+ "roughness": {
+  "ratio": 1.2528,
+  "ratio_x": 1.2201,
+  "ratio_y": 1.2853,
+  "outlier_x": 0.6646,
+  "outlier_y": 0.7884
+ },
+ "periodicity_albedo": {
+  "mad": 0.00104,
+  "corr": 0.9977,
+  "mad_unrolled": 0.03124,
+  "ok": true
+ },
+ "means": {
+  "albedo_linear": [
+   0.02,
+   0.02,
+   0.0139
+  ],
+  "roughness": 0.715
+ }
+}

@@ -1,0 +1,126 @@
+{
+ "ok": true,
+ "seconds": 43.9,
+ "checks": [
+  {
+   "check": "base library opened",
+   "ok": true,
+   "info": "C:\\GodotProjects\\delivery-simulator-2026\\tmp\\roads\\city\\base.blend"
+  },
+  {
+   "check": "PM_Asphalt appended from the saved library, contract intact",
+   "ok": true,
+   "info": {
+    "appended": [
+     "PM_Asphalt"
+    ],
+    "problems": []
+   }
+  },
+  {
+   "check": "road built by the road tool, its own asphalt",
+   "ok": true,
+   "info": {
+    "MRS_Paint": 128,
+    "MRS_Concrete": 192,
+    "MRS_Paving": 192,
+    "MRS_Asphalt": 240
+   }
+  },
+  {
+   "check": "assign(Asphalt Material, PM_Asphalt): the evaluated road surface carries PM_Asphalt",
+   "ok": true,
+   "info": {
+    "report": {
+     "object": "PMA_Road",
+     "socket": "Asphalt Material",
+     "material": "PM_Asphalt",
+     "previous": "MRS_Asphalt",
+     "set_via": "properties",
+     "menu": [
+      "Asphalt Condition",
+      "Default",
+      "Default"
+     ]
+    },
+    "evaluated": {
+     "MRS_Paint": 128,
+     "MRS_Concrete": 192,
+     "MRS_Paving": 192,
+     "PM_Asphalt": 240
+    }
+   }
+  },
+  {
+   "check": "the road tool's material presets leave PM_Asphalt's inputs alone (no shared input names)",
+   "ok": true,
+   "info": {}
+  },
+  {
+   "check": "set_road() puts MRS_* back, reapply() restores PM_Asphalt",
+   "ok": true,
+   "info": {
+    "after set_road": {
+     "MRS_Paint": 128,
+     "MRS_Concrete": 192,
+     "MRS_Paving": 192,
+     "MRS_Asphalt": 240
+    },
+    "after reapply": {
+     "MRS_Paint": 128,
+     "MRS_Concrete": 192,
+     "MRS_Paving": 192,
+     "PM_Asphalt": 240
+    }
+   }
+  },
+  {
+   "check": "the road tool's bake_tiles() bakes the PM contract (copy named MRS_PMAsphaltCheck): albedo / normal / roughness, seamless",
+   "ok": true,
+   "info": {
+    "maps": [
+     "albedo",
+     "normal",
+     "roughness"
+    ],
+    "seam_albedo": {
+     "edge_mad": 0.010878,
+     "interior_mad": 0.010285,
+     "ratio": 1.0576,
+     "ratio_x": 1.0046,
+     "ratio_y": 1.11,
+     "outlier_x": 0.6375,
+     "outlier_y": 0.7019,
+     "pct_x": 0.5127,
+     "pct_y": 0.773,
+     "size": [
+      512,
+      512
+     ]
+    }
+   }
+  },
+  {
+   "check": "eye-level render of an MRS road with PM_Asphalt (EEVEE)",
+   "ok": true,
+   "info": {
+    "mean": 0.5274,
+    "std": 0.2039,
+    "min": 0.1098,
+    "max": 0.9333,
+    "path": "C:\\GodotProjects\\delivery-simulator-2026\\tmp\\materials_asphalt\\road_check\\PM_Asphalt_mrs_road_eevee.png"
+   }
+  },
+  {
+   "check": "eye-level render of an MRS road with PM_Asphalt (CYCLES)",
+   "ok": true,
+   "info": {
+    "mean": 0.5349,
+    "std": 0.2035,
+    "min": 0.0039,
+    "max": 0.9333,
+    "path": "C:\\GodotProjects\\delivery-simulator-2026\\tmp\\materials_asphalt\\road_check\\PM_Asphalt_mrs_road_cycles.png"
+   }
+  }
+ ]
+}

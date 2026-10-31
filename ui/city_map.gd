@@ -233,6 +233,28 @@ func _road(a: Vector3, b: Vector3, width: float, colour: Color) -> void:
 func _draw() -> void:
 	if player == null: return
 	draw_rect(Rect2(Vector2.ZERO, size), Color("1b2a26"))
+	if world != null and world.has_meta("map_roads"): _draw_generated()
+	else: _draw_classic()
+	_draw_places()
+
+## A generated city (Port Halden): its own road graph and its addressable sites.
+func _draw_generated() -> void:
+	var road := Color("3d4c52")
+	for seg: Array in world.get_meta("map_roads"): _road(seg[0], seg[1], float(seg[2]), road)
+	var port = world.get("port")
+	if port == null: return
+	for s: Dictionary in port.sites():
+		var p: Array = s.pos
+		var sz: Array = s.size
+		if float(sz[1]) < 0.5: continue             # a frontage plot of a roads-only plan: no building yet
+		var c: Vector3 = port.to_world(float(p[0]), float(p[1]))
+		var basis := Basis(Vector3.UP, float(s.yaw))
+		var hx := basis.x * float(sz[0]) * 0.5
+		var hz := basis.z * float(sz[1]) * 0.5
+		draw_colored_polygon(PackedVector2Array([to_screen(c - hx - hz), to_screen(c + hx - hz), to_screen(c + hx + hz), to_screen(c - hx + hz)]), Color("56625d"))
+
+## The classic city: its fixed street plan, lots, buildings and downtown blocks.
+func _draw_classic() -> void:
 	# Downtown and civic ground.
 	var dt0 := to_screen(Vector3(120, 0, -246))
 	var dt1 := to_screen(Vector3(630, 0, -690))
@@ -266,6 +288,8 @@ func _draw() -> void:
 		var a := to_screen(Vector3(block.position.x + 4, 0, block.position.y + 4))
 		var b := to_screen(Vector3(block.end.x - 4, 0, block.end.y - 4))
 		draw_rect(Rect2(a, b - a), Color("5b5f66"))
+
+func _draw_places() -> void:
 	# Route preview.
 	var route := route_preview if selected >= 0 else (CityNavigation.route(player.global_position, CityNavigation.target.at) if not CityNavigation.target.is_empty() else PackedVector3Array())
 	for i in range(1, route.size()):

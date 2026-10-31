@@ -1,0 +1,626 @@
+{
+ "PM_GlassCircles": {
+  "tile4m": {
+   "seconds": 2.9,
+   "files": {
+    "albedo": "tmp/materials_bake/glass/tile4m/PM_GlassCircles_albedo.png",
+    "normal": "tmp/materials_bake/glass/tile4m/PM_GlassCircles_normal.png",
+    "roughness": "tmp/materials_bake/glass/tile4m/PM_GlassCircles_roughness.png"
+   },
+   "albedo": {
+    "mean": 1.0,
+    "std": 0.0,
+    "seam": "constant map (no variation): seamless trivially",
+    "seamless": true
+   },
+   "normal": {
+    "mean": 0.6668,
+    "std": 0.23591,
+    "seam": {
+     "edge_mad": 0.006398,
+     "interior_mad": 0.006312,
+     "ratio": 1.0136,
+     "ratio_x": 1.0094,
+     "ratio_y": 1.0179,
+     "outlier_x": 0.9068,
+     "outlier_y": 0.8824,
+     "pct_x": 0.6178,
+     "pct_y": 0.6804,
+     "size": [
+      1024,
+      1024
+     ]
+    },
+    "seamless": true
+   },
+   "roughness": {
+    "mean": 0.2,
+    "std": 0.0,
+    "seam": "constant map (no variation): seamless trivially",
+    "seamless": true
+   }
+  },
+  "tile1m": {
+   "seconds": 2.9,
+   "files": {
+    "albedo": "tmp/materials_bake/glass/tile1m/PM_GlassCircles_albedo.png",
+    "normal": "tmp/materials_bake/glass/tile1m/PM_GlassCircles_normal.png",
+    "roughness": "tmp/materials_bake/glass/tile1m/PM_GlassCircles_roughness.png"
+   },
+   "albedo": {
+    "mean": 1.0,
+    "std": 0.0,
+    "seam": "constant map (no variation): seamless trivially",
+    "seamless": true
+   },
+   "normal": {
+    "mean": 0.6668,
+    "std": 0.23592,
+    "seam": {
+     "edge_mad": 0.001784,
+     "interior_mad": 0.001769,
+     "ratio": 1.0085,
+     "ratio_x": 1.0324,
+     "ratio_y": 0.9846,
+     "outlier_x": 0.8133,
+     "outlier_y": 0.7819,
+     "pct_x": 0.695,
+     "pct_y": 0.4457,
+     "size": [
+      1024,
+      1024
+     ]
+    },
+    "seamless": true
+   },
+   "roughness": {
+    "mean": 0.2,
+    "std": 0.0,
+    "seam": "constant map (no variation): seamless trivially",
+    "seamless": true
+   }
+  },
+  "periodicity": {
+   "normal": {
+    "mad": 0.00048,
+    "corr": 0.99998,
+    "mad_unrolled": 0.01309
+   }
+  },
+  "periodic": true
+ },
+ "PM_GlassVoronoi": {
+  "tile4m": {
+   "seconds": 7.1,
+   "files": {
+    "albedo": "tmp/materials_bake/glass/tile4m/PM_GlassVoronoi_albedo.png",
+    "normal": "tmp/materials_bake/glass/tile4m/PM_GlassVoronoi_normal.png",
+    "roughness": "tmp/materials_bake/glass/tile4m/PM_GlassVoronoi_roughness.png"
+   },
+   "albedo": {
+    "mean": 1.0,
+    "std": 0.0,
+    "seam": "constant map (no variation): seamless trivially",
+    "seamless": true
+   },
+   "normal": {
+    "mean": 0.6664,
+    "std": 0.23615,
+    "seam": {
+     "edge_mad": 0.010753,
+     "interior_mad": 0.010813,
+     "ratio": 0.9944,
+     "ratio_x": 0.9884,
+     "ratio_y": 1.0005,
+     "outlier_x": 0.8381,
+     "outlier_y": 0.8316,
+     "pct_x": 0.4164,
+     "pct_y": 0.5464,
+     "size": [
+      1024,
+      1024
+     ]
+    },
+    "seamless": true
+   },
+   "roughness": {
+    "mean": 0.0,
+    "std": 0.0,
+    "seam": "constant map (no variation): seamless trivially",
+    "seamless": true
+   }
+  },
+  "tile1m": {
+   "seconds": 7.1,
+   "files": {
+    "albedo": "tmp/materials_bake/glass/tile1m/PM_GlassVoronoi_albedo.png",
+    "normal": "tmp/materials_bake/glass/tile1m/PM_GlassVoronoi_normal.png",
+    "roughness": "tmp/materials_bake/glass/tile1m/PM_GlassVoronoi_roughness.png"
+   },
+   "albedo": {
+    "mean": 1.0,
+    "std": 0.0,
+    "seam": "constant map (no variation): seamless trivially",
+    "seamless": true
+   },
+   "normal": {
+    "mean": 0.6662,
+    "std": 0.23625,
+    "seam": {
+     "edge_mad": 0.007864,
+     "interior_mad": 0.007802,
+     "ratio": 1.0079,
+     "ratio_x": 0.9765,
+     "ratio_y": 1.0393,
+     "outlier_x": 0.8018,
+     "outlier_y": 0.8743,
+     "pct_x": 0.3196,
+     "pct_y": 0.8368,
+     "size": [
+      1024,
+      1024
+     ]
+    },
+    "seamless": true
+   },
+   "roughness": {
+    "mean": 0.0,
+    "std": 0.0,
+    "seam": "constant map (no variation): seamless trivially",
+    "seamless": true
+   }
+  },
+  "periodicity": {
+   "normal": {
+    "mad": 0.00194,
+    "corr": 0.99989,
+    "mad_unrolled": 0.01865
+   }
+  },
+  "periodic": true
+ },
+ "PM_GlassCells": {
+  "tile4m": {
+   "seconds": 2.2,
+   "files": {
+    "albedo": "tmp/materials_bake/glass/tile4m/PM_GlassCells_albedo.png",
+    "normal": "tmp/materials_bake/glass/tile4m/PM_GlassCells_normal.png",
+    "roughness": "tmp/materials_bake/glass/tile4m/PM_GlassCells_roughness.png"
+   },
+   "albedo": {
+    "mean": 1.0,
+    "std": 0.0,
+    "seam": "constant map (no variation): seamless trivially",
+    "seamless": true
+   },
+   "normal": {
+    "mean": 0.6669,
+    "std": 0.23597,
+    "seam": {
+     "edge_mad": 0.007343,
+     "interior_mad": 0.006886,
+     "ratio": 1.0664,
+     "ratio_x": 1.0422,
+     "ratio_y": 1.0906,
+     "outlier_x": 0.8732,
+     "outlier_y": 0.897,
+     "pct_x": 0.8084,
+     "pct_y": 0.9423,
+     "size": [
+      1024,
+      1024
+     ]
+    },
+    "seamless": true
+   },
+   "roughness": {
+    "mean": 0.196,
+    "std": 0.00659,
+    "seam": {
+     "edge_mad": 0.004508,
+     "interior_mad": 0.004564,
+     "ratio": 0.9876,
+     "ratio_x": 1.0137,
+     "ratio_y": 0.9616,
+     "outlier_x": 0.9152,
+     "outlier_y": 0.8591,
+     "pct_x": 0.6647,
+     "pct_y": 0.0919,
+     "size": [
+      1024,
+      1024
+     ]
+    },
+    "seamless": true
+   }
+  },
+  "tile1m": {
+   "seconds": 2.2,
+   "files": {
+    "albedo": "tmp/materials_bake/glass/tile1m/PM_GlassCells_albedo.png",
+    "normal": "tmp/materials_bake/glass/tile1m/PM_GlassCells_normal.png",
+    "roughness": "tmp/materials_bake/glass/tile1m/PM_GlassCells_roughness.png"
+   },
+   "albedo": {
+    "mean": 1.0,
+    "std": 0.0,
+    "seam": "constant map (no variation): seamless trivially",
+    "seamless": true
+   },
+   "normal": {
+    "mean": 0.6669,
+    "std": 0.23604,
+    "seam": {
+     "edge_mad": 0.002288,
+     "interior_mad": 0.00229,
+     "ratio": 0.9993,
+     "ratio_x": 0.8942,
+     "ratio_y": 1.1038,
+     "outlier_x": 0.5955,
+     "outlier_y": 0.7466,
+     "pct_x": 0.219,
+     "pct_y": 0.7781,
+     "size": [
+      1024,
+      1024
+     ]
+    },
+    "seamless": true
+   },
+   "roughness": {
+    "mean": 0.1962,
+    "std": 0.00777,
+    "seam": {
+     "edge_mad": 0.004297,
+     "interior_mad": 0.004412,
+     "ratio": 0.9738,
+     "ratio_x": 1.0153,
+     "ratio_y": 0.9323,
+     "outlier_x": 0.933,
+     "outlier_y": 0.8358,
+     "pct_x": 0.6921,
+     "pct_y": 0.0117,
+     "size": [
+      1024,
+      1024
+     ]
+    },
+    "seamless": true
+   }
+  },
+  "periodicity": {
+   "normal": {
+    "mad": 0.00091,
+    "corr": 0.99996,
+    "mad_unrolled": 0.01143
+   }
+  },
+  "periodic": true
+ },
+ "PM_GlassWavy": {
+  "tile4m": {
+   "seconds": 4.8,
+   "files": {
+    "albedo": "tmp/materials_bake/glass/tile4m/PM_GlassWavy_albedo.png",
+    "normal": "tmp/materials_bake/glass/tile4m/PM_GlassWavy_normal.png",
+    "roughness": "tmp/materials_bake/glass/tile4m/PM_GlassWavy_roughness.png"
+   },
+   "albedo": {
+    "mean": 1.0,
+    "std": 0.0,
+    "seam": "constant map (no variation): seamless trivially",
+    "seamless": true
+   },
+   "normal": {
+    "mean": 0.6675,
+    "std": 0.23517,
+    "seam": {
+     "edge_mad": 0.001545,
+     "interior_mad": 0.001597,
+     "ratio": 0.9674,
+     "ratio_x": 0.9721,
+     "ratio_y": 0.9183,
+     "outlier_x": 0.7132,
+     "outlier_y": 0.6993,
+     "pct_x": 0.4008,
+     "pct_y": 0.1896,
+     "size": [
+      1024,
+      1024
+     ]
+    },
+    "seamless": true
+   },
+   "roughness": {
+    "mean": 0.2,
+    "std": 0.0,
+    "seam": "constant map (no variation): seamless trivially",
+    "seamless": true
+   }
+  },
+  "tile1m": {
+   "seconds": 4.7,
+   "files": {
+    "albedo": "tmp/materials_bake/glass/tile1m/PM_GlassWavy_albedo.png",
+    "normal": "tmp/materials_bake/glass/tile1m/PM_GlassWavy_normal.png",
+    "roughness": "tmp/materials_bake/glass/tile1m/PM_GlassWavy_roughness.png"
+   },
+   "albedo": {
+    "mean": 1.0,
+    "std": 0.0,
+    "seam": "constant map (no variation): seamless trivially",
+    "seamless": true
+   },
+   "normal": {
+    "mean": 0.6675,
+    "std": 0.23517,
+    "seam": {
+     "edge_mad": 0.000341,
+     "interior_mad": 0.000434,
+     "ratio": 0.7865,
+     "ratio_x": 0.7797,
+     "ratio_y": 0.8596,
+     "outlier_x": 0.4401,
+     "outlier_y": 0.495,
+     "pct_x": 0.1544,
+     "pct_y": 0.2375,
+     "size": [
+      1024,
+      1024
+     ]
+    },
+    "seamless": true
+   },
+   "roughness": {
+    "mean": 0.2,
+    "std": 0.0,
+    "seam": "constant map (no variation): seamless trivially",
+    "seamless": true
+   }
+  },
+  "periodicity": {
+   "normal": {
+    "mad": 0.00014,
+    "corr": 0.99999,
+    "mad_unrolled": 0.00305
+   }
+  },
+  "periodic": true
+ },
+ "PM_GlassBlobby": {
+  "tile4m": {
+   "seconds": 6.1,
+   "files": {
+    "albedo": "tmp/materials_bake/glass/tile4m/PM_GlassBlobby_albedo.png",
+    "normal": "tmp/materials_bake/glass/tile4m/PM_GlassBlobby_normal.png",
+    "roughness": "tmp/materials_bake/glass/tile4m/PM_GlassBlobby_roughness.png"
+   },
+   "albedo": {
+    "mean": 1.0,
+    "std": 0.0,
+    "seam": "constant map (no variation): seamless trivially",
+    "seamless": true
+   },
+   "normal": {
+    "mean": 0.6669,
+    "std": 0.23589,
+    "seam": {
+     "edge_mad": 0.004746,
+     "interior_mad": 0.004686,
+     "ratio": 1.0126,
+     "ratio_x": 0.9663,
+     "ratio_y": 1.0589,
+     "outlier_x": 0.8595,
+     "outlier_y": 0.9342,
+     "pct_x": 0.1369,
+     "pct_y": 0.9668,
+     "size": [
+      1024,
+      1024
+     ]
+    },
+    "seamless": true
+   },
+   "roughness": {
+    "mean": 0.2241,
+    "std": 0.00751,
+    "seam": {
+     "edge_mad": 0.005176,
+     "interior_mad": 0.005218,
+     "ratio": 0.9919,
+     "ratio_x": 1.0184,
+     "ratio_y": 0.9654,
+     "outlier_x": 0.9309,
+     "outlier_y": 0.8802,
+     "pct_x": 0.7341,
+     "pct_y": 0.1124,
+     "size": [
+      1024,
+      1024
+     ]
+    },
+    "seamless": true
+   }
+  },
+  "tile1m": {
+   "seconds": 6.2,
+   "files": {
+    "albedo": "tmp/materials_bake/glass/tile1m/PM_GlassBlobby_albedo.png",
+    "normal": "tmp/materials_bake/glass/tile1m/PM_GlassBlobby_normal.png",
+    "roughness": "tmp/materials_bake/glass/tile1m/PM_GlassBlobby_roughness.png"
+   },
+   "albedo": {
+    "mean": 1.0,
+    "std": 0.0,
+    "seam": "constant map (no variation): seamless trivially",
+    "seamless": true
+   },
+   "normal": {
+    "mean": 0.6669,
+    "std": 0.23591,
+    "seam": {
+     "edge_mad": 0.001801,
+     "interior_mad": 0.001737,
+     "ratio": 1.0365,
+     "ratio_x": 0.9601,
+     "ratio_y": 1.1131,
+     "outlier_x": 0.7702,
+     "outlier_y": 0.906,
+     "pct_x": 0.2659,
+     "pct_y": 0.9619,
+     "size": [
+      1024,
+      1024
+     ]
+    },
+    "seamless": true
+   },
+   "roughness": {
+    "mean": 0.2243,
+    "std": 0.00886,
+    "seam": {
+     "edge_mad": 0.004923,
+     "interior_mad": 0.005044,
+     "ratio": 0.9759,
+     "ratio_x": 1.009,
+     "ratio_y": 0.9429,
+     "outlier_x": 0.9307,
+     "outlier_y": 0.8697,
+     "pct_x": 0.6256,
+     "pct_y": 0.0225,
+     "size": [
+      1024,
+      1024
+     ]
+    },
+    "seamless": true
+   }
+  },
+  "periodicity": {
+   "normal": {
+    "mad": 0.00048,
+    "corr": 0.99998,
+    "mad_unrolled": 0.01172
+   }
+  },
+  "periodic": true
+ },
+ "PM_GlassFrosted": {
+  "tile4m": {
+   "seconds": 1.7,
+   "files": {
+    "albedo": "tmp/materials_bake/glass/tile4m/PM_GlassFrosted_albedo.png",
+    "normal": "tmp/materials_bake/glass/tile4m/PM_GlassFrosted_normal.png",
+    "roughness": "tmp/materials_bake/glass/tile4m/PM_GlassFrosted_roughness.png"
+   },
+   "albedo": {
+    "mean": 1.0,
+    "std": 0.0,
+    "seam": "constant map (no variation): seamless trivially",
+    "seamless": true
+   },
+   "normal": {
+    "mean": 0.668,
+    "std": 0.23478,
+    "seam": {
+     "edge_mad": 0.0,
+     "interior_mad": 0.0,
+     "ratio": 0.0,
+     "ratio_x": 0.0,
+     "ratio_y": 0.0,
+     "outlier_x": 0.0,
+     "outlier_y": 0.0,
+     "pct_x": 0.0,
+     "pct_y": 0.0,
+     "size": [
+      1024,
+      1024
+     ]
+    },
+    "seamless": false
+   },
+   "roughness": {
+    "mean": 0.2857,
+    "std": 0.00639,
+    "seam": {
+     "edge_mad": 0.004329,
+     "interior_mad": 0.004421,
+     "ratio": 0.9793,
+     "ratio_x": 1.0135,
+     "ratio_y": 0.9451,
+     "outlier_x": 0.9077,
+     "outlier_y": 0.8517,
+     "pct_x": 0.6852,
+     "pct_y": 0.0274,
+     "size": [
+      1024,
+      1024
+     ]
+    },
+    "seamless": true
+   }
+  },
+  "tile1m": {
+   "seconds": 1.7,
+   "files": {
+    "albedo": "tmp/materials_bake/glass/tile1m/PM_GlassFrosted_albedo.png",
+    "normal": "tmp/materials_bake/glass/tile1m/PM_GlassFrosted_normal.png",
+    "roughness": "tmp/materials_bake/glass/tile1m/PM_GlassFrosted_roughness.png"
+   },
+   "albedo": {
+    "mean": 1.0,
+    "std": 0.0,
+    "seam": "constant map (no variation): seamless trivially",
+    "seamless": true
+   },
+   "normal": {
+    "mean": 0.668,
+    "std": 0.23478,
+    "seam": {
+     "edge_mad": 0.0,
+     "interior_mad": 0.0,
+     "ratio": 0.0,
+     "ratio_x": 0.0,
+     "ratio_y": 0.0,
+     "outlier_x": 0.0,
+     "outlier_y": 0.0,
+     "pct_x": 0.0,
+     "pct_y": 0.0,
+     "size": [
+      1024,
+      1024
+     ]
+    },
+    "seamless": false
+   },
+   "roughness": {
+    "mean": 0.2859,
+    "std": 0.00753,
+    "seam": {
+     "edge_mad": 0.00414,
+     "interior_mad": 0.004278,
+     "ratio": 0.9678,
+     "ratio_x": 1.0149,
+     "ratio_y": 0.9207,
+     "outlier_x": 0.925,
+     "outlier_y": 0.8358,
+     "pct_x": 0.6911,
+     "pct_y": 0.0039,
+     "size": [
+      1024,
+      1024
+     ]
+    },
+    "seamless": true
+   }
+  },
+  "periodicity": {
+   "roughness": {
+    "mad": 0.00259,
+    "corr": 0.80097,
+    "mad_unrolled": 0.00638
+   }
+  },
+  "periodic": false
+ }
+}

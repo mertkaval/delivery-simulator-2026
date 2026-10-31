@@ -1,0 +1,221 @@
+{
+ "literal_vs_controls": {
+  "render_mean_abs_8bit": 0.3072,
+  "render_max_abs_8bit": 95,
+  "render_pixels_differing_gt2": 0.02805,
+  "albedo_mean_abs_8bit": 0.0036,
+  "albedo_max_abs_8bit": 4
+ },
+ "lighting_sectors": {
+  "reference_inner": [
+   0.218,
+   0.23,
+   0.181,
+   0.099,
+   0.05,
+   0.03,
+   0.022,
+   0.02,
+   0.024,
+   0.035,
+   0.066,
+   0.14
+  ],
+  "reference_outer": [
+   0.429,
+   0.385,
+   0.266,
+   0.095,
+   0.038,
+   0.02,
+   0.007,
+   0.006,
+   0.008,
+   0.012,
+   0.054,
+   0.213
+  ],
+  "ours_inner": [
+   0.204,
+   0.214,
+   0.163,
+   0.09,
+   0.041,
+   0.022,
+   0.018,
+   0.018,
+   0.021,
+   0.031,
+   0.063,
+   0.131
+  ],
+  "ours_outer": [
+   0.38,
+   0.402,
+   0.264,
+   0.091,
+   0.022,
+   0.008,
+   0.007,
+   0.008,
+   0.008,
+   0.013,
+   0.051,
+   0.18
+  ],
+  "log_rms": 0.217
+ },
+ "relief": {
+  "video": {
+   "lit": {
+    "fine": 0.519,
+    "mid": 0.279,
+    "mean_lum": 0.35
+   },
+   "centre": {
+    "fine": 0.524,
+    "mid": 0.339,
+    "mean_lum": 0.077
+   },
+   "right": {
+    "fine": 0.501,
+    "mid": 0.338,
+    "mean_lum": 0.219
+   }
+  },
+  "PM_Asphalt_fw1.0": {
+   "lit": {
+    "fine": 0.326,
+    "mid": 0.256,
+    "mean_lum": 0.379
+   },
+   "centre": {
+    "fine": 0.371,
+    "mid": 0.347,
+    "mean_lum": 0.068
+   },
+   "right": {
+    "fine": 0.339,
+    "mid": 0.323,
+    "mean_lum": 0.197
+   }
+  },
+  "PM_Asphalt_fw0.1": {
+   "lit": {
+    "fine": 0.176,
+    "mid": 0.161,
+    "mean_lum": 0.391
+   },
+   "centre": {
+    "fine": 0.237,
+    "mid": 0.251,
+    "mean_lum": 0.068
+   },
+   "right": {
+    "fine": 0.221,
+    "mid": 0.225,
+    "mean_lum": 0.205
+   }
+  },
+  "PM_AsphaltTutorial": {
+   "lit": {
+    "fine": 0.327,
+    "mid": 0.258,
+    "mean_lum": 0.379
+   },
+   "centre": {
+    "fine": 0.372,
+    "mid": 0.349,
+    "mean_lum": 0.068
+   },
+   "right": {
+    "fine": 0.338,
+    "mid": 0.325,
+    "mean_lum": 0.198
+   }
+  },
+  "PM_Asphalt_fw2.0_round2_light": {
+   "lit": {
+    "fine": 0.386,
+    "mid": 0.319,
+    "mean_lum": 0.372
+   },
+   "centre": {
+    "fine": 0.383,
+    "mid": 0.41,
+    "mean_lum": 0.066
+   },
+   "right": {
+    "fine": 0.339,
+    "mid": 0.377,
+    "mean_lum": 0.193
+   }
+  }
+ },
+ "chroma": {
+  "video": {
+   "lit": [
+    1.006,
+    1.005,
+    0.989
+   ],
+   "centre": [
+    1.018,
+    1.017,
+    0.966
+   ],
+   "dark": [
+    1.052,
+    1.02,
+    0.928
+   ]
+  },
+  "PM_Asphalt": {
+   "lit": [
+    1.002,
+    1.001,
+    0.997
+   ],
+   "centre": [
+    1.007,
+    1.0,
+    0.993
+   ],
+   "dark": [
+    1.009,
+    1.0,
+    0.991
+   ]
+  },
+  "PM_Asphalt_albedo": {
+   "lit": [
+    1.024,
+    0.996,
+    0.98
+   ],
+   "centre": [
+    1.019,
+    0.997,
+    0.984
+   ],
+   "dark": [
+    1.019,
+    0.997,
+    0.984
+   ]
+  }
+ },
+ "albedo_stats": {
+  "mean_linear_rgb": [
+   0.0271,
+   0.0264,
+   0.026
+  ],
+  "lum_p5_p50_p95": [
+   0.0056,
+   0.0276,
+   0.0395
+  ],
+  "share_below_0.004": 0.0425
+ }
+}

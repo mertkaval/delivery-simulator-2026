@@ -1,0 +1,193 @@
+{
+ "PM_GlassCircles": {
+  "contract": "OK",
+  "group": "PM_GlassCircles",
+  "nodes": 35,
+  "frames": 4,
+  "links": 63,
+  "inputs": [
+   "Scale",
+   "Glass Color",
+   "Glass Roughness",
+   "Glass IOR",
+   "Voronoi Scale",
+   "Voronoi Detail",
+   "Voronoi Roughness",
+   "Voronoi Smoothness",
+   "Voronoi Randomness",
+   "Bump Strength",
+   "Pattern Size",
+   "Use UV",
+   "Tile Size"
+  ],
+  "outputs": [
+   "BSDF",
+   "Albedo"
+  ],
+  "video_group": "Textured Glass Circles",
+  "settings": {
+   "surface_render_method": "DITHERED",
+   "use_raytrace_refraction": true,
+   "displacement_method": "BUMP"
+  }
+ },
+ "PM_GlassVoronoi": {
+  "contract": "OK",
+  "group": "PM_GlassVoronoi",
+  "nodes": 41,
+  "frames": 4,
+  "links": 77,
+  "inputs": [
+   "Scale",
+   "Glass Color",
+   "Glass Roughness",
+   "Glass IOR",
+   "Voronoi Scale 1",
+   "Voronoi Scale 2",
+   "Voronoi Smoothness 1",
+   "Voronoi Smoothness 2",
+   "Voronoi Detail 1",
+   "Voronoi Detail 2",
+   "Bump Strength 1",
+   "Bump Strength 2",
+   "Pattern Size",
+   "Use UV",
+   "Tile Size"
+  ],
+  "outputs": [
+   "BSDF",
+   "Albedo"
+  ],
+  "video_group": "Textured Glass Voronoi",
+  "settings": {
+   "surface_render_method": "DITHERED",
+   "use_raytrace_refraction": true,
+   "displacement_method": "BUMP"
+  }
+ },
+ "PM_GlassCells": {
+  "contract": "OK",
+  "group": "PM_GlassCells",
+  "nodes": 41,
+  "frames": 5,
+  "links": 76,
+  "inputs": [
+   "Scale",
+   "Glass Color",
+   "Glass Roughness",
+   "Glass IOR",
+   "Voronoi Scale",
+   "Voronoi Detail",
+   "Voronoi Roughness",
+   "Voronoi Randomness",
+   "Noise Roughness Scale",
+   "Noise Roughness Detail 1",
+   "Noise Roughness Detail 2",
+   "Bump Strength",
+   "Pattern Size",
+   "Use UV",
+   "Tile Size"
+  ],
+  "outputs": [
+   "BSDF",
+   "Albedo"
+  ],
+  "video_group": "Textured Glass Cells",
+  "settings": {
+   "surface_render_method": "DITHERED",
+   "use_raytrace_refraction": true,
+   "displacement_method": "BUMP"
+  }
+ },
+ "PM_GlassWavy": {
+  "contract": "OK",
+  "group": "PM_GlassWavy",
+  "nodes": 110,
+  "frames": 5,
+  "links": 190,
+  "inputs": [
+   "Scale",
+   "Glass Color",
+   "Glass Roughness",
+   "Glass IOR",
+   "Gabor Frequency",
+   "Bump Strength",
+   "Rotation",
+   "Pattern Size",
+   "Use UV",
+   "Tile Size"
+  ],
+  "outputs": [
+   "BSDF",
+   "Albedo"
+  ],
+  "video_group": "Textured Glass Wavy",
+  "settings": {
+   "surface_render_method": "DITHERED",
+   "use_raytrace_refraction": true,
+   "displacement_method": "BUMP"
+  }
+ },
+ "PM_GlassBlobby": {
+  "contract": "OK",
+  "group": "PM_GlassBlobby",
+  "nodes": 40,
+  "frames": 5,
+  "links": 73,
+  "inputs": [
+   "Scale",
+   "Glass Color",
+   "Glass Roughness",
+   "Glass IOR",
+   "Voronoi Scale",
+   "Voronoi Detail",
+   "Voronoi Smoothness",
+   "Noise Roughness Scale",
+   "Noise Roughness Detail 1",
+   "Noise Roughness Detail 2",
+   "Bump Strength",
+   "Pattern Size",
+   "Use UV",
+   "Tile Size"
+  ],
+  "outputs": [
+   "BSDF",
+   "Albedo"
+  ],
+  "video_group": "Textured Glass Blobby",
+  "settings": {
+   "surface_render_method": "DITHERED",
+   "use_raytrace_refraction": true,
+   "displacement_method": "BUMP"
+  }
+ },
+ "PM_GlassFrosted": {
+  "contract": "OK",
+  "group": "PM_GlassFrosted",
+  "nodes": 34,
+  "frames": 4,
+  "links": 56,
+  "inputs": [
+   "Scale",
+   "Glass Color",
+   "Frosted Amount",
+   "Glass IOR",
+   "Frosted Scale",
+   "Frosted Detail 1",
+   "Frosted Detail 2",
+   "Pattern Size",
+   "Use UV",
+   "Tile Size"
+  ],
+  "outputs": [
+   "BSDF",
+   "Albedo"
+  ],
+  "video_group": "Frosted Glass",
+  "settings": {
+   "surface_render_method": "DITHERED",
+   "use_raytrace_refraction": true,
+   "displacement_method": "BUMP"
+  }
+ }
+}

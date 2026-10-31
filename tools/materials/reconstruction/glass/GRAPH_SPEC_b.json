@@ -1,0 +1,2226 @@
+{
+ "video": {
+  "id": "SNKNqHd0AYI",
+  "title": "Procedural Textured Frosted Glass Materials (Blender Tutorial)",
+  "author": "Ryan King Art",
+  "upload_date": "2026-05-12",
+  "duration": "34:03",
+  "source_file": "tmp/materials_video/SNKNqHd0AYI.webm (2560x1440, 60 fps, VP9)"
+ },
+ "segment": {
+  "id": "b",
+  "range": "22:32-34:03",
+  "variants": [
+   "Textured Glass Wavy",
+   "Textured Glass Blobby",
+   "Frosted Glass"
+  ],
+  "also_read": [
+   "00:40-02:42 customizable nodes overview (product controls)",
+   "03:14-06:10 scene setup"
+  ],
+  "timestamp_note": "Times are video times (mm:ss). Kept frames were extracted at the exact seconds listed in evidence/b/index.json (frame_times)."
+ },
+ "blender_version": "5.1.1",
+ "blender_version_evidence": {
+  "class": "A",
+  "what": "status bar \"5.1.1\" (bottom right) in every frame",
+  "crop": "tools/materials/reconstruction/glass/evidence/b/crops/t0537_blender_version.png"
+ },
+ "evidence_classes": {
+  "A": "directly observed in a frame",
+  "B": "narration / recipe repo only",
+  "C": "our inference / implementation",
+  "D": "unresolved"
+ },
+ "conventions": {
+  "times": "video mm:ss (transcript-based, +-1-2 s; kept-frame exact seconds in evidence/b/index.json frame_times)",
+  "inf": "min/max \"inf\" / \"-inf\" = Blender unbounded float limits (about +-3.4e38)",
+  "colors": "color_linear = scene-linear RGBA to set on the node; perceptual_hsv / hex are what the picker displayed",
+  "node_ids": "ids are local to each group; group_input / group_output are the group I/O nodes",
+  "linked_inputs": "sockets driven by a link (their stored value is irrelevant); values in inputs are the unlinked socket values"
+ },
+ "recipe_repo": "KunalMGupta/material-apprentice has no entry for this video (its frosted / etched glass entries come from other tutorials); not used for any value here.",
+ "scene": {
+  "engine": {
+   "value": "Cycles, Device GPU Compute",
+   "class": "A",
+   "evidence": [
+    "tools/materials/reconstruction/glass/evidence/b/frames/t0450_setup_render_cycles_gpu.jpg",
+    "tools/materials/reconstruction/glass/evidence/b/crops/t0450_render_engine.png"
+   ],
+   "viewport_samples": {
+    "value": 100,
+    "class": "A",
+    "evidence": "viewport overlay \"Sample n/100\" (e.g. 23:38, 29:41)"
+   },
+   "render_samples": {
+    "value": null,
+    "class": "D"
+   },
+   "motion_blur_checkbox": {
+    "value": true,
+    "class": "A",
+    "note": "visible checked in the render panel, irrelevant for stills"
+   },
+   "film": {
+    "exposure": 1.0,
+    "pixel_filter": "Blackman-Harris 1.50 px",
+    "transparent": true,
+    "transparent_glass": "D (sub-option not seen enabled)",
+    "class": "A",
+    "evidence": [
+     "tools/materials/reconstruction/glass/evidence/b/crops/t0529_film_transparent.png"
+    ]
+   },
+   "color_management": {
+    "display": "sRGB",
+    "view": "Filmic",
+    "look": "Very High Contrast",
+    "exposure": 0.0,
+    "gamma": 1.0,
+    "class": "A",
+    "evidence": [
+     "tools/materials/reconstruction/glass/evidence/b/crops/t0537_color_management.png"
+    ]
+   }
+  },
+  "geometry": {
+   "panes": "6 planes in a 3 x 2 grid: default 2 m plane, S 0.4 (0.8 x 0.8 m), R X 90 deg, Ctrl+A Rotation & Scale applied, then Shift+D copies along X and down Z",
+   "class": "A (scale 0.4, rotate X 90, apply menu) / B (apply rotation & scale) / D (exact offsets)",
+   "single_sided": "planes have no thickness in the tutorial scene (C); the product file uses Cube objects (overview breadcrumbs \"Cube.006 > Cube.008\")",
+   "objects_for_segment_b": {
+    "Textured Glass Wavy": "Plane.005",
+    "Textured Glass Blobby": "Plane.003",
+    "Frosted Glass": "Plane.004"
+   },
+   "background_objects": "Suzanne monkeys scaled down (scale applied) behind the panes, material \"Red\" = Principled with a strong red Base Color (A visually; exact RGB D); status bar shows 11 objects",
+   "modifiers": "none seen (A: no modifier added in 03:14-06:10)",
+   "evidence": [
+    "tools/materials/reconstruction/glass/evidence/b/frames/t0324_setup_plane_scale_0p4.jpg",
+    "tools/materials/reconstruction/glass/evidence/b/frames/t0330_setup_rotate_x90_apply_menu.jpg",
+    "tools/materials/reconstruction/glass/evidence/b/crops/t0324_scale_header.png"
+   ]
+  },
+  "camera": {
+   "value": "Camera object (data Camera.001), Perspective, focal length 50 mm, clip 0.1-1000 m, aligned with Ctrl+Alt+Numpad0 then moved (G, G+MMB dolly)",
+   "class": "A (lens panel) / D (transform)",
+   "evidence": [
+    "tools/materials/reconstruction/glass/evidence/b/frames/t0440_setup_camera_lens_50mm.jpg",
+    "tools/materials/reconstruction/glass/evidence/b/crops/t0440_camera_lens.png"
+   ]
+  },
+  "lighting": {
+   "value": "World Background <- Environment Texture \"old_apartments_walkway_1k.hdr\" (Poly Haven), Linear, Equirectangular, Single Image, colour space Linear Rec.709, alpha Premultiplied, Vector Default; Background Strength 0.5. No lamps added.",
+   "class": "A",
+   "evidence": [
+    "tools/materials/reconstruction/glass/evidence/b/frames/t0516_setup_world_hdri_strength_0p5.jpg",
+    "tools/materials/reconstruction/glass/evidence/b/crops/t0516_world_hdri.png"
+   ],
+   "project_rule": "D6: not downloaded; use a bundled studio-light HDRI and report lighting differences separately"
+  },
+  "coordinates": "All three variants: Texture Coordinate Object -> Mapping (Point, location 0) -> texture Vector; no UV. Object space = metres because rotation/scale were applied (C).",
+  "displacement": "No displacement output used; relief is bump only (Bump -> Glass Normal) for Wavy and Blobby, none for Frosted. Material displacement method not shown (D, irrelevant).",
+  "material_settings": "Material properties (EEVEE/Cycles settings panel) never shown in segment b (D).",
+  "node_wrangler": "Node Wrangler add-on used for Ctrl+T (TexCoord + Mapping) and Ctrl+Shift+click previews (B 05:53-06:09; A key overlays)."
+ },
+ "materials": [
+  {
+   "name": "Textured Glass Wavy",
+   "object": "Plane.005",
+   "time_range": "22:32-25:33",
+   "suggested_pm_name": "PM_GlassWavy",
+   "groups": [
+    {
+     "name": "Textured Glass Wavy",
+     "interface": [
+      {
+       "name": "Shader",
+       "in_out": "OUTPUT",
+       "socket_type": "NodeSocketShader",
+       "subtype": null,
+       "default": null,
+       "min": null,
+       "max": null,
+       "class": "A",
+       "evidence": [
+        "24:06-24:10 (wavy)",
+        "28:14-28:18 (blobby)",
+        "31:34-31:37 (frosted)"
+       ],
+       "note": "Created by Ctrl+G as \"BSDF\" (from Glass BSDF output) and renamed \"Shader\" in the N panel."
+      },
+      {
+       "name": "Scale",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.0,
+       "min": "-inf",
+       "max": "inf",
+       "class": "A",
+       "evidence": [
+        "24:15",
+        "24:19",
+        "24:23"
+       ],
+       "description_seen": "The amount...ng each axis (inherited from Mapping Scale)",
+       "internal_destination": "mapping.Scale (float -> vector)",
+       "visible_effect": "uniform pattern size (1 = tutorial size)",
+       "note": "Created as Vector from Mapping Scale, type changed Vector->Float (24:19), default set to 1 (24:23); instance value reset to 1 outside the group (24:24-24:28)."
+      },
+      {
+       "name": "Glass Color",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketColor",
+       "subtype": null,
+       "default": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "min": null,
+       "max": null,
+       "class": "A",
+       "evidence": [
+        "24:41"
+       ],
+       "internal_destination": "glass.Color",
+       "visible_effect": "tint",
+       "note": "White swatch (exact RGBA 1,1,1,1 is the Glass BSDF default, C)."
+      },
+      {
+       "name": "Glass Roughness",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 0.2,
+       "min": 0.0,
+       "max": 1.0,
+       "class": "A",
+       "evidence": [
+        "24:45"
+       ],
+       "internal_destination": "glass.Roughness",
+       "visible_effect": "frost / blur"
+      },
+      {
+       "name": "Glass IOR",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.5,
+       "min": 0.0,
+       "max": 1000.0,
+       "class": "A",
+       "evidence": [
+        "24:49"
+       ],
+       "internal_destination": "glass.IOR",
+       "visible_effect": "refraction strength"
+      },
+      {
+       "name": "Gabor Frequency",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 5.0,
+       "min": 0.0,
+       "max": "inf",
+       "class": "A",
+       "evidence": [
+        "24:53",
+        "25:02"
+       ],
+       "description_seen": "The rate at ...ise direction",
+       "internal_destination": "gabor.Frequency",
+       "visible_effect": "wave density"
+      },
+      {
+       "name": "Bump Strength",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "class": "A",
+       "evidence": [
+        "25:06",
+        "25:10"
+       ],
+       "description_seen": "Strength of t...p mapping",
+       "internal_destination": "bump.Strength",
+       "visible_effect": "wave relief strength"
+      },
+      {
+       "name": "Rotation",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketVector",
+       "subtype": "EULER",
+       "default": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "min": "-inf",
+       "max": "inf",
+       "class": "A",
+       "evidence": [
+        "25:15",
+        "25:17"
+       ],
+       "description_seen": "The amount...s, XYZ order",
+       "internal_destination": "mapping.Rotation",
+       "visible_effect": "rotates the wave direction (overview demo rotates Y)",
+       "note": "Dimensions 3, defaults 0 deg."
+      }
+     ],
+     "nodes": [
+      {
+       "id": "group_input",
+       "type": "NodeGroupInput",
+       "label": "Group Input",
+       "settings": {},
+       "inputs": {},
+       "linked_inputs": [],
+       "class": "A",
+       "evidence": [
+        "25:17"
+       ]
+      },
+      {
+       "id": "group_output",
+       "type": "NodeGroupOutput",
+       "label": "Group Output",
+       "settings": {},
+       "inputs": {},
+       "linked_inputs": [],
+       "class": "A",
+       "evidence": [
+        "24:06"
+       ],
+       "notes": "Single input \"Shader\" fed by the Glass BSDF."
+      },
+      {
+       "id": "tex_coord",
+       "type": "ShaderNodeTexCoord",
+       "label": "Texture Coordinate",
+       "settings": {
+        "from_instancer": false,
+        "object": null
+       },
+       "inputs": {},
+       "linked_inputs": [],
+       "class": "A",
+       "evidence": [
+        "22:47",
+        "23:48"
+       ],
+       "notes": "Added by Node Wrangler Ctrl+T (with Mapping); the Object output is used (narration: \"use the object coordinates\"). No object is set in the Object field."
+      },
+      {
+       "id": "mapping",
+       "type": "ShaderNodeMapping",
+       "label": "Mapping",
+       "settings": {
+        "vector_type": "POINT"
+       },
+       "inputs": {
+        "Location": [
+         0.0,
+         0.0,
+         0.0
+        ]
+       },
+       "linked_inputs": [
+        "Vector",
+        "Rotation",
+        "Scale"
+       ],
+       "class": "A",
+       "evidence": [
+        "22:50",
+        "23:48",
+        "25:17"
+       ],
+       "notes": "Float group input \"Scale\" drives the Vector Scale socket (implicit float->vector (s,s,s))."
+      },
+      {
+       "id": "gabor",
+       "type": "ShaderNodeTexGabor",
+       "label": "Gabor Texture",
+       "settings": {
+        "gabor_type": "3D"
+       },
+       "inputs": {
+        "Scale": 12.0,
+        "Anisotropy": 1.0,
+        "Orientation 3D": [
+         0.797,
+         0.604,
+         0.0
+        ]
+       },
+       "linked_inputs": [
+        "Vector",
+        "Frequency"
+       ],
+       "class": "A",
+       "evidence": [
+        "22:38",
+        "22:50",
+        "22:55",
+        "23:05-23:11",
+        "23:48",
+        "25:00.9"
+       ],
+       "value_classes": {
+        "Scale": "A",
+        "Anisotropy": "A",
+        "Orientation 3D": "C",
+        "Frequency (unlinked value before grouping)": "A"
+       },
+       "notes": "2D->3D at 22:52-22:55. Scale 12 and Frequency 5 typed 23:05-23:11 (Frequency 5.0 later becomes the group default). Anisotropy left at 1.0. Orientation 3D is NOT shown as numbers: the direction-ball widget was measured by a shading fit (see measurements.gabor_orientation_fit): (0.796,0.605,-0.009) at 23:48.5 and (0.799,0.602,-0.007) at 25:00.9; recommended (0.797, 0.604, 0.0). Socket identifier is \"Orientation 3D\" (two inputs are named \"Orientation\").",
+       "output_used": "Value"
+      },
+      {
+       "id": "bump",
+       "type": "ShaderNodeBump",
+       "label": "Bump",
+       "settings": {
+        "invert": false
+       },
+       "inputs": {
+        "Distance": 0.0007,
+        "Filter Width": 0.1
+       },
+       "linked_inputs": [
+        "Strength",
+        "Height"
+       ],
+       "class": "A",
+       "evidence": [
+        "23:24-23:30",
+        "23:38",
+        "23:48"
+       ],
+       "notes": "Distance typed \"0.0007\" at 23:38 (crop); the field then displays 0.001 (3-decimal rounding). Strength 1.0 before grouping, then driven by \"Bump Strength\". Normal input unconnected. Invert unchecked."
+      },
+      {
+       "id": "glass",
+       "type": "ShaderNodeBsdfGlass",
+       "label": "Glass BSDF",
+       "settings": {
+        "distribution": "MULTI_GGX"
+       },
+       "inputs": {
+        "Thin Film Thickness": 0.0,
+        "Thin Film IOR": 1.33
+       },
+       "linked_inputs": [
+        "Color",
+        "Roughness",
+        "IOR",
+        "Normal"
+       ],
+       "class": "A",
+       "evidence": [
+        "23:21",
+        "23:44",
+        "23:48"
+       ],
+       "value_classes": {
+        "Thin Film Thickness": "C",
+        "Thin Film IOR": "C"
+       },
+       "notes": "Before grouping: Color white, Roughness 0.2 (typed 23:41-23:44), IOR 1.5 (default); these values became the interface defaults. Distribution Multiscatter GGX. Thin Film panel collapsed (defaults assumed, C)."
+      }
+     ],
+     "links": [
+      {
+       "from_node": "tex_coord",
+       "from_socket": "Object",
+       "to_node": "mapping",
+       "to_socket": "Vector",
+       "t": "22:48",
+       "class": "A"
+      },
+      {
+       "from_node": "mapping",
+       "from_socket": "Vector",
+       "to_node": "gabor",
+       "to_socket": "Vector",
+       "t": "22:47 (Ctrl+T)",
+       "class": "A"
+      },
+      {
+       "from_node": "gabor",
+       "from_socket": "Value",
+       "to_node": "bump",
+       "to_socket": "Height",
+       "t": "23:28",
+       "class": "A"
+      },
+      {
+       "from_node": "bump",
+       "from_socket": "Normal",
+       "to_node": "glass",
+       "to_socket": "Normal",
+       "t": "23:30",
+       "class": "A"
+      },
+      {
+       "from_node": "glass",
+       "from_socket": "BSDF",
+       "to_node": "group_output",
+       "to_socket": "Shader",
+       "t": "23:53 (Ctrl+G)",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Scale",
+       "to_node": "mapping",
+       "to_socket": "Scale",
+       "t": "24:15",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Glass Color",
+       "to_node": "glass",
+       "to_socket": "Color",
+       "t": "24:34",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Glass Roughness",
+       "to_node": "glass",
+       "to_socket": "Roughness",
+       "t": "24:37",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Glass IOR",
+       "to_node": "glass",
+       "to_socket": "IOR",
+       "t": "24:38",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Gabor Frequency",
+       "to_node": "gabor",
+       "to_socket": "Frequency",
+       "t": "24:53",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Bump Strength",
+       "to_node": "bump",
+       "to_socket": "Strength",
+       "t": "25:06",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Rotation",
+       "to_node": "mapping",
+       "to_socket": "Rotation",
+       "t": "25:15",
+       "class": "A"
+      }
+     ]
+    }
+   ],
+   "top_level": {
+    "nodes": [
+     {
+      "id": "group_node",
+      "type": "ShaderNodeGroup",
+      "label": "Textured Glass Wavy",
+      "settings": {
+       "node_tree": "Textured Glass Wavy"
+      },
+      "inputs": {},
+      "linked_inputs": [],
+      "class": "A",
+      "evidence": [
+       "23:56",
+       "25:26"
+      ],
+      "notes": "Group node name/label = node-group name = material name (copied and pasted at the group header). Node width 140 (Group panel)."
+     },
+     {
+      "id": "material_output",
+      "type": "ShaderNodeOutputMaterial",
+      "label": "Material Output",
+      "settings": {
+       "target": "ALL"
+      },
+      "inputs": {},
+      "linked_inputs": [],
+      "class": "A",
+      "evidence": [
+       "23:56",
+       "25:26"
+      ]
+     }
+    ],
+    "links": [
+     {
+      "from_node": "group_node",
+      "from_socket": "Shader",
+      "to_node": "material_output",
+      "to_socket": "Surface",
+      "t": "23:56",
+      "class": "A"
+     }
+    ]
+   },
+   "final_instance_values": {
+    "Scale": 1.0,
+    "Glass Color": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "Glass Roughness": 0.2,
+    "Glass IOR": 1.5,
+    "Gabor Frequency": 5.0,
+    "Bump Strength": 1.0,
+    "Rotation": [
+     0,
+     0,
+     0
+    ],
+    "class": "A",
+    "evidence": [
+     "25:26 (t2526)",
+     "25:31"
+    ]
+   },
+   "product_overview_variant": {
+    "source": "customizable-nodes overview 01:59-02:15 (purchased project file, objects named Cube.*)",
+    "class": "A (controls) / D (internal graph)",
+    "controls": [
+     [
+      "Scale",
+      1.0
+     ],
+     [
+      "Glass Color",
+      "white"
+     ],
+     [
+      "Glass Roughness",
+      0.2,
+      "factor bar"
+     ],
+     [
+      "Glass IOR",
+      1.5
+     ],
+     [
+      "Bump Strength",
+      1.0,
+      "factor bar"
+     ],
+     [
+      "Rotation",
+      [
+       0,
+       0,
+       0
+      ],
+      "vector, degrees"
+     ]
+    ],
+    "difference": "no \"Gabor Frequency\" control in the product file; otherwise the same names, order and defaults",
+    "demo": "Rotation Y dragged 65.5, 32.1, 60.6, 26.9 deg and reset (02:10-02:14): rotating Y turns the wave direction in the pane",
+    "evidence": [
+     "tools/materials/reconstruction/glass/evidence/b/frames/t0203_overview_product_wavy_group.jpg",
+     "tools/materials/reconstruction/glass/evidence/b/frames/t0211_overview_product_wavy_rotation_y_demo.jpg"
+    ]
+   },
+   "temporary_states": [
+    {
+     "t": "22:41-23:20",
+     "what": "Node Wrangler preview (Ctrl+Shift+click) of the Gabor: Gabor Value wired straight to Material Output Surface; replaced when the Glass BSDF was dropped on the link"
+    },
+    {
+     "t": "22:50-22:55",
+     "what": "Gabor in 2D (default): stripes uniform along Z because the plane lies at y=0 in object space; switched to 3D"
+    },
+    {
+     "t": "22:57-23:16",
+     "what": "two orientation-ball drags (intermediate directions not recorded); final direction measured from 23:48 on"
+    },
+    {
+     "t": "23:21-23:32",
+     "what": "Glass BSDF dropped on the preview link -> Gabor Value -> Glass Color (temporary); unplugged at 23:32"
+    },
+    {
+     "t": "23:38-23:41",
+     "what": "Glass roughness 0.0 (Glass BSDF default) until set to 0.2"
+    },
+    {
+     "t": "24:21-24:28",
+     "what": "group-node Scale not 1 after the Vector->Float change (texture missing, narration; value not read, B); reset to 1.0 outside the group"
+    },
+    {
+     "t": "25:21-25:26",
+     "what": "Rotation X dragged to 1.4 deg (demo), back to 0"
+    }
+   ],
+   "notes": [
+    "Plane lies in the object X-Z plane (normal -Y); the orientation (0.797, 0.604, 0) projects onto the pane as a wave vector along X only, so the crests run vertically; the in-plane frequency is 12 x 5 x 0.797 = 47.8 cycles/m (period ~2.1 cm on the 0.8 m pane) (C).",
+    "Gabor Scale (12) is deliberately not exposed: \"we are already using the scale with the mapping\" (25:00, B)."
+   ]
+  },
+  {
+   "name": "Textured Glass Blobby",
+   "object": "Plane.003",
+   "time_range": "25:33-29:50",
+   "suggested_pm_name": "PM_GlassBlobby",
+   "groups": [
+    {
+     "name": "Textured Glass Blobby",
+     "interface": [
+      {
+       "name": "Shader",
+       "in_out": "OUTPUT",
+       "socket_type": "NodeSocketShader",
+       "subtype": null,
+       "default": null,
+       "min": null,
+       "max": null,
+       "class": "A",
+       "evidence": [
+        "24:06-24:10 (wavy)",
+        "28:14-28:18 (blobby)",
+        "31:34-31:37 (frosted)"
+       ],
+       "note": "Created by Ctrl+G as \"BSDF\" (from Glass BSDF output) and renamed \"Shader\" in the N panel."
+      },
+      {
+       "name": "Scale",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.0,
+       "min": "-inf",
+       "max": "inf",
+       "class": "A",
+       "evidence": [
+        "28:00",
+        "28:05-28:13"
+       ],
+       "description_seen": "The amount...ng (Mapping Scale)",
+       "internal_destination": "mapping.Scale",
+       "visible_effect": "uniform pattern size",
+       "note": "Vector->Float, default 1, instance reset to 1 outside the group."
+      },
+      {
+       "name": "Glass Color",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketColor",
+       "subtype": null,
+       "default": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "min": null,
+       "max": null,
+       "class": "A",
+       "evidence": [
+        "28:21-28:25"
+       ],
+       "internal_destination": "glass.Color",
+       "visible_effect": "tint"
+      },
+      {
+       "name": "Glass Roughness",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 2.0,
+       "class": "A",
+       "evidence": [
+        "28:28-28:33"
+       ],
+       "description_seen": "Value shift...e it brighter (HSV Value)",
+       "internal_destination": "hsv.Value",
+       "visible_effect": "multiplies the noise-driven roughness (0 = clear, 2 = twice as frosted)"
+      },
+      {
+       "name": "Glass IOR",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.5,
+       "min": 0.0,
+       "max": 1000.0,
+       "class": "A",
+       "evidence": [
+        "28:35-28:37"
+       ],
+       "internal_destination": "glass.IOR",
+       "visible_effect": "refraction"
+      },
+      {
+       "name": "Voronoi Scale",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 10.0,
+       "min": -1000.0,
+       "max": 1000.0,
+       "class": "A",
+       "evidence": [
+        "28:42",
+        "28:55-28:59"
+       ],
+       "internal_destination": "voronoi.Scale",
+       "visible_effect": "blob size"
+      },
+      {
+       "name": "Voronoi Detail",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 2.6,
+       "min": 0.0,
+       "max": 15.0,
+       "class": "A (default) / C (min, max)",
+       "evidence": [
+        "28:43",
+        "29:41 (value)"
+       ],
+       "internal_destination": "voronoi.Detail",
+       "visible_effect": "small blobs inside blobs",
+       "note": "Panel never selected on screen; min 0 / max 15 are the Voronoi Detail socket limits (same as the Noise Detail panel)."
+      },
+      {
+       "name": "Voronoi Smoothness",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 0.1,
+       "min": 0.0,
+       "max": 1.0,
+       "class": "A",
+       "evidence": [
+        "28:46",
+        "29:03"
+       ],
+       "internal_destination": "voronoi.Smoothness",
+       "visible_effect": "blob edge softness"
+      },
+      {
+       "name": "Noise Roughness Scale",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 20.0,
+       "min": -1000.0,
+       "max": 1000.0,
+       "class": "A",
+       "evidence": [
+        "29:04",
+        "29:13-29:15"
+       ],
+       "description_seen": "Scale of the bas(e noise)",
+       "internal_destination": "noise.Scale",
+       "visible_effect": "size of the roughness speckle"
+      },
+      {
+       "name": "Noise Roughness Detail 1",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 15.0,
+       "min": 0.0,
+       "max": 15.0,
+       "class": "A",
+       "evidence": [
+        "29:06",
+        "29:07.5",
+        "29:16-29:24"
+       ],
+       "description_seen": "The number...(of octaves)",
+       "internal_destination": "noise.Detail",
+       "visible_effect": "roughness speckle octaves"
+      },
+      {
+       "name": "Noise Roughness Detail 2",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "class": "A",
+       "evidence": [
+        "29:07",
+        "29:23-29:26"
+       ],
+       "description_seen": "Blend factor...(octave)",
+       "internal_destination": "noise.Roughness",
+       "visible_effect": "second layer of speckle detail"
+      },
+      {
+       "name": "Bump Strength",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "class": "A",
+       "evidence": [
+        "29:28-29:32"
+       ],
+       "description_seen": "Strength of t...p mapping",
+       "internal_destination": "bump.Strength",
+       "visible_effect": "blob relief"
+      }
+     ],
+     "nodes": [
+      {
+       "id": "group_input",
+       "type": "NodeGroupInput",
+       "label": "Group Input",
+       "settings": {},
+       "inputs": {},
+       "linked_inputs": [],
+       "class": "A",
+       "evidence": [
+        "29:33"
+       ]
+      },
+      {
+       "id": "group_output",
+       "type": "NodeGroupOutput",
+       "label": "Group Output",
+       "settings": {},
+       "inputs": {},
+       "linked_inputs": [],
+       "class": "A",
+       "evidence": [
+        "28:14"
+       ],
+       "notes": "Single input \"Shader\" fed by the Glass BSDF."
+      },
+      {
+       "id": "tex_coord",
+       "type": "ShaderNodeTexCoord",
+       "label": "Texture Coordinate",
+       "settings": {
+        "from_instancer": false,
+        "object": null
+       },
+       "inputs": {},
+       "linked_inputs": [],
+       "class": "A",
+       "evidence": [
+        "25:45",
+        "27:42"
+       ],
+       "notes": "Added by Node Wrangler Ctrl+T (with Mapping); the Object output is used (narration: \"use the object coordinates\"). No object is set in the Object field."
+      },
+      {
+       "id": "mapping",
+       "type": "ShaderNodeMapping",
+       "label": "Mapping",
+       "settings": {
+        "vector_type": "POINT"
+       },
+       "inputs": {
+        "Location": [
+         0.0,
+         0.0,
+         0.0
+        ],
+        "Rotation": [
+         0.0,
+         0.0,
+         0.0
+        ]
+       },
+       "linked_inputs": [
+        "Vector",
+        "Scale"
+       ],
+       "class": "A",
+       "evidence": [
+        "25:45",
+        "27:42",
+        "29:33"
+       ],
+       "notes": "Float group input \"Scale\" drives the Vector Scale socket (implicit float->vector (s,s,s))."
+      },
+      {
+       "id": "noise",
+       "type": "ShaderNodeTexNoise",
+       "label": "Noise Texture",
+       "settings": {
+        "noise_dimensions": "3D",
+        "noise_type": "FBM",
+        "normalize": true
+       },
+       "inputs": {
+        "Lacunarity": 2.0,
+        "Distortion": 0.0
+       },
+       "linked_inputs": [
+        "Vector",
+        "Scale",
+        "Detail",
+        "Roughness"
+       ],
+       "class": "A",
+       "evidence": [
+        "25:42",
+        "25:52-25:58",
+        "27:42",
+        "29:33"
+       ],
+       "notes": "Scale 20, Detail 15, Roughness 1.0 typed 25:52-25:58; they become the defaults of Noise Roughness Scale / Detail 1 / Detail 2. Output used: Factor (crop shows the link starting at Factor).",
+       "output_used": "Factor",
+       "unlinked_values_before_grouping": {
+        "Scale": 20.0,
+        "Detail": 15.0,
+        "Roughness": 1.0
+       }
+      },
+      {
+       "id": "color_ramp",
+       "type": "ShaderNodeValToRGB",
+       "label": "Color Ramp",
+       "settings": {
+        "color_ramp.color_mode": "RGB",
+        "color_ramp.interpolation": "LINEAR"
+       },
+       "inputs": {},
+       "linked_inputs": [
+        "Fac"
+       ],
+       "class": "A",
+       "evidence": [
+        "26:18-26:22",
+        "26:23-26:34",
+        "27:42"
+       ],
+       "elements": [
+        {
+         "index": 0,
+         "position": 0.0,
+         "color_linear": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+         ],
+         "hex": "#000000",
+         "class": "A",
+         "note": "default black stop, not edited"
+        },
+        {
+         "index": 1,
+         "position": 1.0,
+         "perceptual_hsv": [
+          0.0,
+          0.0,
+          0.7
+         ],
+         "hex": "#B2B2B2",
+         "color_linear": [
+          0.448,
+          0.448,
+          0.448,
+          1.0
+         ],
+         "class": "A (perceptual V and hex read) / C (linear conversion)",
+         "note": "white stop darkened to a light grey (\"light gray or a mid gray\"); picker shows Perceptual + HSV, V 0.700, Hex #B2B2B2. Linear = sRGB EOTF(0.700) = 0.448 (hex-quantised 0.445)."
+        }
+       ]
+      },
+      {
+       "id": "hsv",
+       "type": "ShaderNodeHueSaturation",
+       "label": "Hue/Saturation/Value",
+       "settings": {},
+       "inputs": {
+        "Hue": 0.5,
+        "Saturation": 1.0,
+        "Fac": 1.0
+       },
+       "linked_inputs": [
+        "Value",
+        "Color"
+       ],
+       "class": "A",
+       "evidence": [
+        "26:42-26:50",
+        "27:42",
+        "29:33"
+       ],
+       "notes": "Inserted after the ramp so its Value acts as a roughness multiplier (roughness = ramp grey x Value). Value 1.0 before grouping; becomes \"Glass Roughness\" (0..2). Factor socket identifier is \"Fac\"."
+      },
+      {
+       "id": "voronoi",
+       "type": "ShaderNodeTexVoronoi",
+       "label": "Voronoi Texture",
+       "settings": {
+        "voronoi_dimensions": "3D",
+        "feature": "SMOOTH_F1",
+        "distance": "EUCLIDEAN",
+        "normalize": false
+       },
+       "inputs": {
+        "Roughness": 0.5,
+        "Lacunarity": 2.0,
+        "Randomness": 1.0
+       },
+       "linked_inputs": [
+        "Vector",
+        "Scale",
+        "Detail",
+        "Smoothness"
+       ],
+       "class": "A",
+       "evidence": [
+        "26:57",
+        "27:04-27:22",
+        "27:42",
+        "29:33"
+       ],
+       "notes": "F1 -> Smooth F1 (27:05), Scale 10 (27:10), Detail 2.6 (27:12-27:14), Smoothness 0.1 (27:18-27:21); Roughness/Lacunarity/Randomness left at defaults 0.5/2.0/1.0. Output used: Distance.",
+       "output_used": "Distance",
+       "unlinked_values_before_grouping": {
+        "Scale": 10.0,
+        "Detail": 2.6,
+        "Smoothness": 0.1
+       }
+      },
+      {
+       "id": "bump",
+       "type": "ShaderNodeBump",
+       "label": "Bump",
+       "settings": {
+        "invert": false
+       },
+       "inputs": {
+        "Distance": 0.004,
+        "Filter Width": 0.1
+       },
+       "linked_inputs": [
+        "Strength",
+        "Height"
+       ],
+       "class": "A",
+       "evidence": [
+        "27:24-27:31",
+        "27:35-27:39",
+        "27:42"
+       ],
+       "notes": "Distance field showed 0.001 (Blender 5.x default) and was edited to 0.004 at 27:37-27:38. Strength 1.0 before grouping. Normal input unconnected."
+      },
+      {
+       "id": "glass",
+       "type": "ShaderNodeBsdfGlass",
+       "label": "Glass BSDF",
+       "settings": {
+        "distribution": "MULTI_GGX"
+       },
+       "inputs": {
+        "Thin Film Thickness": 0.0,
+        "Thin Film IOR": 1.33
+       },
+       "linked_inputs": [
+        "Color",
+        "Roughness",
+        "IOR",
+        "Normal"
+       ],
+       "class": "A",
+       "evidence": [
+        "26:06-26:11",
+        "27:42",
+        "28:33"
+       ],
+       "value_classes": {
+        "Thin Film Thickness": "C",
+        "Thin Film IOR": "C"
+       },
+       "notes": "Before grouping: Color white, IOR 1.5 (defaults). Roughness driven by HSV Color (colour->float conversion of a grey = the grey value)."
+      }
+     ],
+     "links": [
+      {
+       "from_node": "tex_coord",
+       "from_socket": "Object",
+       "to_node": "mapping",
+       "to_socket": "Vector",
+       "t": "25:48",
+       "class": "A"
+      },
+      {
+       "from_node": "mapping",
+       "from_socket": "Vector",
+       "to_node": "noise",
+       "to_socket": "Vector",
+       "t": "25:45 (Ctrl+T)",
+       "class": "A"
+      },
+      {
+       "from_node": "mapping",
+       "from_socket": "Vector",
+       "to_node": "voronoi",
+       "to_socket": "Vector",
+       "t": "27:00",
+       "class": "A"
+      },
+      {
+       "from_node": "noise",
+       "from_socket": "Factor",
+       "to_node": "color_ramp",
+       "to_socket": "Fac",
+       "t": "26:13 / 26:20 (ramp inserted on the link)",
+       "class": "A"
+      },
+      {
+       "from_node": "color_ramp",
+       "from_socket": "Color",
+       "to_node": "hsv",
+       "to_socket": "Color",
+       "t": "26:46 (HSV inserted on the link)",
+       "class": "A"
+      },
+      {
+       "from_node": "hsv",
+       "from_socket": "Color",
+       "to_node": "glass",
+       "to_socket": "Roughness",
+       "t": "26:46",
+       "class": "A"
+      },
+      {
+       "from_node": "voronoi",
+       "from_socket": "Distance",
+       "to_node": "bump",
+       "to_socket": "Height",
+       "t": "27:27",
+       "class": "A"
+      },
+      {
+       "from_node": "bump",
+       "from_socket": "Normal",
+       "to_node": "glass",
+       "to_socket": "Normal",
+       "t": "27:29",
+       "class": "A"
+      },
+      {
+       "from_node": "glass",
+       "from_socket": "BSDF",
+       "to_node": "group_output",
+       "to_socket": "Shader",
+       "t": "27:46 (Ctrl+G)",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Scale",
+       "to_node": "mapping",
+       "to_socket": "Scale",
+       "t": "28:00",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Glass Color",
+       "to_node": "glass",
+       "to_socket": "Color",
+       "t": "28:21",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Glass Roughness",
+       "to_node": "hsv",
+       "to_socket": "Value",
+       "t": "28:28",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Glass IOR",
+       "to_node": "glass",
+       "to_socket": "IOR",
+       "t": "28:33",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Voronoi Scale",
+       "to_node": "voronoi",
+       "to_socket": "Scale",
+       "t": "28:42",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Voronoi Detail",
+       "to_node": "voronoi",
+       "to_socket": "Detail",
+       "t": "28:43",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Voronoi Smoothness",
+       "to_node": "voronoi",
+       "to_socket": "Smoothness",
+       "t": "28:46",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Noise Roughness Scale",
+       "to_node": "noise",
+       "to_socket": "Scale",
+       "t": "29:04",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Noise Roughness Detail 1",
+       "to_node": "noise",
+       "to_socket": "Detail",
+       "t": "29:06",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Noise Roughness Detail 2",
+       "to_node": "noise",
+       "to_socket": "Roughness",
+       "t": "29:07",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Bump Strength",
+       "to_node": "bump",
+       "to_socket": "Strength",
+       "t": "29:28",
+       "class": "A"
+      }
+     ]
+    }
+   ],
+   "top_level": {
+    "nodes": [
+     {
+      "id": "group_node",
+      "type": "ShaderNodeGroup",
+      "label": "Textured Glass Blobby",
+      "settings": {
+       "node_tree": "Textured Glass Blobby"
+      },
+      "inputs": {},
+      "linked_inputs": [],
+      "class": "A",
+      "evidence": [
+       "27:51",
+       "29:41"
+      ],
+      "notes": "Group node name/label = node-group name = material name (copied and pasted at the group header). Node width 140 (Group panel)."
+     },
+     {
+      "id": "material_output",
+      "type": "ShaderNodeOutputMaterial",
+      "label": "Material Output",
+      "settings": {
+       "target": "ALL"
+      },
+      "inputs": {},
+      "linked_inputs": [],
+      "class": "A",
+      "evidence": [
+       "27:51",
+       "29:41"
+      ]
+     }
+    ],
+    "links": [
+     {
+      "from_node": "group_node",
+      "from_socket": "Shader",
+      "to_node": "material_output",
+      "to_socket": "Surface",
+      "t": "27:51",
+      "class": "A"
+     }
+    ]
+   },
+   "final_instance_values": {
+    "Scale": 1.0,
+    "Glass Color": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "Glass Roughness": 1.0,
+    "Glass IOR": 1.5,
+    "Voronoi Scale": 10.0,
+    "Voronoi Detail": 2.6,
+    "Voronoi Smoothness": 0.1,
+    "Noise Roughness Scale": 20.0,
+    "Noise Roughness Detail 1": 15.0,
+    "Noise Roughness Detail 2": 1.0,
+    "Bump Strength": 1.0,
+    "class": "A",
+    "evidence": [
+     "29:41 (t2941)"
+    ]
+   },
+   "product_overview_variant": {
+    "source": "customizable-nodes overview 02:15-02:27 (purchased project file)",
+    "class": "A (controls) / D (internal graph)",
+    "controls": [
+     [
+      "Scale",
+      1.0
+     ],
+     [
+      "Glass Color",
+      "white"
+     ],
+     [
+      "Glass Roughness",
+      1.0
+     ],
+     [
+      "Glass IOR",
+      1.5
+     ],
+     [
+      "Voronoi Scale",
+      10.0
+     ],
+     [
+      "Voronoi Detail",
+      2.6
+     ],
+     [
+      "Voronoi Roughness",
+      0.5,
+      "factor bar"
+     ],
+     [
+      "Voronoi Smoothness",
+      0.1,
+      "factor bar"
+     ],
+     [
+      "Bump Strength",
+      1.0,
+      "factor bar"
+     ]
+    ],
+    "difference": "product exposes \"Voronoi Roughness\" (0.5) and does NOT expose the three noise-roughness controls built in the tutorial",
+    "evidence": [
+     "tools/materials/reconstruction/glass/evidence/b/frames/t0216_overview_product_blobby_group.jpg"
+    ]
+   },
+   "temporary_states": [
+    {
+     "t": "25:50-26:05",
+     "what": "noise previewed (Ctrl+Shift+click)"
+    },
+    {
+     "t": "26:13-26:22",
+     "what": "Noise Factor directly into Glass Roughness before the ramp was inserted"
+    },
+    {
+     "t": "26:23-26:33",
+     "what": "white ramp stop dragged from 1.0 down through ~0.71 to the final 0.700"
+    },
+    {
+     "t": "27:00-27:31",
+     "what": "Voronoi previewed; glass previewed again at 27:31"
+    },
+    {
+     "t": "29:37-29:46",
+     "what": "demo: Scale 4.7 and Glass Color green (#1AFF1BFF, H 0.334 S 0.896 V 1.0), then back to defaults"
+    }
+   ],
+   "notes": [
+    "Roughness = ramp(noise Factor) x Glass Roughness: ramp maps 0 -> black, 1 -> 0.448 linear grey, so with the normalised noise around 0.5 the roughness sits near 0.22 (C).",
+    "Bump height = Smooth-F1 Voronoi distance (fractal, detail 2.6) x 0.004 m (C: object space, unit-scale object).",
+    "Voronoi feature size ~1/10 m, roughness speckle ~1/20 m at Scale 1 (C)."
+   ]
+  },
+  {
+   "name": "Frosted Glass",
+   "object": "Plane.004",
+   "time_range": "29:50-33:24",
+   "suggested_pm_name": "PM_GlassFrosted",
+   "groups": [
+    {
+     "name": "Frosted Glass",
+     "interface": [
+      {
+       "name": "Shader",
+       "in_out": "OUTPUT",
+       "socket_type": "NodeSocketShader",
+       "subtype": null,
+       "default": null,
+       "min": null,
+       "max": null,
+       "class": "A",
+       "evidence": [
+        "24:06-24:10 (wavy)",
+        "28:14-28:18 (blobby)",
+        "31:34-31:37 (frosted)"
+       ],
+       "note": "Created by Ctrl+G as \"BSDF\" (from Glass BSDF output) and renamed \"Shader\" in the N panel."
+      },
+      {
+       "name": "Scale",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.0,
+       "min": "-inf",
+       "max": "inf",
+       "class": "A",
+       "evidence": [
+        "31:42",
+        "31:44-31:49"
+       ],
+       "description_seen": "The amount...ng (Mapping Scale)",
+       "internal_destination": "mapping.Scale",
+       "visible_effect": "pattern size (barely visible: very fine noise, narration 33:04)",
+       "note": "Default shown 0.000 after the type change, set to 1.000; instance reset to 1."
+      },
+      {
+       "name": "Glass Color",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketColor",
+       "subtype": null,
+       "default": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "min": null,
+       "max": null,
+       "class": "A",
+       "evidence": [
+        "32:09"
+       ],
+       "internal_destination": "glass.Color",
+       "visible_effect": "tint"
+      },
+      {
+       "name": "Frosted Amount",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 2.0,
+       "class": "A",
+       "evidence": [
+        "32:01",
+        "32:13",
+        "32:46-32:54"
+       ],
+       "description_seen": "Value shift...e it brighter (HSV Value)",
+       "internal_destination": "hsv.Value",
+       "visible_effect": "more / less frosted (roughness multiplier)",
+       "note": "First named \"Glass Roughness\" (32:12-32:15); renamed \"Frosted Amount\" (a transient typo \"Frsoted\" is visible while typing at 32:53; final name read at 33:03)."
+      },
+      {
+       "name": "Glass IOR",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.5,
+       "min": 0.0,
+       "max": 1000.0,
+       "class": "A",
+       "evidence": [
+        "32:16-32:19"
+       ],
+       "internal_destination": "glass.IOR",
+       "visible_effect": "refraction"
+      },
+      {
+       "name": "Frosted Scale",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 20.0,
+       "min": -1000.0,
+       "max": 1000.0,
+       "class": "A",
+       "evidence": [
+        "32:22",
+        "32:30-32:36"
+       ],
+       "description_seen": "Scale of the bas(e noise)",
+       "internal_destination": "noise.Scale",
+       "visible_effect": "frost grain size",
+       "note": "Renamed \"Noise Scale\" -> \"Noise Roughness Scale\" -> \"Frosted Scale\"."
+      },
+      {
+       "name": "Frosted Detail 1",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 15.0,
+       "min": 0.0,
+       "max": 15.0,
+       "class": "A",
+       "evidence": [
+        "32:25",
+        "32:37-32:42"
+       ],
+       "description_seen": "The number...(of octaves)",
+       "internal_destination": "noise.Detail",
+       "visible_effect": "frost octaves"
+      },
+      {
+       "name": "Frosted Detail 2",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "class": "A (default, factor display) / C (min, max)",
+       "evidence": [
+        "32:26",
+        "32:42-32:44",
+        "33:03 (value, factor bar)"
+       ],
+       "internal_destination": "noise.Roughness",
+       "visible_effect": "second detail layer",
+       "note": "Panel never selected; Factor 0..1 are the Noise Roughness socket limits (the blobby twin socket shows Factor 0..1 at 29:26)."
+      }
+     ],
+     "nodes": [
+      {
+       "id": "group_input",
+       "type": "NodeGroupInput",
+       "label": "Group Input",
+       "settings": {},
+       "inputs": {},
+       "linked_inputs": [],
+       "class": "A",
+       "evidence": [
+        "32:58"
+       ]
+      },
+      {
+       "id": "group_output",
+       "type": "NodeGroupOutput",
+       "label": "Group Output",
+       "settings": {},
+       "inputs": {},
+       "linked_inputs": [],
+       "class": "A",
+       "evidence": [
+        "31:34"
+       ],
+       "notes": "Single input \"Shader\" fed by the Glass BSDF."
+      },
+      {
+       "id": "tex_coord",
+       "type": "ShaderNodeTexCoord",
+       "label": "Texture Coordinate",
+       "settings": {
+        "from_instancer": false,
+        "object": null
+       },
+       "inputs": {},
+       "linked_inputs": [],
+       "class": "A",
+       "evidence": [
+        "30:07",
+        "31:16"
+       ],
+       "notes": "Added by Node Wrangler Ctrl+T (with Mapping); the Object output is used (narration: \"use the object coordinates\"). No object is set in the Object field."
+      },
+      {
+       "id": "mapping",
+       "type": "ShaderNodeMapping",
+       "label": "Mapping",
+       "settings": {
+        "vector_type": "POINT"
+       },
+       "inputs": {
+        "Location": [
+         0.0,
+         0.0,
+         0.0
+        ],
+        "Rotation": [
+         0.0,
+         0.0,
+         0.0
+        ]
+       },
+       "linked_inputs": [
+        "Vector",
+        "Scale"
+       ],
+       "class": "A",
+       "evidence": [
+        "30:07",
+        "31:16",
+        "32:58"
+       ],
+       "notes": "Float group input \"Scale\" drives the Vector Scale socket (implicit float->vector (s,s,s))."
+      },
+      {
+       "id": "noise",
+       "type": "ShaderNodeTexNoise",
+       "label": "Noise Texture",
+       "settings": {
+        "noise_dimensions": "3D",
+        "noise_type": "FBM",
+        "normalize": true
+       },
+       "inputs": {
+        "Lacunarity": 2.0,
+        "Distortion": 0.0
+       },
+       "linked_inputs": [
+        "Vector",
+        "Scale",
+        "Detail",
+        "Roughness"
+       ],
+       "class": "A",
+       "evidence": [
+        "30:03",
+        "30:13-30:19",
+        "31:16",
+        "32:58"
+       ],
+       "notes": "Scale 20, Detail 15, Roughness 1.0 (30:13-30:19); become defaults of Frosted Scale / Frosted Detail 1 / Frosted Detail 2. Output used: Factor.",
+       "output_used": "Factor",
+       "unlinked_values_before_grouping": {
+        "Scale": 20.0,
+        "Detail": 15.0,
+        "Roughness": 1.0
+       }
+      },
+      {
+       "id": "color_ramp",
+       "type": "ShaderNodeValToRGB",
+       "label": "Color Ramp",
+       "settings": {
+        "color_ramp.color_mode": "RGB",
+        "color_ramp.interpolation": "LINEAR"
+       },
+       "inputs": {},
+       "linked_inputs": [
+        "Fac"
+       ],
+       "class": "A",
+       "evidence": [
+        "30:35-30:40",
+        "30:40-30:56",
+        "31:16"
+       ],
+       "elements": [
+        {
+         "index": 0,
+         "position": 0.0,
+         "perceptual_hsv": [
+          0.0,
+          0.0,
+          0.342
+         ],
+         "hex": "#575757",
+         "color_linear": [
+          0.0958,
+          0.0958,
+          0.0958,
+          1.0
+         ],
+         "class": "A (perceptual V and hex) / C (linear)",
+         "note": "black stop first lifted to V 0.415 (#6A6A6A, 30:41-30:44), then re-edited to the final V 0.342 at 30:53-30:55.5 (\"make like a dark color\")"
+        },
+        {
+         "index": 1,
+         "position": 1.0,
+         "perceptual_hsv": [
+          0.0,
+          0.0,
+          0.719
+         ],
+         "hex": "#B7B7B7",
+         "color_linear": [
+          0.4755,
+          0.4755,
+          0.4755,
+          1.0
+         ],
+         "class": "A (perceptual V and hex) / C (linear)",
+         "note": "white stop darkened 1.0 -> 0.719 -> 0.399 -> 0.186 -> 0.283, closed, reopened, 0.687 -> 0.729 -> final 0.719 (30:45-30:52) (\"light color\")"
+        }
+       ]
+      },
+      {
+       "id": "hsv",
+       "type": "ShaderNodeHueSaturation",
+       "label": "Hue/Saturation/Value",
+       "settings": {},
+       "inputs": {
+        "Hue": 0.5,
+        "Saturation": 1.0,
+        "Fac": 1.0
+       },
+       "linked_inputs": [
+        "Value",
+        "Color"
+       ],
+       "class": "A",
+       "evidence": [
+        "31:01-31:08",
+        "31:08-31:12 (demo 0 -> 2 -> 1)",
+        "31:16"
+       ],
+       "notes": "Value demonstrated at 0.0 and 2.0, left at 1.0; becomes \"Frosted Amount\" (renamed from Glass Roughness)."
+      },
+      {
+       "id": "glass",
+       "type": "ShaderNodeBsdfGlass",
+       "label": "Glass BSDF",
+       "settings": {
+        "distribution": "MULTI_GGX"
+       },
+       "inputs": {
+        "Thin Film Thickness": 0.0,
+        "Thin Film IOR": 1.33
+       },
+       "linked_inputs": [
+        "Color",
+        "Roughness",
+        "IOR"
+       ],
+       "class": "A",
+       "evidence": [
+        "30:22-30:28",
+        "31:16"
+       ],
+       "value_classes": {
+        "Thin Film Thickness": "C",
+        "Thin Film IOR": "C"
+       },
+       "notes": "No bump: Normal input unconnected. Before grouping Color white, IOR 1.5 (defaults)."
+      }
+     ],
+     "links": [
+      {
+       "from_node": "tex_coord",
+       "from_socket": "Object",
+       "to_node": "mapping",
+       "to_socket": "Vector",
+       "t": "30:09",
+       "class": "A"
+      },
+      {
+       "from_node": "mapping",
+       "from_socket": "Vector",
+       "to_node": "noise",
+       "to_socket": "Vector",
+       "t": "30:07 (Ctrl+T)",
+       "class": "A"
+      },
+      {
+       "from_node": "noise",
+       "from_socket": "Factor",
+       "to_node": "color_ramp",
+       "to_socket": "Fac",
+       "t": "30:28 / 30:38 (ramp inserted on the link)",
+       "class": "A"
+      },
+      {
+       "from_node": "color_ramp",
+       "from_socket": "Color",
+       "to_node": "hsv",
+       "to_socket": "Color",
+       "t": "31:05 (HSV inserted on the link)",
+       "class": "A"
+      },
+      {
+       "from_node": "hsv",
+       "from_socket": "Color",
+       "to_node": "glass",
+       "to_socket": "Roughness",
+       "t": "31:05",
+       "class": "A"
+      },
+      {
+       "from_node": "glass",
+       "from_socket": "BSDF",
+       "to_node": "group_output",
+       "to_socket": "Shader",
+       "t": "31:20 (Ctrl+G)",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Scale",
+       "to_node": "mapping",
+       "to_socket": "Scale",
+       "t": "31:41",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Glass Color",
+       "to_node": "glass",
+       "to_socket": "Color",
+       "t": "31:58",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Frosted Amount",
+       "to_node": "hsv",
+       "to_socket": "Value",
+       "t": "32:01",
+       "class": "A",
+       "note": "socket created as \"Glass Roughness\", renamed \"Frosted Amount\" at 32:46-32:54"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Glass IOR",
+       "to_node": "glass",
+       "to_socket": "IOR",
+       "t": "32:05",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Frosted Scale",
+       "to_node": "noise",
+       "to_socket": "Scale",
+       "t": "32:22",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Frosted Detail 1",
+       "to_node": "noise",
+       "to_socket": "Detail",
+       "t": "32:25",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Frosted Detail 2",
+       "to_node": "noise",
+       "to_socket": "Roughness",
+       "t": "32:26",
+       "class": "A"
+      }
+     ]
+    }
+   ],
+   "top_level": {
+    "nodes": [
+     {
+      "id": "group_node",
+      "type": "ShaderNodeGroup",
+      "label": "Frosted Glass",
+      "settings": {
+       "node_tree": "Frosted Glass"
+      },
+      "inputs": {},
+      "linked_inputs": [],
+      "class": "A",
+      "evidence": [
+       "31:24",
+       "33:03"
+      ],
+      "notes": "Group node name/label = node-group name = material name (copied and pasted at the group header). Node width 140 (Group panel)."
+     },
+     {
+      "id": "material_output",
+      "type": "ShaderNodeOutputMaterial",
+      "label": "Material Output",
+      "settings": {
+       "target": "ALL"
+      },
+      "inputs": {},
+      "linked_inputs": [],
+      "class": "A",
+      "evidence": [
+       "31:24",
+       "33:03"
+      ]
+     }
+    ],
+    "links": [
+     {
+      "from_node": "group_node",
+      "from_socket": "Shader",
+      "to_node": "material_output",
+      "to_socket": "Surface",
+      "t": "31:24",
+      "class": "A"
+     }
+    ]
+   },
+   "final_instance_values": {
+    "Scale": 1.0,
+    "Glass Color": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "Frosted Amount": 1.0,
+    "Glass IOR": 1.5,
+    "Frosted Scale": 20.0,
+    "Frosted Detail 1": 15.0,
+    "Frosted Detail 2": 1.0,
+    "class": "A",
+    "evidence": [
+     "33:03 (t3303)",
+     "33:23"
+    ]
+   },
+   "product_overview_variant": {
+    "source": "customizable-nodes overview 02:27-02:43 (purchased project file)",
+    "class": "A (controls) / D (internal graph, Scale default)",
+    "controls": [
+     [
+      "Scale",
+      "dragged (16.7, -3.6); default not seen"
+     ],
+     [
+      "Glass Color",
+      "white"
+     ],
+     [
+      "Glass Roughness",
+      1.0
+     ],
+     [
+      "Glass IOR",
+      1.5
+     ],
+     [
+      "Noise Scale",
+      20.0
+     ],
+     [
+      "Noise Detail",
+      15.0
+     ],
+     [
+      "Noise Roughness",
+      1.0,
+      "factor bar"
+     ]
+    ],
+    "difference": "product names: Glass Roughness / Noise Scale / Noise Detail / Noise Roughness; tutorial build renames them Frosted Amount / Frosted Scale / Frosted Detail 1 / Frosted Detail 2",
+    "evidence": [
+     "tools/materials/reconstruction/glass/evidence/b/frames/t0230_overview_product_frosted_group.jpg"
+    ]
+   },
+   "temporary_states": [
+    {
+     "t": "30:11-30:20",
+     "what": "noise previewed; a temporary link from the noise into the Principled BSDF before it was deleted (30:20-30:26)"
+    },
+    {
+     "t": "30:28-30:38",
+     "what": "Noise Factor directly into Glass Roughness before the ramp was inserted (\"too rough\")"
+    },
+    {
+     "t": "30:41-30:44",
+     "what": "ramp stop 0 at V 0.415 (#6A6A6A), later re-edited to 0.342"
+    },
+    {
+     "t": "31:08-31:12",
+     "what": "HSV Value demo 0.0 and 2.0, left at 1.0"
+    },
+    {
+     "t": "33:04-33:18",
+     "what": "group demo: Frosted Amount 2.0, Glass IOR 0.0, Frosted Detail 2 0.99, then back to defaults"
+    }
+   ],
+   "notes": [
+    "Roughness = ramp(noise Factor) x Frosted Amount; ramp maps 0 -> 0.0958, 1 -> 0.4755 linear, so roughness ~0.29 around the noise mean 0.5 (C).",
+    "No bump / normal: the frosted look is roughness only."
+   ]
+  }
+ ],
+ "measurements": {
+  "gabor_orientation_fit": {
+   "class": "C (measured from A pixels)",
+   "method": "Blender draws the Orientation 3D socket as a direction ball lit by the vector (x = screen right, y = screen up, z = toward viewer: Blender UNITVEC widget). Inside the ball we fitted brightness = gain * max(0, n.w) + offset over all pixels (n = sphere normal from the circle) and solved for the unit vector w.",
+   "validation": {
+    "t": "22:54.95-22:55.23",
+    "fit": [
+     0.706,
+     0.704,
+     -0.08
+    ],
+    "rmse": 0.045,
+    "expected": "Blender 5.x default Orientation 3D (sqrt2, sqrt2, 0) normalised = (0.707, 0.707, 0)",
+    "note": "mouse cursor over the ball raises the error; the default is recovered within ~0.01 in x/y"
+   },
+   "final": [
+    {
+     "t": "23:48.48",
+     "frame": "tools/materials/reconstruction/glass/evidence/b/frames/t2348_wavy_full_graph_before_group.jpg",
+     "crop": "tools/materials/reconstruction/glass/evidence/b/crops/t2348_wavy_gabor_ball.png",
+     "fit": [
+      0.796,
+      0.605,
+      -0.009
+     ],
+     "rmse": 0.0055,
+     "radius_px": 35.5
+    },
+    {
+     "t": "25:00.86",
+     "frame": "tools/materials/reconstruction/glass/evidence/b/frames/t2500_wavy_group_interior_gabor_ball.jpg",
+     "crop": "tools/materials/reconstruction/glass/evidence/b/crops/t2500_wavy_gabor_ball.png",
+     "fit": [
+      0.799,
+      0.602,
+      -0.007
+     ],
+     "rmse": 0.0043,
+     "radius_px": 53.0
+    }
+   ],
+   "recommended": [
+    0.797,
+    0.604,
+    0.0
+   ],
+   "uncertainty": "+-0.02 per component; z ~ 0 is consistent with the drag ending outside the circle (rim clamp)",
+   "azimuth_deg": 37.1
+  }
+ },
+ "colour_conversions": {
+  "picker_mode": "Colour picker shows Perceptual + HSV; hex is display sRGB. Ramp colours are stored scene-linear, so V(perceptual) is converted with the sRGB EOTF (C).",
+  "values": [
+   {
+    "what": "blobby ramp stop 1",
+    "perceptual_V": 0.7,
+    "hex": "#B2B2B2",
+    "linear": 0.448
+   },
+   {
+    "what": "frosted ramp stop 0",
+    "perceptual_V": 0.342,
+    "hex": "#575757",
+    "linear": 0.0958
+   },
+   {
+    "what": "frosted ramp stop 1",
+    "perceptual_V": 0.719,
+    "hex": "#B7B7B7",
+    "linear": 0.4755
+   }
+  ]
+ },
+ "reference_frames": [
+  {
+   "t": "00:04",
+   "path": "tools/materials/reconstruction/glass/evidence/b/frames/t0004_intro_final_render_six_panes.jpg",
+   "what": "final render, product scene: six glass panes in black frames on a dark studio floor; bottom row = Wavy | Blobby | Frosted (crop t0004_render_bottom_row.png)"
+  },
+  {
+   "t": "33:26",
+   "path": "tools/materials/reconstruction/glass/evidence/b/frames/t3326_closing_final_render_six_panes.jpg",
+   "what": "closing render, same product scene and layout"
+  },
+  {
+   "t": "33:23",
+   "path": "tools/materials/reconstruction/glass/evidence/b/frames/t3323_closing_viewport_all_panes.jpg",
+   "what": "tutorial scene in the rendered viewport (Cycles, camera view, HDRI 0.5, film transparent): six planes with red Suzannes behind; Frosted group node shown"
+  },
+  {
+   "t": "25:26",
+   "path": "tools/materials/reconstruction/glass/evidence/b/frames/t2526_wavy_final_group_node.jpg",
+   "what": "Wavy pane (tutorial build) in the viewport: vertical wavy refraction streaks over the red monkey"
+  },
+  {
+   "t": "29:41",
+   "path": "tools/materials/reconstruction/glass/evidence/b/frames/t2941_blobby_final_group_node.jpg",
+   "what": "Blobby pane (tutorial build): crinkled refraction with fine roughness speckle"
+  },
+  {
+   "t": "33:03",
+   "path": "tools/materials/reconstruction/glass/evidence/b/frames/t3303_frosted_final_group_node.jpg",
+   "what": "Frosted pane (tutorial build): uniformly blurred monkey"
+  },
+  {
+   "t": "02:03",
+   "path": "tools/materials/reconstruction/glass/evidence/b/frames/t0203_overview_product_wavy_group.jpg",
+   "what": "product-file Wavy pane in the viewport (Cube object) with its controls"
+  },
+  {
+   "t": "02:16",
+   "path": "tools/materials/reconstruction/glass/evidence/b/frames/t0216_overview_product_blobby_group.jpg",
+   "what": "product-file Blobby pane in the viewport"
+  },
+  {
+   "t": "02:30",
+   "path": "tools/materials/reconstruction/glass/evidence/b/frames/t0230_overview_product_frosted_group.jpg",
+   "what": "product-file Frosted pane in the viewport"
+  }
+ ],
+ "builder_notes": [
+  {
+   "class": "C",
+   "note": "D5: the Gabor Texture has only 2D/3D modes, so the 4D torus (seamless) mode of the library contract cannot use it as-is; the Wavy needs a mode adaptation (e.g. periodic construction along the wave vector), listed as a version/mode adaptation."
+  },
+  {
+   "class": "C",
+   "note": "The Wavy direction depends on the surface orientation in object space: the video pane is the X-Z plane, so (0.797, 0.604, 0) acts as a wave along X. On an X-Y surface (road-tool or a horizontal quad) the same vector gives a different stripe direction and frequency; keep the in-plane component explicit."
+  },
+  {
+   "class": "C",
+   "note": "D4 metres: pane 0.8 m, unit-scale objects. Wavy Gabor 12/m with frequency 5 (period ~2.1 cm along X); Blobby Voronoi 10/m, roughness noise 20/m; Frosted noise 20/m; bump distances 0.0007 m and 0.004 m."
+  },
+  {
+   "class": "C",
+   "note": "Interface descriptions were inherited from the node sockets (truncated in the UI); they can be left empty or copied from the Blender socket descriptions."
+  },
+  {
+   "class": "C",
+   "note": "Segment b group outputs are named \"Shader\"; the library contract (D2) wraps them in the MRS group with BSDF/Albedo outputs."
+  }
+ ]
+}

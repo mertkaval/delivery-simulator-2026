@@ -1,0 +1,94 @@
+{
+ "PM_Asphalt": {
+  "seam_albedo": {
+   "edge_mad": 0.008614,
+   "interior_mad": 0.008826,
+   "ratio": 0.976,
+   "ratio_x": 0.9231,
+   "ratio_y": 1.0284,
+   "outlier_x": 0.6135,
+   "outlier_y": 0.669,
+   "pct_x": 0.3382,
+   "pct_y": 0.5943,
+   "size": [
+    1024,
+    1024
+   ]
+  },
+  "seam_normal": {
+   "edge_mad": 0.053259,
+   "interior_mad": 0.054758,
+   "ratio": 0.9726,
+   "ratio_x": 1.0372,
+   "ratio_y": 0.9111,
+   "outlier_x": 0.857,
+   "outlier_y": 0.7622,
+   "pct_x": 0.7263,
+   "pct_y": 0.0352,
+   "size": [
+    1024,
+    1024
+   ]
+  },
+  "periodicity": {
+   "verdict": "OK",
+   "albedo": {
+    "mad": 0.00107,
+    "corr": 0.9975,
+    "mad_unrolled": 0.03996
+   }
+  }
+ },
+ "PM_AsphaltTutorial": {
+  "seam_albedo": {
+   "edge_mad": 0.008604,
+   "interior_mad": 0.008816,
+   "ratio": 0.976,
+   "ratio_x": 0.923,
+   "ratio_y": 1.0284,
+   "outlier_x": 0.6134,
+   "outlier_y": 0.669,
+   "pct_x": 0.3392,
+   "pct_y": 0.5963,
+   "size": [
+    1024,
+    1024
+   ]
+  },
+  "seam_normal": {
+   "edge_mad": 0.053559,
+   "interior_mad": 0.054863,
+   "ratio": 0.9762,
+   "ratio_x": 1.04,
+   "ratio_y": 0.9155,
+   "outlier_x": 0.8634,
+   "outlier_y": 0.7637,
+   "pct_x": 0.7468,
+   "pct_y": 0.0459,
+   "size": [
+    1024,
+    1024
+   ]
+  },
+  "periodicity": {
+   "verdict": "OK",
+   "albedo": {
+    "mad": 0.00107,
+    "corr": 0.99751,
+    "mad_unrolled": 0.03995
+   }
+  }
+ },
+ "settings": {
+  "tile_m": 4.0,
+  "res_px": 1024,
+  "samples": 16,
+  "periodicity_res_px": 512,
+  "periodicity_offset_uv": [
+   0.5,
+   0.25
+  ],
+  "files": "tmp/materials_bake/asphalt/"
+ },
+ "note": "Rebaked after AS17 (UV_MATCH, audit ASP-1): run.py -- build asphalt --bake tmp/materials_bake/asphalt --tile 4 --bake-res 1024 --bake-samples 16 --periodicity"
+}

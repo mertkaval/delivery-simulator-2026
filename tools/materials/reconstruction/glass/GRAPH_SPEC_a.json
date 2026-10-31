@@ -1,0 +1,2759 @@
+{
+ "video": {
+  "id": "SNKNqHd0AYI",
+  "title": "Procedural Textured Frosted Glass Materials (Blender Tutorial)",
+  "author": "Ryan King Art",
+  "upload_date": "2026-05-12",
+  "duration": "34:03",
+  "source_file": "tmp/materials_video/SNKNqHd0AYI.webm (2560x1440, 60 fps, VP9)"
+ },
+ "segment": {
+  "id": "a",
+  "range": "00:00-22:32",
+  "variants": [
+   "Textured Glass Circles",
+   "Textured Glass Voronoi",
+   "Textured Glass Cells"
+  ],
+  "also": [
+   "00:40-02:42 customizable nodes overview (all six product groups)",
+   "03:14-06:10 scene setup"
+  ],
+  "skipped": "16:43-17:52 kitchen-interior course ad",
+  "timestamp_note": "Times are true video times mm:ss.s; evidence frames were extracted with ffmpeg -ss at the listed seconds (see evidence/a/index.json frame_times). Transcript times are +-1 s."
+ },
+ "blender_version": "5.1.1",
+ "blender_version_evidence": {
+  "class": "A",
+  "what": "status bar '5.1.1' bottom right in every frame",
+  "crop": "tools/materials/reconstruction/glass/evidence/a/crops/t0506_blender_version.png"
+ },
+ "evidence_classes": {
+  "A": "directly observed in a frame",
+  "B": "narration / recipe repo only",
+  "C": "our inference / implementation",
+  "D": "unresolved"
+ },
+ "conventions": {
+  "inputs": "unlinked socket values as set; '(GI)' marks a socket driven by the group input whose value at grouping time became the interface default",
+  "linked_inputs": "sockets driven by a link",
+  "colors": "color_linear = scene-linear RGBA to set on the node; hex / perceptual_hsv = what the picker displayed",
+  "inf": "'inf'/'-inf' = Blender's unbounded float limits",
+  "node_ids": "local to each group; group_input / group_output are the group I/O nodes",
+  "socket_names": "display names as seen in Blender 5.1 (Factor = bpy 'Fac' on ColorRamp/Noise/HSV/RGB Curves)"
+ },
+ "recipe_repo": "KunalMGupta/material-apprentice has no entry for this video (its frosted / etched glass entries come from other tutorials: background only); nothing here is taken from it.",
+ "scene": {
+  "blender_ui": {
+   "version": "5.1.1",
+   "class": "A",
+   "evidence": "tools/materials/reconstruction/glass/evidence/a/crops/t0506_blender_version.png",
+   "workspaces": "Layout for modelling, Shading for materials (camera view in the left 3D viewport, node editor right)",
+   "collection": "objects live in a collection named 'Procedural Material' (viewport overlay '(52) Procedural Material | Plane.002', outliner at 4:53)",
+   "collection_class": "A"
+  },
+  "geometry": {
+   "panes": "6 x Plane (Shift+A > Mesh > Plane, default 2 m) scaled S 0.4 and rotated R X 90, Ctrl+A Apply Rotation & Scale -> 0.8 m x 0.8 m vertical panes (normal -Y), object scale 1, no subdivision, no modifiers",
+   "panes_class": "A (keys S .4 / R X 90 / Apply Object Transform overlays) + B (Rotation & Scale option named in narration)",
+   "layout": "2 rows x 3 columns; Shift+D moves read live as ~0.88-0.90 m in X, -1.76 m in X and -0.87 m in Z (approximately: columns at x ~ -0.86, 0, +0.89; rows 0.87 m apart; then all moved up by an unknown amount)",
+   "layout_class": "C (live drag readouts, final values not displayed)",
+   "monkeys": "4 Suzannes (Shift+A > Mesh > Monkey) scaled down, scale applied, behind the panes (+Y side); size/positions D",
+   "counts": "status bar: Verts 2,052 / Faces 2,006 / Tris 3,884 = 6 planes + 4 Suzannes; Objects 10 before the camera, 11 after",
+   "counts_class": "A",
+   "material_assignment": {
+    "Plane.002": "Textured Glass Circles",
+    "Plane": "Textured Glass Voronoi",
+    "Plane.001": "Textured Glass Cells",
+    "Suzanne*": "red"
+   },
+   "evidence": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t0334_setup_apply_object_transform.jpg",
+    "tools/materials/reconstruction/glass/evidence/a/frames/t0342_setup_six_panes_grid.jpg",
+    "tools/materials/reconstruction/glass/evidence/a/crops/t0326_keys_S_0p4.png",
+    "tools/materials/reconstruction/glass/evidence/a/crops/t0329_keys_R_X_90.png",
+    "tools/materials/reconstruction/glass/evidence/a/crops/t0330_keys_ctrlA_apply_menu.png"
+   ]
+  },
+  "backdrop_material": {
+   "name": "red (narration)",
+   "type": "Principled BSDF only",
+   "Base Color": {
+    "perceptual_hsv": [
+     0.009,
+     1.0,
+     0.956
+    ],
+    "hex": "#F40D00",
+    "color_linear_C": [
+     0.9047,
+     0.004,
+     0.0,
+     1.0
+    ]
+   },
+   "other_inputs": "defaults (Metallic 0, Roughness 0.5, IOR 1.5, Alpha 1)",
+   "class": "A",
+   "evidence": [
+    "tools/materials/reconstruction/glass/evidence/a/crops/t0417_red_picker_drag.png",
+    "tools/materials/reconstruction/glass/evidence/a/crops/t0418_red_picker_final.png"
+   ]
+  },
+  "camera": {
+   "type": "PERSP",
+   "lens_mm": 50.0,
+   "lens_unit": "MILLIMETERS",
+   "shift": [
+    0.0,
+    0.0
+   ],
+   "clip": [
+    0.1,
+    1000.0
+   ],
+   "dof": false,
+   "placement": "Ctrl+Alt+Numpad0 (align active camera to view) then interactive G / G+MMB; transform D",
+   "class": "A",
+   "evidence": [
+    "tools/materials/reconstruction/glass/evidence/a/crops/t0446_camera_lens.png"
+   ]
+  },
+  "lighting": {
+   "lamps": "none (object count = 6 planes + 4 monkeys + camera)",
+   "world": "HDRI only",
+   "class": "A"
+  },
+  "world": {
+   "surface": "Background",
+   "color": "Environment Texture old_apartments_walkway_1k.hdr (Poly Haven, 1K)",
+   "env_texture": {
+    "interpolation": "Linear",
+    "projection": "EQUIRECTANGULAR",
+    "source": "Single Image",
+    "colorspace": "Linear Rec.709",
+    "alpha": "Premultiplied",
+    "vector": "Default (unlinked)"
+   },
+   "strength": 0.5,
+   "class": "A",
+   "evidence": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t0506_setup_world_hdri.jpg",
+    "tools/materials/reconstruction/glass/evidence/a/crops/t0506_world_hdri.png"
+   ],
+   "project_substitute": "D6: no download; use a bundled studiolight (city / courtyard ...) and report lighting differences"
+  },
+  "engine": {
+   "engine": "CYCLES",
+   "device": "GPU Compute",
+   "open_shading_language": false,
+   "motion_blur_checkbox": true,
+   "viewport_samples": 100,
+   "viewport_samples_evidence": "overlay 'Sample n/100' (e.g. 10:46.5, 16:35.5)",
+   "render_samples": null,
+   "render_samples_class": "D (Sampling panel never opened)",
+   "class": "A",
+   "evidence": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t0453_setup_render_cycles_gpu.jpg",
+    "tools/materials/reconstruction/glass/evidence/a/crops/t0452_render_engine_menu.png",
+    "tools/materials/reconstruction/glass/evidence/a/crops/t0453_render_device.png"
+   ]
+  },
+  "film": {
+   "transparent": true,
+   "exposure": 1.0,
+   "pixel_filter": "BLACKMAN_HARRIS",
+   "filter_width_px": 1.5,
+   "class": "A",
+   "evidence": [
+    "tools/materials/reconstruction/glass/evidence/a/crops/t0530_film_transparent.png"
+   ]
+  },
+  "color_management": {
+   "display": "sRGB",
+   "view": "Filmic",
+   "look": "Very High Contrast",
+   "exposure": 0.0,
+   "gamma": 1.0,
+   "curves": false,
+   "white_balance": false,
+   "class": "A",
+   "evidence": [
+    "tools/materials/reconstruction/glass/evidence/a/crops/t0534_view_transform_menu.png",
+    "tools/materials/reconstruction/glass/evidence/a/crops/t0538_color_management.png"
+   ]
+  },
+  "material_settings": {
+   "displacement": "nothing linked to Material Output Displacement in any of the 3 materials; relief is Bump-node normal perturbation only. Material Settings panel (displacement method, blend/thickness) never shown -> D (Blender default 'Bump Only' assumed, class C).",
+   "class": "A (no displacement link) / D (panel)"
+  },
+  "texture_coordinates": {
+   "all_textures": "Texture Coordinate Object output -> Mapping (Point, loc 0, rot 0, scale <- group Scale)",
+   "why": "narration 6:50: object coordinates place the texture evenly on the object",
+   "units": "scale was applied, so object space = metres: Voronoi Scale 50 = 50 cells per metre (~2 cm dimples on a 0.8 m pane), Bump Distance in metres",
+   "class": "A (links) / C (metre interpretation)"
+  },
+  "add_ons": {
+   "node_wrangler": "used: Ctrl+T (Texture Coordinate + Mapping), Ctrl+Shift+click previews",
+   "class": "A/B"
+  }
+ },
+ "materials": [
+  {
+   "name": "Textured Glass Circles",
+   "object": "Plane.002 (0.8 m pane)",
+   "class": "A",
+   "evidence_frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t0640_circles_voronoi_smoothf1_scale50.jpg",
+    "tools/materials/reconstruction/glass/evidence/a/frames/t1043_circles_group_final_graph.jpg",
+    "tools/materials/reconstruction/glass/evidence/a/frames/t1044_circles_viewport_look.jpg"
+   ],
+   "evidence_crops": [
+    "tools/materials/reconstruction/glass/evidence/a/crops/t1043_group_input_texcoord_mapping.png",
+    "tools/materials/reconstruction/glass/evidence/a/crops/t1043_mapping_to_group_output.png",
+    "tools/materials/reconstruction/glass/evidence/a/crops/t1043_distance_to_curves_color.png",
+    "tools/materials/reconstruction/glass/evidence/a/crops/t2229_circles_group_node_values.png"
+   ],
+   "groups": [
+    {
+     "name": "Textured Glass Circles",
+     "interface": [
+      {
+       "name": "Shader",
+       "in_out": "OUTPUT",
+       "socket_type": "NodeSocketShader",
+       "subtype": null,
+       "default": null,
+       "min": null,
+       "max": null,
+       "description_visible": null,
+       "internal_destination": "glass.BSDF",
+       "visible_effect": "material output (renamed from BSDF)",
+       "class": "A",
+       "evidence": [
+        "08:52.5",
+        "08:58.5"
+       ]
+      },
+      {
+       "name": "Scale",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.0,
+       "min": "-inf",
+       "max": "inf",
+       "description_visible": "The amount...ng each axis",
+       "internal_destination": "mapping.Scale (float -> vector broadcast)",
+       "visible_effect": "multiplies the object coordinates: larger = smaller dimples",
+       "class": "A",
+       "evidence": [
+        "09:07.5",
+        "09:16.5",
+        "09:22.5"
+       ]
+      },
+      {
+       "name": "Glass Color",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketColor",
+       "subtype": null,
+       "default": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "min": null,
+       "max": null,
+       "description_visible": null,
+       "internal_destination": "glass.Color",
+       "visible_effect": "tints the glass (demo #CCEDFF)",
+       "class": "A",
+       "evidence": [
+        "09:43.5",
+        "10:52.5"
+       ]
+      },
+      {
+       "name": "Glass Roughness",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 0.2,
+       "min": 0.0,
+       "max": 1.0,
+       "description_visible": null,
+       "internal_destination": "glass.Roughness",
+       "visible_effect": "frost amount",
+       "class": "A",
+       "evidence": [
+        "09:46.5",
+        "09:49.5"
+       ]
+      },
+      {
+       "name": "Glass IOR",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.5,
+       "min": 0.0,
+       "max": 1000.0,
+       "description_visible": null,
+       "internal_destination": "glass.IOR",
+       "visible_effect": "refraction strength",
+       "class": "A",
+       "evidence": [
+        "09:52.5",
+        "09:55.5"
+       ]
+      },
+      {
+       "name": "Voronoi Scale",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 50.0,
+       "min": -1000.0,
+       "max": 1000.0,
+       "description_visible": null,
+       "internal_destination": "voronoi.Scale",
+       "visible_effect": "dimple density",
+       "class": "A",
+       "evidence": [
+        "10:13.5",
+        "10:16.5"
+       ]
+      },
+      {
+       "name": "Voronoi Detail",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 0.0,
+       "min": 0.0,
+       "max": 15.0,
+       "description_visible": "(not displayed; Voronoi Detail socket description)",
+       "internal_destination": "voronoi.Detail",
+       "visible_effect": "extra fractal layers of dimples",
+       "class": "A",
+       "evidence": [
+        "10:13.5",
+        "22:29.5"
+       ],
+       "min_max_class": "C (socket never selected; Blender Voronoi Detail limits 0..15, same as the A-observed twin sockets of the Voronoi material)"
+      },
+      {
+       "name": "Voronoi Roughness",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 0.5,
+       "min": 0.0,
+       "max": 1.0,
+       "description_visible": "The influenc...evious layer",
+       "internal_destination": "voronoi.Roughness",
+       "visible_effect": "weight of the detail layers",
+       "class": "A",
+       "evidence": [
+        "10:19.5",
+        "10:22.5"
+       ]
+      },
+      {
+       "name": "Voronoi Smoothness",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "description_visible": null,
+       "internal_destination": "voronoi.Smoothness",
+       "visible_effect": "rounds the cell edges (Smooth F1)",
+       "class": "A",
+       "evidence": [
+        "10:28.5",
+        "10:31.5"
+       ]
+      },
+      {
+       "name": "Voronoi Randomness",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "description_visible": null,
+       "internal_destination": "voronoi.Randomness",
+       "visible_effect": "regular grid (0) to random cells (1)",
+       "class": "A",
+       "evidence": [
+        "10:25.5",
+        "22:29.5"
+       ],
+       "min_max_class": "C (socket never selected; Voronoi Randomness is a 0..1 factor)"
+      },
+      {
+       "name": "Bump Strength",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "description_visible": "Strength of t...p mapping",
+       "internal_destination": "bump.Strength",
+       "visible_effect": "bump intensity",
+       "class": "A",
+       "evidence": [
+        "10:35.5",
+        "10:39.5"
+       ]
+      }
+     ],
+     "nodes": [
+      {
+       "id": "group_input",
+       "type": "NodeGroupInput",
+       "label": "Group Input",
+       "settings": {},
+       "inputs": {},
+       "linked_inputs": [],
+       "class": "A",
+       "evidence": [
+        "10:43.5"
+       ]
+      },
+      {
+       "id": "tex_coord",
+       "type": "ShaderNodeTexCoord",
+       "label": "Texture Coordinate",
+       "settings": {
+        "object": null,
+        "from_instancer": false
+       },
+       "inputs": {},
+       "linked_inputs": [],
+       "class": "A",
+       "evidence": [
+        "06:46.5",
+        "06:56.5",
+        "10:43.5"
+       ]
+      },
+      {
+       "id": "mapping",
+       "type": "ShaderNodeMapping",
+       "label": "Mapping",
+       "settings": {
+        "vector_type": "POINT"
+       },
+       "inputs": {
+        "Location": [
+         0.0,
+         0.0,
+         0.0
+        ],
+        "Rotation": [
+         0.0,
+         0.0,
+         0.0
+        ]
+       },
+       "linked_inputs": [
+        "Vector",
+        "Scale"
+       ],
+       "class": "A",
+       "evidence": [
+        "06:46.5",
+        "10:43.5"
+       ]
+      },
+      {
+       "id": "voronoi",
+       "type": "ShaderNodeTexVoronoi",
+       "label": "Voronoi Texture",
+       "settings": {
+        "voronoi_dimensions": "3D",
+        "feature": "SMOOTH_F1",
+        "distance": "EUCLIDEAN",
+        "normalize": false
+       },
+       "inputs": {
+        "Lacunarity": 2.0,
+        "Scale (value at grouping, now GI default)": 50.0,
+        "Detail (GI)": 0.0,
+        "Roughness (GI)": 0.5,
+        "Smoothness (GI)": 1.0,
+        "Randomness (GI)": 1.0
+       },
+       "linked_inputs": [
+        "Vector",
+        "Scale",
+        "Detail",
+        "Roughness",
+        "Smoothness",
+        "Randomness"
+       ],
+       "class": "A",
+       "evidence": [
+        "06:34.5",
+        "06:40.5",
+        "10:43.5"
+       ]
+      },
+      {
+       "id": "rgb_curves",
+       "type": "ShaderNodeRGBCurve",
+       "label": "RGB Curves",
+       "settings": {
+        "mapping.curves[C] (combined, index 3)": [
+         [
+          0.0,
+          0.0
+         ],
+         [
+          0.314,
+          0.2464
+         ],
+         [
+          0.5804,
+          0.6535
+         ],
+         [
+          1.0,
+          1.0
+         ]
+        ],
+        "point_handle_type": "AUTO (default; first handle icon active)",
+        "curves R/G/B": "untouched (identity)",
+        "active channel tab": "C"
+       },
+       "inputs": {
+        "Factor": 1.0
+       },
+       "linked_inputs": [
+        "Color"
+       ],
+       "class": "A",
+       "evidence": [
+        "07:46.5",
+        "08:14.0",
+        "08:14.6",
+        "10:43.5"
+       ],
+       "notes": "Point readouts: upper (0.5804, 0.6535) at 08:14.0, lower (0.3140, 0.2464) from 08:14.6 to 10:43.5; graph pixels at 10:43.5 put the points at ~(0.315, 0.245) and ~(0.581, 0.656)."
+      },
+      {
+       "id": "bump",
+       "type": "ShaderNodeBump",
+       "label": "Bump",
+       "settings": {
+        "invert": true
+       },
+       "inputs": {
+        "Distance": 0.002,
+        "Filter Width": 0.1,
+        "Strength (GI)": 1.0
+       },
+       "linked_inputs": [
+        "Strength",
+        "Height"
+       ],
+       "class": "A",
+       "evidence": [
+        "07:22.5",
+        "07:55.5",
+        "10:43.5"
+       ]
+      },
+      {
+       "id": "glass",
+       "type": "ShaderNodeBsdfGlass",
+       "label": "Glass BSDF",
+       "settings": {
+        "distribution": "MULTI_GGX"
+       },
+       "inputs": {
+        "Color (GI)": [
+         1.0,
+         1.0,
+         1.0,
+         1.0
+        ],
+        "Roughness (GI)": 0.2,
+        "IOR (GI)": 1.5
+       },
+       "linked_inputs": [
+        "Color",
+        "Roughness",
+        "IOR",
+        "Normal"
+       ],
+       "class": "A",
+       "evidence": [
+        "06:19.5",
+        "08:25.5",
+        "10:43.5"
+       ],
+       "notes": "Thin Film panel collapsed and never opened: Thin Film Thickness / IOR stay at Blender defaults (class C). Weight socket not shown (default)."
+      },
+      {
+       "id": "group_output",
+       "type": "NodeGroupOutput",
+       "label": "Group Output",
+       "settings": {
+        "is_active_output": true
+       },
+       "inputs": {},
+       "linked_inputs": [
+        "Shader"
+       ],
+       "class": "A",
+       "evidence": [
+        "10:43.5"
+       ]
+      }
+     ],
+     "links": [
+      {
+       "from_node": "tex_coord",
+       "from_socket": "Object",
+       "to_node": "mapping",
+       "to_socket": "Vector",
+       "t": "06:56.5",
+       "class": "A",
+       "note": "NW Ctrl+T first linked Generated (06:46.5); relinked to Object"
+      },
+      {
+       "from_node": "mapping",
+       "from_socket": "Vector",
+       "to_node": "voronoi",
+       "to_socket": "Vector",
+       "t": "06:46.5",
+       "class": "A"
+      },
+      {
+       "from_node": "voronoi",
+       "from_socket": "Distance",
+       "to_node": "rgb_curves",
+       "to_socket": "Color",
+       "t": "07:37.5",
+       "class": "A",
+       "note": "float Distance into the Color input (grey->yellow wire), not Factor"
+      },
+      {
+       "from_node": "rgb_curves",
+       "from_socket": "Color",
+       "to_node": "bump",
+       "to_socket": "Height",
+       "t": "07:37.5",
+       "class": "A"
+      },
+      {
+       "from_node": "bump",
+       "from_socket": "Normal",
+       "to_node": "glass",
+       "to_socket": "Normal",
+       "t": "07:16.5",
+       "class": "A"
+      },
+      {
+       "from_node": "glass",
+       "from_socket": "BSDF",
+       "to_node": "group_output",
+       "to_socket": "Shader",
+       "t": "08:37.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Scale",
+       "to_node": "mapping",
+       "to_socket": "Scale",
+       "t": "09:07.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Glass Color",
+       "to_node": "glass",
+       "to_socket": "Color",
+       "t": "09:37.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Glass Roughness",
+       "to_node": "glass",
+       "to_socket": "Roughness",
+       "t": "09:46.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Glass IOR",
+       "to_node": "glass",
+       "to_socket": "IOR",
+       "t": "09:52.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Voronoi Scale",
+       "to_node": "voronoi",
+       "to_socket": "Scale",
+       "t": "10:10.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Voronoi Detail",
+       "to_node": "voronoi",
+       "to_socket": "Detail",
+       "t": "10:10.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Voronoi Roughness",
+       "to_node": "voronoi",
+       "to_socket": "Roughness",
+       "t": "10:10.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Voronoi Smoothness",
+       "to_node": "voronoi",
+       "to_socket": "Smoothness",
+       "t": "10:25.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Voronoi Randomness",
+       "to_node": "voronoi",
+       "to_socket": "Randomness",
+       "t": "10:25.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Bump Strength",
+       "to_node": "bump",
+       "to_socket": "Strength",
+       "t": "10:35.5",
+       "class": "A"
+      }
+     ]
+    }
+   ],
+   "top_level": {
+    "nodes": [
+     {
+      "id": "group",
+      "type": "ShaderNodeGroup",
+      "label": "Textured Glass Circles",
+      "settings": {
+       "node_tree": "Textured Glass Circles"
+      },
+      "inputs": {
+       "Scale": 1.0,
+       "Glass Color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "Glass Roughness": 0.2,
+       "Glass IOR": 1.5,
+       "Voronoi Scale": 50.0,
+       "Voronoi Detail": 0.0,
+       "Voronoi Roughness": 0.5,
+       "Voronoi Smoothness": 1.0,
+       "Voronoi Randomness": 1.0,
+       "Bump Strength": 1.0
+      },
+      "linked_inputs": [],
+      "class": "A",
+      "evidence": [
+       "22:29.5",
+       "10:44.5"
+      ],
+      "notes": "values = the group node's own socket values at the end of the chapter (demo edits reverted)"
+     },
+     {
+      "id": "material_output",
+      "type": "ShaderNodeOutputMaterial",
+      "label": "Material Output",
+      "settings": {
+       "target": "ALL",
+       "is_active_output": true
+      },
+      "inputs": {},
+      "linked_inputs": [
+       "Surface"
+      ],
+      "class": "A",
+      "evidence": [
+       "22:29.5",
+       "10:44.5"
+      ]
+     }
+    ],
+    "links": [
+     {
+      "from_node": "group",
+      "from_socket": "Shader",
+      "to_node": "material_output",
+      "to_socket": "Surface",
+      "t": "22:29.5",
+      "class": "A"
+     }
+    ],
+    "unlinked_outputs": "Material Output Volume / Displacement / Thickness unlinked (bump only, no true displacement)"
+   }
+  },
+  {
+   "name": "Textured Glass Voronoi",
+   "object": "Plane (0.8 m pane)",
+   "class": "A",
+   "evidence_frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t1626_voronoi_group_final_graph.jpg",
+    "tools/materials/reconstruction/glass/evidence/a/frames/t1641_voronoi_group_node_final.jpg"
+   ],
+   "evidence_crops": [
+    "tools/materials/reconstruction/glass/evidence/a/crops/t1626_inputs_texcoord_voronois.png",
+    "tools/materials/reconstruction/glass/evidence/a/crops/t1626_curves_bumps.png",
+    "tools/materials/reconstruction/glass/evidence/a/crops/t1626_bumps_glass_output.png",
+    "tools/materials/reconstruction/glass/evidence/a/crops/t1641_voronoi_group_node_values.png"
+   ],
+   "groups": [
+    {
+     "name": "Textured Glass Voronoi",
+     "interface": [
+      {
+       "name": "Shader",
+       "in_out": "OUTPUT",
+       "socket_type": "NodeSocketShader",
+       "subtype": null,
+       "default": null,
+       "min": null,
+       "max": null,
+       "description_visible": null,
+       "internal_destination": "glass.BSDF",
+       "visible_effect": null,
+       "class": "A",
+       "evidence": [
+        "14:53.5"
+       ]
+      },
+      {
+       "name": "Scale",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.0,
+       "min": "-inf",
+       "max": "inf",
+       "description_visible": "The amount...ng each axis",
+       "internal_destination": "mapping.Scale",
+       "visible_effect": "overall pattern size",
+       "class": "A",
+       "evidence": [
+        "14:56.5",
+        "14:59.5",
+        "15:08.5"
+       ]
+      },
+      {
+       "name": "Glass Color",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketColor",
+       "subtype": null,
+       "default": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "min": null,
+       "max": null,
+       "description_visible": null,
+       "internal_destination": "glass.Color",
+       "visible_effect": "tint",
+       "class": "A",
+       "evidence": [
+        "15:17.5"
+       ]
+      },
+      {
+       "name": "Glass Roughness",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 0.0,
+       "min": 0.0,
+       "max": 1.0,
+       "description_visible": null,
+       "internal_destination": "glass.Roughness",
+       "visible_effect": "frost (tutorial leaves 0)",
+       "class": "A",
+       "evidence": [
+        "15:23.5"
+       ]
+      },
+      {
+       "name": "Glass IOR",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.5,
+       "min": 0.0,
+       "max": 1000.0,
+       "description_visible": null,
+       "internal_destination": "glass.IOR",
+       "visible_effect": null,
+       "class": "A",
+       "evidence": [
+        "15:29.5"
+       ]
+      },
+      {
+       "name": "Voronoi Scale 1",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 30.0,
+       "min": -1000.0,
+       "max": 1000.0,
+       "description_visible": null,
+       "internal_destination": "voronoi_1.Scale",
+       "visible_effect": "size of the large hammered cells",
+       "class": "A",
+       "evidence": [
+        "15:44.5",
+        "15:59.5"
+       ]
+      },
+      {
+       "name": "Voronoi Scale 2",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 30.0,
+       "min": -1000.0,
+       "max": 1000.0,
+       "description_visible": null,
+       "internal_destination": "voronoi_2.Scale",
+       "visible_effect": "size of the fine cell layer",
+       "class": "A",
+       "evidence": [
+        "15:44.5",
+        "16:02.5"
+       ]
+      },
+      {
+       "name": "Voronoi Smoothness 1",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 0.1,
+       "min": 0.0,
+       "max": 1.0,
+       "description_visible": null,
+       "internal_destination": "voronoi_1.Smoothness",
+       "visible_effect": "softness of the large cell edges",
+       "class": "A",
+       "evidence": [
+        "16:05.5"
+       ]
+      },
+      {
+       "name": "Voronoi Smoothness 2",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 0.03,
+       "min": 0.0,
+       "max": 1.0,
+       "description_visible": null,
+       "internal_destination": "voronoi_2.Smoothness",
+       "visible_effect": null,
+       "class": "A",
+       "evidence": [
+        "15:47.5",
+        "15:50.5"
+       ]
+      },
+      {
+       "name": "Voronoi Detail 1",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 0.0,
+       "min": 0.0,
+       "max": 15.0,
+       "description_visible": "The number...yers to sum",
+       "internal_destination": "voronoi_1.Detail",
+       "visible_effect": null,
+       "class": "A",
+       "evidence": [
+        "16:08.5",
+        "16:14.5"
+       ]
+      },
+      {
+       "name": "Voronoi Detail 2",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 3.0,
+       "min": 0.0,
+       "max": 15.0,
+       "description_visible": "The number...yers to sum",
+       "internal_destination": "voronoi_2.Detail",
+       "visible_effect": null,
+       "class": "A",
+       "evidence": [
+        "15:53.5"
+       ]
+      },
+      {
+       "name": "Bump Strength 1",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "description_visible": "Strength of t...p mapping",
+       "internal_destination": "bump_1.Strength",
+       "visible_effect": "large cells bump",
+       "class": "A",
+       "evidence": [
+        "16:15.5",
+        "16:23.5"
+       ]
+      },
+      {
+       "name": "Bump Strength 2",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "description_visible": "Strength of t...p mapping",
+       "internal_destination": "bump_2.Strength",
+       "visible_effect": "fine layer bump",
+       "class": "A",
+       "evidence": [
+        "16:16.5",
+        "16:23.5"
+       ]
+      }
+     ],
+     "nodes": [
+      {
+       "id": "group_input",
+       "type": "NodeGroupInput",
+       "label": "Group Input",
+       "settings": {},
+       "inputs": {},
+       "linked_inputs": [],
+       "class": "A",
+       "evidence": [
+        "16:26.5"
+       ]
+      },
+      {
+       "id": "tex_coord",
+       "type": "ShaderNodeTexCoord",
+       "label": "Texture Coordinate",
+       "settings": {
+        "object": null,
+        "from_instancer": false
+       },
+       "inputs": {},
+       "linked_inputs": [],
+       "class": "A",
+       "evidence": [
+        "11:16.5",
+        "16:26.5"
+       ]
+      },
+      {
+       "id": "mapping",
+       "type": "ShaderNodeMapping",
+       "label": "Mapping",
+       "settings": {
+        "vector_type": "POINT"
+       },
+       "inputs": {
+        "Location": [
+         0.0,
+         0.0,
+         0.0
+        ],
+        "Rotation": [
+         0.0,
+         0.0,
+         0.0
+        ]
+       },
+       "linked_inputs": [
+        "Vector",
+        "Scale"
+       ],
+       "class": "A",
+       "evidence": [
+        "16:26.5"
+       ]
+      },
+      {
+       "id": "voronoi_1",
+       "type": "ShaderNodeTexVoronoi",
+       "label": "Voronoi Texture",
+       "settings": {
+        "voronoi_dimensions": "3D",
+        "feature": "SMOOTH_F1",
+        "distance": "EUCLIDEAN",
+        "normalize": false
+       },
+       "inputs": {
+        "Roughness": 0.0,
+        "Lacunarity": 2.0,
+        "Randomness": 1.0,
+        "Scale (GI)": 30.0,
+        "Detail (GI)": 0.0,
+        "Smoothness (GI)": 0.1
+       },
+       "linked_inputs": [
+        "Vector",
+        "Scale",
+        "Detail",
+        "Smoothness"
+       ],
+       "class": "A",
+       "evidence": [
+        "11:22.5",
+        "11:36.5",
+        "12:20.5",
+        "16:26.5"
+       ],
+       "notes": "upper Voronoi in the graph"
+      },
+      {
+       "id": "voronoi_2",
+       "type": "ShaderNodeTexVoronoi",
+       "label": "Voronoi Texture",
+       "settings": {
+        "voronoi_dimensions": "3D",
+        "feature": "SMOOTH_F1",
+        "distance": "EUCLIDEAN",
+        "normalize": false
+       },
+       "inputs": {
+        "Roughness": 1.0,
+        "Lacunarity": 2.0,
+        "Randomness": 1.0,
+        "Scale (GI)": 30.0,
+        "Detail (GI)": 3.0,
+        "Smoothness (GI)": 0.03
+       },
+       "linked_inputs": [
+        "Vector",
+        "Scale",
+        "Detail",
+        "Smoothness"
+       ],
+       "class": "A",
+       "evidence": [
+        "12:40.5",
+        "13:00.5",
+        "16:26.5"
+       ],
+       "notes": "Shift+Ctrl+D copy of voronoi_1 (keeps the Mapping link), lower in the graph"
+      },
+      {
+       "id": "rgb_curves_1",
+       "type": "ShaderNodeRGBCurve",
+       "label": "RGB Curves",
+       "settings": {
+        "mapping.curves[C] (combined, index 3)": [
+         [
+          0.0,
+          0.0
+         ],
+         [
+          0.6758,
+          0.2928
+         ],
+         [
+          1.0,
+          1.0
+         ]
+        ],
+        "point_handle_type": "AUTO (default)",
+        "curves R/G/B": "untouched (identity)"
+       },
+       "inputs": {
+        "Factor": 1.0
+       },
+       "linked_inputs": [
+        "Color"
+       ],
+       "class": "A",
+       "evidence": [
+        "14:05.5",
+        "16:26.5"
+       ]
+      },
+      {
+       "id": "rgb_curves_2",
+       "type": "ShaderNodeRGBCurve",
+       "label": "RGB Curves",
+       "settings": {
+        "mapping.curves[C] (combined, index 3)": [
+         [
+          0.0,
+          0.0
+         ],
+         [
+          0.6331,
+          0.3
+         ],
+         [
+          1.0,
+          1.0
+         ]
+        ],
+        "point_handle_type": "AUTO (default)",
+        "curves R/G/B": "untouched (identity)"
+       },
+       "inputs": {
+        "Factor": 1.0
+       },
+       "linked_inputs": [
+        "Color"
+       ],
+       "class": "A",
+       "evidence": [
+        "14:17.5",
+        "16:26.5"
+       ]
+      },
+      {
+       "id": "bump_1",
+       "type": "ShaderNodeBump",
+       "label": "Bump",
+       "settings": {
+        "invert": true
+       },
+       "inputs": {
+        "Distance": 0.004,
+        "Filter Width": 0.1,
+        "Strength (GI)": 1.0
+       },
+       "linked_inputs": [
+        "Strength",
+        "Height",
+        "Normal"
+       ],
+       "class": "A",
+       "evidence": [
+        "12:08.5",
+        "12:28.5",
+        "16:26.5"
+       ]
+      },
+      {
+       "id": "bump_2",
+       "type": "ShaderNodeBump",
+       "label": "Bump",
+       "settings": {
+        "invert": true
+       },
+       "inputs": {
+        "Distance": 8e-05,
+        "Filter Width": 0.1,
+        "Strength (GI)": 1.0
+       },
+       "linked_inputs": [
+        "Strength",
+        "Height"
+       ],
+       "class": "A",
+       "evidence": [
+        "13:04.5",
+        "13:26.5",
+        "16:26.5"
+       ],
+       "notes": "Distance typed '0.00008' (13:24-13:26); the field displays 0.0001 because of 4-decimal display"
+      },
+      {
+       "id": "glass",
+       "type": "ShaderNodeBsdfGlass",
+       "label": "Glass BSDF",
+       "settings": {
+        "distribution": "MULTI_GGX"
+       },
+       "inputs": {
+        "Color (GI)": [
+         1.0,
+         1.0,
+         1.0,
+         1.0
+        ],
+        "Roughness (GI)": 0.0,
+        "IOR (GI)": 1.5
+       },
+       "linked_inputs": [
+        "Color",
+        "Roughness",
+        "IOR",
+        "Normal"
+       ],
+       "class": "A",
+       "evidence": [
+        "11:56.5",
+        "16:26.5"
+       ],
+       "notes": "Thin Film panel collapsed and never opened: Thin Film Thickness / IOR stay at Blender defaults (class C). Weight socket not shown (default)."
+      },
+      {
+       "id": "group_output",
+       "type": "NodeGroupOutput",
+       "label": "Group Output",
+       "settings": {
+        "is_active_output": true
+       },
+       "inputs": {},
+       "linked_inputs": [
+        "Shader"
+       ],
+       "class": "A",
+       "evidence": [
+        "16:26.5"
+       ]
+      }
+     ],
+     "links": [
+      {
+       "from_node": "tex_coord",
+       "from_socket": "Object",
+       "to_node": "mapping",
+       "to_socket": "Vector",
+       "t": "11:16.5",
+       "class": "A"
+      },
+      {
+       "from_node": "mapping",
+       "from_socket": "Vector",
+       "to_node": "voronoi_1",
+       "to_socket": "Vector",
+       "t": "11:16.5",
+       "class": "A"
+      },
+      {
+       "from_node": "mapping",
+       "from_socket": "Vector",
+       "to_node": "voronoi_2",
+       "to_socket": "Vector",
+       "t": "12:40.5",
+       "class": "A",
+       "note": "kept by Shift+Ctrl+D"
+      },
+      {
+       "from_node": "voronoi_1",
+       "from_socket": "Distance",
+       "to_node": "rgb_curves_1",
+       "to_socket": "Color",
+       "t": "13:44.5",
+       "class": "A"
+      },
+      {
+       "from_node": "rgb_curves_1",
+       "from_socket": "Color",
+       "to_node": "bump_1",
+       "to_socket": "Height",
+       "t": "13:44.5",
+       "class": "A"
+      },
+      {
+       "from_node": "voronoi_2",
+       "from_socket": "Distance",
+       "to_node": "rgb_curves_2",
+       "to_socket": "Color",
+       "t": "13:44.5",
+       "class": "A"
+      },
+      {
+       "from_node": "rgb_curves_2",
+       "from_socket": "Color",
+       "to_node": "bump_2",
+       "to_socket": "Height",
+       "t": "13:44.5",
+       "class": "A"
+      },
+      {
+       "from_node": "bump_2",
+       "from_socket": "Normal",
+       "to_node": "bump_1",
+       "to_socket": "Normal",
+       "t": "13:08.5",
+       "class": "A"
+      },
+      {
+       "from_node": "bump_1",
+       "from_socket": "Normal",
+       "to_node": "glass",
+       "to_socket": "Normal",
+       "t": "11:56.5",
+       "class": "A"
+      },
+      {
+       "from_node": "glass",
+       "from_socket": "BSDF",
+       "to_node": "group_output",
+       "to_socket": "Shader",
+       "t": "14:29.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Scale",
+       "to_node": "mapping",
+       "to_socket": "Scale",
+       "t": "14:56.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Glass Color",
+       "to_node": "glass",
+       "to_socket": "Color",
+       "t": "15:11.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Glass Roughness",
+       "to_node": "glass",
+       "to_socket": "Roughness",
+       "t": "15:20.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Glass IOR",
+       "to_node": "glass",
+       "to_socket": "IOR",
+       "t": "15:26.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Voronoi Scale 1",
+       "to_node": "voronoi_1",
+       "to_socket": "Scale",
+       "t": "15:33.3",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Voronoi Scale 2",
+       "to_node": "voronoi_2",
+       "to_socket": "Scale",
+       "t": "15:34.3",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Voronoi Smoothness 1",
+       "to_node": "voronoi_1",
+       "to_socket": "Smoothness",
+       "t": "15:41.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Voronoi Smoothness 2",
+       "to_node": "voronoi_2",
+       "to_socket": "Smoothness",
+       "t": "15:47.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Voronoi Detail 1",
+       "to_node": "voronoi_1",
+       "to_socket": "Detail",
+       "t": "15:50.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Voronoi Detail 2",
+       "to_node": "voronoi_2",
+       "to_socket": "Detail",
+       "t": "15:53.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Bump Strength 1",
+       "to_node": "bump_1",
+       "to_socket": "Strength",
+       "t": "16:15.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Bump Strength 2",
+       "to_node": "bump_2",
+       "to_socket": "Strength",
+       "t": "16:16.5",
+       "class": "A"
+      }
+     ]
+    }
+   ],
+   "top_level": {
+    "nodes": [
+     {
+      "id": "group",
+      "type": "ShaderNodeGroup",
+      "label": "Textured Glass Voronoi",
+      "settings": {
+       "node_tree": "Textured Glass Voronoi"
+      },
+      "inputs": {
+       "Scale": 1.0,
+       "Glass Color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "Glass Roughness": 0.0,
+       "Glass IOR": 1.5,
+       "Voronoi Scale 1": 30.0,
+       "Voronoi Scale 2": 30.0,
+       "Voronoi Smoothness 1": 0.1,
+       "Voronoi Smoothness 2": 0.03,
+       "Voronoi Detail 1": 0.0,
+       "Voronoi Detail 2": 3.0,
+       "Bump Strength 1": 1.0,
+       "Bump Strength 2": 1.0
+      },
+      "linked_inputs": [],
+      "class": "A",
+      "evidence": [
+       "16:41.5",
+       "16:26.5"
+      ],
+      "notes": "values = the group node's own socket values at the end of the chapter (demo edits reverted)"
+     },
+     {
+      "id": "material_output",
+      "type": "ShaderNodeOutputMaterial",
+      "label": "Material Output",
+      "settings": {
+       "target": "ALL",
+       "is_active_output": true
+      },
+      "inputs": {},
+      "linked_inputs": [
+       "Surface"
+      ],
+      "class": "A",
+      "evidence": [
+       "16:41.5",
+       "16:26.5"
+      ]
+     }
+    ],
+    "links": [
+     {
+      "from_node": "group",
+      "from_socket": "Shader",
+      "to_node": "material_output",
+      "to_socket": "Surface",
+      "t": "16:41.5",
+      "class": "A"
+     }
+    ],
+    "unlinked_outputs": "Material Output Volume / Displacement / Thickness unlinked (bump only, no true displacement)"
+   }
+  },
+  {
+   "name": "Textured Glass Cells",
+   "object": "Plane.001 (0.8 m pane)",
+   "class": "A",
+   "evidence_frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t2015_cells_graph_before_grouping.jpg",
+    "tools/materials/reconstruction/glass/evidence/a/frames/t2207_cells_group_interior.jpg",
+    "tools/materials/reconstruction/glass/evidence/a/frames/t2225_cells_group_node_final.jpg"
+   ],
+   "evidence_crops": [
+    "tools/materials/reconstruction/glass/evidence/a/crops/t2015_noise_ramp_hsv.png",
+    "tools/materials/reconstruction/glass/evidence/a/crops/t2015_voronoi_maprange_bump.png",
+    "tools/materials/reconstruction/glass/evidence/a/crops/t2015_whole_graph.png",
+    "tools/materials/reconstruction/glass/evidence/a/crops/t2207_group_interior.png",
+    "tools/materials/reconstruction/glass/evidence/a/crops/t2225_cells_group_node_values.png"
+   ],
+   "groups": [
+    {
+     "name": "Textured Glass Cells",
+     "interface": [
+      {
+       "name": "Shader",
+       "in_out": "OUTPUT",
+       "socket_type": "NodeSocketShader",
+       "subtype": null,
+       "default": null,
+       "min": null,
+       "max": null,
+       "description_visible": null,
+       "internal_destination": "glass.BSDF",
+       "visible_effect": null,
+       "class": "A",
+       "evidence": [
+        "20:32.5"
+       ]
+      },
+      {
+       "name": "Scale",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.0,
+       "min": "-inf",
+       "max": "inf",
+       "description_visible": "The amount...ng each axis",
+       "internal_destination": "mapping.Scale",
+       "visible_effect": null,
+       "class": "A",
+       "evidence": [
+        "20:40.5",
+        "20:47.5"
+       ]
+      },
+      {
+       "name": "Glass Color",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketColor",
+       "subtype": null,
+       "default": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "min": null,
+       "max": null,
+       "description_visible": null,
+       "internal_destination": "glass.Color",
+       "visible_effect": null,
+       "class": "A",
+       "evidence": [
+        "20:53.5",
+        "20:56.5"
+       ]
+      },
+      {
+       "name": "Glass Roughness",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 2.0,
+       "description_visible": "Value shift...e it brighter",
+       "internal_destination": "hsv.Value",
+       "visible_effect": "scales the noise-driven roughness (0 clear .. 2 very frosted)",
+       "class": "A",
+       "evidence": [
+        "21:02.5"
+       ]
+      },
+      {
+       "name": "Glass IOR",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 1.5,
+       "min": 0.0,
+       "max": 1000.0,
+       "description_visible": null,
+       "internal_destination": "glass.IOR",
+       "visible_effect": null,
+       "class": "A",
+       "evidence": [
+        "21:11.5"
+       ]
+      },
+      {
+       "name": "Voronoi Scale",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 30.0,
+       "min": -1000.0,
+       "max": 1000.0,
+       "description_visible": null,
+       "internal_destination": "voronoi.Scale",
+       "visible_effect": null,
+       "class": "A",
+       "evidence": [
+        "21:20.5"
+       ]
+      },
+      {
+       "name": "Voronoi Detail",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 0.0,
+       "min": 0.0,
+       "max": 15.0,
+       "description_visible": null,
+       "internal_destination": "voronoi.Detail",
+       "visible_effect": "cracks inside cells (demo 2.1 at 22:20)",
+       "class": "A",
+       "evidence": [
+        "21:20.5",
+        "22:25.5"
+       ],
+       "min_max_class": "C (socket properties never displayed; Voronoi Detail limits 0..15)"
+      },
+      {
+       "name": "Voronoi Roughness",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 0.5,
+       "min": 0.0,
+       "max": 1.0,
+       "description_visible": "The influenc...evious layer",
+       "internal_destination": "voronoi.Roughness",
+       "visible_effect": null,
+       "class": "A",
+       "evidence": [
+        "21:36.5"
+       ]
+      },
+      {
+       "name": "Voronoi Randomness",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "description_visible": null,
+       "internal_destination": "voronoi.Randomness",
+       "visible_effect": null,
+       "class": "A",
+       "evidence": [
+        "21:30.5",
+        "22:25.5"
+       ],
+       "min_max_class": "C (socket properties never displayed; Randomness factor 0..1)"
+      },
+      {
+       "name": "Noise Roughness Scale",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 20.0,
+       "min": -1000.0,
+       "max": 1000.0,
+       "description_visible": "Scale of the base noise o...",
+       "internal_destination": "noise.Scale",
+       "visible_effect": "size of the roughness variation",
+       "class": "A",
+       "evidence": [
+        "21:40.5",
+        "21:46.5"
+       ]
+      },
+      {
+       "name": "Noise Roughness Detail 1",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "NONE",
+       "default": 15.0,
+       "min": 0.0,
+       "max": 15.0,
+       "description_visible": "The number... render time",
+       "internal_destination": "noise.Detail",
+       "visible_effect": null,
+       "class": "A",
+       "evidence": [
+        "21:52.5",
+        "21:54.5"
+       ]
+      },
+      {
+       "name": "Noise Roughness Detail 2",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "description_visible": "Blend factor...o zero detail",
+       "internal_destination": "noise.Roughness",
+       "visible_effect": "noise roughness ('a second layer of detail' per narration)",
+       "class": "A",
+       "evidence": [
+        "21:48.5",
+        "21:50.5"
+       ]
+      },
+      {
+       "name": "Bump Strength",
+       "in_out": "INPUT",
+       "socket_type": "NodeSocketFloat",
+       "subtype": "FACTOR",
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "description_visible": "Strength of t...p mapping",
+       "internal_destination": "bump.Strength",
+       "visible_effect": null,
+       "class": "A",
+       "evidence": [
+        "22:04.5",
+        "22:06.5"
+       ]
+      }
+     ],
+     "nodes": [
+      {
+       "id": "group_input",
+       "type": "NodeGroupInput",
+       "label": "Group Input",
+       "settings": {},
+       "inputs": {},
+       "linked_inputs": [],
+       "class": "A",
+       "evidence": [
+        "22:07.5"
+       ]
+      },
+      {
+       "id": "tex_coord",
+       "type": "ShaderNodeTexCoord",
+       "label": "Texture Coordinate",
+       "settings": {
+        "object": null,
+        "from_instancer": false
+       },
+       "inputs": {},
+       "linked_inputs": [],
+       "class": "A",
+       "evidence": [
+        "18:04",
+        "22:07.5"
+       ]
+      },
+      {
+       "id": "mapping",
+       "type": "ShaderNodeMapping",
+       "label": "Mapping",
+       "settings": {
+        "vector_type": "POINT"
+       },
+       "inputs": {
+        "Location": [
+         0.0,
+         0.0,
+         0.0
+        ],
+        "Rotation": [
+         0.0,
+         0.0,
+         0.0
+        ]
+       },
+       "linked_inputs": [
+        "Vector",
+        "Scale"
+       ],
+       "class": "A",
+       "evidence": [
+        "22:07.5"
+       ]
+      },
+      {
+       "id": "voronoi",
+       "type": "ShaderNodeTexVoronoi",
+       "label": "Voronoi Texture",
+       "settings": {
+        "voronoi_dimensions": "3D",
+        "feature": "DISTANCE_TO_EDGE",
+        "distance": "EUCLIDEAN (hidden for Distance to Edge; default)",
+        "normalize": false
+       },
+       "inputs": {
+        "Lacunarity": 2.0,
+        "Scale (GI)": 30.0,
+        "Detail (GI)": 0.0,
+        "Roughness (GI)": 0.5,
+        "Randomness (GI)": 1.0
+       },
+       "linked_inputs": [
+        "Vector",
+        "Scale",
+        "Detail",
+        "Roughness",
+        "Randomness"
+       ],
+       "class": "A",
+       "evidence": [
+        "18:17.5",
+        "18:24.5",
+        "20:15.5",
+        "22:07.5"
+       ]
+      },
+      {
+       "id": "map_range",
+       "type": "ShaderNodeMapRange",
+       "label": "Map Range",
+       "settings": {
+        "data_type": "FLOAT",
+        "interpolation_type": "LINEAR",
+        "clamp": true
+       },
+       "inputs": {
+        "From Min": 0.02,
+        "From Max": 1.0,
+        "To Min": 0.0,
+        "To Max": 1.0
+       },
+       "linked_inputs": [
+        "Value"
+       ],
+       "class": "A",
+       "evidence": [
+        "19:04.5",
+        "19:20.5",
+        "22:07.5"
+       ]
+      },
+      {
+       "id": "bump",
+       "type": "ShaderNodeBump",
+       "label": "Bump",
+       "settings": {
+        "invert": true
+       },
+       "inputs": {
+        "Distance": 0.003,
+        "Filter Width": 0.1,
+        "Strength (GI)": 1.0
+       },
+       "linked_inputs": [
+        "Strength",
+        "Height"
+       ],
+       "class": "A",
+       "evidence": [
+        "18:44.5",
+        "18:48.5",
+        "20:15.5"
+       ]
+      },
+      {
+       "id": "noise",
+       "type": "ShaderNodeTexNoise",
+       "label": "Noise Texture",
+       "settings": {
+        "noise_dimensions": "3D",
+        "noise_type": "FBM",
+        "normalize": true
+       },
+       "inputs": {
+        "Lacunarity": 2.0,
+        "Distortion": 0.0,
+        "Scale (GI)": 20.0,
+        "Detail (GI)": 15.0,
+        "Roughness (GI)": 1.0
+       },
+       "linked_inputs": [
+        "Vector",
+        "Scale",
+        "Detail",
+        "Roughness"
+       ],
+       "class": "A",
+       "evidence": [
+        "19:37.5",
+        "20:15.5",
+        "22:07.5"
+       ]
+      },
+      {
+       "id": "color_ramp",
+       "type": "ShaderNodeValToRGB",
+       "label": "Color Ramp",
+       "settings": {
+        "color_mode": "RGB",
+        "interpolation": "LINEAR",
+        "elements": [
+         {
+          "position": 0.0,
+          "color_linear": [
+           0.0,
+           0.0,
+           0.0,
+           1.0
+          ],
+          "hex": "#000000",
+          "class": "A (default black stop, untouched)"
+         },
+         {
+          "position": 1.0,
+          "color_linear": [
+           0.3916,
+           0.3916,
+           0.3916,
+           1.0
+          ],
+          "perceptual_hsv": [
+           0.0,
+           0.0,
+           0.659
+          ],
+          "hex": "#A8A8A8",
+          "class": "A (picker readout 19:57.85; linear value by sRGB EOTF = C)"
+         }
+        ]
+       },
+       "inputs": {},
+       "linked_inputs": [
+        "Fac"
+       ],
+       "class": "A",
+       "evidence": [
+        "19:52.5",
+        "19:57.85",
+        "20:15.5"
+       ]
+      },
+      {
+       "id": "hsv",
+       "type": "ShaderNodeHueSaturation",
+       "label": "Hue/Saturation/Value",
+       "settings": {},
+       "inputs": {
+        "Hue": 0.5,
+        "Saturation": 1.0,
+        "Fac": 1.0,
+        "Value (GI)": 1.0
+       },
+       "linked_inputs": [
+        "Value",
+        "Color"
+       ],
+       "class": "A",
+       "evidence": [
+        "20:11.5",
+        "20:49.5"
+       ],
+       "notes": "Value demo drags 0.97 / 0.39 / 2.0 were temporary; 1.0 when exposed (GI default 1.000)"
+      },
+      {
+       "id": "glass",
+       "type": "ShaderNodeBsdfGlass",
+       "label": "Glass BSDF",
+       "settings": {
+        "distribution": "MULTI_GGX"
+       },
+       "inputs": {
+        "Color (GI)": [
+         1.0,
+         1.0,
+         1.0,
+         1.0
+        ],
+        "IOR (GI)": 1.5
+       },
+       "linked_inputs": [
+        "Color",
+        "Roughness",
+        "IOR",
+        "Normal"
+       ],
+       "class": "A",
+       "evidence": [
+        "18:36.5",
+        "20:15.5",
+        "20:56.5"
+       ],
+       "notes": "Thin Film panel collapsed and never opened: Thin Film Thickness / IOR stay at Blender defaults (class C). Weight socket not shown (default)."
+      },
+      {
+       "id": "group_output",
+       "type": "NodeGroupOutput",
+       "label": "Group Output",
+       "settings": {
+        "is_active_output": true
+       },
+       "inputs": {},
+       "linked_inputs": [
+        "Shader"
+       ],
+       "class": "A",
+       "evidence": [
+        "20:20.5"
+       ]
+      }
+     ],
+     "links": [
+      {
+       "from_node": "tex_coord",
+       "from_socket": "Object",
+       "to_node": "mapping",
+       "to_socket": "Vector",
+       "t": "18:04",
+       "class": "A"
+      },
+      {
+       "from_node": "mapping",
+       "from_socket": "Vector",
+       "to_node": "voronoi",
+       "to_socket": "Vector",
+       "t": "18:04",
+       "class": "A"
+      },
+      {
+       "from_node": "mapping",
+       "from_socket": "Vector",
+       "to_node": "noise",
+       "to_socket": "Vector",
+       "t": "19:28.5",
+       "class": "A"
+      },
+      {
+       "from_node": "voronoi",
+       "from_socket": "Distance",
+       "to_node": "map_range",
+       "to_socket": "Value",
+       "t": "19:00.5",
+       "class": "A"
+      },
+      {
+       "from_node": "map_range",
+       "from_socket": "Result",
+       "to_node": "bump",
+       "to_socket": "Height",
+       "t": "19:00.5",
+       "class": "A"
+      },
+      {
+       "from_node": "bump",
+       "from_socket": "Normal",
+       "to_node": "glass",
+       "to_socket": "Normal",
+       "t": "18:40.5",
+       "class": "A"
+      },
+      {
+       "from_node": "noise",
+       "from_socket": "Factor",
+       "to_node": "color_ramp",
+       "to_socket": "Factor",
+       "t": "19:52.5",
+       "class": "A",
+       "note": "Noise Fac output (grey wire), not Color; bpy name 'Fac'"
+      },
+      {
+       "from_node": "color_ramp",
+       "from_socket": "Color",
+       "to_node": "hsv",
+       "to_socket": "Color",
+       "t": "20:08",
+       "class": "A"
+      },
+      {
+       "from_node": "hsv",
+       "from_socket": "Color",
+       "to_node": "glass",
+       "to_socket": "Roughness",
+       "t": "20:08",
+       "class": "A"
+      },
+      {
+       "from_node": "glass",
+       "from_socket": "BSDF",
+       "to_node": "group_output",
+       "to_socket": "Shader",
+       "t": "20:18.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Scale",
+       "to_node": "mapping",
+       "to_socket": "Scale",
+       "t": "20:37",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Glass Color",
+       "to_node": "glass",
+       "to_socket": "Color",
+       "t": "20:53.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Glass Roughness",
+       "to_node": "hsv",
+       "to_socket": "Value",
+       "t": "21:00",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Glass IOR",
+       "to_node": "glass",
+       "to_socket": "IOR",
+       "t": "21:06.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Voronoi Scale",
+       "to_node": "voronoi",
+       "to_socket": "Scale",
+       "t": "21:17.5",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Voronoi Detail",
+       "to_node": "voronoi",
+       "to_socket": "Detail",
+       "t": "21:20",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Voronoi Roughness",
+       "to_node": "voronoi",
+       "to_socket": "Roughness",
+       "t": "21:27",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Voronoi Randomness",
+       "to_node": "voronoi",
+       "to_socket": "Randomness",
+       "t": "21:28",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Noise Roughness Scale",
+       "to_node": "noise",
+       "to_socket": "Scale",
+       "t": "21:36",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Noise Roughness Detail 1",
+       "to_node": "noise",
+       "to_socket": "Detail",
+       "t": "21:37",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Noise Roughness Detail 2",
+       "to_node": "noise",
+       "to_socket": "Roughness",
+       "t": "21:38",
+       "class": "A"
+      },
+      {
+       "from_node": "group_input",
+       "from_socket": "Bump Strength",
+       "to_node": "bump",
+       "to_socket": "Strength",
+       "t": "22:02.5",
+       "class": "A"
+      }
+     ]
+    }
+   ],
+   "top_level": {
+    "nodes": [
+     {
+      "id": "group",
+      "type": "ShaderNodeGroup",
+      "label": "Textured Glass Cells",
+      "settings": {
+       "node_tree": "Textured Glass Cells"
+      },
+      "inputs": {
+       "Scale": 1.0,
+       "Glass Color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "Glass Roughness": 1.0,
+       "Glass IOR": 1.5,
+       "Voronoi Scale": 30.0,
+       "Voronoi Detail": 0.0,
+       "Voronoi Roughness": 0.5,
+       "Voronoi Randomness": 1.0,
+       "Noise Roughness Scale": 20.0,
+       "Noise Roughness Detail 1": 15.0,
+       "Noise Roughness Detail 2": 1.0,
+       "Bump Strength": 1.0
+      },
+      "linked_inputs": [],
+      "class": "A",
+      "evidence": [
+       "22:25.5",
+       "22:07.5"
+      ],
+      "notes": "values = the group node's own socket values at the end of the chapter (demo edits reverted)"
+     },
+     {
+      "id": "material_output",
+      "type": "ShaderNodeOutputMaterial",
+      "label": "Material Output",
+      "settings": {
+       "target": "ALL",
+       "is_active_output": true
+      },
+      "inputs": {},
+      "linked_inputs": [
+       "Surface"
+      ],
+      "class": "A",
+      "evidence": [
+       "22:25.5",
+       "22:07.5"
+      ]
+     }
+    ],
+    "links": [
+     {
+      "from_node": "group",
+      "from_socket": "Shader",
+      "to_node": "material_output",
+      "to_socket": "Surface",
+      "t": "22:25.5",
+      "class": "A"
+     }
+    ],
+    "unlinked_outputs": "Material Output Volume / Displacement / Thickness unlinked (bump only, no true displacement)"
+   }
+  }
+ ],
+ "product_variants_overview": [
+  {
+   "group": "Textured Glass Circles",
+   "t": "00:42.5",
+   "class": "A",
+   "crop": "tools/materials/reconstruction/glass/evidence/a/crops/t0042_product_circles_controls.png",
+   "controls": [
+    [
+     "Scale",
+     1.0,
+     "float"
+    ],
+    [
+     "Glass Color",
+     "white",
+     "color"
+    ],
+    [
+     "Glass Roughness",
+     0.2,
+     "factor"
+    ],
+    [
+     "Glass IOR",
+     1.5,
+     "float"
+    ],
+    [
+     "Voronoi Scale",
+     50.0,
+     "float"
+    ],
+    [
+     "Voronoi Detail",
+     0.0,
+     "float"
+    ],
+    [
+     "Voronoi Roughness",
+     0.5,
+     "factor"
+    ],
+    [
+     "Voronoi Smoothness",
+     1.0,
+     "factor"
+    ],
+    [
+     "Voronoi Randomness",
+     1.0,
+     "factor"
+    ],
+    [
+     "Bump Strength",
+     1.0,
+     "factor"
+    ]
+   ],
+   "vs_tutorial": "identical control set and values"
+  },
+  {
+   "group": "Textured Glass Voronoi",
+   "t": "01:18.5",
+   "class": "A",
+   "crop": "tools/materials/reconstruction/glass/evidence/a/crops/t0118_product_voronoi_controls.png",
+   "controls": [
+    [
+     "Scale",
+     1.0,
+     "float"
+    ],
+    [
+     "Glass Color",
+     "pale mint, display ~#ECFEF0 (pixel 236/254/240)",
+     "color"
+    ],
+    [
+     "Glass Roughness",
+     0.2,
+     "factor"
+    ],
+    [
+     "Glass IOR",
+     1.5,
+     "float"
+    ],
+    [
+     "Voronoi Scale 1",
+     30.0,
+     "float"
+    ],
+    [
+     "Voronoi Scale 2",
+     30.0,
+     "float"
+    ],
+    [
+     "Voronoi Smoothness 1",
+     0.1,
+     "factor"
+    ],
+    [
+     "Voronoi Smoothness 2",
+     0.03,
+     "factor"
+    ],
+    [
+     "Voronoi Detail 1",
+     3.0,
+     "float"
+    ],
+    [
+     "Voronoi Detail 2",
+     1.0,
+     "factor"
+    ],
+    [
+     "Bump Strength 1",
+     1.0,
+     "factor"
+    ],
+    [
+     "Bump Strength 2",
+     1.0,
+     "factor"
+    ]
+   ],
+   "vs_tutorial": "differs: product Glass Roughness 0.2 (tutorial 0.0), tinted colour, and Detail 1 = 3.0 / Detail 2 = 1.0 factor (tutorial: Detail 1 = V1 detail 0, Detail 2 = V2 detail 3); the product sockets probably drive V2 detail and V2 roughness (class D, internals never shown)"
+  },
+  {
+   "group": "Textured Glass Cells",
+   "t": "01:38.5",
+   "class": "A",
+   "crop": "tools/materials/reconstruction/glass/evidence/a/crops/t0138_product_cells_controls.png",
+   "controls": [
+    [
+     "Scale",
+     1.0,
+     "float"
+    ],
+    [
+     "Glass Color",
+     "white",
+     "color"
+    ],
+    [
+     "Glass Roughness",
+     1.0,
+     "float 0..2 (demo 2.000 at 1:46)"
+    ],
+    [
+     "Glass IOR",
+     1.5,
+     "float"
+    ],
+    [
+     "Voronoi Scale",
+     30.0,
+     "float"
+    ],
+    [
+     "Voronoi Detail",
+     0.0,
+     "float"
+    ],
+    [
+     "Voronoi Roughness",
+     0.5,
+     "factor"
+    ],
+    [
+     "Voronoi Randomness",
+     1.0,
+     "factor"
+    ],
+    [
+     "Bump Strength",
+     1.0,
+     "factor"
+    ]
+   ],
+   "vs_tutorial": "differs: no Noise Roughness Scale / Detail 1 / Detail 2 controls (tutorial adds them at 21:33-21:58)"
+  },
+  {
+   "group": "Textured Glass Wavy",
+   "t": "02:00.5",
+   "class": "A",
+   "crop": "tools/materials/reconstruction/glass/evidence/a/crops/t0200_product_wavy_controls.png",
+   "controls": [
+    [
+     "Scale",
+     1.0,
+     "float"
+    ],
+    [
+     "Glass Color",
+     "white",
+     "color"
+    ],
+    [
+     "Glass Roughness",
+     0.2,
+     "factor"
+    ],
+    [
+     "Glass IOR",
+     1.5,
+     "float"
+    ],
+    [
+     "Bump Strength",
+     1.0,
+     "factor"
+    ],
+    [
+     "Rotation",
+     [
+      0,
+      0,
+      0
+     ],
+     "vector (degrees)"
+    ]
+   ],
+   "vs_tutorial": "built in segment b (22:32+)"
+  },
+  {
+   "group": "Textured Glass Blobby",
+   "t": "02:16.5",
+   "class": "A",
+   "crop": "tools/materials/reconstruction/glass/evidence/a/crops/t0216_product_blobby_controls.png",
+   "controls": [
+    [
+     "Scale",
+     1.0,
+     "float"
+    ],
+    [
+     "Glass Color",
+     "white",
+     "color"
+    ],
+    [
+     "Glass Roughness",
+     1.0,
+     "float"
+    ],
+    [
+     "Glass IOR",
+     1.5,
+     "float"
+    ],
+    [
+     "Voronoi Scale",
+     10.0,
+     "float"
+    ],
+    [
+     "Voronoi Detail",
+     2.6,
+     "float"
+    ],
+    [
+     "Voronoi Roughness",
+     0.5,
+     "factor"
+    ],
+    [
+     "Voronoi Smoothness",
+     0.1,
+     "factor"
+    ],
+    [
+     "Bump Strength",
+     1.0,
+     "factor"
+    ]
+   ],
+   "vs_tutorial": "built in segment b"
+  },
+  {
+   "group": "Frosted Glass",
+   "t": "02:28.5",
+   "class": "A",
+   "crop": "tools/materials/reconstruction/glass/evidence/a/crops/t0228_product_frosted_controls.png",
+   "controls": [
+    [
+     "Scale",
+     1.0,
+     "float"
+    ],
+    [
+     "Glass Color",
+     "white",
+     "color"
+    ],
+    [
+     "Glass Roughness",
+     1.0,
+     "float"
+    ],
+    [
+     "Glass IOR",
+     1.5,
+     "float"
+    ],
+    [
+     "Noise Scale",
+     20.0,
+     "float"
+    ],
+    [
+     "Noise Detail",
+     15.0,
+     "float"
+    ],
+    [
+     "Noise Roughness",
+     1.0,
+     "factor"
+    ]
+   ],
+   "vs_tutorial": "built in segment b"
+  }
+ ],
+ "reference_frames": [
+  {
+   "path": "tools/materials/reconstruction/glass/evidence/a/frames/t0004_intro_final_render_six_panes.jpg",
+   "t": "00:04.5",
+   "what": "finished product render: 3x2 framed panes on a dark studio backdrop (product scene, objects Cube.00x); top row Circles / Voronoi / Cells, bottom row Wavy / Blobby / Frosted (order inferred from the overview, class C)"
+  },
+  {
+   "path": "tools/materials/reconstruction/glass/evidence/a/frames/t0042_overview_product_circles_group.jpg",
+   "t": "00:42.5",
+   "what": "Circles pane in camera view, red Suzanne behind, Cycles viewport, product file"
+  },
+  {
+   "path": "tools/materials/reconstruction/glass/evidence/a/frames/t0118_overview_product_voronoi_group.jpg",
+   "t": "01:18.5",
+   "what": "Voronoi pane (product, mint tint)"
+  },
+  {
+   "path": "tools/materials/reconstruction/glass/evidence/a/frames/t0138_overview_product_cells_group.jpg",
+   "t": "01:38.5",
+   "what": "Cells pane (product)"
+  },
+  {
+   "path": "tools/materials/reconstruction/glass/evidence/a/frames/t1044_circles_viewport_look.jpg",
+   "t": "10:44.5",
+   "what": "tutorial-built Textured Glass Circles in camera view (zoomed onto Plane.002, red Suzanne behind, HDRI 0.5, Filmic VHC)"
+  },
+  {
+   "path": "tools/materials/reconstruction/glass/evidence/a/frames/t1626_voronoi_group_final_graph.jpg",
+   "t": "16:26.5",
+   "what": "tutorial-built Textured Glass Voronoi in the left viewport + whole group graph"
+  },
+  {
+   "path": "tools/materials/reconstruction/glass/evidence/a/frames/t1641_voronoi_group_node_final.jpg",
+   "t": "16:41.5",
+   "what": "Voronoi pane result with group node values"
+  },
+  {
+   "path": "tools/materials/reconstruction/glass/evidence/a/frames/t2207_cells_group_interior.jpg",
+   "t": "22:07.5",
+   "what": "tutorial-built Textured Glass Cells in the left viewport"
+  },
+  {
+   "path": "tools/materials/reconstruction/glass/evidence/a/frames/t2225_cells_group_node_final.jpg",
+   "t": "22:25.5",
+   "what": "Voronoi (left) and Cells (right) panes side by side with the Cells group node values"
+  }
+ ],
+ "builder_notes": [
+  "All three graphs use only 3D Voronoi / Noise textures on Object coordinates -> every texture has a 4D variant, so the D2 torus (seamless) mode needs no D5 substitution in this segment (class C).",
+  "Group socket defaults: when a socket is exposed by dragging to the Group Input, Blender copies the type, subtype, limits and description; the tutorial then changes Scale from Vector to Float and types default 1, and the group node's Scale must be set back to 1 (it reads 0 after the type change).",
+  "Socket lookup: the UI labels 'Factor' on Color Ramp / Noise / RGB Curves / HSV correspond to bpy socket name/identifier 'Fac' in older versions; look sockets up by identifier or index, not by display text (class C).",
+  "Bump node 'Filter Width' (0.1) exists in Blender 4.4+/5.x; set it explicitly.",
+  "Bump distances are in object units = metres here (0.002 / 0.004 / 0.00008 / 0.003 m).",
+  "Colour ramp grey for Cells stop 1: Perceptual V 0.659 / #A8A8A8 -> linear 0.3916 (sRGB EOTF)."
+ ],
+ "counts": {
+  "nodes_in_groups": 30,
+  "links_in_groups": 60,
+  "top_level_nodes": 6,
+  "top_level_links": 3,
+  "total_nodes": 36,
+  "total_links": 63
+ }
+}

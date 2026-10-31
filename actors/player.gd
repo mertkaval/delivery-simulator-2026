@@ -58,6 +58,10 @@ const AIR_ACCEL := 2.5
 const JUMP_SPEED := 5.0
 const GRAVITY := 20.0
 const COYOTE := 0.12
+## On foot the courier steps up any ledge up to this high (kerbs, steps) instead of stopping at it; higher needs a jump.
+const STEP_MAX := 0.35
+## How far ahead a step is looked for (m): at least this, more when moving faster.
+const STEP_REACH := 0.12
 const JUMP_BUFFER := 0.12
 var coyote_time := 0.0
 var jump_buffer := 0.0
@@ -428,12 +432,33 @@ func walk(delta: float) -> void:
 		coyote_time = 0.0
 		if avatar: avatar.jumped()
 	var falling := -velocity.y
+	if on_floor and velocity.y <= 0.0: step_up(delta)
 	move_and_slide()
 	if is_on_floor() and not _was_on_floor:
 		last_fall_speed = falling
 		if falling > 6.5: land_recovery = 0.25
 	_was_on_floor = is_on_floor()
 	session.energy = clampf(session.energy + ((-4.8 if session.owns("backpack") else -6.0) if sprinting else 2.0) * delta, 0.0, 100.0)
+
+## Kerbs and steps: when the way ahead is blocked at the feet but clear STEP_MAX higher, and there is a walkable floor
+## to stand on there, the courier is lifted onto it (the capsule's round bottom met a 15 cm kerb at a slope steeper
+## than floor_max_angle and stopped dead). A wall (still blocked when raised) or a drop is left to move_and_slide.
+func step_up(delta: float) -> void:
+	var h := Vector3(velocity.x, 0.0, velocity.z)
+	if h.length() < 0.05: return
+	var ahead := h.normalized() * maxf(h.length() * delta, STEP_REACH)
+	var from := global_transform
+	if not test_move(from, ahead): return                      # nothing in the way
+	var up := Vector3.UP * STEP_MAX
+	if test_move(from, up): return                             # no head room
+	var raised := from.translated(up)
+	if test_move(raised, ahead): return                        # still blocked: a wall, not a step
+	var hit := KinematicCollision3D.new()
+	if not test_move(raised.translated(ahead), -up, hit): return
+	if hit.get_normal().angle_to(Vector3.UP) > floor_max_angle: return   # lands on a slope, not a floor
+	var rise := STEP_MAX + hit.get_travel().y
+	if rise <= 0.01: return
+	global_position.y += rise + safe_margin
 
 ## Bicycle drivetrain: the crank turns with the rear wheel / gear ratio while pedalling and
 ## freewheels when coasting (the rider then backpedals to level pedals); the pedal platforms

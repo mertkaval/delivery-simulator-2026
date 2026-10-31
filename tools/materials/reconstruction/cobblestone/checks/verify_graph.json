@@ -1,0 +1,130 @@
+{
+ "command": "blender --background --factory-startup --python scripts/verify_graph.py -- OUT.json",
+ "links_ok": 91,
+ "links_total": 91,
+ "problems": [
+  "4D twin differs cell_vor_smooth_3d [('Smoothness', ['Group Input.003.Cobblestone Individual Size'], ['uv_smooth.Value'])]",
+  "node mapping: no attr vector_type",
+  "node cell_ramp: ramp stop got 0.0 [0.3185, 0.3185, 0.3185] want(b) 0.0 [0.314, 0.314, 0.314]",
+  "node cell_ramp: ramp stop got 0.035 [0.0, 0.0, 0.0] want(b) 0.02 [0.0, 0.0, 0.0]",
+  "node dirt_color_ramp: ramp stop got 0.151 [0.0, 0.0, 0.0] want(b) 0.155 [0.0, 0.0, 0.0]",
+  "node dmoss_sharp_ramp: ramp stop got 0.324 [1.0, 1.0, 1.0] want(b) 0.314 [1.0, 1.0, 1.0]",
+  "node dmoss_ramp: ramp stop got 0.467 [0.0, 0.0, 0.0] want(b) 0.469 [0.0, 0.0, 0.0]",
+  "node rmmask_ramp: ramp stop got 0.651 [1.0, 1.0, 1.0] want(b) 0.645 [1.0, 1.0, 1.0]"
+ ],
+ "documented_by": {
+  "ramp stops (spec a typed values over spec b bar measurements)": "CB3",
+  "mapping vector_type (Mapping replaced by the core multiply)": "CB4",
+  "4D twin Smoothness x uv_smooth_gain": "CB16"
+ },
+ "twins": [
+  {
+   "node": "dist_noise_3d",
+   "diffs": []
+  },
+  {
+   "node": "cell_vor_smooth_3d",
+   "diffs": [
+    [
+     "Smoothness",
+     [
+      "Group Input.003.Cobblestone Individual Size"
+     ],
+     [
+      "uv_smooth.Value"
+     ]
+    ]
+   ]
+  },
+  {
+   "node": "cell_vor_f1_3d",
+   "diffs": []
+  },
+  {
+   "node": "dmoss_noise_3d",
+   "diffs": []
+  },
+  {
+   "node": "dirt_noise_3d",
+   "diffs": []
+  },
+  {
+   "node": "rock_noise_3d",
+   "diffs": []
+  },
+  {
+   "node": "rock_vor_3d",
+   "diffs": []
+  },
+  {
+   "node": "rmmask_noise_3d",
+   "diffs": []
+  },
+  {
+   "node": "rmoss_noise_3d",
+   "diffs": []
+  }
+ ],
+ "extra_nodes": {
+  "mapping_scale": 1,
+  "coords": 20,
+  "dual_mix": 9,
+  "uv_smooth_gain": 1,
+  "uv_rock_gain": 1,
+  "uv_rock_gain_rock": 1,
+  "albedo_rock": 1,
+  "albedo": 1,
+  "height": 1
+ },
+ "counts": {
+  "nodes": 104,
+  "links": 205,
+  "non_frame": 94
+ },
+ "outputs": [
+  "BSDF",
+  "Albedo",
+  "Displacement",
+  "Height"
+ ],
+ "contract": {
+  "PM_Cobblestone": [],
+  "PM_CobblestoneDisplaced": []
+ },
+ "materials": {
+  "PM_Cobblestone": {
+   "displacement_method": "BUMP",
+   "group_nodes": [
+    "MRS"
+   ],
+   "out_links": [
+    "MRS.BSDF->Surface",
+    "MRS.Displacement->Displacement"
+   ],
+   "diffuse": [
+    0.018699999898672104,
+    0.018300000578165054,
+    0.012199999764561653,
+    1.0
+   ],
+   "roughness": 0.7400000095367432
+  },
+  "PM_CobblestoneDisplaced": {
+   "displacement_method": "BOTH",
+   "group_nodes": [
+    "MRS"
+   ],
+   "out_links": [
+    "MRS.BSDF->Surface",
+    "MRS.Displacement->Displacement"
+   ],
+   "diffuse": [
+    0.018699999898672104,
+    0.018300000578165054,
+    0.012199999764561653,
+    1.0
+   ],
+   "roughness": 0.7400000095367432
+  }
+ }
+}

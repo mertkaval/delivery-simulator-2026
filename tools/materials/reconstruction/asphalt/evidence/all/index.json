@@ -1,0 +1,2185 @@
+{
+ "video": "Eofg9SBcdBY",
+ "segment": "all",
+ "frame_size": [
+  2560,
+  1440
+ ],
+ "classes": {
+  "A": "directly observed in a frame",
+  "B": "narration / recipe-repo only",
+  "C": "our inference / implementation",
+  "D": "unresolved"
+ },
+ "note": "frames are full-resolution PNG extracted with ffmpeg -ss <t>; crop bounds are [x0, y0, x1, y1] in source-frame pixels; crops carry a yellow caption bar",
+ "events": [
+  {
+   "t": "00:00-00:08",
+   "action": "Intro shows the finished render overlaid on the Blender UI",
+   "result": "dark grey cracked/damaged asphalt sphere on black",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0003_intro_final_render.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0003_intro_render_overlay.png",
+     "bounds": [
+      538,
+      0,
+      2022,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0003_intro_final_render.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0003_render_engine_cycles_gpu.png",
+     "bounds": [
+      2234,
+      160,
+      2554,
+      294
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0003_intro_final_render.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0003_status_blender_version.png",
+     "bounds": [
+      2016,
+      1405,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0003_intro_final_render.jpg"
+    }
+   ]
+  },
+  {
+   "t": "00:38-00:47",
+   "action": "Shift+A > Icosphere, subdivided 'so that it's very nice and smooth'",
+   "result": "smooth sphere; scene stats Verts 10,327 / Faces 20,545 / Tris 20,610, 4 objects",
+   "class": "B",
+   "confidence": "medium",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0240_texcoord_object_to_voronoi.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0240_status_blender_320.png",
+     "bounds": [
+      1280,
+      1405,
+      2560,
+      1439
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0240_texcoord_object_to_voronoi.jpg"
+    }
+   ]
+  },
+  {
+   "t": "00:48-00:51",
+   "action": "Camera added and pointed at the icosphere",
+   "result": "camera visible beside the sphere",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0058_rimlight_emission5.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "00:52-01:05",
+   "action": "Rim light: object 'Lighting.001' (mesh 'Plane.001') gets Emission, white, Strength 5",
+   "result": "long thin emissive strip; node editor Emission 5.000",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0058_rimlight_emission5.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0058_rim_emission_strength5.png",
+     "bounds": [
+      870,
+      109,
+      1997,
+      813
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0058_rimlight_emission5.jpg"
+    }
+   ]
+  },
+  {
+   "t": "01:05-01:13",
+   "action": "Key light: object 'Lighting' (mesh 'Plane') gets Emission, white, Strength 100",
+   "result": "bright elliptical emitter; Emission 100.000",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0108_keylight_emission100.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0108_key_emission_strength100.png",
+     "bounds": [
+      870,
+      109,
+      2176,
+      819
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0108_keylight_emission100.jpg"
+    }
+   ]
+  },
+  {
+   "t": "01:13-01:39",
+   "action": "World 'World.001': Background colour <- Environment Texture machine_shop_02_1k.hdr",
+   "result": "Linear, Equirectangular, Single Image, Vector Default, Strength 1.000",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0120_world_hdri_machine_shop.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0120_world_machine_shop_hdri.png",
+     "bounds": [
+      1792,
+      102,
+      2554,
+      768
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0120_world_hdri_machine_shop.jpg"
+    }
+   ]
+  },
+  {
+   "t": "00:03 / 01:08",
+   "action": "Render Properties visible",
+   "result": "Cycles, Feature Set Supported, Device GPU Compute; Motion Blur on, Simplify/Freestyle off; Sampling and Color Management collapsed",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0003_intro_final_render.jpg",
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0108_keylight_emission100.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0003_render_engine_cycles_gpu.png",
+     "bounds": [
+      2234,
+      160,
+      2554,
+      294
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0003_intro_final_render.jpg"
+    }
+   ]
+  },
+  {
+   "t": "01:41-01:52",
+   "action": "Node Wrangler add-on enabled in Preferences > Add-ons",
+   "result": "'Node: Node Wrangler' checked",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0148_node_wrangler_prefs.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "01:54-02:00",
+   "action": "Sphere selected, New material, renamed 'Asphalt'",
+   "result": "default Principled BSDF -> Material Output; breadcrumb Icosphere > Icosphere > Asphalt",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0240_texcoord_object_to_voronoi.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0240_breadcrumb_material_asphalt.png",
+     "bounds": [
+      640,
+      51,
+      1946,
+      147
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0240_texcoord_object_to_voronoi.jpg"
+    }
+   ]
+  },
+  {
+   "t": "02:02-02:08",
+   "action": "Shift+A search 'Voronoi Texture', dropped",
+   "result": "Voronoi 3D / F1 / Euclidean, Scale 5, Randomness 1",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0233_ctrlT_texcoord_mapping.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "02:10-02:20",
+   "action": "Ctrl+Shift+click (Node Wrangler) previews the Voronoi",
+   "result": "temporary 'Viewer' node feeds the output (removed by the end)",
+   "class": "A",
+   "confidence": "medium",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0233_ctrlT_texcoord_mapping.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "02:22-02:28",
+   "action": "Ctrl+T (Node Wrangler) on the Voronoi",
+   "result": "Texture Coordinate + Mapping added in front of the Voronoi",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0233_ctrlT_texcoord_mapping.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0233_texcoord_mapping_added.png",
+     "bounds": [
+      755,
+      320,
+      2554,
+      1280
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0233_ctrlT_texcoord_mapping.jpg"
+    }
+   ]
+  },
+  {
+   "t": "02:31-02:36",
+   "action": "Mapping node deleted (X)",
+   "result": "Texture Coordinate and Voronoi only",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0240_texcoord_object_to_voronoi.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "02:37-02:42",
+   "action": "Texture Coordinate Object -> Voronoi Vector",
+   "result": "object-space placement",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0240_texcoord_object_to_voronoi.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0240_object_to_voronoi_vector.png",
+     "bounds": [
+      806,
+      307,
+      1920,
+      832
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0240_texcoord_object_to_voronoi.jpg"
+    }
+   ]
+  },
+  {
+   "t": "02:48-02:57",
+   "action": "Voronoi feature F1 -> Smooth F1; Smoothness checked at 1.0",
+   "result": "Smooth F1, Smoothness 1.000",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0310_voronoi_smoothf1_minkowski.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0310_voronoi_smoothf1_minkowski_exp32.png",
+     "bounds": [
+      1536,
+      256,
+      1894,
+      832
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0310_voronoi_smoothf1_minkowski.jpg"
+    }
+   ]
+  },
+  {
+   "t": "03:00-03:05",
+   "action": "Distance metric Euclidean -> Minkowski",
+   "result": "Minkowski; Exponent socket appears",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0310_voronoi_smoothf1_minkowski.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0310_voronoi_smoothf1_minkowski_exp32.png",
+     "bounds": [
+      1536,
+      256,
+      1894,
+      832
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0310_voronoi_smoothf1_minkowski.jpg"
+    }
+   ]
+  },
+  {
+   "t": "03:05-03:10",
+   "action": "Exponent dragged to the maximum",
+   "result": "Exponent 32.000",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0310_voronoi_smoothf1_minkowski.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0310_voronoi_smoothf1_minkowski_exp32.png",
+     "bounds": [
+      1536,
+      256,
+      1894,
+      832
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0310_voronoi_smoothf1_minkowski.jpg"
+    }
+   ]
+  },
+  {
+   "t": "03:22-03:31",
+   "action": "Noise Texture dropped between Texture Coordinate and Voronoi",
+   "result": "Object -> Noise Vector, Noise Color -> Voronoi Vector",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0350_noise_18_15_06.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0350_noise_scale18_detail15_rough06.png",
+     "bounds": [
+      755,
+      474,
+      2125,
+      979
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0350_noise_18_15_06.jpg"
+    }
+   ]
+  },
+  {
+   "t": "03:37-03:49",
+   "action": "Noise Scale 18, Detail 15 (max), Roughness 0.6",
+   "result": "Noise 3D 18 / 15 / 0.6 / Distortion 0",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0350_noise_18_15_06.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0350_noise_scale18_detail15_rough06.png",
+     "bounds": [
+      755,
+      474,
+      2125,
+      979
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0350_noise_18_15_06.jpg"
+    }
+   ]
+  },
+  {
+   "t": "03:55-04:04",
+   "action": "Shift+A 'Mix RGB' dropped after the Noise",
+   "result": "Mix Color -> Voronoi Vector",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0450_linear_light_fac01.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "04:04-04:15",
+   "action": "Object -> Mix Color1; Noise Color -> Mix Color2",
+   "result": "two inputs wired",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0450_linear_light_fac01.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0450_linear_light_fac01_links.png",
+     "bounds": [
+      928,
+      365,
+      2509,
+      1024
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0450_linear_light_fac01.jpg"
+    }
+   ]
+  },
+  {
+   "t": "04:15-04:31",
+   "action": "Fac dragged between 1 and 0 to show the pattern sliding (temporary)",
+   "result": "texture slides while dragging",
+   "class": "B",
+   "confidence": "medium",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "04:31-04:38",
+   "action": "Blend Mix -> Linear Light",
+   "result": "header 'Linear Light'; Clamp off",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0450_linear_light_fac01.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0450_linear_light_fac01_links.png",
+     "bounds": [
+      928,
+      365,
+      2509,
+      1024
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0450_linear_light_fac01.jpg"
+    }
+   ]
+  },
+  {
+   "t": "04:46-04:49",
+   "action": "Fac set to 0.1",
+   "result": "Fac 0.100",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0450_linear_light_fac01.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0450_linear_light_fac01_links.png",
+     "bounds": [
+      928,
+      365,
+      2509,
+      1024
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0450_linear_light_fac01.jpg"
+    }
+   ]
+  },
+  {
+   "t": "05:06-05:12",
+   "action": "Voronoi Scale 5 -> 10",
+   "result": "Scale 10.000",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0450_linear_light_fac01.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "05:25-05:38",
+   "action": "ColorRamp dropped after the Voronoi; Distance -> Fac; previewed",
+   "result": "black-white ramp on the cells",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0643_ramp_to_base_color.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0643_ramp_basecolor_principled_defaults.png",
+     "bounds": [
+      845,
+      512,
+      2490,
+      1402
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0643_ramp_to_base_color.jpg"
+    }
+   ]
+  },
+  {
+   "t": "05:50-06:12",
+   "action": "Stop 0 colour -> very dark warm grey",
+   "result": "caption + picker 'Hex: 1A1817'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0612_ramp_hex_1A1817.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0612_hex_1A1817.png",
+     "bounds": [
+      1344,
+      730,
+      1702,
+      832
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0612_ramp_hex_1A1817.jpg"
+    }
+   ]
+  },
+  {
+   "t": "06:16-06:30",
+   "action": "Stop 1 colour -> dark grey",
+   "result": "caption + picker 'Hex: 4D4D4D'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0628_ramp_hex_4D4D4D.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0628_hex_4D4D4D.png",
+     "bounds": [
+      1299,
+      736,
+      1651,
+      832
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0628_ramp_hex_4D4D4D.jpg"
+    }
+   ]
+  },
+  {
+   "t": "06:32-06:37",
+   "action": "ColorRamp Color -> Principled Base Color; Principled previewed",
+   "result": "asphalt-like grey cells",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0643_ramp_to_base_color.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0643_ramp_basecolor_principled_defaults.png",
+     "bounds": [
+      845,
+      512,
+      2490,
+      1402
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0643_ramp_to_base_color.jpg"
+    }
+   ]
+  },
+  {
+   "t": "06:46-07:05",
+   "action": "Box select, Ctrl+J, F2 rename 'Color'",
+   "result": "frame 'Color' (Noise, Linear Light, Voronoi, ColorRamp); Texture Coordinate outside",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1050_frames_color_cracks.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1050_frames_color_cracks_reroutes.png",
+     "bounds": [
+      749,
+      115,
+      2509,
+      1126
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1050_frames_color_cracks.jpg"
+    }
+   ]
+  },
+  {
+   "t": "07:15-07:24",
+   "action": "New Voronoi (cracks) added and previewed",
+   "result": "default Voronoi",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0735_cracks_voronoi_dte.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "07:28-07:34",
+   "action": "Feature -> Distance to Edge",
+   "result": "cell-edge lines",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0735_cracks_voronoi_dte.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0735_cracks_voronoi_distance_to_edge.png",
+     "bounds": [
+      1606,
+      544,
+      1894,
+      896
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0735_cracks_voronoi_dte.jpg"
+    }
+   ]
+  },
+  {
+   "t": "07:40-07:44",
+   "action": "Object -> Voronoi Vector (superseded by the noise next)",
+   "result": "object-space cracks",
+   "class": "A",
+   "confidence": "medium",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0735_cracks_voronoi_dte.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "07:46-07:58",
+   "action": "Noise Texture placed before the Voronoi; Object -> Noise Vector; Noise Color -> Voronoi Vector (no mix)",
+   "result": "wiggly cracks",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0812_cracks_noise_25.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0812_cracks_noise_color_to_vector.png",
+     "bounds": [
+      1107,
+      403,
+      1811,
+      832
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0812_cracks_noise_25.jpg"
+    }
+   ]
+  },
+  {
+   "t": "08:00-08:09",
+   "action": "Noise Scale 2.5, Detail 15",
+   "result": "Noise 2.5 / 15 / 0.5 / 0",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0812_cracks_noise_25.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0812_cracks_noise_color_to_vector.png",
+     "bounds": [
+      1107,
+      403,
+      1811,
+      832
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0812_cracks_noise_25.jpg"
+    }
+   ]
+  },
+  {
+   "t": "08:15-08:18",
+   "action": "Nodes box-selected and moved down",
+   "result": "layout only",
+   "class": "B",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "08:29-08:36",
+   "action": "Shift+D: cracks noise duplicated above (mask noise)",
+   "result": "second Noise 2.5 / 15 / 0.5",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0856_reroute_color_frame.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "08:37-08:41",
+   "action": "Object -> mask noise Vector",
+   "result": "wired",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0856_reroute_color_frame.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "08:41-08:56",
+   "action": "Shift+right-drag across the two Color-frame Object wires",
+   "result": "reroute merging Object->Noise Vector and Object->Color1, dragged into frame 'Color'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0856_reroute_color_frame.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0856_reroute_merges_color_wires.png",
+     "bounds": [
+      749,
+      96,
+      2509,
+      1408
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0856_reroute_color_frame.jpg"
+    }
+   ]
+  },
+  {
+   "t": "08:58-09:06",
+   "action": "Shift+right-drag across the two cracks Object wires",
+   "result": "second reroute feeding both cracks noises",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0904_reroute_cracks.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0904_reroute_merges_cracks_wires.png",
+     "bounds": [
+      749,
+      96,
+      2509,
+      1408
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0904_reroute_cracks.jpg"
+    }
+   ]
+  },
+  {
+   "t": "09:18-09:26",
+   "action": "ColorRamp after the mask noise",
+   "result": "mask Noise Fac -> Ramp Fac",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0938_mask_ramp_0499.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0938_mask_noise_fac_to_ramp.png",
+     "bounds": [
+      896,
+      422,
+      1229,
+      794
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0938_mask_ramp_0499.jpg"
+    }
+   ]
+  },
+  {
+   "t": "09:27-09:33",
+   "action": "Black stop dragged toward the centre",
+   "result": "stop 0 Pos 0.499",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t0938_mask_ramp_0499.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t0938_mask_ramp_black_0499.png",
+     "bounds": [
+      1139,
+      416,
+      1555,
+      768
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t0938_mask_ramp_0499.jpg"
+    }
+   ]
+  },
+  {
+   "t": "09:41-09:52",
+   "action": "Ramp + cracks Voronoi selected, Ctrl+0 (Node Wrangler merge)",
+   "result": "MixRGB 'Mix' added",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1009_cracks_mix_links.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "09:54-10:02",
+   "action": "Ramp Color -> Mix Fac; Voronoi Distance -> Mix Color1",
+   "result": "rewired",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1009_cracks_mix_links.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1009_cracks_mix_fac_color1_color2.png",
+     "bounds": [
+      934,
+      435,
+      1843,
+      1248
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1009_cracks_mix_links.jpg"
+    }
+   ]
+  },
+  {
+   "t": "10:02-10:06",
+   "action": "Mix Color2 set to white",
+   "result": "picker BCBCBC -> BBBBBB -> 'Hex: FFFFFF'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1005_cracks_mix_color2_FFFFFF.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1005_cracks_mix_color2_hex_FFFFFF.png",
+     "bounds": [
+      1408,
+      486,
+      1920,
+      922
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1005_cracks_mix_color2_FFFFFF.jpg"
+    }
+   ]
+  },
+  {
+   "t": "10:10-10:18",
+   "action": "Ramp previewed to show where cracks are removed (temporary)",
+   "result": "white = no cracks",
+   "class": "B",
+   "confidence": "medium",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "10:20-10:28",
+   "action": "Mask noise Scale 2.5 -> 4.5",
+   "result": "Scale 4.500",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1050_frames_color_cracks.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1050_frames_color_cracks_reroutes.png",
+     "bounds": [
+      749,
+      115,
+      2509,
+      1126
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1050_frames_color_cracks.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2632_final_cracks_frame.png",
+     "bounds": [
+      998,
+      570,
+      1536,
+      902
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+    }
+   ]
+  },
+  {
+   "t": "10:34-10:51",
+   "action": "Box select, Ctrl+J, F2 rename 'Cracks'",
+   "result": "frame 'Cracks'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1050_frames_color_cracks.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1050_frames_color_cracks_reroutes.png",
+     "bounds": [
+      749,
+      115,
+      2509,
+      1126
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1050_frames_color_cracks.jpg"
+    }
+   ]
+  },
+  {
+   "t": "10:58-11:04",
+   "action": "New Voronoi (damage / pebbles) added",
+   "result": "default Voronoi",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1140_pebbles_voronoi_4d_110.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "11:06-11:10",
+   "action": "Object -> Voronoi Vector; previewed (superseded by the warp below)",
+   "result": "wired",
+   "class": "A",
+   "confidence": "medium",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1140_pebbles_voronoi_4d_110.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "11:12-11:18",
+   "action": "Feature -> Distance to Edge",
+   "result": "edge lines",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1140_pebbles_voronoi_4d_110.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1140_damage_voronoi_4d_dte_scale110.png",
+     "bounds": [
+      1498,
+      595,
+      1786,
+      986
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1140_pebbles_voronoi_4d_110.jpg"
+    }
+   ]
+  },
+  {
+   "t": "11:18-11:22",
+   "action": "Dimensions 3D -> 4D",
+   "result": "W socket appears, W 0.000",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1140_pebbles_voronoi_4d_110.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1140_damage_voronoi_4d_dte_scale110.png",
+     "bounds": [
+      1498,
+      595,
+      1786,
+      986
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1140_pebbles_voronoi_4d_110.jpg"
+    }
+   ]
+  },
+  {
+   "t": "11:33-11:38",
+   "action": "Scale -> 110",
+   "result": "Scale 110.000 (small pebbles)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1140_pebbles_voronoi_4d_110.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1140_damage_voronoi_4d_dte_scale110.png",
+     "bounds": [
+      1498,
+      595,
+      1786,
+      986
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1140_pebbles_voronoi_4d_110.jpg"
+    }
+   ]
+  },
+  {
+   "t": "11:53-12:04",
+   "action": "Noise Texture dropped between Texture Coordinate and Voronoi",
+   "result": "noise warp",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1330_damage_linear_light_002.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "12:06-12:17",
+   "action": "Mix RGB dropped between Noise and Voronoi",
+   "result": "Mix Color -> Voronoi Vector",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1330_damage_linear_light_002.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "12:18-12:27",
+   "action": "Shift+right-drag on the Object wire",
+   "result": "reroute (damage)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1330_damage_linear_light_002.jpg",
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1412_damage_mask_noise_35.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1412_damage_reroute_mask_noise35.png",
+     "bounds": [
+      768,
+      256,
+      2150,
+      1190
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1412_damage_mask_noise_35.jpg"
+    }
+   ]
+  },
+  {
+   "t": "12:28-12:33",
+   "action": "Reroute -> Mix Color1",
+   "result": "wired",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1330_damage_linear_light_002.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1330_damage_noise_fac_to_color2.png",
+     "bounds": [
+      1126,
+      614,
+      1536,
+      934
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1330_damage_linear_light_002.jpg"
+    }
+   ]
+  },
+  {
+   "t": "12:33-12:38",
+   "action": "Noise Fac -> Mix Color2 (Fac, not Color)",
+   "result": "wired",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1330_damage_linear_light_002.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1330_damage_noise_fac_to_color2.png",
+     "bounds": [
+      1126,
+      614,
+      1536,
+      934
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1330_damage_linear_light_002.jpg"
+    }
+   ]
+  },
+  {
+   "t": "12:40-12:59",
+   "action": "Noise Scale 20, Detail 15, Roughness 0.6",
+   "result": "Noise 20 / 15 / 0.6 / 0",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1330_damage_linear_light_002.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1330_damage_linear_light_fac002.png",
+     "bounds": [
+      896,
+      512,
+      2304,
+      1101
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1330_damage_linear_light_002.jpg"
+    }
+   ]
+  },
+  {
+   "t": "13:01-13:09",
+   "action": "Blend -> Linear Light",
+   "result": "header 'Linear Light'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1330_damage_linear_light_002.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1330_damage_linear_light_fac002.png",
+     "bounds": [
+      896,
+      512,
+      2304,
+      1101
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1330_damage_linear_light_002.jpg"
+    }
+   ]
+  },
+  {
+   "t": "13:23-13:30",
+   "action": "Fac -> 0.02",
+   "result": "Fac 0.020",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1330_damage_linear_light_002.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1330_damage_linear_light_fac002.png",
+     "bounds": [
+      896,
+      512,
+      2304,
+      1101
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1330_damage_linear_light_002.jpg"
+    }
+   ]
+  },
+  {
+   "t": "13:45-13:52",
+   "action": "Ctrl+Shift+D: noise duplicated keeping its input wire (damage mask noise); previewed",
+   "result": "second noise fed by the damage reroute",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1412_damage_mask_noise_35.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1412_damage_reroute_mask_noise35.png",
+     "bounds": [
+      768,
+      256,
+      2150,
+      1190
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1412_damage_mask_noise_35.jpg"
+    }
+   ]
+  },
+  {
+   "t": "14:02-14:12",
+   "action": "Mask noise Scale 3.5, Roughness 0.5",
+   "result": "Noise 3.5 / 15 / 0.5 / 0",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1412_damage_mask_noise_35.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1412_damage_reroute_mask_noise35.png",
+     "bounds": [
+      768,
+      256,
+      2150,
+      1190
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1412_damage_mask_noise_35.jpg"
+    }
+   ]
+  },
+  {
+   "t": "14:17-14:24",
+   "action": "ColorRamp after the mask noise",
+   "result": "mask Noise Fac -> Ramp Fac",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1456_damage_ramp_black_0343.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "14:26-14:57",
+   "action": "Both stops dragged together (amount demo, 'to about there and to about there')",
+   "result": "stop 0 last legible 0.343 (14:56.5); jump cut ~14:57.1; then stop 1 0.442, stop 0 measures ~0.35",
+   "class": "A",
+   "confidence": "medium",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1456_damage_ramp_black_0343.jpg",
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1457_damage_ramp_after_cut.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1456_damage_mask_ramp_black_0343.png",
+     "bounds": [
+      1440,
+      680,
+      2200,
+      980
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1456_damage_ramp_black_0343.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1457_damage_mask_ramp_white_0442.png",
+     "bounds": [
+      1040,
+      860,
+      1520,
+      1020
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1457_damage_ramp_after_cut.jpg"
+    }
+   ]
+  },
+  {
+   "t": "15:05-15:13",
+   "action": "Pebble Voronoi + ramp selected, Ctrl+0",
+   "result": "MixRGB added",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1533_lighten.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "15:17-15:22",
+   "action": "Blend -> Lighten",
+   "result": "header 'Lighten'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1533_lighten.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1533_lighten_fac1_inputs.png",
+     "bounds": [
+      1133,
+      365,
+      1862,
+      1357
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1533_lighten.jpg"
+    }
+   ]
+  },
+  {
+   "t": "15:23-15:30",
+   "action": "Voronoi Distance -> Color1; ramp Color -> Color2; Fac 1",
+   "result": "pebbles only in the black mask areas",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1533_lighten.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1533_lighten_fac1_inputs.png",
+     "bounds": [
+      1133,
+      365,
+      1862,
+      1357
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1533_lighten.jpg"
+    }
+   ]
+  },
+  {
+   "t": "15:41-15:56",
+   "action": "Box select, Ctrl+J, F2 rename 'Damage'",
+   "result": "frame 'Damage'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2632_final_damage_frame.png",
+     "bounds": [
+      1011,
+      915,
+      1536,
+      1280
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+    }
+   ]
+  },
+  {
+   "t": "16:04-16:10",
+   "action": "Frames box-selected and spread out",
+   "result": "layout only",
+   "class": "B",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "16:11-16:21",
+   "action": "Base ColorRamp + cracks Mix selected, Ctrl+0",
+   "result": "MixRGB added",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1648_darken_cracks.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "16:32-16:36",
+   "action": "Blend -> Darken",
+   "result": "header 'Darken'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1648_darken_cracks.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1648_darken_cracks_fac1.png",
+     "bounds": [
+      749,
+      102,
+      1811,
+      1280
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1648_darken_cracks.jpg"
+    }
+   ]
+  },
+  {
+   "t": "16:37-16:47",
+   "action": "Base ramp Color -> Color1; cracks Mix Color -> Color2; Fac 1",
+   "result": "cracks darken the base colour",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1648_darken_cracks.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1648_darken_cracks_fac1.png",
+     "bounds": [
+      749,
+      102,
+      1811,
+      1280
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1648_darken_cracks.jpg"
+    }
+   ]
+  },
+  {
+   "t": "16:52-17:08",
+   "action": "Demonstration: cracks mask black stop dragged (0.231 .. 0.548)",
+   "result": "back at Pos 0.499 by 17:08",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1700_crack_mask_demo_moved.jpg",
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1708_crack_mask_back_0499.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1700_crack_mask_demo_moved.png",
+     "bounds": [
+      749,
+      96,
+      2509,
+      1408
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1700_crack_mask_demo_moved.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1708_crack_mask_ramp_back_0499.png",
+     "bounds": [
+      1024,
+      640,
+      1408,
+      966
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1708_crack_mask_back_0499.jpg"
+    }
+   ]
+  },
+  {
+   "t": "17:15-17:21",
+   "action": "Shift+D: Darken duplicated, placed after the first",
+   "result": "Darken #2",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1822_darken_to_base_color.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "17:23-17:29",
+   "action": "Lighten Color -> Darken #2 Color2; Darken #1 Color -> Darken #2 Color1",
+   "result": "damage joined",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1822_darken_to_base_color.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1822_darken_damage_to_base_color.png",
+     "bounds": [
+      749,
+      358,
+      2234,
+      1280
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1822_darken_to_base_color.jpg"
+    }
+   ]
+  },
+  {
+   "t": "17:52-18:00",
+   "action": "ColorRamp dropped between Lighten and Darken #2",
+   "result": "Lighten -> Ramp Fac, Ramp Color -> Darken #2 Color2",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1811_damage_dark_ramp_0338.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "18:02-18:11",
+   "action": "Black stop dragged right",
+   "result": "stop 0 Pos 0.338: darker damaged patches",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1811_damage_dark_ramp_0338.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1811_damage_dark_ramp_black_0338.png",
+     "bounds": [
+      1082,
+      499,
+      1914,
+      1216
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1811_damage_dark_ramp_0338.jpg"
+    }
+   ]
+  },
+  {
+   "t": "18:17-18:24",
+   "action": "Darken #2 Color -> Principled Base Color; Principled previewed",
+   "result": "final base colour",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1822_darken_to_base_color.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1822_darken_damage_to_base_color.png",
+     "bounds": [
+      749,
+      358,
+      2234,
+      1280
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1822_darken_to_base_color.jpg"
+    }
+   ]
+  },
+  {
+   "t": "18:42-18:53",
+   "action": "New Noise Texture (bump) placed below the Damage frame",
+   "result": "default noise",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1946_bump_noise_60.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "18:55-19:02",
+   "action": "Object -> bump noise Vector (long wire)",
+   "result": "wired",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1946_bump_noise_60.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "19:05-19:15",
+   "action": "Shift+right-drag on that wire",
+   "result": "reroute (bump)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2632_final_texcoord_reroutes.png",
+     "bounds": [
+      749,
+      358,
+      1114,
+      1318
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+    }
+   ]
+  },
+  {
+   "t": "19:23-19:46",
+   "action": "Noise Scale 60, Detail 15, Roughness 0.4",
+   "result": "Noise 60 / 15 / 0.4 / 0",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t1946_bump_noise_60.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t1946_bump_noise_60_15_04.png",
+     "bounds": [
+      1357,
+      538,
+      1670,
+      998
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t1946_bump_noise_60.jpg"
+    }
+   ]
+  },
+  {
+   "t": "19:48-19:54",
+   "action": "Noise Fac -> Principled Normal (temporary, wrong data type)",
+   "result": "shading artefacts",
+   "class": "B",
+   "confidence": "medium",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "20:20-20:33",
+   "action": "Bump dropped between noise and Normal: Fac -> Height, Bump Normal -> Principled Normal",
+   "result": "bumpy surface",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2045_bump1_01.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2045_bump1_strength01_distance1.png",
+     "bounds": [
+      838,
+      627,
+      2509,
+      1318
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2045_bump1_01.jpg"
+    }
+   ]
+  },
+  {
+   "t": "20:39-20:44",
+   "action": "Bump Strength 1 -> 0.1",
+   "result": "Strength 0.100, Distance 1.000, Invert off",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2045_bump1_01.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2045_bump1_strength01_distance1.png",
+     "bounds": [
+      838,
+      627,
+      2509,
+      1318
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2045_bump1_01.jpg"
+    }
+   ]
+  },
+  {
+   "t": "20:51-20:56",
+   "action": "Color-frame Voronoi previewed",
+   "result": "blotchy Smooth F1 cells on the sphere",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2122_color_voronoi_to_bump2.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "20:58-21:10",
+   "action": "Shift+D: Bump duplicated after Bump #1",
+   "result": "Bump #1 Normal -> Bump #2 Normal, Bump #2 Normal -> Principled Normal",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2128_wire_lands_bump2_height.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2128_wire_into_bump2_height.png",
+     "bounds": [
+      1408,
+      538,
+      1997,
+      1024
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2128_wire_lands_bump2_height.jpg"
+    }
+   ]
+  },
+  {
+   "t": "21:18-21:30",
+   "action": "Wire pulled from the Color-frame Voronoi Distance 'way up here' down to Bump #2 Height",
+   "result": "second bump layer (base cells)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2122_color_voronoi_to_bump2.jpg",
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2124_color_voronoi_wire_drag.jpg",
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2128_wire_lands_bump2_height.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2122_color_voronoi_distance_drag.png",
+     "bounds": [
+      986,
+      243,
+      1715,
+      794
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2122_color_voronoi_to_bump2.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2124_wire_from_color_voronoi_distance.png",
+     "bounds": [
+      986,
+      128,
+      2176,
+      1395
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2124_color_voronoi_wire_drag.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2128_wire_into_bump2_height.png",
+     "bounds": [
+      1408,
+      538,
+      1997,
+      1024
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2128_wire_lands_bump2_height.jpg"
+    }
+   ]
+  },
+  {
+   "t": "21:36-21:40",
+   "action": "Bump #2 Strength 0.2",
+   "result": "Strength 0.200",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2134_bump2_link.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2134_bump2_height_from_above.png",
+     "bounds": [
+      870,
+      768,
+      2266,
+      1395
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2134_bump2_link.jpg"
+    }
+   ]
+  },
+  {
+   "t": "21:52-21:58",
+   "action": "Shift+D: Bump #3 after Bump #2 (Normal chained)",
+   "result": "Bump #3",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2224_bump3_03.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "22:06-22:12",
+   "action": "Cracks Mix Color -> Bump #3 Height",
+   "result": "cracks everywhere in the bump",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2210_cracks_mix_to_bump3.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2210_cracks_mix_color_drag.png",
+     "bounds": [
+      1120,
+      307,
+      1722,
+      742
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2210_cracks_mix_to_bump3.jpg"
+    }
+   ]
+  },
+  {
+   "t": "22:14-22:20",
+   "action": "Bump #3 Strength 0.3",
+   "result": "Strength 0.300",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2224_bump3_03.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2224_bump_chain_strengths.png",
+     "bounds": [
+      749,
+      576,
+      2509,
+      1318
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2224_bump3_03.jpg"
+    }
+   ]
+  },
+  {
+   "t": "22:23-22:34",
+   "action": "Bump #2 and Bump #1 muted (M) to judge Bump #3 (temporary)",
+   "result": "greyed bumps; normal-preview colours",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2230_bumps_muted.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2230_bumps_muted.png",
+     "bounds": [
+      749,
+      96,
+      2509,
+      1408
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2230_bumps_muted.jpg"
+    }
+   ]
+  },
+  {
+   "t": "22:45-22:57",
+   "action": "ColorRamp dropped between cracks Mix and Bump #3",
+   "result": "Mix Color -> Ramp Fac, Ramp Color -> Bump #3 Height",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2300_crack_bump_ramp_inserted.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2300_crack_bump_ramp_inserted.png",
+     "bounds": [
+      749,
+      96,
+      2509,
+      1408
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2300_crack_bump_ramp_inserted.jpg"
+    }
+   ]
+  },
+  {
+   "t": "22:59-23:28",
+   "action": "White stop dragged toward black (0.899, 0.109, 0.042, 0.057, 0.083)",
+   "result": "stop 1 Pos 0.094 (final): only thin crack lines remain",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2327_crack_bump_ramp_0094.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2327_crack_bump_ramp_white_0094.png",
+     "bounds": [
+      1037,
+      486,
+      2451,
+      1357
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2327_crack_bump_ramp_0094.jpg"
+    }
+   ]
+  },
+  {
+   "t": "23:30-23:36",
+   "action": "Bump #2 and Bump #1 unmuted",
+   "result": "all four bump layers active",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2422_lighten_to_bump4.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "23:41-23:45",
+   "action": "Principled previewed again",
+   "result": "full material",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2422_lighten_to_bump4.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "23:58-24:04",
+   "action": "Two nodes moved for space",
+   "result": "layout only",
+   "class": "B",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "24:04-24:12",
+   "action": "Shift+D: Bump #4 after Bump #3 (Normal chained, Bump #4 Normal -> Principled Normal)",
+   "result": "Bump #4",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2422_lighten_to_bump4.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "24:18-24:27",
+   "action": "Lighten Color (damage) -> Bump #4 Height",
+   "result": "damaged patches recessed",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2422_lighten_to_bump4.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2422_lighten_color_to_bump4.png",
+     "bounds": [
+      749,
+      717,
+      2509,
+      1408
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2422_lighten_to_bump4.jpg"
+    }
+   ]
+  },
+  {
+   "t": "24:36-24:40",
+   "action": "Bump #4 Strength 0.4",
+   "result": "Strength 0.400",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2444_bump4_04.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2444_bump4_strength04.png",
+     "bounds": [
+      749,
+      704,
+      2509,
+      1357
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2444_bump4_04.jpg"
+    }
+   ]
+  },
+  {
+   "t": "24:46-25:20",
+   "action": "Ctrl+B viewport render region (close-up), later reset to the whole camera",
+   "result": "viewport only; close-up shows pebbles, cracks and broken edges",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2510_viewport_closeup_reference.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2510_viewport_closeup_reference.png",
+     "bounds": [
+      0,
+      384,
+      659,
+      1088
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2510_viewport_closeup_reference.jpg"
+    }
+   ]
+  },
+  {
+   "t": "25:26-25:39",
+   "action": "Wire from the Color-frame Voronoi Distance -> Principled Roughness",
+   "result": "too shiny / wet look",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2530_roughness_wire_from_color_voronoi.jpg",
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2539_wire_into_roughness.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2530_roughness_wire_drag.png",
+     "bounds": [
+      922,
+      307,
+      1472,
+      666
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2530_roughness_wire_from_color_voronoi.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2539_wire_into_principled_roughness.png",
+     "bounds": [
+      883,
+      218,
+      2304,
+      832
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2539_wire_into_roughness.jpg"
+    }
+   ]
+  },
+  {
+   "t": "25:47-25:55",
+   "action": "ColorRamp dropped into the Roughness wire",
+   "result": "Voronoi Distance -> Ramp Fac, Ramp Color -> Roughness",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2551_roughness_ramp_inserted.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2551_roughness_ramp_inserted.png",
+     "bounds": [
+      749,
+      96,
+      2509,
+      1408
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2551_roughness_ramp_inserted.jpg"
+    }
+   ]
+  },
+  {
+   "t": "26:02-26:22",
+   "action": "Stop 0 colour raised to grey",
+   "result": "caption + picker 'Hex: ABABAB'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2622_roughness_hex_ABABAB.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2622_roughness_ramp_hex_ABABAB.png",
+     "bounds": [
+      1152,
+      384,
+      2394,
+      1062
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2622_roughness_hex_ABABAB.jpg"
+    }
+   ]
+  },
+  {
+   "t": "26:26-26:29",
+   "action": "Stop 1 (Pos 1.000) colour opened",
+   "result": "picker 'Hex: FFFFFF' (unchanged white)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2628_roughness_white_FFFFFF.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2628_roughness_white_hex_FFFFFF.png",
+     "bounds": [
+      1150,
+      380,
+      1720,
+      1000
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2628_roughness_white_FFFFFF.jpg"
+    }
+   ]
+  },
+  {
+   "t": "26:30-26:35",
+   "action": "Zoom out: whole final graph visible",
+   "result": "3 frames, 2 Darken, 4 ramps outside frames, bump chain, Principled, Output; no Viewer node",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2632_final_color_frame.png",
+     "bounds": [
+      960,
+      326,
+      1600,
+      563
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2632_final_cracks_frame.png",
+     "bounds": [
+      998,
+      570,
+      1536,
+      902
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2632_final_damage_frame.png",
+     "bounds": [
+      1011,
+      915,
+      1536,
+      1280
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2632_final_combine_ramps.png",
+     "bounds": [
+      1587,
+      442,
+      1933,
+      1011
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2632_final_bump_chain.png",
+     "bounds": [
+      1536,
+      922,
+      2202,
+      1357
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2632_final_principled_output.png",
+     "bounds": [
+      2010,
+      614,
+      2509,
+      1075
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2632_final_texcoord_reroutes.png",
+     "bounds": [
+      749,
+      358,
+      1114,
+      1318
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2632_final_graph_overview.jpg"
+    }
+   ]
+  },
+  {
+   "t": "26:35-26:38",
+   "action": "Final render (F12)",
+   "result": "Render Result, square, black background",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/asphalt/evidence/all/frames/t2638_final_render.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/asphalt/evidence/all/crops/c_t2638_final_render.png",
+     "bounds": [
+      630,
+      99,
+      1930,
+      1398
+     ],
+     "source_frame": "tools/materials/reconstruction/asphalt/evidence/all/frames/t2638_final_render.jpg"
+    }
+   ]
+  },
+  {
+   "t": "26:38-27:08",
+   "action": "Closing: store, material pack and playlist pages (no frame kept)",
+   "result": "no material changes",
+   "class": "B",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  }
+ ]
+}

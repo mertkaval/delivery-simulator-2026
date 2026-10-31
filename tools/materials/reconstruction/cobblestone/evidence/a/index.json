@@ -1,0 +1,3179 @@
+{
+ "video": {
+  "id": "30vbbpy9zwg",
+  "title": "Procedural Cobblestone Ground Material (Blender Tutorial)",
+  "author": "Ryan King Art",
+  "date": "2026-01-12",
+  "duration": "40:41",
+  "file": "tmp/materials_video/30vbbpy9zwg.webm (2560x1440 VP9 60 fps, video only)"
+ },
+ "segment": {
+  "id": "a",
+  "range": "00:00-26:10",
+  "focus": "customizable node demo 0:25-3:36, scene setup 4:00-7:22, procedural build 7:22-26:10"
+ },
+ "time_base": "Times are video times (m:ss[.s]). Evidence frames were extracted with an accurate ffmpeg seek at the exact time in index.json (file names use the floor second t<mmss>). 1-fps review frames (work folder tmp/materials_video/30vbbpy9zwg_work_a/, not kept) sample t = N + 0.5 s (checked against exact grabs at 21:33). Narration times come from the auto-caption transcript (about +-1 s).",
+ "classes": {
+  "A": "directly observed in a frame",
+  "B": "narration / recipe repo only",
+  "C": "our inference / measurement",
+  "D": "unresolved"
+ },
+ "work_folder": "tmp/materials_video/30vbbpy9zwg_work_a/ (1-fps review frames fps1/sNNNN.jpg and 2-10 fps strips; not committed)",
+ "frames": {
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0004_intro_final_render.jpg": {
+   "t_seconds": 4.0,
+   "t": "0:04"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0009_product_interface_lower.jpg": {
+   "t_seconds": 9.0,
+   "t": "0:09"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0013_product_interface_upper.jpg": {
+   "t_seconds": 13.0,
+   "t": "0:13"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0025_demo_panels_collapsed.jpg": {
+   "t_seconds": 25.0,
+   "t": "0:25"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0043_demo_rock_distortion_order.jpg": {
+   "t_seconds": 43.0,
+   "t": "0:43"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0110_demo_closeup_dirt_moss.jpg": {
+   "t_seconds": 70.0,
+   "t": "1:10"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0145_demo_dirt_and_moss_panel.jpg": {
+   "t_seconds": 105.0,
+   "t": "1:45"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0153_demo_cobblestone_chunks_panel.jpg": {
+   "t_seconds": 113.0,
+   "t": "1:53"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0251_demo_rock_moss_color_hsv.jpg": {
+   "t_seconds": 171.5,
+   "t": "2:51.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0321_demo_rock_color1_hsv.jpg": {
+   "t_seconds": 201.5,
+   "t": "3:21.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0327_demo_rock_color2_hsv.jpg": {
+   "t_seconds": 207.5,
+   "t": "3:27.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0417_add_icosphere_subdiv6.jpg": {
+   "t_seconds": 257.0,
+   "t": "4:17"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0450_scale_0p5_typed.jpg": {
+   "t_seconds": 290.5,
+   "t": "4:50.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0452_apply_scale_menu.jpg": {
+   "t_seconds": 292.5,
+   "t": "4:52.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0512_subdivision_modifier.jpg": {
+   "t_seconds": 312.0,
+   "t": "5:12"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0524_camera_focal_80mm.jpg": {
+   "t_seconds": 324.5,
+   "t": "5:24.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0528_output_resolution.jpg": {
+   "t_seconds": 328.0,
+   "t": "5:28"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0539_sun_light.jpg": {
+   "t_seconds": 339.0,
+   "t": "5:39"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0556_area_light_color.jpg": {
+   "t_seconds": 356.0,
+   "t": "5:56"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0600_area_light_settings.jpg": {
+   "t_seconds": 360.0,
+   "t": "6:00"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0638_world_hdri.jpg": {
+   "t_seconds": 398.0,
+   "t": "6:38"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0642_render_engine_film.jpg": {
+   "t_seconds": 402.5,
+   "t": "6:42.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0654_color_management.jpg": {
+   "t_seconds": 414.0,
+   "t": "6:54"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0751_mapping_frame.jpg": {
+   "t_seconds": 471.0,
+   "t": "7:51"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0810_dirt_noise_settings.jpg": {
+   "t_seconds": 490.5,
+   "t": "8:10.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0820_dirt_ramp_stop0_0p151.jpg": {
+   "t_seconds": 500.5,
+   "t": "8:20.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0822_dirt_ramp_stop1_0p553.jpg": {
+   "t_seconds": 502.25,
+   "t": "8:22.2"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0838_dirt_color_A_332C24.jpg": {
+   "t_seconds": 518.0,
+   "t": "8:38"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0848_dirt_color_B_19140F.jpg": {
+   "t_seconds": 528.0,
+   "t": "8:48"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0935_roughness_ramp_D2D2D2.jpg": {
+   "t_seconds": 575.0,
+   "t": "9:35"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1013_dirt_bump_distance_0p02.jpg": {
+   "t_seconds": 613.0,
+   "t": "10:13"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1055_dirt_moss_hsv_inserted.jpg": {
+   "t_seconds": 655.5,
+   "t": "10:55.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1104_dirt_moss_texture_frame.jpg": {
+   "t_seconds": 664.0,
+   "t": "11:04"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1128_dirt_moss_mix2.jpg": {
+   "t_seconds": 688.5,
+   "t": "11:28.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1210_dirt_material_overview.jpg": {
+   "t_seconds": 730.5,
+   "t": "12:10.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1226_moss_color_232511.jpg": {
+   "t_seconds": 746.0,
+   "t": "12:26"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1249_moss_bump_links.jpg": {
+   "t_seconds": 769.5,
+   "t": "12:49.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1258_moss_bump_distance_0p005.jpg": {
+   "t_seconds": 778.5,
+   "t": "12:58.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1354_rock_color_A_343534.jpg": {
+   "t_seconds": 834.0,
+   "t": "13:54"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1358_rock_color_B_292524.jpg": {
+   "t_seconds": 838.5,
+   "t": "13:58.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1444_rock_noise_mix_bsdf_bump.jpg": {
+   "t_seconds": 884.0,
+   "t": "14:44"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1521_rock_voronoi_settings.jpg": {
+   "t_seconds": 921.0,
+   "t": "15:21"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1540_rock_bump2_distance_0p015.jpg": {
+   "t_seconds": 940.0,
+   "t": "15:40"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1633_rock_moss_color_222812.jpg": {
+   "t_seconds": 993.0,
+   "t": "16:33"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1640_rock_moss_roughness.jpg": {
+   "t_seconds": 1000.5,
+   "t": "16:40.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1651_rock_moss_noise_bump_bsdf.jpg": {
+   "t_seconds": 1011.0,
+   "t": "16:51"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1803_moss_rock_mask_noise_hsv.jpg": {
+   "t_seconds": 1083.5,
+   "t": "18:03.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1841_rock_moss_mix_shader_swapped.jpg": {
+   "t_seconds": 1121.5,
+   "t": "18:41.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1849_mask_ramp_stop1_0p651.jpg": {
+   "t_seconds": 1129.5,
+   "t": "18:49.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1853_mask_ramp_stop0_0p407.jpg": {
+   "t_seconds": 1133.0,
+   "t": "18:53"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2027_voronoi_smooth_f1.jpg": {
+   "t_seconds": 1227.0,
+   "t": "20:27"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2042_voronoi_f1.jpg": {
+   "t_seconds": 1242.0,
+   "t": "20:42"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2100_difference_mix.jpg": {
+   "t_seconds": 1260.0,
+   "t": "21:00"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2141_cell_ramp_stop1_0p035.jpg": {
+   "t_seconds": 1301.5,
+   "t": "21:41.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2156_cell_ramp_stop0_999999.jpg": {
+   "t_seconds": 1316.0,
+   "t": "21:56"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2227_distortion_noise.jpg": {
+   "t_seconds": 1347.0,
+   "t": "22:27"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2258_linear_light.jpg": {
+   "t_seconds": 1378.0,
+   "t": "22:58"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2340_final_mix_shader_links.jpg": {
+   "t_seconds": 1420.0,
+   "t": "23:40"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2420_mix_rocks_dirt_ramp_0p030.jpg": {
+   "t_seconds": 1460.5,
+   "t": "24:20.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2500_displacement_height_link.jpg": {
+   "t_seconds": 1500.0,
+   "t": "25:00"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2525_mix_rocks_dirt_frame.jpg": {
+   "t_seconds": 1525.0,
+   "t": "25:25"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2542_material_displacement_and_bump.jpg": {
+   "t_seconds": 1542.5,
+   "t": "25:42.5"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2608_viewport_after_displacement.jpg": {
+   "t_seconds": 1568.0,
+   "t": "26:08"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2610_displacement_final.jpg": {
+   "t_seconds": 1570.0,
+   "t": "26:10"
+  },
+  "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2612_full_graph_overview.jpg": {
+   "t_seconds": 1572.5,
+   "t": "26:12.5"
+  }
+ },
+ "crops": [
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0013_interface_upper.png",
+   "bounds": [
+    1000,
+    60,
+    2000,
+    760
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0013_product_interface_upper.jpg",
+   "label": "0:13 product node: Material Scale, Rock Distortion (intro order: Detail 2 above Detail 1), Dirt & Moss"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0013_interface_middle.png",
+   "bounds": [
+    1000,
+    700,
+    2000,
+    1440
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0013_product_interface_upper.jpg",
+   "label": "0:13 product node: Dirt & Moss (cont.), Cobblestone Chunks"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0009_interface_lower.png",
+   "bounds": [
+    1000,
+    700,
+    2000,
+    1440
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0009_product_interface_lower.jpg",
+   "label": "0:09 product node: Rocks and Moss, Cobblestone Rocks"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0043_rock_distortion_order.png",
+   "bounds": [
+    1100,
+    250,
+    2100,
+    1250
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0043_demo_rock_distortion_order.jpg",
+   "label": "0:43 demo: Rock Distortion panel (Detail 1 above Detail 2)"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0145_dirt_and_moss_values.png",
+   "bounds": [
+    1100,
+    250,
+    2100,
+    1250
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0145_demo_dirt_and_moss_panel.jpg",
+   "label": "1:45 demo: Dirt & Moss panel (Dirt Roughness dragged to 2.000)"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0153_chunks_values.png",
+   "bounds": [
+    1100,
+    250,
+    2100,
+    1250
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0153_demo_cobblestone_chunks_panel.jpg",
+   "label": "1:53 demo: Cobblestone Chunks panel defaults"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0251_rock_moss_color_hsv.png",
+   "bounds": [
+    1500,
+    350,
+    2300,
+    1300
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0251_demo_rock_moss_color_hsv.jpg",
+   "label": "2:51 demo: Rock Moss Color HSV 0.215 / 0.551 / 0.156"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0321_rock_color1_hsv.png",
+   "bounds": [
+    1500,
+    350,
+    2300,
+    1300
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0321_demo_rock_color1_hsv.jpg",
+   "label": "3:21 demo: Rock Color 1 HSV 0.324 / 0.028 / 0.209"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0327_rock_color2_hsv.png",
+   "bounds": [
+    1500,
+    350,
+    2300,
+    1300
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0327_demo_rock_color2_hsv.jpg",
+   "label": "3:27 demo: Rock Color 2 HSV 0.031 / 0.120 / 0.162"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0417_add_icosphere.png",
+   "bounds": [
+    0,
+    700,
+    700,
+    1440
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0417_add_icosphere_subdiv6.jpg",
+   "label": "4:17 Add Ico Sphere: Subdivisions 6, Radius 1 m (demo object Icosphere.001)"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0450_scale_typed.png",
+   "bounds": [
+    1800,
+    800,
+    2060,
+    1200
+   ],
+   "scale": 1.5,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0450_scale_0p5_typed.jpg",
+   "label": "4:50 key overlay '. 5 Return' (S .5)"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0452_apply_scale.png",
+   "bounds": [
+    740,
+    450,
+    1130,
+    1080
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0452_apply_scale_menu.jpg",
+   "label": "4:52 Ctrl+A > Apply > Scale"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0512_subdivision.png",
+   "bounds": [
+    1700,
+    250,
+    2560,
+    800
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0512_subdivision_modifier.jpg",
+   "label": "5:12 Subdivision: Catmull-Clark, Levels Viewport 0, Render 3"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0524_focal_80.png",
+   "bounds": [
+    1900,
+    450,
+    2560,
+    570
+   ],
+   "scale": 1.5,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0524_camera_focal_80mm.jpg",
+   "label": "5:24 camera Focal Length 80 mm"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0528_output.png",
+   "bounds": [
+    1700,
+    60,
+    2560,
+    1440
+   ],
+   "scale": 0.8,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0528_output_resolution.jpg",
+   "label": "5:28 Output: Resolution X 2560 px, aspect 1/1, PNG RGBA"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0539_sun.png",
+   "bounds": [
+    1700,
+    380,
+    2560,
+    820
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0539_sun_light.jpg",
+   "label": "5:39 Sun: Temperature 6000 K, Strength 15, Angle 0.526 deg"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0556_area_color.png",
+   "bounds": [
+    2100,
+    560,
+    2520,
+    1180
+   ],
+   "scale": 1.2,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0556_area_light_color.jpg",
+   "label": "5:56 Area (rim) light colour #FFEDE0"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0600_area_settings.png",
+   "bounds": [
+    1700,
+    330,
+    2560,
+    960
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0600_area_light_settings.jpg",
+   "label": "6:00 Area light: Power 300 W, Shape Disk, Size 1 m"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0638_world.png",
+   "bounds": [
+    1700,
+    430,
+    2560,
+    950
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0638_world_hdri.jpg",
+   "label": "6:38 World: Environment Texture fish_hoek_beach_1k.hdr, Strength 1"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0642_render_film.png",
+   "bounds": [
+    1700,
+    300,
+    2560,
+    1180
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0642_render_engine_film.jpg",
+   "label": "6:42 Render: Cycles, GPU Compute, Film Transparent"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0654_color_management.png",
+   "bounds": [
+    1900,
+    700,
+    2560,
+    1300
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0654_color_management.jpg",
+   "label": "6:54 Colour management: sRGB, Filmic, Very High Contrast"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0751_mapping.png",
+   "bounds": [
+    700,
+    200,
+    2000,
+    1300
+   ],
+   "scale": 0.8,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0751_mapping_frame.jpg",
+   "label": "7:51 Texture Coordinate Object -> Mapping (Point, defaults) -> Noise Vector"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0810_dirt_noise.png",
+   "bounds": [
+    850,
+    150,
+    2560,
+    1440
+   ],
+   "scale": 0.6,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0810_dirt_noise_settings.jpg",
+   "label": "8:10 dirt Noise: 3D fBM, Scale 20, Detail 10, Roughness 0.55"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0820_dirt_ramp_stop0.png",
+   "bounds": [
+    1060,
+    420,
+    1760,
+    750
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0820_dirt_ramp_stop0_0p151.jpg",
+   "label": "8:20 dirt colour ramp: stop 0 Pos 0.151"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0822_dirt_ramp_stop1.png",
+   "bounds": [
+    1060,
+    420,
+    1760,
+    750
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0822_dirt_ramp_stop1_0p553.jpg",
+   "label": "8:22 dirt colour ramp: stop 1 Pos 0.553"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0838_dirt_color_A.png",
+   "bounds": [
+    1500,
+    100,
+    2560,
+    1440
+   ],
+   "scale": 0.6,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0838_dirt_color_A_332C24.jpg",
+   "label": "8:38 dirt Mix A #332C24"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0848_dirt_color_B.png",
+   "bounds": [
+    1500,
+    100,
+    2560,
+    1440
+   ],
+   "scale": 0.6,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0848_dirt_color_B_19140F.jpg",
+   "label": "8:48 dirt Mix B #19140F"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0935_rough_ramp_hex.png",
+   "bounds": [
+    850,
+    150,
+    2560,
+    1440
+   ],
+   "scale": 0.5,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0935_roughness_ramp_D2D2D2.jpg",
+   "label": "9:35 roughness ramp stop 0 colour #D2D2D2"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1013_dirt_bump.png",
+   "bounds": [
+    850,
+    150,
+    2560,
+    1440
+   ],
+   "scale": 0.6,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1013_dirt_bump_distance_0p02.jpg",
+   "label": "10:13 dirt Bump: Strength 1, Distance 0.020; Normal -> BSDF Normal"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1055_dirt_moss_hsv.png",
+   "bounds": [
+    850,
+    150,
+    2560,
+    1440
+   ],
+   "scale": 0.5,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1055_dirt_moss_hsv_inserted.jpg",
+   "label": "10:55 dirt-moss Noise (25 / 9 / 0.5 / lacunarity 3) -> HSV -> ramp"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1055_dirt_moss_socket.png",
+   "bounds": [
+    1340,
+    515,
+    1430,
+    650
+   ],
+   "scale": 5.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1055_dirt_moss_hsv_inserted.jpg",
+   "label": "10:55 zoom: Noise Factor (not Color) -> HSV Color"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1104_dirt_moss_ramp.png",
+   "bounds": [
+    850,
+    150,
+    2560,
+    1440
+   ],
+   "scale": 0.5,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1104_dirt_moss_texture_frame.jpg",
+   "label": "11:04 dirt-moss ramp stop 0 Pos 0.467; HSV 0.5 / 1 / 1 / 1"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1128_dirt_mix2.png",
+   "bounds": [
+    850,
+    250,
+    2560,
+    1440
+   ],
+   "scale": 0.75,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1128_dirt_moss_mix2.jpg",
+   "label": "11:28 Mix1 Result -> Mix2 A; Mix2 Result -> BSDF Base Color"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1210_dirt_material.png",
+   "bounds": [
+    850,
+    300,
+    2560,
+    1100
+   ],
+   "scale": 0.75,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1210_dirt_material_overview.jpg",
+   "label": "12:10 Dirt Material frame: contrast ramp stop 1 Pos 0.324, BSDF Metallic 0 / IOR 1.5 / Alpha 1"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1226_moss_color.png",
+   "bounds": [
+    850,
+    100,
+    2560,
+    1440
+   ],
+   "scale": 0.7,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1226_moss_color_232511.jpg",
+   "label": "12:26 Mix2 B (moss colour) #232511"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1249_moss_bump_links.png",
+   "bounds": [
+    850,
+    100,
+    2560,
+    1440
+   ],
+   "scale": 0.7,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1249_moss_bump_links.jpg",
+   "label": "12:49 moss Bump: dirt-moss ramp Color -> Height, dirt Bump Normal -> Normal"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1258_moss_bump_distance.png",
+   "bounds": [
+    850,
+    100,
+    2560,
+    1440
+   ],
+   "scale": 0.5,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1258_moss_bump_distance_0p005.jpg",
+   "label": "12:58 moss Bump Distance 0.005"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1354_rock_color_A.png",
+   "bounds": [
+    1000,
+    450,
+    2000,
+    1440
+   ],
+   "scale": 0.8,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1354_rock_color_A_343534.jpg",
+   "label": "13:54 rock Mix A #343534"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1358_rock_color_B.png",
+   "bounds": [
+    1000,
+    450,
+    2000,
+    1440
+   ],
+   "scale": 0.8,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1358_rock_color_B_292524.jpg",
+   "label": "13:58 rock Mix B #292524"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1444_rock_nodes.png",
+   "bounds": [
+    850,
+    150,
+    2560,
+    1440
+   ],
+   "scale": 0.8,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1444_rock_noise_mix_bsdf_bump.jpg",
+   "label": "14:44 rock Noise 20 / 10 / 0.5, Mix, BSDF Roughness 0.650, Bump Distance 0.007"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1444_rock_noise_socket.png",
+   "bounds": [
+    1060,
+    270,
+    1180,
+    420
+   ],
+   "scale": 5.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1444_rock_noise_mix_bsdf_bump.jpg",
+   "label": "14:44 zoom: both links leave the Noise Factor socket"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1521_rock_voronoi.png",
+   "bounds": [
+    850,
+    150,
+    2560,
+    1440
+   ],
+   "scale": 0.7,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1521_rock_voronoi_settings.jpg",
+   "label": "15:21 rock Voronoi: Smooth F1, Scale 12, Detail 10, Smoothness 1, Randomness 1"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1540_rock_bump2.png",
+   "bounds": [
+    850,
+    150,
+    2560,
+    1440
+   ],
+   "scale": 0.8,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1540_rock_bump2_distance_0p015.jpg",
+   "label": "15:40 Voronoi Distance -> Bump2 (0.015); Bump1 Normal -> Bump2 Normal -> BSDF Normal"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1633_rock_moss_color.png",
+   "bounds": [
+    1500,
+    100,
+    2560,
+    1100
+   ],
+   "scale": 0.8,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1633_rock_moss_color_222812.jpg",
+   "label": "16:33 rock moss Base Color #222812"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1640_rock_moss_roughness.png",
+   "bounds": [
+    1300,
+    300,
+    2560,
+    900
+   ],
+   "scale": 0.8,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1640_rock_moss_roughness.jpg",
+   "label": "16:40 rock moss BSDF Roughness 0.650"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1651_rock_moss_nodes.png",
+   "bounds": [
+    850,
+    250,
+    2560,
+    1440
+   ],
+   "scale": 0.7,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1651_rock_moss_noise_bump_bsdf.jpg",
+   "label": "16:51 rock moss Noise 17 / 15 / 0.7 -> Bump 0.010 -> BSDF Normal"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1803_mask_noise_hsv.png",
+   "bounds": [
+    1000,
+    450,
+    2100,
+    1150
+   ],
+   "scale": 0.9,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1803_moss_rock_mask_noise_hsv.jpg",
+   "label": "18:03 Moss & Rock Mask: Noise 15 / 10 / 0.8 -> HSV 0.5 / 1 / 1 / 1 -> ramp"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1803_mask_noise_socket.png",
+   "bounds": [
+    1180,
+    640,
+    1310,
+    760
+   ],
+   "scale": 5.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1803_moss_rock_mask_noise_hsv.jpg",
+   "label": "18:03 zoom: Noise Factor -> HSV Color"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1841_rock_moss_mix.png",
+   "bounds": [
+    850,
+    100,
+    2560,
+    1440
+   ],
+   "scale": 0.7,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1841_rock_moss_mix_shader_swapped.jpg",
+   "label": "18:41 Mix Shader: Fac <- mask ramp; Shader 1 <- rock BSDF; Shader 2 <- rock moss BSDF"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1849_mask_ramp_stop1.png",
+   "bounds": [
+    980,
+    700,
+    1360,
+    1030
+   ],
+   "scale": 2.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1849_mask_ramp_stop1_0p651.jpg",
+   "label": "18:49 Moss & Rock Mask ramp: stop 1 Pos 0.651"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1853_mask_ramp_stop0.png",
+   "bounds": [
+    950,
+    850,
+    1250,
+    1080
+   ],
+   "scale": 3.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1853_mask_ramp_stop0_0p407.jpg",
+   "label": "18:53 Moss & Rock Mask ramp: stop 0 Pos 0.407"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2027_voronoi_smooth_f1.png",
+   "bounds": [
+    1100,
+    150,
+    1900,
+    1050
+   ],
+   "scale": 0.9,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2027_voronoi_smooth_f1.jpg",
+   "label": "20:27 Voronoi 1: Smooth F1, Scale 7, Detail 0, Smoothness 0.6, Randomness 1"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2042_voronoi_f1.png",
+   "bounds": [
+    1100,
+    150,
+    2560,
+    1440
+   ],
+   "scale": 0.6,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2042_voronoi_f1.jpg",
+   "label": "20:42 Voronoi 2 (Ctrl+Shift+D copy): F1, Scale 7, Detail 0"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2100_difference.png",
+   "bounds": [
+    850,
+    300,
+    2560,
+    1440
+   ],
+   "scale": 0.7,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2100_difference_mix.jpg",
+   "label": "21:00 Mix (Difference), Factor 1: Voronoi 1 Distance -> A, Voronoi 2 Distance -> B"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2141_cell_ramp_stop1.png",
+   "bounds": [
+    850,
+    150,
+    2560,
+    1440
+   ],
+   "scale": 0.5,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2141_cell_ramp_stop1_0p035.jpg",
+   "label": "21:41 Cobblestone Mask ramp: stop 1 (black) Pos 0.035"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2156_cell_ramp_hex.png",
+   "bounds": [
+    1300,
+    40,
+    1960,
+    1150
+   ],
+   "scale": 0.8,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2156_cell_ramp_stop0_999999.jpg",
+   "label": "21:56 Cobblestone Mask ramp: stop 0 colour #999999 (V 0.600)"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2227_distortion_noise.png",
+   "bounds": [
+    850,
+    150,
+    2560,
+    1440
+   ],
+   "scale": 0.6,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2227_distortion_noise.jpg",
+   "label": "22:27 distortion Noise: 3D fBM, Scale 2, Detail 7, Roughness 0.5"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2258_linear_light.png",
+   "bounds": [
+    850,
+    100,
+    2560,
+    1440
+   ],
+   "scale": 0.6,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2258_linear_light.jpg",
+   "label": "22:58 Linear Light: A <- Mapping Vector, B <- Noise Color, Factor 0.200"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2340_final_mix.png",
+   "bounds": [
+    850,
+    100,
+    2560,
+    1440
+   ],
+   "scale": 0.5,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2340_final_mix_shader_links.jpg",
+   "label": "23:40 new Mix Shader: Shader 1 <- dirt BSDF, Shader 2 <- rock/moss Mix Shader"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2420_mix_rocks_dirt_ramp.png",
+   "bounds": [
+    850,
+    100,
+    2560,
+    1440
+   ],
+   "scale": 0.5,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2420_mix_rocks_dirt_ramp_0p030.jpg",
+   "label": "24:20 Mix Rocks & Dirt ramp: stop 1 Pos 0.030"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2500_displacement_link.png",
+   "bounds": [
+    850,
+    100,
+    2560,
+    1440
+   ],
+   "scale": 0.5,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2500_displacement_height_link.jpg",
+   "label": "25:00 Cobblestone Mask ramp Color -> Displacement Height (and -> Mix Rocks & Dirt ramp)"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2525_mix_rocks_dirt.png",
+   "bounds": [
+    850,
+    100,
+    2560,
+    1440
+   ],
+   "scale": 0.5,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2525_mix_rocks_dirt_frame.jpg",
+   "label": "25:25 Mix Rocks & Dirt frame: ramp -> Mix Shader Factor; Displacement -> Output"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2525_final_mix_sockets.png",
+   "bounds": [
+    1440,
+    520,
+    1720,
+    700
+   ],
+   "scale": 3.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2525_mix_rocks_dirt_frame.jpg",
+   "label": "25:25 zoom: final Mix Shader inputs (Factor, Shader 1 from upper left, Shader 2 from below)"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2542_material_settings.png",
+   "bounds": [
+    1900,
+    250,
+    2560,
+    800
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2542_material_displacement_and_bump.jpg",
+   "label": "25:42 Material Settings: Displacement 'Displacement and Bump'"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2610_displacement.png",
+   "bounds": [
+    1300,
+    400,
+    2200,
+    1000
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2610_displacement_final.jpg",
+   "label": "26:10 Displacement: Object Space, Midlevel 0.000, Scale 0.020"
+  },
+  {
+   "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2612_overview.png",
+   "bounds": [
+    850,
+    60,
+    2560,
+    1400
+   ],
+   "scale": 1.0,
+   "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2612_full_graph_overview.jpg",
+   "label": "26:12 whole graph before grouping (9 frames)"
+  }
+ ],
+ "events": [
+  {
+   "t": "0:00-0:08",
+   "action": "Intro: the finished material on a sphere (camera view, Cycles rendered viewport + a large final render)",
+   "result": "grey stones with moss patches, dark brown dirt joints with fine moss",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0004_intro_final_render.jpg"
+   ],
+   "crops": [],
+   "review_frames": ""
+  },
+  {
+   "t": "0:09-0:16",
+   "action": "Product node group 'Cobblestone Ground' shown with every panel open; outputs Shader -> Surface, Displacement -> Displacement",
+   "result": "34 inputs: Material Scale + 5 panels (Rock Distortion 4, Dirt & Moss 11, Cobblestone Chunks 6, Rocks and Moss 7, Cobblestone Rocks 5)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0009_product_interface_lower.jpg",
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0013_product_interface_upper.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0013_interface_upper.png",
+     "bounds": [
+      1000,
+      60,
+      2000,
+      760
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0013_product_interface_upper.jpg",
+     "scale": 1.0,
+     "label": "0:13 product node: Material Scale, Rock Distortion (intro order: Detail 2 above Detail 1), Dirt & Moss"
+    },
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0013_interface_middle.png",
+     "bounds": [
+      1000,
+      700,
+      2000,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0013_product_interface_upper.jpg",
+     "scale": 1.0,
+     "label": "0:13 product node: Dirt & Moss (cont.), Cobblestone Chunks"
+    },
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0009_interface_lower.png",
+     "bounds": [
+      1000,
+      700,
+      2000,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0009_product_interface_lower.jpg",
+     "scale": 1.0,
+     "label": "0:09 product node: Rocks and Moss, Cobblestone Rocks"
+    }
+   ],
+   "review_frames": "s0011-s0016"
+  },
+  {
+   "t": "0:11-0:16 vs 0:33-1:01",
+   "action": "Order check of the Rock Distortion panel",
+   "result": "intro: Detail 2, Detail 1, Scale, Strength; demo: Detail 1, Detail 2, Scale, Strength",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0013_product_interface_upper.jpg",
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0043_demo_rock_distortion_order.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0013_interface_upper.png",
+     "bounds": [
+      1000,
+      60,
+      2000,
+      760
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0013_product_interface_upper.jpg",
+     "scale": 1.0,
+     "label": "0:13 product node: Material Scale, Rock Distortion (intro order: Detail 2 above Detail 1), Dirt & Moss"
+    },
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0043_rock_distortion_order.png",
+     "bounds": [
+      1100,
+      250,
+      2100,
+      1250
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0043_demo_rock_distortion_order.jpg",
+     "scale": 1.0,
+     "label": "0:43 demo: Rock Distortion panel (Detail 1 above Detail 2)"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "0:20-0:25",
+   "action": "All panels collapsed",
+   "result": "Material Scale + five closed panels",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0025_demo_panels_collapsed.jpg"
+   ],
+   "crops": [],
+   "review_frames": ""
+  },
+  {
+   "t": "0:26-0:31",
+   "action": "Material Scale 1.000 -> 1.240 -> 0.600 -> 1.000",
+   "result": "whole pattern scales (stones larger/smaller)",
+   "class": "A (values) / B (effect)",
+   "confidence": "high",
+   "frames": [],
+   "crops": [],
+   "review_frames": "s0027, s0029"
+  },
+  {
+   "t": "0:31-0:37",
+   "action": "Rock Distortion opened; Distortion Detail 1 11.400 -> 1.100 -> 7.000",
+   "result": "more / less distorted stone outlines",
+   "class": "A / B",
+   "confidence": "high",
+   "frames": [],
+   "crops": [],
+   "review_frames": "s0033, s0035"
+  },
+  {
+   "t": "0:37-0:44",
+   "action": "Distortion Detail 2 0.706, 0.668, 0.714 -> 0.500",
+   "result": "edges of the stones change a lot",
+   "class": "A / B",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0043_demo_rock_distortion_order.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0043_rock_distortion_order.png",
+     "bounds": [
+      1100,
+      250,
+      2100,
+      1250
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0043_demo_rock_distortion_order.jpg",
+     "scale": 1.0,
+     "label": "0:43 demo: Rock Distortion panel (Detail 1 above Detail 2)"
+    }
+   ],
+   "review_frames": "s0037-s0041"
+  },
+  {
+   "t": "0:44-0:53",
+   "action": "Distortion Scale 6.500, 5.300, 2.700, 0.100 -> 2.000",
+   "result": "high: chunky, random stones; low: round, smooth",
+   "class": "A / B",
+   "confidence": "high",
+   "frames": [],
+   "crops": [],
+   "review_frames": "s0045-s0051"
+  },
+  {
+   "t": "0:53-1:02",
+   "action": "Distortion Strength 0.466, 0.000, 0.075, 0.341, 0.483 -> 0.200",
+   "result": "0: smooth rounded stones; up: randomly shaped, chunky",
+   "class": "A / B",
+   "confidence": "high",
+   "frames": [],
+   "crops": [],
+   "review_frames": "s0053-s0061"
+  },
+  {
+   "t": "1:03-1:15",
+   "action": "Dirt & Moss opened, camera zoomed close to the joints; Dirt Moss Detail 1 3.200 -> 9.000; Dirt Moss Detail 2 0.000 -> 0.500",
+   "result": "finer / coarser moss on the dirt",
+   "class": "A / B",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0110_demo_closeup_dirt_moss.jpg"
+   ],
+   "crops": [],
+   "review_frames": "s0067-s0073"
+  },
+  {
+   "t": "1:15-1:22",
+   "action": "Dirt Moss Visibility 2.000, 1.380 -> 1.000",
+   "result": "up: lots of moss on the dirt; down: no moss",
+   "class": "A / B",
+   "confidence": "high",
+   "frames": [],
+   "crops": [],
+   "review_frames": "s0077, s0079"
+  },
+  {
+   "t": "1:22-1:40",
+   "action": "Dirt Color 1 lightened to #8A7762 (HSV 0.088/0.291/0.541), Dirt Color 2 to #534232 (0.082/0.392/0.324), Dirt Moss Color to #858C40 (0.181/0.545/0.550); all restored",
+   "result": "hue/saturation of the pickers equal the build colours (#332C24, #19140F, #232511)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [],
+   "review_frames": "s0083, s0087, s0095"
+  },
+  {
+   "t": "1:40-1:50",
+   "action": "Dirt Scale 23.800, Dirt Moss Scale 21.100, Dirt Roughness 2.000, Dirt Bump Strength 0.015, Moss Bump Strength 0.000; all restored",
+   "result": "scale/roughness/bump of dirt and moss",
+   "class": "A / B",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0145_demo_dirt_and_moss_panel.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0145_dirt_and_moss_values.png",
+     "bounds": [
+      1100,
+      250,
+      2100,
+      1250
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0145_demo_dirt_and_moss_panel.jpg",
+     "scale": 1.0,
+     "label": "1:45 demo: Dirt & Moss panel (Dirt Roughness dragged to 2.000)"
+    }
+   ],
+   "review_frames": "s0101-s0109"
+  },
+  {
+   "t": "1:51-2:00",
+   "action": "Cobblestone Chunks opened; Cobblestone Scale 4.620, 8.210, 10.140 -> 7.000",
+   "result": "bigger / smaller stones",
+   "class": "A / B",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0153_demo_cobblestone_chunks_panel.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0153_chunks_values.png",
+     "bounds": [
+      1100,
+      250,
+      2100,
+      1250
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0153_demo_cobblestone_chunks_panel.jpg",
+     "scale": 1.0,
+     "label": "1:53 demo: Cobblestone Chunks panel defaults"
+    }
+   ],
+   "review_frames": "s0115-s0119"
+  },
+  {
+   "t": "2:00-2:17",
+   "action": "Cobblestone Cracks 0.780, 3.960, 0.780, 1.000 -> 0.000",
+   "result": "little cracks/chunks in every stone; too high looks wrong, ~1 recommended",
+   "class": "A / B",
+   "confidence": "high",
+   "frames": [],
+   "crops": [],
+   "review_frames": "s0123-s0137"
+  },
+  {
+   "t": "2:17-2:22",
+   "action": "Cobblestone Visibility 0.640, 0.927 -> 1.000",
+   "result": "stones sink back into the dirt",
+   "class": "A / B",
+   "confidence": "high",
+   "frames": [],
+   "crops": [],
+   "review_frames": "s0137, s0139"
+  },
+  {
+   "t": "2:22-2:29",
+   "action": "Cobblestone Alignment 0.000, 0.177 -> 1.000",
+   "result": "low: aligned, road-like rows; high: random",
+   "class": "A / B",
+   "confidence": "high",
+   "frames": [],
+   "crops": [],
+   "review_frames": "s0143, s0147"
+  },
+  {
+   "t": "2:29-2:37",
+   "action": "Cobblestone Size 0.558, 0.617, 0.226, 0.565 -> 0.600",
+   "result": "size of each stone (joint width)",
+   "class": "A / B",
+   "confidence": "high",
+   "frames": [],
+   "crops": [],
+   "review_frames": "s0149-s0155"
+  },
+  {
+   "t": "2:37-2:42",
+   "action": "Displacement Strength 0.110, 0.000, 0.070 -> 0.020",
+   "result": "stones pop out of the mesh",
+   "class": "A / B",
+   "confidence": "high",
+   "frames": [],
+   "crops": [],
+   "review_frames": "s0157-s0161"
+  },
+  {
+   "t": "2:43-2:58",
+   "action": "Rocks and Moss opened; Rock Moss Scale 16.500 -> 15.000; Rock Moss Color picker HSV 0.215/0.551/0.156 raised to V 0.442 for visibility",
+   "result": "scale and colour of the moss on the stones",
+   "class": "A / B",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0251_demo_rock_moss_color_hsv.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0251_rock_moss_color_hsv.png",
+     "bounds": [
+      1500,
+      350,
+      2300,
+      1300
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0251_demo_rock_moss_color_hsv.jpg",
+     "scale": 1.0,
+     "label": "2:51 demo: Rock Moss Color HSV 0.215 / 0.551 / 0.156"
+    }
+   ],
+   "review_frames": "s0169-s0173"
+  },
+  {
+   "t": "2:58-3:16",
+   "action": "Rock Moss Roughness 0.650; Detail 1 15.000; Detail 2 0.565 -> 0.704; Visibility 2.000, 1.990, 0.970, 0.510 -> 1.000; Bump Strength 1.000; colour restored",
+   "result": "up: moss covers the stones; down: none",
+   "class": "A / B",
+   "confidence": "high",
+   "frames": [],
+   "crops": [],
+   "review_frames": "s0179-s0195"
+  },
+  {
+   "t": "3:17-3:36",
+   "action": "Cobblestone Rocks opened; Rock Color 1 HSV 0.324/0.028/0.209; Rock Color 2 made browner (0.084/0.789/0.162) then 0.031/0.120/0.162; Rock Roughness 0.417, Rock Detail 0.000, Rock Bump Strength 0.000; restored",
+   "result": "grey or brownish stones; stone roughness/detail/bump",
+   "class": "A / B",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0321_demo_rock_color1_hsv.jpg",
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0327_demo_rock_color2_hsv.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0321_rock_color1_hsv.png",
+     "bounds": [
+      1500,
+      350,
+      2300,
+      1300
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0321_demo_rock_color1_hsv.jpg",
+     "scale": 1.0,
+     "label": "3:21 demo: Rock Color 1 HSV 0.324 / 0.028 / 0.209"
+    },
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0327_rock_color2_hsv.png",
+     "bounds": [
+      1500,
+      350,
+      2300,
+      1300
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0327_demo_rock_color2_hsv.jpg",
+     "scale": 1.0,
+     "label": "3:27 demo: Rock Color 2 HSV 0.031 / 0.120 / 0.162"
+    }
+   ],
+   "review_frames": "s0199-s0213"
+  },
+  {
+   "t": "4:05-4:20",
+   "action": "Add > Mesh > Ico Sphere; redo panel Subdivisions 6, Radius 1 m, Generate UVs, Align World",
+   "result": "demo object 'Icosphere.001' 10,242 verts / 20,480 faces",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0417_add_icosphere_subdiv6.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0417_add_icosphere.png",
+     "bounds": [
+      0,
+      700,
+      700,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0417_add_icosphere_subdiv6.jpg",
+     "scale": 1.0,
+     "label": "4:17 Add Ico Sphere: Subdivisions 6, Radius 1 m (demo object Icosphere.001)"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "4:20",
+   "action": "Shade Smooth",
+   "result": "smooth shading",
+   "class": "B",
+   "confidence": "medium",
+   "frames": [],
+   "crops": [],
+   "review_frames": ""
+  },
+  {
+   "t": "4:44-4:53",
+   "action": "S .5 Enter, then Ctrl+A > Apply > Scale",
+   "result": "sphere radius 0.5 m, scale applied",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0450_scale_0p5_typed.jpg",
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0452_apply_scale_menu.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0450_scale_typed.png",
+     "bounds": [
+      1800,
+      800,
+      2060,
+      1200
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0450_scale_0p5_typed.jpg",
+     "scale": 1.5,
+     "label": "4:50 key overlay '. 5 Return' (S .5)"
+    },
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0452_apply_scale.png",
+     "bounds": [
+      740,
+      450,
+      1130,
+      1080
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0452_apply_scale_menu.jpg",
+     "scale": 1.0,
+     "label": "4:52 Ctrl+A > Apply > Scale"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "4:54-5:15",
+   "action": "(prepared file, object 'Icosphere', 642 verts / 1,280 faces) Subdivision Surface: Catmull-Clark, Levels Viewport 0, Render 3, Optimal Display",
+   "result": "render-time subdivision for displacement",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0512_subdivision_modifier.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0512_subdivision.png",
+     "bounds": [
+      1700,
+      250,
+      2560,
+      800
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0512_subdivision_modifier.jpg",
+     "scale": 1.0,
+     "label": "5:12 Subdivision: Catmull-Clark, Levels Viewport 0, Render 3"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "5:15-5:25",
+   "action": "Camera aimed at the sphere; Focal Length dragged 61..93 mm and released at 80 mm",
+   "result": "Perspective, 80 mm, clip 0.1-1000 m",
+   "class": "A / B (aim)",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0524_camera_focal_80mm.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0524_focal_80.png",
+     "bounds": [
+      1900,
+      450,
+      2560,
+      570
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0524_camera_focal_80mm.jpg",
+     "scale": 1.5,
+     "label": "5:24 camera Focal Length 80 mm"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "5:25-5:30",
+   "action": "Output: Resolution 2560 x 2560 px",
+   "result": "aspect 1:1, Render Region on, 24 fps, PNG RGBA",
+   "class": "A (Y partly hidden) / B",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0528_output_resolution.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0528_output.png",
+     "bounds": [
+      1700,
+      60,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0528_output_resolution.jpg",
+     "scale": 0.8,
+     "label": "5:28 Output: Resolution X 2560 px, aspect 1/1, PNG RGBA"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "5:31-5:48",
+   "action": "Sun (object 'Area'): Temperature on 6000 K, Strength 15; viewport set to rendered",
+   "result": "bright, slightly yellow outdoor light; Angle 0.526 deg, Normalize on",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0539_sun_light.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0539_sun.png",
+     "bounds": [
+      1700,
+      380,
+      2560,
+      820
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0539_sun_light.jpg",
+     "scale": 1.0,
+     "label": "5:39 Sun: Temperature 6000 K, Strength 15, Angle 0.526 deg"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "5:48-6:04",
+   "action": "Rim light: Area light 'Area.001', Color #FFEDE0, Power 300 W, Shape Disk, Size 1 m, placed behind the object",
+   "result": "subtle rim light",
+   "class": "A / B (placement)",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0556_area_light_color.jpg",
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0600_area_light_settings.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0556_area_color.png",
+     "bounds": [
+      2100,
+      560,
+      2520,
+      1180
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0556_area_light_color.jpg",
+     "scale": 1.2,
+     "label": "5:56 Area (rim) light colour #FFEDE0"
+    },
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0600_area_settings.png",
+     "bounds": [
+      1700,
+      330,
+      2560,
+      960
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0600_area_light_settings.jpg",
+     "scale": 1.0,
+     "label": "6:00 Area light: Power 300 W, Shape Disk, Size 1 m"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "6:05-6:38",
+   "action": "World: fish_hoek_beach 1K HDR (Easy HDRI add-on); world deleted and re-created: Background Color <- Environment Texture fish_hoek_beach_1k.hdr",
+   "result": "Strength 1, Linear Rec.709, Equirectangular",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0638_world_hdri.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0638_world.png",
+     "bounds": [
+      1700,
+      430,
+      2560,
+      950
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0638_world_hdri.jpg",
+     "scale": 1.0,
+     "label": "6:38 World: Environment Texture fish_hoek_beach_1k.hdr, Strength 1"
+    }
+   ],
+   "review_frames": "s0366-s0398"
+  },
+  {
+   "t": "6:39-6:44",
+   "action": "Render properties: Cycles, GPU Compute; Film > Transparent on",
+   "result": "Film Exposure 1.00, Blackman-Harris 1.50 px; Motion Blur box on",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0642_render_engine_film.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0642_render_film.png",
+     "bounds": [
+      1700,
+      300,
+      2560,
+      1180
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0642_render_engine_film.jpg",
+     "scale": 1.0,
+     "label": "6:42 Render: Cycles, GPU Compute, Film Transparent"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "6:45-6:54",
+   "action": "Colour management: View Filmic, Look Very High Contrast",
+   "result": "Display sRGB, Exposure 0, Gamma 1",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0654_color_management.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0654_color_management.png",
+     "bounds": [
+      1900,
+      700,
+      2560,
+      1300
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0654_color_management.jpg",
+     "scale": 1.0,
+     "label": "6:54 Colour management: sRGB, Filmic, Very High Contrast"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "6:55-7:22",
+   "action": "Shading workspace, rendered viewport; new material renamed 'Cobblestone Ground'; Node Wrangler enabled in Preferences",
+   "result": "empty material with Principled BSDF + Material Output",
+   "class": "B (name A at 0:25, 26:12)",
+   "confidence": "medium",
+   "frames": [],
+   "crops": [],
+   "review_frames": "s0416-s0442"
+  },
+  {
+   "t": "7:34-7:47",
+   "action": "Noise Texture added and previewed (Ctrl+Shift+click); Ctrl+T adds Texture Coordinate + Mapping; Object -> Mapping Vector",
+   "result": "object-space coordinates",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0751_mapping_frame.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0751_mapping.png",
+     "bounds": [
+      700,
+      200,
+      2000,
+      1300
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0751_mapping_frame.jpg",
+     "scale": 0.8,
+     "label": "7:51 Texture Coordinate Object -> Mapping (Point, defaults) -> Noise Vector"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "7:49-7:57",
+   "action": "Texture Coordinate + Mapping framed (F), label 'Mapping'",
+   "result": "frame 'Mapping'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0751_mapping_frame.jpg"
+   ],
+   "crops": [],
+   "review_frames": ""
+  },
+  {
+   "t": "8:00-8:10",
+   "action": "Dirt Noise: Scale 20, Detail 10, Roughness 0.55",
+   "result": "3D fBM, Normalize on, Lacunarity 2, Distortion 0",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0810_dirt_noise_settings.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0810_dirt_noise.png",
+     "bounds": [
+      850,
+      150,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0810_dirt_noise_settings.jpg",
+     "scale": 0.6,
+     "label": "8:10 dirt Noise: 3D fBM, Scale 20, Detail 10, Roughness 0.55"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "8:13-8:23",
+   "action": "Color Ramp after the noise (Noise Factor -> ramp); black stop dragged to 0.151, white stop to 0.553",
+   "result": "more contrast",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0820_dirt_ramp_stop0_0p151.jpg",
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0822_dirt_ramp_stop1_0p553.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0820_dirt_ramp_stop0.png",
+     "bounds": [
+      1060,
+      420,
+      1760,
+      750
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0820_dirt_ramp_stop0_0p151.jpg",
+     "scale": 1.0,
+     "label": "8:20 dirt colour ramp: stop 0 Pos 0.151"
+    },
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0822_dirt_ramp_stop1.png",
+     "bounds": [
+      1060,
+      420,
+      1760,
+      750
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0822_dirt_ramp_stop1_0p553.jpg",
+     "scale": 1.0,
+     "label": "8:22 dirt colour ramp: stop 1 Pos 0.553"
+    }
+   ],
+   "review_frames": "4 fps 8:17-8:24"
+  },
+  {
+   "t": "8:23-8:50",
+   "action": "Mix (Color) added: ramp Color -> Factor; A = #332C24, B = #19140F (hex typed)",
+   "result": "two dark browns",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0838_dirt_color_A_332C24.jpg",
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0848_dirt_color_B_19140F.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0838_dirt_color_A.png",
+     "bounds": [
+      1500,
+      100,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0838_dirt_color_A_332C24.jpg",
+     "scale": 0.6,
+     "label": "8:38 dirt Mix A #332C24"
+    },
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0848_dirt_color_B.png",
+     "bounds": [
+      1500,
+      100,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0848_dirt_color_B_19140F.jpg",
+     "scale": 0.6,
+     "label": "8:48 dirt Mix B #19140F"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "8:52-8:57",
+   "action": "Noise, ramp and Mix framed, label 'Dirt Material'",
+   "result": "frame 'Dirt Material'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1210_dirt_material_overview.jpg"
+   ],
+   "crops": [],
+   "review_frames": ""
+  },
+  {
+   "t": "8:57-9:05",
+   "action": "Default Principled BSDF moved into the frame; Mix Result -> Base Color",
+   "result": "dirt colour on the sphere",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [],
+   "review_frames": "s0545"
+  },
+  {
+   "t": "9:05-9:23",
+   "action": "Color Ramp duplicated and reset (Backspace: black 0, white 1); Noise Factor -> ramp; ramp Color -> BSDF Roughness",
+   "result": "roughness variation",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [],
+   "review_frames": "s0562"
+  },
+  {
+   "t": "9:23-9:38",
+   "action": "Roughness ramp black stop colour #D2D2D2",
+   "result": "rougher dirt overall",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0935_roughness_ramp_D2D2D2.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t0935_rough_ramp_hex.png",
+     "bounds": [
+      850,
+      150,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t0935_roughness_ramp_D2D2D2.jpg",
+     "scale": 0.5,
+     "label": "9:35 roughness ramp stop 0 colour #D2D2D2"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "9:38-9:52",
+   "action": "Hue/Saturation/Value dropped between roughness ramp and Roughness (Hue 0.5, Sat 1, Value 1, Fac 1)",
+   "result": "one value to make the roughness lighter/darker",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1210_dirt_material_overview.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1210_dirt_material.png",
+     "bounds": [
+      850,
+      300,
+      2560,
+      1100
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1210_dirt_material_overview.jpg",
+     "scale": 0.75,
+     "label": "12:10 Dirt Material frame: contrast ramp stop 1 Pos 0.324, BSDF Metallic 0 / IOR 1.5 / Alpha 1"
+    }
+   ],
+   "review_frames": "s0596"
+  },
+  {
+   "t": "9:52-10:13",
+   "action": "Bump added: Noise Factor -> Height, Normal -> BSDF Normal; Distance 0.020",
+   "result": "subtle bumpy dirt",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1013_dirt_bump_distance_0p02.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1013_dirt_bump.png",
+     "bounds": [
+      850,
+      150,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1013_dirt_bump_distance_0p02.jpg",
+     "scale": 0.6,
+     "label": "10:13 dirt Bump: Strength 1, Distance 0.020; Normal -> BSDF Normal"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "10:16-10:41",
+   "action": "Second Noise (dirt moss): Mapping -> Vector, previewed; Scale 25, Detail 9, Lacunarity 3 (higher lacunarity demo shows a dot pattern)",
+   "result": "moss noise",
+   "class": "A / B",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1055_dirt_moss_hsv_inserted.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1055_dirt_moss_hsv.png",
+     "bounds": [
+      850,
+      150,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1055_dirt_moss_hsv_inserted.jpg",
+     "scale": 0.5,
+     "label": "10:55 dirt-moss Noise (25 / 9 / 0.5 / lacunarity 3) -> HSV -> ramp"
+    }
+   ],
+   "review_frames": "s0626-s0641"
+  },
+  {
+   "t": "10:41-10:52",
+   "action": "Color Ramp after the noise; black stop dragged to 0.467",
+   "result": "white = where the moss is",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1104_dirt_moss_texture_frame.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1104_dirt_moss_ramp.png",
+     "bounds": [
+      850,
+      150,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1104_dirt_moss_texture_frame.jpg",
+     "scale": 0.5,
+     "label": "11:04 dirt-moss ramp stop 0 Pos 0.467; HSV 0.5 / 1 / 1 / 1"
+    }
+   ],
+   "review_frames": "4 fps 10:43-10:52"
+  },
+  {
+   "t": "10:52-11:01",
+   "action": "Hue/Saturation/Value dropped between the noise and the ramp (Noise Factor -> HSV Color); Value demo up/down, left at 1.000",
+   "result": "more / less moss",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1055_dirt_moss_hsv_inserted.jpg",
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1104_dirt_moss_texture_frame.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1055_dirt_moss_socket.png",
+     "bounds": [
+      1340,
+      515,
+      1430,
+      650
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1055_dirt_moss_hsv_inserted.jpg",
+     "scale": 5.0,
+     "label": "10:55 zoom: Noise Factor (not Color) -> HSV Color"
+    },
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1104_dirt_moss_ramp.png",
+     "bounds": [
+      850,
+      150,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1104_dirt_moss_texture_frame.jpg",
+     "scale": 0.5,
+     "label": "11:04 dirt-moss ramp stop 0 Pos 0.467; HSV 0.5 / 1 / 1 / 1"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "11:02-11:10",
+   "action": "Noise, HSV and ramp framed, label 'Dirt Moss Texture'",
+   "result": "frame 'Dirt Moss Texture'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1104_dirt_moss_texture_frame.jpg"
+   ],
+   "crops": [],
+   "review_frames": ""
+  },
+  {
+   "t": "11:10-11:29",
+   "action": "Mix duplicated onto the Mix -> Base Color link; dirt-moss ramp Color -> new Mix Factor; first Mix -> A; B temporary bright green",
+   "result": "moss layer over the dirt",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1128_dirt_moss_mix2.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1128_dirt_mix2.png",
+     "bounds": [
+      850,
+      250,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1128_dirt_moss_mix2.jpg",
+     "scale": 0.75,
+     "label": "11:28 Mix1 Result -> Mix2 A; Mix2 Result -> BSDF Base Color"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "11:39-12:15",
+   "action": "Color Ramp dropped between the dirt-moss ramp and the new Mix Factor; white stop dragged 0.917 ... 0.098 ... 0.324 (black at 0)",
+   "result": "sharper moss colour edge; bump keeps the softer ramp",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1210_dirt_material_overview.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1210_dirt_material.png",
+     "bounds": [
+      850,
+      300,
+      2560,
+      1100
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1210_dirt_material_overview.jpg",
+     "scale": 0.75,
+     "label": "12:10 Dirt Material frame: contrast ramp stop 1 Pos 0.324, BSDF Metallic 0 / IOR 1.5 / Alpha 1"
+    }
+   ],
+   "review_frames": "s0710-s0735, 2 fps 11:50-12:16, 4 fps 12:08-12:20"
+  },
+  {
+   "t": "12:02-12:03",
+   "action": "Demo: dirt-moss ramp white stop dragged (0.676, 0.641) and back to 1.000",
+   "result": "no change",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [],
+   "review_frames": "s0722, s0723"
+  },
+  {
+   "t": "12:14-12:26",
+   "action": "Mix B (moss colour) = #232511 (hex typed)",
+   "result": "subtle greenish-brown moss",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1226_moss_color_232511.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1226_moss_color.png",
+     "bounds": [
+      850,
+      100,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1226_moss_color_232511.jpg",
+     "scale": 0.7,
+     "label": "12:26 Mix2 B (moss colour) #232511"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "12:33-12:50",
+   "action": "Bump duplicated after the first (first Bump Normal -> second Bump Normal -> BSDF Normal); dirt-moss ramp Color -> second Bump Height",
+   "result": "moss pops out of the mesh",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1249_moss_bump_links.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1249_moss_bump_links.png",
+     "bounds": [
+      850,
+      100,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1249_moss_bump_links.jpg",
+     "scale": 0.7,
+     "label": "12:49 moss Bump: dirt-moss ramp Color -> Height, dirt Bump Normal -> Normal"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "12:52-13:03",
+   "action": "Second Bump Distance 0.005",
+   "result": "subtle moss bump",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1258_moss_bump_distance_0p005.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1258_moss_bump_distance.png",
+     "bounds": [
+      850,
+      100,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1258_moss_bump_distance_0p005.jpg",
+     "scale": 0.5,
+     "label": "12:58 moss Bump Distance 0.005"
+    }
+   ],
+   "review_frames": "4 fps 12:59-13:06"
+  },
+  {
+   "t": "13:08-13:24",
+   "action": "Third Noise (rock): Mapping -> Vector, previewed; Scale 20, Detail 10",
+   "result": "rock noise",
+   "class": "A / B",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1444_rock_noise_mix_bsdf_bump.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1444_rock_nodes.png",
+     "bounds": [
+      850,
+      150,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1444_rock_noise_mix_bsdf_bump.jpg",
+     "scale": 0.8,
+     "label": "14:44 rock Noise 20 / 10 / 0.5, Mix, BSDF Roughness 0.650, Bump Distance 0.007"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "13:25-14:01",
+   "action": "Mix (Color): Noise Factor -> Factor; A = #343534, B = #292524 (hex typed)",
+   "result": "two greys",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1354_rock_color_A_343534.jpg",
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1358_rock_color_B_292524.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1354_rock_color_A.png",
+     "bounds": [
+      1000,
+      450,
+      2000,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1354_rock_color_A_343534.jpg",
+     "scale": 0.8,
+     "label": "13:54 rock Mix A #343534"
+    },
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1358_rock_color_B.png",
+     "bounds": [
+      1000,
+      450,
+      2000,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1358_rock_color_B_292524.jpg",
+     "scale": 0.8,
+     "label": "13:58 rock Mix B #292524"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "14:02-14:22",
+   "action": "New Principled BSDF: Mix Result -> Base Color; framed 'Cobblestone Rock Material'; Roughness 0.650",
+   "result": "rock shader",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1444_rock_noise_mix_bsdf_bump.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1444_rock_nodes.png",
+     "bounds": [
+      850,
+      150,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1444_rock_noise_mix_bsdf_bump.jpg",
+     "scale": 0.8,
+     "label": "14:44 rock Noise 20 / 10 / 0.5, Mix, BSDF Roughness 0.650, Bump Distance 0.007"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "14:22-14:39",
+   "action": "Bump: Noise Factor -> Height, Normal -> BSDF Normal; Distance 0.007 (narration '0.7')",
+   "result": "bumpy rock",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1444_rock_noise_mix_bsdf_bump.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1444_rock_noise_socket.png",
+     "bounds": [
+      1060,
+      270,
+      1180,
+      420
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1444_rock_noise_mix_bsdf_bump.jpg",
+     "scale": 5.0,
+     "label": "14:44 zoom: both links leave the Noise Factor socket"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "14:46-15:01",
+   "action": "Voronoi Texture (Mapping -> Vector); Bump duplicated onto the Bump -> Normal link; Voronoi Distance -> new Bump Height",
+   "result": "second bump layer",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1540_rock_bump2_distance_0p015.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1540_rock_bump2.png",
+     "bounds": [
+      850,
+      150,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1540_rock_bump2_distance_0p015.jpg",
+     "scale": 0.8,
+     "label": "15:40 Voronoi Distance -> Bump2 (0.015); Bump1 Normal -> Bump2 Normal -> BSDF Normal"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "15:05-15:20",
+   "action": "Voronoi: Smooth F1, Scale 12, Detail 10 (Smoothness 1, Randomness 1)",
+   "result": "detailed rock with small round chunks",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1521_rock_voronoi_settings.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1521_rock_voronoi.png",
+     "bounds": [
+      850,
+      150,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1521_rock_voronoi_settings.jpg",
+     "scale": 0.7,
+     "label": "15:21 rock Voronoi: Smooth F1, Scale 12, Detail 10, Smoothness 1, Randomness 1"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "15:35-15:41",
+   "action": "Second Bump Distance 0.015",
+   "result": "stronger rock detail",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1540_rock_bump2_distance_0p015.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1540_rock_bump2.png",
+     "bounds": [
+      850,
+      150,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1540_rock_bump2_distance_0p015.jpg",
+     "scale": 0.8,
+     "label": "15:40 Voronoi Distance -> Bump2 (0.015); Bump1 Normal -> Bump2 Normal -> BSDF Normal"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "15:43-16:13",
+   "action": "New Principled BSDF and Noise (rock moss): Mapping -> Vector; Scale 17, Detail 15, Roughness 0.7",
+   "result": "moss noise",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1651_rock_moss_noise_bump_bsdf.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1651_rock_moss_nodes.png",
+     "bounds": [
+      850,
+      250,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1651_rock_moss_noise_bump_bsdf.jpg",
+     "scale": 0.7,
+     "label": "16:51 rock moss Noise 17 / 15 / 0.7 -> Bump 0.010 -> BSDF Normal"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "16:13-16:22",
+   "action": "Bump dropped between noise and BSDF Normal: Noise Factor -> Height",
+   "result": "bump data",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1651_rock_moss_noise_bump_bsdf.jpg"
+   ],
+   "crops": [],
+   "review_frames": ""
+  },
+  {
+   "t": "16:25-16:41",
+   "action": "Moss BSDF Base Color #222812 (hex), Roughness 0.650",
+   "result": "dark brownish green",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1633_rock_moss_color_222812.jpg",
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1640_rock_moss_roughness.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1633_rock_moss_color.png",
+     "bounds": [
+      1500,
+      100,
+      2560,
+      1100
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1633_rock_moss_color_222812.jpg",
+     "scale": 0.8,
+     "label": "16:33 rock moss Base Color #222812"
+    },
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1640_rock_moss_roughness.png",
+     "bounds": [
+      1300,
+      300,
+      2560,
+      900
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1640_rock_moss_roughness.jpg",
+     "scale": 0.8,
+     "label": "16:40 rock moss BSDF Roughness 0.650"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "16:43-16:53",
+   "action": "Moss Bump Distance 0.010",
+   "result": "detailed mossy bump",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1651_rock_moss_noise_bump_bsdf.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1651_rock_moss_nodes.png",
+     "bounds": [
+      850,
+      250,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1651_rock_moss_noise_bump_bsdf.jpg",
+     "scale": 0.7,
+     "label": "16:51 rock moss Noise 17 / 15 / 0.7 -> Bump 0.010 -> BSDF Normal"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "16:53-17:10",
+   "action": "Moss nodes framed, label 'Rock Moss Material'; frame dragged down",
+   "result": "frame 'Rock Moss Material'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2612_full_graph_overview.jpg"
+   ],
+   "crops": [],
+   "review_frames": ""
+  },
+  {
+   "t": "17:20-17:48",
+   "action": "Noise + Color Ramp (moss/rock mask): Mapping -> Noise Vector, Noise Factor -> ramp; Scale 15, Detail 10, Roughness 0.8",
+   "result": "mask noise",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1803_moss_rock_mask_noise_hsv.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1803_mask_noise_hsv.png",
+     "bounds": [
+      1000,
+      450,
+      2100,
+      1150
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1803_moss_rock_mask_noise_hsv.jpg",
+     "scale": 0.9,
+     "label": "18:03 Moss & Rock Mask: Noise 15 / 10 / 0.8 -> HSV 0.5 / 1 / 1 / 1 -> ramp"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "17:48-17:56",
+   "action": "Ramp stops dragged close together (about 0.37 / 0.63; 0.417 at 18:00)",
+   "result": "moss here and there",
+   "class": "A",
+   "confidence": "medium",
+   "frames": [],
+   "crops": [],
+   "review_frames": "4 fps 17:46-18:06"
+  },
+  {
+   "t": "17:56-18:03",
+   "action": "Hue/Saturation/Value dropped between noise and ramp (Noise Factor -> HSV Color); Value demo 1.01-1.30, back to 1.000",
+   "result": "more / less moss",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1803_moss_rock_mask_noise_hsv.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1803_mask_noise_socket.png",
+     "bounds": [
+      1180,
+      640,
+      1310,
+      760
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1803_moss_rock_mask_noise_hsv.jpg",
+     "scale": 5.0,
+     "label": "18:03 zoom: Noise Factor -> HSV Color"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "18:03-18:10",
+   "action": "Framed, label 'Moss & Rock Mask'",
+   "result": "frame 'Moss & Rock Mask'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1853_mask_ramp_stop0_0p407.jpg"
+   ],
+   "crops": [],
+   "review_frames": ""
+  },
+  {
+   "t": "18:13-18:31",
+   "action": "Both BSDFs selected, Ctrl+0 (Node Wrangler) -> Mix Shader; mask ramp Color -> Fac; previewed",
+   "result": "rock/moss mix",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [],
+   "review_frames": "2 fps 18:06-18:52"
+  },
+  {
+   "t": "18:32-18:41",
+   "action": "Shader inputs swapped: rock BSDF -> Shader 1, rock moss BSDF -> Shader 2",
+   "result": "moss in spots over the rock",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1841_rock_moss_mix_shader_swapped.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1841_rock_moss_mix.png",
+     "bounds": [
+      850,
+      100,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1841_rock_moss_mix_shader_swapped.jpg",
+     "scale": 0.7,
+     "label": "18:41 Mix Shader: Fac <- mask ramp; Shader 1 <- rock BSDF; Shader 2 <- rock moss BSDF"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "18:42-18:53",
+   "action": "Mask ramp demo, final black stop 0.407, white stop 0.651",
+   "result": "subtle moss spots",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1849_mask_ramp_stop1_0p651.jpg",
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1853_mask_ramp_stop0_0p407.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1849_mask_ramp_stop1.png",
+     "bounds": [
+      980,
+      700,
+      1360,
+      1030
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1849_mask_ramp_stop1_0p651.jpg",
+     "scale": 2.0,
+     "label": "18:49 Moss & Rock Mask ramp: stop 1 Pos 0.651"
+    },
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t1853_mask_ramp_stop0.png",
+     "bounds": [
+      950,
+      850,
+      1250,
+      1080
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t1853_mask_ramp_stop0_0p407.jpg",
+     "scale": 3.0,
+     "label": "18:53 Moss & Rock Mask ramp: stop 0 Pos 0.407"
+    }
+   ],
+   "review_frames": "2 fps 18:44-18:53"
+  },
+  {
+   "t": "18:53-20:03",
+   "action": "Layout: rock groups dragged down, reroutes added with Shift+right-drag",
+   "result": "no functional change",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [],
+   "review_frames": "s1133-s1203"
+  },
+  {
+   "t": "20:06-20:16",
+   "action": "Voronoi Texture added and previewed; Mapping -> Vector (via reroute)",
+   "result": "cells",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2027_voronoi_smooth_f1.jpg"
+   ],
+   "crops": [],
+   "review_frames": ""
+  },
+  {
+   "t": "20:16-20:27",
+   "action": "Voronoi 1: Smooth F1, Scale 7, Smoothness 0.6",
+   "result": "Detail 0, Roughness 0.5, Lacunarity 2, Randomness 1, Euclidean, 3D",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2027_voronoi_smooth_f1.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2027_voronoi_smooth_f1.png",
+     "bounds": [
+      1100,
+      150,
+      1900,
+      1050
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2027_voronoi_smooth_f1.jpg",
+     "scale": 0.9,
+     "label": "20:27 Voronoi 1: Smooth F1, Scale 7, Detail 0, Smoothness 0.6, Randomness 1"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "20:27-20:42",
+   "action": "Ctrl+Shift+D duplicate (input link kept), reroute; Voronoi 2 feature F1",
+   "result": "hard cell borders",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2042_voronoi_f1.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2042_voronoi_f1.png",
+     "bounds": [
+      1100,
+      150,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2042_voronoi_f1.jpg",
+     "scale": 0.6,
+     "label": "20:42 Voronoi 2 (Ctrl+Shift+D copy): F1, Scale 7, Detail 0"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "20:42-21:00",
+   "action": "Mix Color 'Difference' (search 'difference'): Voronoi 1 Distance -> A, Voronoi 2 Distance -> B, Factor 1.000",
+   "result": "bright lines only at the cell borders, black elsewhere",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2100_difference_mix.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2100_difference.png",
+     "bounds": [
+      850,
+      300,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2100_difference_mix.jpg",
+     "scale": 0.7,
+     "label": "21:00 Mix (Difference), Factor 1: Voronoi 1 Distance -> A, Voronoi 2 Distance -> B"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "21:16-21:24",
+   "action": "Framed, label 'Cobblestone Mask'",
+   "result": "frame 'Cobblestone Mask'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2141_cell_ramp_stop1_0p035.jpg"
+   ],
+   "crops": [],
+   "review_frames": ""
+  },
+  {
+   "t": "21:24-21:42",
+   "action": "Color Ramp after Difference (Result -> Fac) inside the frame; stops flipped (white left, black right); black stop dragged 0.410 ... 0.048 -> 0.035",
+   "result": "inverted mask: stones light, joints black",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2141_cell_ramp_stop1_0p035.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2141_cell_ramp_stop1.png",
+     "bounds": [
+      850,
+      150,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2141_cell_ramp_stop1_0p035.jpg",
+     "scale": 0.5,
+     "label": "21:41 Cobblestone Mask ramp: stop 1 (black) Pos 0.035"
+    }
+   ],
+   "review_frames": "4 fps 21:30.5-21:46"
+  },
+  {
+   "t": "21:42-21:57",
+   "action": "White stop colour typed #999999 (HSV value 0.600)",
+   "result": "smoother edges in bump/displacement",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2156_cell_ramp_stop0_999999.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2156_cell_ramp_hex.png",
+     "bounds": [
+      1300,
+      40,
+      1960,
+      1150
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2156_cell_ramp_stop0_999999.jpg",
+     "scale": 0.8,
+     "label": "21:56 Cobblestone Mask ramp: stop 0 colour #999999 (V 0.600)"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "22:10-22:30",
+   "action": "Noise Texture dropped on the Mapping -> Voronoi link (auto-insert); Scale 2, Detail 7",
+   "result": "far too distorted ('clouds')",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2227_distortion_noise.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2227_distortion_noise.png",
+     "bounds": [
+      850,
+      150,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2227_distortion_noise.jpg",
+     "scale": 0.6,
+     "label": "22:27 distortion Noise: 3D fBM, Scale 2, Detail 7, Roughness 0.5"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "22:31-22:49",
+   "action": "Mix Color 'Linear Light' dropped after the noise; Mapping Vector -> A, Noise Color -> B; Result -> Voronoi vectors",
+   "result": "mix of undistorted and distorted coordinates",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2258_linear_light.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2258_linear_light.png",
+     "bounds": [
+      850,
+      100,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2258_linear_light.jpg",
+     "scale": 0.6,
+     "label": "22:58 Linear Light: A <- Mapping Vector, B <- Noise Color, Factor 0.200"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "22:49-23:00",
+   "action": "Linear Light Factor dragged 0.145, 0.417, set 0.200",
+   "result": "cobblestones with slightly bumpy, distorted edges",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2258_linear_light.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2258_linear_light.png",
+     "bounds": [
+      850,
+      100,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2258_linear_light.jpg",
+     "scale": 0.6,
+     "label": "22:58 Linear Light: A <- Mapping Vector, B <- Noise Color, Factor 0.200"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "23:03-23:06",
+   "action": "Framed, label 'Cobblestone Distortion'",
+   "result": "frame 'Cobblestone Distortion'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2612_full_graph_overview.jpg"
+   ],
+   "crops": [],
+   "review_frames": ""
+  },
+  {
+   "t": "23:27-23:42",
+   "action": "Mix Shader added: dirt BSDF -> Shader 1 (top), rock/moss Mix Shader -> Shader 2 (bottom); previewed",
+   "result": "50/50 blend",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2340_final_mix_shader_links.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2340_final_mix.png",
+     "bounds": [
+      850,
+      100,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2340_final_mix_shader_links.jpg",
+     "scale": 0.5,
+     "label": "23:40 new Mix Shader: Shader 1 <- dirt BSDF, Shader 2 <- rock/moss Mix Shader"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "23:44-23:52",
+   "action": "Cobblestone Mask ramp Color -> Mix Shader Fac",
+   "result": "stones and dirt, transition far too smooth",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2525_mix_rocks_dirt_frame.jpg"
+   ],
+   "crops": [],
+   "review_frames": ""
+  },
+  {
+   "t": "24:04-24:20",
+   "action": "Color Ramp dropped between the mask and the Mix Shader Fac; white stop dragged 0.568, 0.085, 0.033 -> 0.030",
+   "result": "sharp stone/dirt border",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2420_mix_rocks_dirt_ramp_0p030.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2420_mix_rocks_dirt_ramp.png",
+     "bounds": [
+      850,
+      100,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2420_mix_rocks_dirt_ramp_0p030.jpg",
+     "scale": 0.5,
+     "label": "24:20 Mix Rocks & Dirt ramp: stop 1 Pos 0.030"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "24:24-24:32",
+   "action": "Framed, label 'Mix Rocks & Dirt'; reroute",
+   "result": "frame 'Mix Rocks & Dirt'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2525_mix_rocks_dirt_frame.jpg"
+   ],
+   "crops": [],
+   "review_frames": ""
+  },
+  {
+   "t": "24:38-24:48",
+   "action": "Displacement node added (Midlevel 0.5, Scale 0.010, Object Space); Displacement -> Material Output Displacement",
+   "result": "bump-only displacement",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2525_mix_rocks_dirt_frame.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2525_mix_rocks_dirt.png",
+     "bounds": [
+      850,
+      100,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2525_mix_rocks_dirt_frame.jpg",
+     "scale": 0.5,
+     "label": "25:25 Mix Rocks & Dirt frame: ramp -> Mix Shader Factor; Displacement -> Output"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "24:49-25:00",
+   "action": "Cobblestone Mask ramp Color -> Displacement Height (long wire)",
+   "result": "stones look raised at the silhouette",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2500_displacement_height_link.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2500_displacement_link.png",
+     "bounds": [
+      850,
+      100,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2500_displacement_height_link.jpg",
+     "scale": 0.5,
+     "label": "25:00 Cobblestone Mask ramp Color -> Displacement Height (and -> Mix Rocks & Dirt ramp)"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "25:04-25:21",
+   "action": "Reroute added; Displacement moved into the 'Mix Rocks & Dirt' frame",
+   "result": "layout only",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2525_mix_rocks_dirt_frame.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2525_mix_rocks_dirt.png",
+     "bounds": [
+      850,
+      100,
+      2560,
+      1440
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2525_mix_rocks_dirt_frame.jpg",
+     "scale": 0.5,
+     "label": "25:25 Mix Rocks & Dirt frame: ramp -> Mix Shader Factor; Displacement -> Output"
+    },
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2525_final_mix_sockets.png",
+     "bounds": [
+      1440,
+      520,
+      1720,
+      700
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2525_mix_rocks_dirt_frame.jpg",
+     "scale": 3.0,
+     "label": "25:25 zoom: final Mix Shader inputs (Factor, Shader 1 from upper left, Shader 2 from below)"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "25:26-25:42",
+   "action": "N panel > Options > Settings: Displacement 'Bump Only' -> 'Displacement and Bump'",
+   "result": "true displacement",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2542_material_displacement_and_bump.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2542_material_settings.png",
+     "bounds": [
+      1900,
+      250,
+      2560,
+      800
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2542_material_displacement_and_bump.jpg",
+     "scale": 1.0,
+     "label": "25:42 Material Settings: Displacement 'Displacement and Bump'"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "25:44-26:00",
+   "action": "Displacement Scale drag demo 0.010, 0.000, 0.080, 0.070 (Midlevel 0.5)",
+   "result": "dirt pushed into the stones at Midlevel 0.5",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [],
+   "review_frames": "2 fps 25:20-26:12"
+  },
+  {
+   "t": "26:00-26:10",
+   "action": "Midlevel 0.000, Scale typed 0.020",
+   "result": "only the stones pop out of the mesh",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2610_displacement_final.jpg",
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2608_viewport_after_displacement.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2610_displacement.png",
+     "bounds": [
+      1300,
+      400,
+      2200,
+      1000
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2610_displacement_final.jpg",
+     "scale": 1.0,
+     "label": "26:10 Displacement: Object Space, Midlevel 0.000, Scale 0.020"
+    }
+   ],
+   "review_frames": ""
+  },
+  {
+   "t": "26:12",
+   "action": "Node editor zoomed out on the whole graph (outside the segment by 2 s; used to confirm the topology)",
+   "result": "9 frames, 38 nodes",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2612_full_graph_overview.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/cobblestone/evidence/a/crops/c_t2612_overview.png",
+     "bounds": [
+      850,
+      60,
+      2560,
+      1400
+     ],
+     "source_frame": "tools/materials/reconstruction/cobblestone/evidence/a/frames/t2612_full_graph_overview.jpg",
+     "scale": 1.0,
+     "label": "26:12 whole graph before grouping (9 frames)"
+    }
+   ],
+   "review_frames": ""
+  }
+ ],
+ "uncited_frames": [],
+ "uncited_crops": []
+}

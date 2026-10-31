@@ -1,0 +1,27 @@
+{
+ "none": "C:\\GodotProjects\\delivery-simulator-2026\\tools\\materials\\reconstruction\\glass\\renders\\panel_none.png",
+ "PM_GlassCircles": {
+  "file": "C:\\GodotProjects\\delivery-simulator-2026\\tools\\materials\\reconstruction\\glass\\renders\\panel_GlassCircles.png",
+  "seconds": 12.4
+ },
+ "PM_GlassVoronoi": {
+  "file": "C:\\GodotProjects\\delivery-simulator-2026\\tools\\materials\\reconstruction\\glass\\renders\\panel_GlassVoronoi.png",
+  "seconds": 13.7
+ },
+ "PM_GlassCells": {
+  "file": "C:\\GodotProjects\\delivery-simulator-2026\\tools\\materials\\reconstruction\\glass\\renders\\panel_GlassCells.png",
+  "seconds": 12.6
+ },
+ "PM_GlassWavy": {
+  "file": "C:\\GodotProjects\\delivery-simulator-2026\\tools\\materials\\reconstruction\\glass\\renders\\panel_GlassWavy.png",
+  "seconds": 13.8
+ },
+ "PM_GlassBlobby": {
+  "file": "C:\\GodotProjects\\delivery-simulator-2026\\tools\\materials\\reconstruction\\glass\\renders\\panel_GlassBlobby.png",
+  "seconds": 14.7
+ },
+ "PM_GlassFrosted": {
+  "file": "C:\\GodotProjects\\delivery-simulator-2026\\tools\\materials\\reconstruction\\glass\\renders\\panel_GlassFrosted.png",
+  "seconds": 13.0
+ }
+}

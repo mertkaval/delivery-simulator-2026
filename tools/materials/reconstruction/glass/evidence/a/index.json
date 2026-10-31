@@ -1,0 +1,2557 @@
+{
+ "video": "SNKNqHd0AYI",
+ "title": "Procedural Textured Frosted Glass Materials (Blender Tutorial), Ryan King Art, 2026-05-12",
+ "segment": "a",
+ "range": "00:00-22:32 (course ad 16:43-17:52 skipped)",
+ "classes": {
+  "A": "directly observed in a frame",
+  "B": "narration / recipe repo only",
+  "C": "our inference / implementation",
+  "D": "unresolved"
+ },
+ "timing_note": "t / t_s are true video times. Frames were extracted with ffmpeg -ss <t_s> -frames:v 1 at 2560x1440. The 1 fps scan frames used for the survey (tmp, not kept) showed video time N+0.5 s; all times here are corrected.",
+ "frame_times": {
+  "tools/materials/reconstruction/glass/evidence/a/frames/t0004_intro_final_render_six_panes.jpg": 4.5,
+  "tools/materials/reconstruction/glass/evidence/a/frames/t0042_overview_product_circles_group.jpg": 42.5,
+  "tools/materials/reconstruction/glass/evidence/a/frames/t0118_overview_product_voronoi_group.jpg": 78.5,
+  "tools/materials/reconstruction/glass/evidence/a/frames/t0138_overview_product_cells_group.jpg": 98.5,
+  "tools/materials/reconstruction/glass/evidence/a/frames/t0334_setup_apply_object_transform.jpg": 214.5,
+  "tools/materials/reconstruction/glass/evidence/a/frames/t0342_setup_six_panes_grid.jpg": 222.5,
+  "tools/materials/reconstruction/glass/evidence/a/frames/t0453_setup_render_cycles_gpu.jpg": 293.5,
+  "tools/materials/reconstruction/glass/evidence/a/frames/t0506_setup_world_hdri.jpg": 306.5,
+  "tools/materials/reconstruction/glass/evidence/a/frames/t0640_circles_voronoi_smoothf1_scale50.jpg": 400.5,
+  "tools/materials/reconstruction/glass/evidence/a/frames/t1043_circles_group_final_graph.jpg": 643.5,
+  "tools/materials/reconstruction/glass/evidence/a/frames/t1044_circles_viewport_look.jpg": 644.5,
+  "tools/materials/reconstruction/glass/evidence/a/frames/t1626_voronoi_group_final_graph.jpg": 986.5,
+  "tools/materials/reconstruction/glass/evidence/a/frames/t1641_voronoi_group_node_final.jpg": 1001.5,
+  "tools/materials/reconstruction/glass/evidence/a/frames/t2015_cells_graph_before_grouping.jpg": 1215.5,
+  "tools/materials/reconstruction/glass/evidence/a/frames/t2207_cells_group_interior.jpg": 1327.5,
+  "tools/materials/reconstruction/glass/evidence/a/frames/t2225_cells_group_node_final.jpg": 1345.5
+ },
+ "events": [
+  {
+   "t": "00:04.5",
+   "t_s": 4.5,
+   "action": "Intro: finished product render shown in the 3D viewport (Rendering Done)",
+   "result": "3x2 glass panes in black frames on a dark studio backdrop; status bar shows Blender 5.1.1, objects named Cube.00x (product scene)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t0004_intro_final_render_six_panes.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "00:42.5",
+   "t_s": 42.5,
+   "action": "Overview: Textured Glass Circles group node (purchased project file), before demo edits",
+   "result": "controls: Scale 1, Glass Color white, Glass Roughness 0.200 (factor), Glass IOR 1.500, Voronoi Scale 50, Voronoi Detail 0, Voronoi Roughness 0.5 (f), Voronoi Smoothness 1 (f), Voronoi Randomness 1 (f), Bump Strength 1 (f)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t0042_overview_product_circles_group.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0042_product_circles_controls.png",
+     "bounds": [
+      1140,
+      300,
+      1880,
+      1150
+     ],
+     "scale": 1.0,
+     "source_time_s": 42.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t0042_overview_product_circles_group.jpg"
+    }
+   ]
+  },
+  {
+   "t": "00:45.5",
+   "t_s": 45.5,
+   "action": "Overview demo: Circles Scale dragged (2.7); 0:50 colour picker tint #BEDAFF; 0:54 Glass Roughness 0.454; 0:58-1:02 IOR 1.12/1.29; 1:06 Voronoi Scale 54.4; 1:10 Voronoi Detail 6.7; 1:14 Bump Strength",
+   "result": "temporary demo values (not part of the reconstructed defaults)",
+   "class": "A",
+   "confidence": "medium",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "01:18.5",
+   "t_s": 78.5,
+   "action": "Overview: Textured Glass Voronoi group node (product), before demo edits",
+   "result": "controls: Scale 1, Glass Color pale mint (display ~#ECFEF0), Glass Roughness 0.200 (f), Glass IOR 1.5, Voronoi Scale 1 30, Voronoi Scale 2 30, Voronoi Smoothness 1 0.1 (f), Voronoi Smoothness 2 0.03 (f), Voronoi Detail 1 3.000, Voronoi Detail 2 1.000 (factor bar), Bump Strength 1/2 1.0 (f)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t0118_overview_product_voronoi_group.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0118_product_voronoi_controls.png",
+     "bounds": [
+      1160,
+      240,
+      1980,
+      1210
+     ],
+     "scale": 1.0,
+     "source_time_s": 78.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t0118_overview_product_voronoi_group.jpg"
+    }
+   ]
+  },
+  {
+   "t": "01:38.5",
+   "t_s": 98.5,
+   "action": "Overview: Textured Glass Cells group node (product)",
+   "result": "controls: Scale 1, Glass Color white, Glass Roughness 1.000 (plain float), Glass IOR 1.5, Voronoi Scale 30, Voronoi Detail 0, Voronoi Roughness 0.5 (f), Voronoi Randomness 1 (f), Bump Strength 1 (f); no noise controls",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t0138_overview_product_cells_group.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0138_product_cells_controls.png",
+     "bounds": [
+      1170,
+      390,
+      1880,
+      1140
+     ],
+     "scale": 1.0,
+     "source_time_s": 98.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t0138_overview_product_cells_group.jpg"
+    }
+   ]
+  },
+  {
+   "t": "02:00.5",
+   "t_s": 120.5,
+   "action": "Overview: Textured Glass Wavy group node (product; built in segment b)",
+   "result": "controls: Scale 1, Glass Color white, Glass Roughness 0.2 (f), Glass IOR 1.5, Bump Strength 1 (f), Rotation X/Y/Z 0 deg",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0200_product_wavy_controls.png",
+     "bounds": [
+      1140,
+      420,
+      1900,
+      1260
+     ],
+     "scale": 1.0,
+     "source_time_s": 120.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 120.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "02:16.5",
+   "t_s": 136.5,
+   "action": "Overview: Textured Glass Blobby group node (product; built in segment b)",
+   "result": "controls: Scale 1, Glass Color white, Glass Roughness 1.000, Glass IOR 1.5, Voronoi Scale 10, Voronoi Detail 2.6, Voronoi Roughness 0.5 (f), Voronoi Smoothness 0.1 (f), Bump Strength 1 (f)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0216_product_blobby_controls.png",
+     "bounds": [
+      1170,
+      350,
+      1890,
+      1150
+     ],
+     "scale": 1.0,
+     "source_time_s": 136.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 136.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "02:28.5",
+   "t_s": 148.5,
+   "action": "Overview: Frosted Glass group node (product; built in segment b)",
+   "result": "controls: Scale 1, Glass Color white, Glass Roughness 1.000, Glass IOR 1.5, Noise Scale 20, Noise Detail 15, Noise Roughness 1.0 (f)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0228_product_frosted_controls.png",
+     "bounds": [
+      1040,
+      470,
+      1820,
+      1150
+     ],
+     "scale": 1.0,
+     "source_time_s": 148.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 148.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "03:22.5",
+   "t_s": 202.5,
+   "action": "Layout: Shift+A > Mesh > Plane",
+   "result": "default 2 m plane at the origin (overlay 'Add Plane')",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "03:26.5",
+   "t_s": 206.5,
+   "action": "S .4 Return",
+   "result": "plane scaled to 0.4 (0.8 m x 0.8 m)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0326_keys_S_0p4.png",
+     "bounds": [
+      1600,
+      780,
+      2000,
+      1200
+     ],
+     "scale": 1.0,
+     "source_time_s": 206.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 206.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "03:29.5",
+   "t_s": 209.5,
+   "action": "R X 90 Return",
+   "result": "plane rotated 90 deg about global X (stands vertical, normal -Y)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0327_header_rotation_global_x.png",
+     "bounds": [
+      900,
+      95,
+      2100,
+      135
+     ],
+     "scale": 1.0,
+     "source_time_s": 207.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 207.50 s (frame not kept, crop only)"
+    },
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0329_keys_R_X_90.png",
+     "bounds": [
+      1600,
+      780,
+      2000,
+      1200
+     ],
+     "scale": 1.0,
+     "source_time_s": 209.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 209.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "03:34.5",
+   "t_s": 214.5,
+   "action": "Ctrl+A > Apply Object Transform (Rotation & Scale per narration)",
+   "result": "rotation and scale applied (object scale 1, mesh in metres)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t0334_setup_apply_object_transform.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0330_keys_ctrlA_apply_menu.png",
+     "bounds": [
+      700,
+      380,
+      2000,
+      1260
+     ],
+     "scale": 0.8,
+     "source_time_s": 210.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 210.50 s (frame not kept, crop only)"
+    },
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0334_apply_object_transform.png",
+     "bounds": [
+      1600,
+      900,
+      2100,
+      1120
+     ],
+     "scale": 1.0,
+     "source_time_s": 214.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t0334_setup_apply_object_transform.jpg"
+    }
+   ]
+  },
+  {
+   "t": "03:36.5",
+   "t_s": 216.5,
+   "action": "Shift+D, X (interactive)",
+   "result": "second pane ~0.88-0.90 m along +X (live readout 'D: 0.8845 along global X')",
+   "class": "A",
+   "confidence": "medium",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0336_header_dup_dx.png",
+     "bounds": [
+      900,
+      95,
+      2100,
+      135
+     ],
+     "scale": 1.0,
+     "source_time_s": 216.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 216.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "03:38.5",
+   "t_s": 218.5,
+   "action": "Shift+D, X (interactive)",
+   "result": "third pane ~-1.76 m from the second (live readout 'D: -1.7553 along global X')",
+   "class": "A",
+   "confidence": "medium",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0338_header_dup_dx2.png",
+     "bounds": [
+      900,
+      95,
+      2100,
+      135
+     ],
+     "scale": 1.0,
+     "source_time_s": 218.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 218.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "03:41.5",
+   "t_s": 221.5,
+   "action": "box select row, Shift+D, Z (interactive)",
+   "result": "second row ~0.87 m below (live readout 'D: -0.8707 along global Z')",
+   "class": "A",
+   "confidence": "medium",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0341_header_dup_dz.png",
+     "bounds": [
+      900,
+      95,
+      2100,
+      135
+     ],
+     "scale": 1.0,
+     "source_time_s": 221.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 221.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "03:42.5",
+   "t_s": 222.5,
+   "action": "result: 2 rows x 3 panes; then G Z moves all up (amount not shown)",
+   "result": "six 0.8 m panes (Plane..Plane.005)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t0342_setup_six_panes_grid.jpg"
+   ],
+   "crops": []
+  },
+  {
+   "t": "03:50.5",
+   "t_s": 230.5,
+   "action": "Shift+A > Mesh > Monkey, scaled down, moved, Ctrl+A apply scale, Shift+D duplicates",
+   "result": "4 Suzannes behind the panes (status: 10 objects = 6 planes + 4 monkeys, no lamp)",
+   "class": "A",
+   "confidence": "medium",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "04:17.5",
+   "t_s": 257.5,
+   "action": "Suzanne.001: New material 'red'; Base Color picker (Perceptual HSV) drag",
+   "result": "H 0.009 S 1.000 V 0.906 #E70C00 (still dragging)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0417_red_picker_drag.png",
+     "bounds": [
+      1250,
+      560,
+      2050,
+      1440
+     ],
+     "scale": 1.0,
+     "source_time_s": 257.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 257.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "04:18.2",
+   "t_s": 258.2,
+   "action": "red Base Color final before the picker closes",
+   "result": "H 0.009 S 1.000 V 0.956, Hex #F40D00; other Principled inputs default (Metallic 0, Roughness 0.5, IOR 1.5)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0418_red_picker_final.png",
+     "bounds": [
+      1250,
+      560,
+      2050,
+      1440
+     ],
+     "scale": 1.0,
+     "source_time_s": 258.2,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 258.20 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "04:22.5",
+   "t_s": 262.5,
+   "action": "drag-and-drop the material onto the other monkeys",
+   "result": "overlay 'Drop Named Material on Object'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "04:30.5",
+   "t_s": 270.5,
+   "action": "Shift+A > Camera; Ctrl+Alt+Numpad0 at ~4:36; G and G+MMB moves",
+   "result": "camera aligned to the view, moved interactively",
+   "class": "A",
+   "confidence": "medium",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "04:46.5",
+   "t_s": 286.5,
+   "action": "camera properties",
+   "result": "Perspective, Focal Length 50 mm, Lens Unit Millimeters, Shift 0/0, Clip 0.1/1000, Depth of Field off",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0446_camera_lens.png",
+     "bounds": [
+      1790,
+      480,
+      2560,
+      1180
+     ],
+     "scale": 1.0,
+     "source_time_s": 286.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 286.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "04:52.5",
+   "t_s": 292.5,
+   "action": "Render Engine > Cycles",
+   "result": "Cycles; Device GPU Compute; OSL off; Motion Blur checkbox on; Sampling panel never opened",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t0453_setup_render_cycles_gpu.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0452_render_engine_menu.png",
+     "bounds": [
+      2020,
+      330,
+      2560,
+      620
+     ],
+     "scale": 1.0,
+     "source_time_s": 292.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 292.50 s (frame not kept, crop only)"
+    },
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0453_render_device.png",
+     "bounds": [
+      1990,
+      280,
+      2560,
+      900
+     ],
+     "scale": 1.0,
+     "source_time_s": 293.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t0453_setup_render_cycles_gpu.jpg"
+    }
+   ]
+  },
+  {
+   "t": "05:06.5",
+   "t_s": 306.5,
+   "action": "World: Color > Environment Texture > open HDRI; Strength 0.5",
+   "result": "old_apartments_walkway_1k.hdr (Poly Haven 1K), Linear, Equirectangular, Single Image, Color Space Linear Rec.709, Alpha Premultiplied, Vector Default, Strength 0.500",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t0506_setup_world_hdri.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0506_world_hdri.png",
+     "bounds": [
+      1800,
+      280,
+      2560,
+      920
+     ],
+     "scale": 1.0,
+     "source_time_s": 306.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t0506_setup_world_hdri.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0506_blender_version.png",
+     "bounds": [
+      2200,
+      1405,
+      2560,
+      1440
+     ],
+     "scale": 2.0,
+     "source_time_s": 306.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t0506_setup_world_hdri.jpg"
+    }
+   ]
+  },
+  {
+   "t": "05:30.5",
+   "t_s": 330.5,
+   "action": "Render > Film > Transparent on",
+   "result": "Exposure 1.00, Pixel Filter Blackman-Harris 1.50 px, Transparent checked",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0530_film_transparent.png",
+     "bounds": [
+      1820,
+      780,
+      2560,
+      1080
+     ],
+     "scale": 1.0,
+     "source_time_s": 330.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 330.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "05:34.5",
+   "t_s": 334.5,
+   "action": "Color Management > View > Filmic",
+   "result": "View Filmic (menu lists ACES 2.0, Khronos PBR Neutral, AgX, Filmic, Filmic Log, False Color, Raw)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0534_view_transform_menu.png",
+     "bounds": [
+      1820,
+      780,
+      2560,
+      1180
+     ],
+     "scale": 1.0,
+     "source_time_s": 334.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 334.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "05:38.5",
+   "t_s": 338.5,
+   "action": "Color Management > Look > Very High Contrast",
+   "result": "Display sRGB, View Filmic, Look Very High Contrast, Exposure 0, Gamma 1",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0538_color_management.png",
+     "bounds": [
+      1820,
+      1000,
+      2560,
+      1300
+     ],
+     "scale": 1.0,
+     "source_time_s": 338.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 338.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "05:50.5",
+   "t_s": 350.5,
+   "action": "Shading workspace, camera view; Plane.002 > New material, renamed 'Textured Glass Circles'",
+   "result": "material created with default Principled BSDF",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "06:00.0",
+   "t_s": 360.0,
+   "action": "narration: enable the Node Wrangler add-on (Edit > Preferences > Add-ons)",
+   "result": "Node Wrangler used for Ctrl+T and Ctrl+Shift+click previews",
+   "class": "B",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "06:13.5",
+   "t_s": 373.5,
+   "action": "select Principled BSDF, X",
+   "result": "Principled deleted",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "06:19.5",
+   "t_s": 379.5,
+   "action": "Shift+A 'glas' > Glass BSDF; BSDF -> Material Output Surface",
+   "result": "Glass: Multiscatter GGX, Color white, Roughness 0, IOR 1.5",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "06:28.5",
+   "t_s": 388.5,
+   "action": "Shift+A 'vor' > Voronoi Texture; Ctrl+Shift+click preview",
+   "result": "defaults 3D/F1/Euclidean, Scale 5, Detail 0, Roughness 0.5, Lacunarity 2, Randomness 1",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "06:34.5",
+   "t_s": 394.5,
+   "action": "Voronoi feature F1 -> Smooth F1",
+   "result": "Smoothness socket appears (1.0)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0634_voronoi_feature_menu.png",
+     "bounds": [
+      1100,
+      330,
+      1700,
+      1440
+     ],
+     "scale": 0.8,
+     "source_time_s": 394.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 394.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "06:40.5",
+   "t_s": 400.5,
+   "action": "Voronoi Scale 50",
+   "result": "Scale 50, Detail 0, Roughness 0.5, Lacunarity 2, Smoothness 1, Randomness 1, Normalize off",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t0640_circles_voronoi_smoothf1_scale50.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0640_voronoi_smoothf1_scale50.png",
+     "bounds": [
+      1300,
+      370,
+      1700,
+      1190
+     ],
+     "scale": 1.0,
+     "source_time_s": 400.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t0640_circles_voronoi_smoothf1_scale50.jpg"
+    }
+   ]
+  },
+  {
+   "t": "06:46.5",
+   "t_s": 406.5,
+   "action": "Ctrl+T (Node Wrangler) on the Voronoi",
+   "result": "Texture Coordinate + Mapping added; NW linked Generated -> Mapping Vector",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0646_ctrlT_generated_link.png",
+     "bounds": [
+      1100,
+      330,
+      1900,
+      1000
+     ],
+     "scale": 1.0,
+     "source_time_s": 406.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 406.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "06:56.5",
+   "t_s": 416.5,
+   "action": "relink Texture Coordinate Object -> Mapping Vector",
+   "result": "object coordinates used (final)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0656_texcoord_object_link.png",
+     "bounds": [
+      1200,
+      440,
+      1800,
+      960
+     ],
+     "scale": 1.0,
+     "source_time_s": 416.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 416.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "07:01.5",
+   "t_s": 421.5,
+   "action": "Voronoi Distance -> Glass Normal (temporary)",
+   "result": "replaced by the Bump at 7:13",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "07:16.5",
+   "t_s": 436.5,
+   "action": "Shift+A 'bum' > Bump dropped between",
+   "result": "Distance -> Bump Height, Bump Normal -> Glass Normal; default Distance 0.001",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "07:22.5",
+   "t_s": 442.5,
+   "action": "Bump Distance typed 0.002",
+   "result": "Distance 0.002, Strength 1, Filter Width 0.1",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0722_bump_distance_typed.png",
+     "bounds": [
+      1250,
+      430,
+      2300,
+      980
+     ],
+     "scale": 1.0,
+     "source_time_s": 442.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 442.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "07:25.5",
+   "t_s": 445.5,
+   "action": "Bump Strength 0 demo, back to 1.000 at 7:28",
+   "result": "temporary",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "07:37.5",
+   "t_s": 457.5,
+   "action": "Shift+A 'rgb' > RGB Curves dropped between Voronoi and Bump",
+   "result": "Distance -> Curves Color input; Curves Color -> Bump Height",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "07:46.5",
+   "t_s": 466.5,
+   "action": "C curve: first point added (0.5075, 0.4535); 7:49 second point (0.2788, 0.3571)",
+   "result": "two interior points",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "07:55.5",
+   "t_s": 475.5,
+   "action": "Bump Invert on",
+   "result": "dots read as dents",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "08:14.0",
+   "t_s": 494.0,
+   "action": "curve points adjusted in side view (7:52-8:14)",
+   "result": "upper point (0.5804, 0.6535) final",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0814_curves_upper_point_invert.png",
+     "bounds": [
+      1300,
+      280,
+      2350,
+      1020
+     ],
+     "scale": 1.0,
+     "source_time_s": 494.0,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 494.00 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "08:14.6",
+   "t_s": 494.6,
+   "action": "lower point readout after the adjustments",
+   "result": "(0.3140, 0.2464) final (unchanged to 10:43)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "08:25.5",
+   "t_s": 505.5,
+   "action": "Glass Roughness 0.2",
+   "result": "frosted look",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0825_glass_roughness_0p2.png",
+     "bounds": [
+      1400,
+      440,
+      2000,
+      980
+     ],
+     "scale": 1.0,
+     "source_time_s": 505.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 505.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "08:37.5",
+   "t_s": 517.5,
+   "action": "box select all but Material Output, Ctrl+G",
+   "result": "NodeGroup created",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "08:46.5",
+   "t_s": 526.5,
+   "action": "Tab out, group renamed 'Textured Glass Circles' (pasted material name)",
+   "result": "group node in material, Shader -> Surface",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "08:52.5",
+   "t_s": 532.5,
+   "action": "Tab in, N panel: Group Sockets output 'BSDF' renamed 'Shader'",
+   "result": "output socket Shader",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0852_group_sockets_bsdf.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      700
+     ],
+     "scale": 1.0,
+     "source_time_s": 532.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 532.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "09:07.5",
+   "t_s": 547.5,
+   "action": "Mapping Scale -> Group Input extra socket",
+   "result": "interface 'Scale' Vector XYZ (1,1,1)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "09:16.5",
+   "t_s": 556.5,
+   "action": "Scale type Vector -> Float; default typed 1",
+   "result": "Float, subtype None, default 1.000, min -inf, max inf",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0916_np_scale_type_menu.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 556.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 556.50 s (frame not kept, crop only)"
+    },
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0922_np_scale_float_default1.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 562.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 562.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "09:25.5",
+   "t_s": 565.5,
+   "action": "Tab out: group node Scale was 0.000, set back to 1",
+   "result": "group node Scale 1.0 (2.8 drag seen at 9:28)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "09:43.5",
+   "t_s": 583.5,
+   "action": "Glass Color -> extra socket, renamed 'Glass Color'",
+   "result": "Color, default white",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0943_np_glass_color.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 583.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 583.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "09:49.5",
+   "t_s": 589.5,
+   "action": "Glass Roughness -> extra socket, renamed",
+   "result": "Float Factor 0.200, 0..1",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0949_np_glass_roughness.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 589.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 589.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "09:55.5",
+   "t_s": 595.5,
+   "action": "Glass IOR -> extra socket, renamed",
+   "result": "Float None 1.500, 0..1000",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t0955_np_glass_ior.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 595.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 595.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "10:16.5",
+   "t_s": 616.5,
+   "action": "Voronoi Scale, Detail, Roughness -> extra sockets, renamed Voronoi Scale/Detail/Roughness",
+   "result": "Voronoi Scale Float 50, -1000..1000",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1016_np_voronoi_scale.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 616.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 616.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "10:22.5",
+   "t_s": 622.5,
+   "action": "Voronoi Roughness socket",
+   "result": "Float Factor 0.5, 0..1, 'The influenc...evious layer'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1022_np_voronoi_roughness.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 622.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 622.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "10:31.5",
+   "t_s": 631.5,
+   "action": "Voronoi Smoothness + Randomness -> extra sockets, renamed",
+   "result": "Voronoi Smoothness Factor 1.0, 0..1",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1031_np_voronoi_smoothness.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 631.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 631.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "10:39.5",
+   "t_s": 639.5,
+   "action": "Bump Strength -> extra socket, renamed 'Bump Strength'",
+   "result": "Factor 1.0, 0..1, 'Strength of t...p mapping'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1039_np_bump_strength.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 639.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 639.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "10:43.5",
+   "t_s": 643.5,
+   "action": "final Circles group graph visible",
+   "result": "GI -> TexCoord/Mapping -> Voronoi -> RGB Curves -> Bump -> Glass -> Group Output",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t1043_circles_group_final_graph.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1043_group_input_texcoord_mapping.png",
+     "bounds": [
+      717,
+      620,
+      1180,
+      1000
+     ],
+     "scale": 2.0,
+     "source_time_s": 643.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t1043_circles_group_final_graph.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1043_mapping_to_group_output.png",
+     "bounds": [
+      1050,
+      560,
+      2300,
+      1100
+     ],
+     "scale": 1.0,
+     "source_time_s": 643.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t1043_circles_group_final_graph.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1043_distance_to_curves_color.png",
+     "bounds": [
+      1170,
+      560,
+      1600,
+      1060
+     ],
+     "scale": 2.0,
+     "source_time_s": 643.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t1043_circles_group_final_graph.jpg"
+    }
+   ]
+  },
+  {
+   "t": "10:44.5",
+   "t_s": 644.5,
+   "action": "Tab out; result in camera view",
+   "result": "finished Circles look (red Suzanne behind)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t1044_circles_viewport_look.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1044_viewport_look.png",
+     "bounds": [
+      0,
+      90,
+      717,
+      1300
+     ],
+     "scale": 1.0,
+     "source_time_s": 644.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t1044_circles_viewport_look.jpg"
+    }
+   ]
+  },
+  {
+   "t": "10:47.5",
+   "t_s": 647.5,
+   "action": "group node demos (Bump Strength 0.445, Voronoi Randomness 0.715, Glass Color picker #CCEDFF at 10:52)",
+   "result": "temporary; all defaults again at 22:29",
+   "class": "A",
+   "confidence": "medium",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "22:29.5",
+   "t_s": 1349.5,
+   "action": "Circles group node seen again at 22:29 (H hides finished panes)",
+   "result": "all values at the defaults",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2229_circles_group_node_values.png",
+     "bounds": [
+      1180,
+      360,
+      1760,
+      1120
+     ],
+     "scale": 1.0,
+     "source_time_s": 1349.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 1349.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "11:00.5",
+   "t_s": 660.5,
+   "action": "Plane: New material 'Textured Glass Voronoi'; Voronoi + Ctrl+T, Object coordinates",
+   "result": "TexCoord Object -> Mapping -> Voronoi",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "11:22.5",
+   "t_s": 682.5,
+   "action": "Voronoi feature -> Smooth F1",
+   "result": "Smooth F1, Scale 5",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1122_voronoi1_feature_smooth_f1.png",
+     "bounds": [
+      1370,
+      160,
+      1840,
+      1100
+     ],
+     "scale": 1.0,
+     "source_time_s": 682.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 682.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "11:26.5",
+   "t_s": 686.5,
+   "action": "Scale typed 30 (then undone)",
+   "result": "Scale 30",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "11:28.5",
+   "t_s": 688.5,
+   "action": "Ctrl+Z x4",
+   "result": "Scale back to 5.000; Roughness 0.000; Detail 0",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1128_undo_ctrl_z_x4.png",
+     "bounds": [
+      1330,
+      130,
+      1920,
+      1100
+     ],
+     "scale": 1.0,
+     "source_time_s": 688.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 688.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "11:36.5",
+   "t_s": 696.5,
+   "action": "Smoothness typed .1",
+   "result": "Smoothness 0.100",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1136_voronoi1_smoothness_0p1.png",
+     "bounds": [
+      1050,
+      100,
+      2330,
+      1400
+     ],
+     "scale": 0.6,
+     "source_time_s": 696.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 696.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "11:48.5",
+   "t_s": 708.5,
+   "action": "Shift+A Bump; Principled deleted; Shift+A Glass BSDF (11:52)",
+   "result": "Glass Multiscatter GGX",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "12:00.5",
+   "t_s": 720.5,
+   "action": "Bump Normal -> Glass Normal; Voronoi Distance -> Bump Height",
+   "result": "bump chain",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "12:04.5",
+   "t_s": 724.5,
+   "action": "unplug the link into Glass Color",
+   "result": "Glass Color unlinked (white)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1204_glass_color_link_removed.png",
+     "bounds": [
+      1050,
+      100,
+      2330,
+      1400
+     ],
+     "scale": 0.6,
+     "source_time_s": 724.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 724.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "12:08.5",
+   "t_s": 728.5,
+   "action": "Bump Distance 0.004",
+   "result": "Distance 0.004",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1208_bump1_distance_0p004.png",
+     "bounds": [
+      1050,
+      100,
+      2330,
+      1400
+     ],
+     "scale": 0.6,
+     "source_time_s": 728.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 728.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "12:20.5",
+   "t_s": 740.5,
+   "action": "Voronoi Scale 30 typed again",
+   "result": "V1: Smooth F1, Scale 30, Detail 0, Roughness 0, Lacunarity 2, Smoothness 0.1, Randomness 1",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1220_voronoi1_values.png",
+     "bounds": [
+      1040,
+      110,
+      1560,
+      980
+     ],
+     "scale": 1.0,
+     "source_time_s": 740.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 740.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "12:28.5",
+   "t_s": 748.5,
+   "action": "Bump Invert on",
+   "result": "Invert checked",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1228_bump1_invert.png",
+     "bounds": [
+      1050,
+      100,
+      2330,
+      1400
+     ],
+     "scale": 0.6,
+     "source_time_s": 748.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 748.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "12:40.5",
+   "t_s": 760.5,
+   "action": "Shift+Ctrl+D on the Voronoi (duplicate keeping input links)",
+   "result": "V2 with the Mapping link",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1240_dup_voronoi_shift_ctrl_d.png",
+     "bounds": [
+      1050,
+      100,
+      2330,
+      1400
+     ],
+     "scale": 0.6,
+     "source_time_s": 760.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 760.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "13:00.5",
+   "t_s": 780.5,
+   "action": "V2 Detail 3, Roughness 1, Smoothness 0.030",
+   "result": "V2: Scale 30, Detail 3, Roughness 1, Lacunarity 2, Smoothness 0.03, Randomness 1",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1300_voronoi2_values.png",
+     "bounds": [
+      1120,
+      250,
+      1580,
+      1200
+     ],
+     "scale": 1.0,
+     "source_time_s": 780.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 780.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "13:08.5",
+   "t_s": 788.5,
+   "action": "Shift+D Bump; V2 Distance -> Bump2 Height; Bump2 Normal -> Bump1 Normal",
+   "result": "two bump layers chained",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1308_bump2_chain.png",
+     "bounds": [
+      1050,
+      100,
+      2330,
+      1400
+     ],
+     "scale": 0.6,
+     "source_time_s": 788.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 788.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "13:26.5",
+   "t_s": 806.5,
+   "action": "Bump2 Distance typed 0.00008",
+   "result": "field shows 0.00008; displays 0.0001 afterwards (4-decimal display)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1326_bump2_distance_typed.png",
+     "bounds": [
+      1280,
+      480,
+      1840,
+      1190
+     ],
+     "scale": 1.0,
+     "source_time_s": 806.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 806.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "13:44.5",
+   "t_s": 824.5,
+   "action": "RGB Curves dropped after V1; Shift+D copy dropped after V2",
+   "result": "two curves nodes",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "14:05.5",
+   "t_s": 845.5,
+   "action": "Curves1 C point added and dragged",
+   "result": "(0.6758, 0.2928) final",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1405_curves1_final_point.png",
+     "bounds": [
+      1190,
+      400,
+      1680,
+      1000
+     ],
+     "scale": 1.0,
+     "source_time_s": 845.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 845.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "14:17.5",
+   "t_s": 857.5,
+   "action": "Curves2 C point dragged",
+   "result": "(0.6331, 0.3000) final",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1417_curves2_final_point.png",
+     "bounds": [
+      1150,
+      500,
+      1780,
+      1280
+     ],
+     "scale": 1.0,
+     "source_time_s": 857.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 857.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "14:29.5",
+   "t_s": 869.5,
+   "action": "box select, Ctrl+G; Tab out; renamed 'Textured Glass Voronoi'",
+   "result": "group node",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "14:59.5",
+   "t_s": 899.5,
+   "action": "output BSDF -> 'Shader'; Mapping Scale -> 'Scale' Vector -> Float, default 1",
+   "result": "Float 1.0, -inf..inf",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1459_np_scale_float.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 899.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 899.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "15:17.5",
+   "t_s": 917.5,
+   "action": "Glass Color -> 'Glass Color'",
+   "result": "Color white",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1517_np_glass_color.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 917.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 917.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "15:23.5",
+   "t_s": 923.5,
+   "action": "Glass Roughness -> 'Glass Roughness'",
+   "result": "Float Factor 0.000, 0..1",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1523_np_glass_roughness_factor0.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 923.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 923.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "15:29.5",
+   "t_s": 929.5,
+   "action": "Glass IOR -> 'Glass IOR'",
+   "result": "Float 1.5, 0..1000",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1529_np_glass_ior.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 929.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 929.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "15:35.5",
+   "t_s": 935.5,
+   "action": "V1 Scale then V2 Scale -> extra sockets",
+   "result": "two 'Scale' sockets (30, -1000..1000)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1544_np_voronoi_scale.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 944.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 944.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "15:50.5",
+   "t_s": 950.5,
+   "action": "V1 then V2 Smoothness -> extra sockets",
+   "result": "second Smoothness Factor 0.030",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1550_np_smoothness2.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 950.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 950.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "15:53.5",
+   "t_s": 953.5,
+   "action": "V1 then V2 Detail -> extra sockets",
+   "result": "second Detail 3.000, 0..15",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1553_np_detail2.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 953.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 953.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "16:05.5",
+   "t_s": 965.5,
+   "action": "renamed Voronoi Scale 1/2, Voronoi Smoothness 1/2",
+   "result": "Smoothness 1 Factor 0.100",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1605_np_smoothness1.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 965.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 965.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "16:14.5",
+   "t_s": 974.5,
+   "action": "renamed Voronoi Detail 1/2",
+   "result": "Detail 1 Float 0.000, 0..15",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1614_np_detail1.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 974.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 974.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "16:15.5",
+   "t_s": 975.5,
+   "action": "Bump1 Strength linked first, then Bump2 Strength (16:16)",
+   "result": "Strength sockets in that order",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1615_bump1_strength_linked_first.png",
+     "bounds": [
+      1050,
+      100,
+      2330,
+      1400
+     ],
+     "scale": 0.6,
+     "source_time_s": 975.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 975.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "16:23.5",
+   "t_s": 983.5,
+   "action": "renamed Bump Strength 1/2",
+   "result": "Factor 1.0, 0..1",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1623_np_bump_strength1.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 983.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 983.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "16:26.5",
+   "t_s": 986.5,
+   "action": "final Voronoi group graph visible",
+   "result": "12 inputs wired; two Voronoi/Curves/Bump chains",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t1626_voronoi_group_final_graph.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1626_inputs_texcoord_voronois.png",
+     "bounds": [
+      717,
+      512,
+      1340,
+      1126
+     ],
+     "scale": 2.0,
+     "source_time_s": 986.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t1626_voronoi_group_final_graph.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1626_curves_bumps.png",
+     "bounds": [
+      1300,
+      500,
+      1900,
+      1130
+     ],
+     "scale": 2.0,
+     "source_time_s": 986.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t1626_voronoi_group_final_graph.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1626_bumps_glass_output.png",
+     "bounds": [
+      1300,
+      512,
+      2280,
+      1000
+     ],
+     "scale": 1.5,
+     "source_time_s": 986.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t1626_voronoi_group_final_graph.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1626_viewport_look.png",
+     "bounds": [
+      0,
+      90,
+      717,
+      1300
+     ],
+     "scale": 1.0,
+     "source_time_s": 986.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t1626_voronoi_group_final_graph.jpg"
+    }
+   ]
+  },
+  {
+   "t": "16:32.5",
+   "t_s": 992.5,
+   "action": "group node demos (Scale 4.7, Glass Color picker turned green, Voronoi Smoothness 1 0.947, Bump Strength 1 0)",
+   "result": "temporary; defaults again at 16:41",
+   "class": "A",
+   "confidence": "medium",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "16:41.5",
+   "t_s": 1001.5,
+   "action": "Voronoi group node values at the end of the chapter",
+   "result": "Scale 1, white, Roughness 0, IOR 1.5, 30/30, 0.1/0.03, 0/3, 1/1",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t1641_voronoi_group_node_final.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1641_voronoi_group_node_values.png",
+     "bounds": [
+      880,
+      280,
+      1580,
+      1130
+     ],
+     "scale": 1.0,
+     "source_time_s": 1001.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t1641_voronoi_group_node_final.jpg"
+    }
+   ]
+  },
+  {
+   "t": "17:57.5",
+   "t_s": 1077.5,
+   "action": "Plane.001: New material 'Textured Glass Cells'; Voronoi; Ctrl+T, Object coordinates",
+   "result": "TexCoord Object -> Mapping -> Voronoi",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "18:17.5",
+   "t_s": 1097.5,
+   "action": "Voronoi feature F1 -> Distance to Edge",
+   "result": "no Smoothness socket",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1817_voronoi_distance_to_edge.png",
+     "bounds": [
+      1150,
+      220,
+      1620,
+      880
+     ],
+     "scale": 1.0,
+     "source_time_s": 1097.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 1097.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "18:24.5",
+   "t_s": 1104.5,
+   "action": "Voronoi Scale 30",
+   "result": "Scale 30, Detail 0, Roughness 0.5, Lacunarity 2, Randomness 1",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "18:40.5",
+   "t_s": 1120.5,
+   "action": "Bump added, Principled deleted, Glass BSDF -> Surface, Bump Normal -> Glass Normal, Distance -> Height",
+   "result": "bump chain",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "18:48.5",
+   "t_s": 1128.5,
+   "action": "Bump Distance 0.003, Invert on",
+   "result": "Distance 0.003, Invert checked",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "19:04.5",
+   "t_s": 1144.5,
+   "action": "Shift+A Map Range dropped between Voronoi and Bump",
+   "result": "Float, Linear, Clamp on, 0/1/0/1",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1904_map_range_bump.png",
+     "bounds": [
+      1180,
+      320,
+      2330,
+      1120
+     ],
+     "scale": 1.0,
+     "source_time_s": 1144.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 1144.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "19:20.5",
+   "t_s": 1160.5,
+   "action": "From Min dragged (0.19, 0.07, 0.03) and set 0.020",
+   "result": "From Min 0.020",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "19:37.5",
+   "t_s": 1177.5,
+   "action": "Shift+A Noise Texture; Mapping Vector -> Noise Vector; Scale 20, Detail 15, Roughness 1",
+   "result": "fBM, Normalize on, Lacunarity 2, Distortion 0",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1937_noise_values.png",
+     "bounds": [
+      1080,
+      260,
+      2330,
+      1400
+     ],
+     "scale": 0.8,
+     "source_time_s": 1177.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 1177.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "19:44.5",
+   "t_s": 1184.5,
+   "action": "Noise Factor -> Glass Roughness",
+   "result": "",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "19:52.5",
+   "t_s": 1192.5,
+   "action": "Shift+A 'ram' > Color Ramp dropped between noise and glass",
+   "result": "Noise Factor -> Ramp Factor, Ramp Color -> Glass Roughness",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "19:57.8",
+   "t_s": 1197.8,
+   "action": "white stop (index 1, pos 1.0) darkened in the picker",
+   "result": "last value before the popup closes: V 0.659 (Perceptual), #A8A8A8",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t1957_ramp_stop1_final_color.png",
+     "bounds": [
+      1060,
+      230,
+      1460,
+      1330
+     ],
+     "scale": 1.0,
+     "source_time_s": 1197.8,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 1197.80 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "20:11.5",
+   "t_s": 1211.5,
+   "action": "Shift+A Hue/Saturation/Value dropped after the ramp; Value demo drags (0.97, 0.39)",
+   "result": "Hue 0.5, Saturation 1, Value 1.0, Factor 1",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2011_hsv_values.png",
+     "bounds": [
+      1080,
+      190,
+      1800,
+      700
+     ],
+     "scale": 1.0,
+     "source_time_s": 1211.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 1211.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "20:15.5",
+   "t_s": 1215.5,
+   "action": "whole graph before grouping",
+   "result": "Noise -> Ramp -> HSV -> Glass Roughness; Voronoi -> Map Range -> Bump -> Glass Normal",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t2015_cells_graph_before_grouping.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2015_noise_ramp_hsv.png",
+     "bounds": [
+      1240,
+      470,
+      1720,
+      740
+     ],
+     "scale": 3.0,
+     "source_time_s": 1215.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t2015_cells_graph_before_grouping.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2015_whole_graph.png",
+     "bounds": [
+      1060,
+      280,
+      2160,
+      920
+     ],
+     "scale": 1.0,
+     "source_time_s": 1215.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t2015_cells_graph_before_grouping.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2015_voronoi_maprange_bump.png",
+     "bounds": [
+      1060,
+      740,
+      1800,
+      1060
+     ],
+     "scale": 1.5,
+     "source_time_s": 1215.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t2015_cells_graph_before_grouping.jpg"
+    }
+   ]
+  },
+  {
+   "t": "20:18.5",
+   "t_s": 1218.5,
+   "action": "box select, Ctrl+G; renamed 'Textured Glass Cells'; output BSDF -> 'Shader'",
+   "result": "group node",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": []
+  },
+  {
+   "t": "20:40.5",
+   "t_s": 1240.5,
+   "action": "Mapping Scale -> 'Scale'; Vector -> Float; default 1; Tab out: node Scale 0 -> 1",
+   "result": "Float 1.0",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2041_np_scale_vector_menu.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 1240.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 1240.50 s (frame not kept, crop only)"
+    },
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2047_np_scale_float_default1.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 1247.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 1247.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "20:49.5",
+   "t_s": 1249.5,
+   "action": "Ctrl+Z x11 (key overlay)",
+   "result": "no visible difference before/after; what was undone is unknown (D)",
+   "class": "D",
+   "confidence": "low",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2049_undo_ctrl_z_x11.png",
+     "bounds": [
+      1050,
+      100,
+      2330,
+      1400
+     ],
+     "scale": 0.75,
+     "source_time_s": 1249.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 1249.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "20:56.5",
+   "t_s": 1256.5,
+   "action": "Glass Color -> 'Glass Color'",
+   "result": "Color white",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2056_np_glass_color.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 1256.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 1256.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "21:02.5",
+   "t_s": 1262.5,
+   "action": "HSV Value -> 'Glass Roughness'",
+   "result": "Float None 1.000, 0..2, 'Value shift...e it brighter'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2102_np_glass_roughness_hsv_value.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 1262.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 1262.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "21:11.5",
+   "t_s": 1271.5,
+   "action": "Glass IOR -> 'Glass IOR'",
+   "result": "Float 1.5, 0..1000",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2111_np_glass_ior.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 1271.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 1271.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "21:20.5",
+   "t_s": 1280.5,
+   "action": "Voronoi Scale, Detail -> 'Voronoi Scale', 'Voronoi Detail'",
+   "result": "Scale 30, -1000..1000",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2120_np_voronoi_scale.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 1280.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 1280.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "21:36.5",
+   "t_s": 1296.5,
+   "action": "Voronoi Roughness, Randomness -> 'Voronoi Roughness', 'Voronoi Randomness'",
+   "result": "Roughness Factor 0.5, 0..1",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2136_np_voronoi_roughness.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 1296.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 1296.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "21:46.5",
+   "t_s": 1306.5,
+   "action": "Noise Scale, Detail, Roughness -> extra sockets; Scale renamed 'Noise Roughness Scale'",
+   "result": "Float 20, -1000..1000",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2144_np_noise_roughness_scale.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 1306.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 1306.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "21:50.5",
+   "t_s": 1310.5,
+   "action": "noise Roughness socket renamed 'Noise Roughness Detail 2'",
+   "result": "Float Factor 1.0, 0..1 'Blend factor...o zero detail'",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2150_np_noise_roughness_detail2.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 1310.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 1310.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "21:54.5",
+   "t_s": 1314.5,
+   "action": "noise Detail socket renamed 'Noise Roughness Detail 1'",
+   "result": "Float 15, 0..15",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2154_np_noise_roughness_detail1.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 1314.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 1314.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "22:06.5",
+   "t_s": 1326.5,
+   "action": "Bump Strength -> 'Bump Strength'",
+   "result": "Factor 1.0, 0..1",
+   "class": "A",
+   "confidence": "high",
+   "frames": [],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2206_np_bump_strength.png",
+     "bounds": [
+      1830,
+      120,
+      2330,
+      1400
+     ],
+     "scale": 1.0,
+     "source_time_s": 1326.5,
+     "source_frame": "tmp/materials_video/SNKNqHd0AYI.webm @ 1326.50 s (frame not kept, crop only)"
+    }
+   ]
+  },
+  {
+   "t": "22:07.5",
+   "t_s": 1327.5,
+   "action": "group interior with all inputs wired",
+   "result": "Cells group final (right side partly behind the N panel; see 20:15)",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t2207_cells_group_interior.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2207_group_interior.png",
+     "bounds": [
+      1050,
+      400,
+      2130,
+      1100
+     ],
+     "scale": 1.0,
+     "source_time_s": 1327.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t2207_cells_group_interior.jpg"
+    },
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2207_viewport_look.png",
+     "bounds": [
+      0,
+      90,
+      717,
+      1300
+     ],
+     "scale": 1.0,
+     "source_time_s": 1327.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t2207_cells_group_interior.jpg"
+    }
+   ]
+  },
+  {
+   "t": "22:25.5",
+   "t_s": 1345.5,
+   "action": "Cells group node values at the end of the chapter (Voronoi Detail 2.1 demo at 22:20 reverted)",
+   "result": "all defaults",
+   "class": "A",
+   "confidence": "high",
+   "frames": [
+    "tools/materials/reconstruction/glass/evidence/a/frames/t2225_cells_group_node_final.jpg"
+   ],
+   "crops": [
+    {
+     "path": "tools/materials/reconstruction/glass/evidence/a/crops/t2225_cells_group_node_values.png",
+     "bounds": [
+      1100,
+      400,
+      1780,
+      1280
+     ],
+     "scale": 1.0,
+     "source_time_s": 1345.5,
+     "source_frame": "tools/materials/reconstruction/glass/evidence/a/frames/t2225_cells_group_node_final.jpg"
+    }
+   ]
+  }
+ ],
+ "unused_frames": [],
+ "unused_crops": []
+}

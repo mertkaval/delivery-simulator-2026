@@ -1,0 +1,1205 @@
+# Material PM_GlassCircles
+
+- displacement_method: BUMP
+- surface_render_method: DITHERED
+- use_backface_culling: false
+- diffuse_color: (0.8, 0.85, 0.87, 0.35)
+- roughness: 0.2
+- metallic: 0
+- procmat group: PM_GlassCircles
+
+## Material tree
+
+### Nodes (2; frames 0)
+
+Types: ShaderNodeGroup x1, ShaderNodeOutputMaterial x1
+
+| node | type | label | frame | settings (non-default) | input values (non-default, unlinked) | note |
+|---|---|---|---|---|---|---|
+| MRS | ShaderNodeGroup | PM_GlassCircles |  | node_tree=PM_GlassCircles |  |  |
+| Material Output | ShaderNodeOutputMaterial |  |  |  |  |  |
+
+### Connections (1)
+
+| from | to |
+|---|---|
+| MRS.BSDF | Material Output.Surface |
+
+## Group PM_GlassCircles
+
+### Interface
+
+| socket | in/out | type | default | min | max | panel | description |
+|---|---|---|---|---|---|---|---|
+| Scale | input | Float | 1 |  |  |  | The video's Mapping Scale: multiplies the object coordinates (metres); 2 = every feature half the size |
+| Glass Color | input | Color | (1, 1, 1, 1) |  |  |  | Glass BSDF colour: the tint (white = clear; the video demos #CCEDFF) |
+| Glass Roughness | input | Float | 0.2 | 0 | 1 |  | Glass BSDF roughness: 0 = clear, higher = frosted |
+| Glass IOR | input | Float | 1.5 | 0 | 1000 |  | Index of refraction (1.5 = window glass; 1 = no refraction) |
+| Voronoi Scale | input | Float | 50 | -1000 | 1000 |  | Dimples per metre (Voronoi Scale; 50 = 2 cm dimples) |
+| Voronoi Detail | input | Float | 0 | 0 | 15 |  | Voronoi Detail: extra layers of smaller dimples (limits C) |
+| Voronoi Roughness | input | Float | 0.5 | 0 | 1 |  | Voronoi Roughness: weight of the detail layers |
+| Voronoi Smoothness | input | Float | 1 | 0 | 1 |  | Voronoi Smoothness (Smooth F1): roundness of the dimples |
+| Voronoi Randomness | input | Float | 1 | 0 | 1 |  | Voronoi Randomness: 0 = a regular grid of dimples, 1 = random (limits C) |
+| Bump Strength | input | Float | 1 | 0 | 1 |  | Bump strength: 0 = flat glass, 1 = the full relief |
+| Pattern Size | input | Float | 1 | 0.01 | 100 | Mapping | Metres per unit of the video's object space (its panes have applied scale: 1 unit = 1 m). 1 = the video's sizes; 2 = every feature and the relief depth twice as large (library control, C) |
+| Use UV | input | Float | 0 | 0 | 1 | Mapping | 0 = object space in metres; 1 = UVMap x Tile Size, every 4D texture sampled on a seamless torus (baked tiles repeat) |
+| Tile Size | input | Float | 4 | 0.05 | 1000 | Mapping | Metres covered by UV 0..1 in UV mode: the repeat length of a baked tile |
+| BSDF | output | Shader |  |  |  |  |  |
+| Albedo | output | Color | (0, 0, 0, 1) |  |  |  |  |
+
+### Nodes (35; frames 4)
+
+Types: ShaderNodeMath x14, NodeGroupInput x4, ShaderNodeMix x4, ShaderNodeTexVoronoi x2, NodeGroupOutput x1, ShaderNodeAttribute x1, ShaderNodeBsdfGlass x1, ShaderNodeBump x1, ShaderNodeCombineXYZ x1, ShaderNodeMapping x1, ShaderNodeRGBCurve x1, ShaderNodeSeparateXYZ x1, ShaderNodeTexCoord x1, ShaderNodeVectorMath x1, ShaderNodeVectorRotate x1
+
+| node | type | label | frame | settings (non-default) | input values (non-default, unlinked) | note |
+|---|---|---|---|---|---|---|
+| Group Output | NodeGroupOutput |  |  |  |  |  |
+| Group Input.001 | NodeGroupInput |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Texture Coordinate | ShaderNodeTexCoord |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Attribute | ShaderNodeAttribute | UV | Coordinates: object metres, or UVMap x Tile Size on a seamless  | attribute_name=UVMap |  |  |
+| Vector Math | ShaderNodeVectorMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SCALE |  |  |
+| Mix | ShaderNodeMix | P (m) | Coordinates: object metres, or UVMap x Tile Size on a seamless  | data_type=VECTOR |  |  |
+| Separate XYZ | ShaderNodeSeparateXYZ |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Math | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=DIVIDE | Value_001=6.283 |  |
+| Math.001 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY | Value_001=6.283 |  |
+| Math.002 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY | Value_001=6.283 |  |
+| Math.003 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=COSINE |  |  |
+| Math.004 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SINE |  |  |
+| Math.005 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=COSINE |  |  |
+| Math.006 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SINE |  |  |
+| Math.007 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Math.008 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Math.009 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Combine XYZ | ShaderNodeCombineXYZ | torus | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Vector Rotate | ShaderNodeVectorRotate | tilt off the lattice | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  | Axis=(0.53, 0.71, 0.46); Angle=0.83 |  |
+| Math.010 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Mix.001 | ShaderNodeMix |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | data_type=VECTOR |  |  |
+| Mix.002 | ShaderNodeMix |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Group Input.003 | NodeGroupInput |  | Glass BSDF |  |  |  |
+| glass | ShaderNodeBsdfGlass | glass | Glass BSDF |  |  | A 06:19.5, 08:25.5, 10:43.5: Glass BSDF Multiscatter GGX; Color / Roughness (0.2) / IOR (1.5) from the group, Normal <- Bump \| Thin Film Thickness 0 / IOR 1.33 = defaults (panel never opened, C) |
+| Group Input | NodeGroupInput |  | Mapping (video): Object coordinates -> Mapping Point, Scale = S |  |  |  |
+| pattern_scale | ShaderNodeMath | pattern_scale | Mapping (video): Object coordinates -> Mapping Point, Scale = S | operation=DIVIDE |  | C: the Mapping Scale = the video's Scale (A) / Pattern Size (library metres, 1 = the video's object space) |
+| mapping | ShaderNodeMapping | mapping | Mapping (video): Object coordinates -> Mapping Point, Scale = S |  |  | A 06:46.5, 10:43.5: Mapping Point, Location 0, Rotation 0, Scale <- Scale \| Vector = Object coordinates (Use UV 0) or the torus point (Use UV 1, C) |
+| mapping_w | ShaderNodeMath | mapping_w | Mapping (video): Object coordinates -> Mapping Point, Scale = S | operation=MULTIPLY |  | C: the torus' 4th coordinate scaled like the Mapping (0 in object mode) |
+| Group Input.002 | NodeGroupInput |  | Relief: Voronoi Smooth F1 -> RGB Curves -> Bump (inverted, 2 mm |  |  |  |
+| voronoi_3d | ShaderNodeTexVoronoi | voronoi (object 3D) | Relief: Voronoi Smooth F1 -> RGB Curves -> Bump (inverted, 2 mm | feature=SMOOTH_F1 |  | A 06:34.5-06:40.5, 10:43.5: Voronoi 3D Smooth F1 Euclidean, Normalize off, Lacunarity 2; Scale 50 / Detail 0 / Roughness 0.5 / Smoothness 1 / Randomness 1 from the group \| object mode (Use UV 0): the video's 3D texture |
+| voronoi_4d | ShaderNodeTexVoronoi | voronoi (UV 4D) | Relief: Voronoi Smooth F1 -> RGB Curves -> Bump (inverted, 2 mm | voronoi_dimensions=4D; feature=SMOOTH_F1 |  | A 06:34.5-06:40.5, 10:43.5: Voronoi 3D Smooth F1 Euclidean, Normalize off, Lacunarity 2; Scale 50 / Detail 0 / Roughness 0.5 / Smoothness 1 / Randomness 1 from the group \| UV mode (Use UV 1): 4D twin on the seamless torus (C) |
+| voronoi_mode | ShaderNodeMix | voronoi: object 3D \| UV 4D | Relief: Voronoi Smooth F1 -> RGB Curves -> Bump (inverted, 2 mm |  |  | C: Use UV picks the video's 3D texture (0) or its 4D torus twin (1) |
+| rgb_curves | ShaderNodeRGBCurve | rgb_curves | Relief: Voronoi Smooth F1 -> RGB Curves -> Bump (inverted, 2 mm |  |  | A 07:37.5-08:14.6, 10:43.5: Distance -> RGB Curves Color (not Factor); points read 08:14.0 / 08:14.6 (lower point's last move C) \| C curve (0, 0), (0.314, 0.2464), (0.5804, 0.6535), (1, 1), auto handles, Factor 1 |
+| bump_distance | ShaderNodeMath | bump_distance | Relief: Voronoi Smooth F1 -> RGB Curves -> Bump (inverted, 2 mm | operation=MULTIPLY | Value=0.002 | C: Bump Distance = the video's 0.002 m (A) x Pattern Size |
+| bump | ShaderNodeBump | bump | Relief: Voronoi Smooth F1 -> RGB Curves -> Bump (inverted, 2 mm | invert=true |  | A 07:22.5, 07:55.5, 10:43.5: Bump Invert on, Distance 0.002, Filter Width 0.1, Strength <- Bump Strength |
+
+### Connections (63)
+
+| from | to |
+|---|---|
+| glass.BSDF | Group Output.BSDF |
+| Group Input.003.Glass Color | Group Output.Albedo |
+| Group Input.Scale | pattern_scale.Value |
+| Group Input.Pattern Size | pattern_scale.Value_001 |
+| pattern_scale.Value | mapping.Scale |
+| Mix.001.Result | mapping.Vector |
+| Group Input.001.Tile Size | Vector Math.Scale |
+| Attribute.Vector | Vector Math.Vector |
+| Texture Coordinate.Object | Mix.A |
+| Vector Math.Vector | Mix.B |
+| Group Input.001.Use UV | Mix.Factor |
+| Attribute.Vector | Separate XYZ.Vector |
+| Group Input.001.Tile Size | Math.Value |
+| Separate XYZ.X | Math.001.Value |
+| Separate XYZ.Y | Math.002.Value |
+| Math.001.Value | Math.003.Value |
+| Math.001.Value | Math.004.Value |
+| Math.002.Value | Math.005.Value |
+| Math.002.Value | Math.006.Value |
+| Math.003.Value | Math.007.Value |
+| Math.Value | Math.007.Value_001 |
+| Math.004.Value | Math.008.Value |
+| Math.Value | Math.008.Value_001 |
+| Math.005.Value | Math.009.Value |
+| Math.Value | Math.009.Value_001 |
+| Math.007.Value | Combine XYZ.X |
+| Math.008.Value | Combine XYZ.Y |
+| Math.009.Value | Combine XYZ.Z |
+| Combine XYZ.Vector | Vector Rotate.Vector |
+| Math.006.Value | Math.010.Value |
+| Math.Value | Math.010.Value_001 |
+| Texture Coordinate.Object | Mix.001.A |
+| Vector Rotate.Vector | Mix.001.B |
+| Group Input.001.Use UV | Mix.001.Factor |
+| Math.010.Value | Mix.002.B |
+| Group Input.001.Use UV | Mix.002.Factor |
+| Mix.002.Result | mapping_w.Value |
+| pattern_scale.Value | mapping_w.Value_001 |
+| Group Input.002.Voronoi Detail | voronoi_3d.Detail |
+| Group Input.002.Voronoi Randomness | voronoi_3d.Randomness |
+| Group Input.002.Voronoi Roughness | voronoi_3d.Roughness |
+| Group Input.002.Voronoi Scale | voronoi_3d.Scale |
+| Group Input.002.Voronoi Smoothness | voronoi_3d.Smoothness |
+| mapping.Vector | voronoi_3d.Vector |
+| Group Input.002.Voronoi Detail | voronoi_4d.Detail |
+| Group Input.002.Voronoi Randomness | voronoi_4d.Randomness |
+| Group Input.002.Voronoi Roughness | voronoi_4d.Roughness |
+| Group Input.002.Voronoi Scale | voronoi_4d.Scale |
+| Group Input.002.Voronoi Smoothness | voronoi_4d.Smoothness |
+| mapping.Vector | voronoi_4d.Vector |
+| mapping_w.Value | voronoi_4d.W |
+| voronoi_3d.Distance | voronoi_mode.A |
+| voronoi_4d.Distance | voronoi_mode.B |
+| Group Input.001.Use UV | voronoi_mode.Factor |
+| voronoi_mode.Result | rgb_curves.Color |
+| Group Input.002.Pattern Size | bump_distance.Value_001 |
+| bump_distance.Value | bump.Distance |
+| rgb_curves.Color | bump.Height |
+| Group Input.002.Bump Strength | bump.Strength |
+| Group Input.003.Glass Color | glass.Color |
+| Group Input.003.Glass IOR | glass.IOR |
+| bump.Normal | glass.Normal |
+| Group Input.003.Glass Roughness | glass.Roughness |
+
+
+# Material PM_GlassVoronoi
+
+- displacement_method: BUMP
+- surface_render_method: DITHERED
+- use_backface_culling: false
+- diffuse_color: (0.8, 0.85, 0.87, 0.3)
+- roughness: 0
+- metallic: 0
+- procmat group: PM_GlassVoronoi
+
+## Material tree
+
+### Nodes (2; frames 0)
+
+Types: ShaderNodeGroup x1, ShaderNodeOutputMaterial x1
+
+| node | type | label | frame | settings (non-default) | input values (non-default, unlinked) | note |
+|---|---|---|---|---|---|---|
+| MRS | ShaderNodeGroup | PM_GlassVoronoi |  | node_tree=PM_GlassVoronoi |  |  |
+| Material Output | ShaderNodeOutputMaterial |  |  |  |  |  |
+
+### Connections (1)
+
+| from | to |
+|---|---|
+| MRS.BSDF | Material Output.Surface |
+
+## Group PM_GlassVoronoi
+
+### Interface
+
+| socket | in/out | type | default | min | max | panel | description |
+|---|---|---|---|---|---|---|---|
+| Scale | input | Float | 1 |  |  |  | The video's Mapping Scale: multiplies the object coordinates (metres); 2 = every feature half the size |
+| Glass Color | input | Color | (1, 1, 1, 1) |  |  |  | Glass BSDF colour: the tint (white = clear; the video demos #CCEDFF) |
+| Glass Roughness | input | Float | 0 | 0 | 1 |  | Glass BSDF roughness: 0 = clear, higher = frosted |
+| Glass IOR | input | Float | 1.5 | 0 | 1000 |  | Index of refraction (1.5 = window glass; 1 = no refraction) |
+| Voronoi Scale 1 | input | Float | 30 | -1000 | 1000 |  | Cells per metre of the large hammered cells (30 = 3.3 cm) |
+| Voronoi Scale 2 | input | Float | 30 | -1000 | 1000 |  | Cells per metre of the fine second layer (its first octave) |
+| Voronoi Smoothness 1 | input | Float | 0.1 | 0 | 1 |  | Smooth F1 smoothness of the large cells |
+| Voronoi Smoothness 2 | input | Float | 0.03 | 0 | 1 |  | Smooth F1 smoothness of the fine layer |
+| Voronoi Detail 1 | input | Float | 0 | 0 | 15 |  | Voronoi Detail of the large cells |
+| Voronoi Detail 2 | input | Float | 3 | 0 | 15 |  | Voronoi Detail of the fine layer (3 = four octaves) |
+| Bump Strength 1 | input | Float | 1 | 0 | 1 |  | Bump strength: 0 = flat glass, 1 = the full relief |
+| Bump Strength 2 | input | Float | 1 | 0 | 1 |  | Bump strength: 0 = flat glass, 1 = the full relief |
+| Pattern Size | input | Float | 1 | 0.01 | 100 | Mapping | Metres per unit of the video's object space (its panes have applied scale: 1 unit = 1 m). 1 = the video's sizes; 2 = every feature and the relief depth twice as large (library control, C) |
+| Use UV | input | Float | 0 | 0 | 1 | Mapping | 0 = object space in metres; 1 = UVMap x Tile Size, every 4D texture sampled on a seamless torus (baked tiles repeat) |
+| Tile Size | input | Float | 4 | 0.05 | 1000 | Mapping | Metres covered by UV 0..1 in UV mode: the repeat length of a baked tile |
+| BSDF | output | Shader |  |  |  |  |  |
+| Albedo | output | Color | (0, 0, 0, 1) |  |  |  |  |
+
+### Nodes (41; frames 4)
+
+Types: ShaderNodeMath x15, ShaderNodeMix x5, NodeGroupInput x4, ShaderNodeTexVoronoi x4, ShaderNodeBump x2, ShaderNodeRGBCurve x2, NodeGroupOutput x1, ShaderNodeAttribute x1, ShaderNodeBsdfGlass x1, ShaderNodeCombineXYZ x1, ShaderNodeMapping x1, ShaderNodeSeparateXYZ x1, ShaderNodeTexCoord x1, ShaderNodeVectorMath x1, ShaderNodeVectorRotate x1
+
+| node | type | label | frame | settings (non-default) | input values (non-default, unlinked) | note |
+|---|---|---|---|---|---|---|
+| Group Output | NodeGroupOutput |  |  |  |  |  |
+| Group Input.001 | NodeGroupInput |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Texture Coordinate | ShaderNodeTexCoord |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Attribute | ShaderNodeAttribute | UV | Coordinates: object metres, or UVMap x Tile Size on a seamless  | attribute_name=UVMap |  |  |
+| Vector Math | ShaderNodeVectorMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SCALE |  |  |
+| Mix | ShaderNodeMix | P (m) | Coordinates: object metres, or UVMap x Tile Size on a seamless  | data_type=VECTOR |  |  |
+| Separate XYZ | ShaderNodeSeparateXYZ |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Math | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=DIVIDE | Value_001=6.283 |  |
+| Math.001 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY | Value_001=6.283 |  |
+| Math.002 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY | Value_001=6.283 |  |
+| Math.003 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=COSINE |  |  |
+| Math.004 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SINE |  |  |
+| Math.005 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=COSINE |  |  |
+| Math.006 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SINE |  |  |
+| Math.007 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Math.008 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Math.009 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Combine XYZ | ShaderNodeCombineXYZ | torus | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Vector Rotate | ShaderNodeVectorRotate | tilt off the lattice | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  | Axis=(0.53, 0.71, 0.46); Angle=0.83 |  |
+| Math.010 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Mix.001 | ShaderNodeMix |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | data_type=VECTOR |  |  |
+| Mix.002 | ShaderNodeMix |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Group Input.003 | NodeGroupInput |  | Glass BSDF |  |  |  |
+| glass | ShaderNodeBsdfGlass | glass | Glass BSDF |  |  | A 11:56.5, 16:26.5: Glass BSDF Multiscatter GGX; Roughness 0.0 (clear), IOR 1.5 \| Thin Film Thickness 0 / IOR 1.33 = defaults (panel never opened, C) |
+| Group Input | NodeGroupInput |  | Mapping (video): Object coordinates -> Mapping Point, Scale = S |  |  |  |
+| pattern_scale | ShaderNodeMath | pattern_scale | Mapping (video): Object coordinates -> Mapping Point, Scale = S | operation=DIVIDE |  | C: the Mapping Scale = the video's Scale (A) / Pattern Size (library metres, 1 = the video's object space) |
+| mapping | ShaderNodeMapping | mapping | Mapping (video): Object coordinates -> Mapping Point, Scale = S |  |  | A 11:16.5, 16:26.5: Mapping Point, Location 0, Rotation 0, Scale <- Scale \| Vector = Object coordinates (Use UV 0) or the torus point (Use UV 1, C) |
+| mapping_w | ShaderNodeMath | mapping_w | Mapping (video): Object coordinates -> Mapping Point, Scale = S | operation=MULTIPLY |  | C: the torus' 4th coordinate scaled like the Mapping (0 in object mode) |
+| Group Input.002 | NodeGroupInput |  | Relief: two Voronoi Smooth F1 -> RGB Curves -> chained Bumps (i |  |  |  |
+| voronoi_1_3d | ShaderNodeTexVoronoi | voronoi_1 (object 3D) | Relief: two Voronoi Smooth F1 -> RGB Curves -> chained Bumps (i | feature=SMOOTH_F1 | Roughness=0 | A 11:22.5, 11:36.5, 12:20.5, 16:26.5: Voronoi 3D Smooth F1 Euclidean, Normalize off, Roughness 0.0, Lacunarity 2, Randomness 1; Scale 30 / Detail 0 / Smoothness 0.1 from the group \| object mode (Use UV 0): the video's 3D texture |
+| voronoi_1_4d | ShaderNodeTexVoronoi | voronoi_1 (UV 4D) | Relief: two Voronoi Smooth F1 -> RGB Curves -> chained Bumps (i | voronoi_dimensions=4D; feature=SMOOTH_F1 | Roughness=0 | A 11:22.5, 11:36.5, 12:20.5, 16:26.5: Voronoi 3D Smooth F1 Euclidean, Normalize off, Roughness 0.0, Lacunarity 2, Randomness 1; Scale 30 / Detail 0 / Smoothness 0.1 from the group \| UV mode (Use UV 1): 4D twin on the seamless torus (C) |
+| voronoi_1_mode | ShaderNodeMix | voronoi_1: object 3D \| UV 4D | Relief: two Voronoi Smooth F1 -> RGB Curves -> chained Bumps (i |  |  | C: Use UV picks the video's 3D texture (0) or its 4D torus twin (1) |
+| voronoi_2_3d | ShaderNodeTexVoronoi | voronoi_2 (object 3D) | Relief: two Voronoi Smooth F1 -> RGB Curves -> chained Bumps (i | feature=SMOOTH_F1 | Roughness=1 | A 12:40.5, 13:00.5, 16:26.5: copy of voronoi_1 (Shift+Ctrl+D) with Roughness 1.0; Scale 30 / Detail 3 / Smoothness 0.03 from the group \| object mode (Use UV 0): the video's 3D texture |
+| voronoi_2_4d | ShaderNodeTexVoronoi | voronoi_2 (UV 4D) | Relief: two Voronoi Smooth F1 -> RGB Curves -> chained Bumps (i | voronoi_dimensions=4D; feature=SMOOTH_F1 | Roughness=1 | A 12:40.5, 13:00.5, 16:26.5: copy of voronoi_1 (Shift+Ctrl+D) with Roughness 1.0; Scale 30 / Detail 3 / Smoothness 0.03 from the group \| UV mode (Use UV 1): 4D twin on the seamless torus (C) |
+| voronoi_2_mode | ShaderNodeMix | voronoi_2: object 3D \| UV 4D | Relief: two Voronoi Smooth F1 -> RGB Curves -> chained Bumps (i |  |  | C: Use UV picks the video's 3D texture (0) or its 4D torus twin (1) |
+| rgb_curves_1 | ShaderNodeRGBCurve | rgb_curves_1 | Relief: two Voronoi Smooth F1 -> RGB Curves -> chained Bumps (i |  |  | A 13:44.5, 14:05.5, 16:26.5: voronoi_1 Distance -> Color \| C curve (0, 0), (0.6758, 0.2928), (1, 1), auto handles, Factor 1 |
+| rgb_curves_2 | ShaderNodeRGBCurve | rgb_curves_2 | Relief: two Voronoi Smooth F1 -> RGB Curves -> chained Bumps (i |  |  | A 13:44.5, 14:17.5, 16:26.5: voronoi_2 Distance -> Color \| C curve (0, 0), (0.6331, 0.3), (1, 1), auto handles, Factor 1 |
+| bump_2_distance | ShaderNodeMath | bump_2_distance | Relief: two Voronoi Smooth F1 -> RGB Curves -> chained Bumps (i | operation=MULTIPLY | Value=8e-05 | C: Bump Distance = the video's 8e-05 m (A) x Pattern Size |
+| bump_2 | ShaderNodeBump | bump_2 | Relief: two Voronoi Smooth F1 -> RGB Curves -> chained Bumps (i | invert=true |  | A 13:04.5-13:26.5: Bump Invert on (copied), Distance typed 0.00008 (displays 0.0001), Filter Width 0.1; Normal -> bump_1 Normal |
+| bump_1_distance | ShaderNodeMath | bump_1_distance | Relief: two Voronoi Smooth F1 -> RGB Curves -> chained Bumps (i | operation=MULTIPLY | Value=0.004 | C: Bump Distance = the video's 0.004 m (A) x Pattern Size |
+| bump_1 | ShaderNodeBump | bump_1 | Relief: two Voronoi Smooth F1 -> RGB Curves -> chained Bumps (i | invert=true |  | A 12:08.5, 12:28.5, 13:08.5: Bump Invert on, Distance 0.004, Filter Width 0.1, Normal <- bump_2 |
+
+### Connections (77)
+
+| from | to |
+|---|---|
+| glass.BSDF | Group Output.BSDF |
+| Group Input.003.Glass Color | Group Output.Albedo |
+| Group Input.Scale | pattern_scale.Value |
+| Group Input.Pattern Size | pattern_scale.Value_001 |
+| pattern_scale.Value | mapping.Scale |
+| Mix.001.Result | mapping.Vector |
+| Group Input.001.Tile Size | Vector Math.Scale |
+| Attribute.Vector | Vector Math.Vector |
+| Texture Coordinate.Object | Mix.A |
+| Vector Math.Vector | Mix.B |
+| Group Input.001.Use UV | Mix.Factor |
+| Attribute.Vector | Separate XYZ.Vector |
+| Group Input.001.Tile Size | Math.Value |
+| Separate XYZ.X | Math.001.Value |
+| Separate XYZ.Y | Math.002.Value |
+| Math.001.Value | Math.003.Value |
+| Math.001.Value | Math.004.Value |
+| Math.002.Value | Math.005.Value |
+| Math.002.Value | Math.006.Value |
+| Math.003.Value | Math.007.Value |
+| Math.Value | Math.007.Value_001 |
+| Math.004.Value | Math.008.Value |
+| Math.Value | Math.008.Value_001 |
+| Math.005.Value | Math.009.Value |
+| Math.Value | Math.009.Value_001 |
+| Math.007.Value | Combine XYZ.X |
+| Math.008.Value | Combine XYZ.Y |
+| Math.009.Value | Combine XYZ.Z |
+| Combine XYZ.Vector | Vector Rotate.Vector |
+| Math.006.Value | Math.010.Value |
+| Math.Value | Math.010.Value_001 |
+| Texture Coordinate.Object | Mix.001.A |
+| Vector Rotate.Vector | Mix.001.B |
+| Group Input.001.Use UV | Mix.001.Factor |
+| Math.010.Value | Mix.002.B |
+| Group Input.001.Use UV | Mix.002.Factor |
+| Mix.002.Result | mapping_w.Value |
+| pattern_scale.Value | mapping_w.Value_001 |
+| Group Input.002.Voronoi Detail 1 | voronoi_1_3d.Detail |
+| Group Input.002.Voronoi Scale 1 | voronoi_1_3d.Scale |
+| Group Input.002.Voronoi Smoothness 1 | voronoi_1_3d.Smoothness |
+| mapping.Vector | voronoi_1_3d.Vector |
+| Group Input.002.Voronoi Detail 1 | voronoi_1_4d.Detail |
+| Group Input.002.Voronoi Scale 1 | voronoi_1_4d.Scale |
+| Group Input.002.Voronoi Smoothness 1 | voronoi_1_4d.Smoothness |
+| mapping.Vector | voronoi_1_4d.Vector |
+| mapping_w.Value | voronoi_1_4d.W |
+| voronoi_1_3d.Distance | voronoi_1_mode.A |
+| voronoi_1_4d.Distance | voronoi_1_mode.B |
+| Group Input.001.Use UV | voronoi_1_mode.Factor |
+| Group Input.002.Voronoi Detail 2 | voronoi_2_3d.Detail |
+| Group Input.002.Voronoi Scale 2 | voronoi_2_3d.Scale |
+| Group Input.002.Voronoi Smoothness 2 | voronoi_2_3d.Smoothness |
+| mapping.Vector | voronoi_2_3d.Vector |
+| Group Input.002.Voronoi Detail 2 | voronoi_2_4d.Detail |
+| Group Input.002.Voronoi Scale 2 | voronoi_2_4d.Scale |
+| Group Input.002.Voronoi Smoothness 2 | voronoi_2_4d.Smoothness |
+| mapping.Vector | voronoi_2_4d.Vector |
+| mapping_w.Value | voronoi_2_4d.W |
+| voronoi_2_3d.Distance | voronoi_2_mode.A |
+| voronoi_2_4d.Distance | voronoi_2_mode.B |
+| Group Input.001.Use UV | voronoi_2_mode.Factor |
+| voronoi_1_mode.Result | rgb_curves_1.Color |
+| voronoi_2_mode.Result | rgb_curves_2.Color |
+| Group Input.002.Pattern Size | bump_2_distance.Value_001 |
+| bump_2_distance.Value | bump_2.Distance |
+| rgb_curves_2.Color | bump_2.Height |
+| Group Input.002.Bump Strength 2 | bump_2.Strength |
+| Group Input.002.Pattern Size | bump_1_distance.Value_001 |
+| bump_1_distance.Value | bump_1.Distance |
+| rgb_curves_1.Color | bump_1.Height |
+| bump_2.Normal | bump_1.Normal |
+| Group Input.002.Bump Strength 1 | bump_1.Strength |
+| Group Input.003.Glass Color | glass.Color |
+| Group Input.003.Glass IOR | glass.IOR |
+| bump_1.Normal | glass.Normal |
+| Group Input.003.Glass Roughness | glass.Roughness |
+
+
+# Material PM_GlassCells
+
+- displacement_method: BUMP
+- surface_render_method: DITHERED
+- use_backface_culling: false
+- diffuse_color: (0.8, 0.85, 0.87, 0.45)
+- roughness: 0.2
+- metallic: 0
+- procmat group: PM_GlassCells
+
+## Material tree
+
+### Nodes (2; frames 0)
+
+Types: ShaderNodeGroup x1, ShaderNodeOutputMaterial x1
+
+| node | type | label | frame | settings (non-default) | input values (non-default, unlinked) | note |
+|---|---|---|---|---|---|---|
+| MRS | ShaderNodeGroup | PM_GlassCells |  | node_tree=PM_GlassCells |  |  |
+| Material Output | ShaderNodeOutputMaterial |  |  |  |  |  |
+
+### Connections (1)
+
+| from | to |
+|---|---|
+| MRS.BSDF | Material Output.Surface |
+
+## Group PM_GlassCells
+
+### Interface
+
+| socket | in/out | type | default | min | max | panel | description |
+|---|---|---|---|---|---|---|---|
+| Scale | input | Float | 1 |  |  |  | The video's Mapping Scale: multiplies the object coordinates (metres); 2 = every feature half the size |
+| Glass Color | input | Color | (1, 1, 1, 1) |  |  |  | Glass BSDF colour: the tint (white = clear; the video demos #CCEDFF) |
+| Glass Roughness | input | Float | 1 | 0 | 2 |  | Multiplies the noise-varied roughness (Hue/Saturation/Value Value): 0 = clear, 2 = twice as frosted |
+| Glass IOR | input | Float | 1.5 | 0 | 1000 |  | Index of refraction (1.5 = window glass; 1 = no refraction) |
+| Voronoi Scale | input | Float | 30 | -1000 | 1000 |  | Cells per metre (30 = 3.3 cm plates) |
+| Voronoi Detail | input | Float | 0 | 0 | 15 |  | Voronoi Detail: cracks inside the cells (limits C) |
+| Voronoi Roughness | input | Float | 0.5 | 0 | 1 |  | Voronoi Roughness: weight of the detail layers |
+| Voronoi Randomness | input | Float | 1 | 0 | 1 |  | Voronoi Randomness: 0 = regular grid, 1 = random (limits C) |
+| Noise Roughness Scale | input | Float | 20 | -1000 | 1000 |  | Noise Scale per metre of the frost / roughness variation (20 = ~5 cm grain) |
+| Noise Roughness Detail 1 | input | Float | 15 | 0 | 15 |  | Noise Detail: octaves of the frost grain |
+| Noise Roughness Detail 2 | input | Float | 1 | 0 | 1 |  | Noise Roughness: weight of the finer octaves ("second layer of detail") |
+| Bump Strength | input | Float | 1 | 0 | 1 |  | Bump strength: 0 = flat glass, 1 = the full relief |
+| Pattern Size | input | Float | 1 | 0.01 | 100 | Mapping | Metres per unit of the video's object space (its panes have applied scale: 1 unit = 1 m). 1 = the video's sizes; 2 = every feature and the relief depth twice as large (library control, C) |
+| Use UV | input | Float | 0 | 0 | 1 | Mapping | 0 = object space in metres; 1 = UVMap x Tile Size, every 4D texture sampled on a seamless torus (baked tiles repeat) |
+| Tile Size | input | Float | 4 | 0.05 | 1000 | Mapping | Metres covered by UV 0..1 in UV mode: the repeat length of a baked tile |
+| BSDF | output | Shader |  |  |  |  |  |
+| Albedo | output | Color | (0, 0, 0, 1) |  |  |  |  |
+
+### Nodes (41; frames 5)
+
+Types: ShaderNodeMath x14, NodeGroupInput x5, ShaderNodeMix x5, ShaderNodeTexNoise x2, ShaderNodeTexVoronoi x2, NodeGroupOutput x1, ShaderNodeAttribute x1, ShaderNodeBsdfGlass x1, ShaderNodeBump x1, ShaderNodeCombineXYZ x1, ShaderNodeHueSaturation x1, ShaderNodeMapRange x1, ShaderNodeMapping x1, ShaderNodeSeparateXYZ x1, ShaderNodeTexCoord x1, ShaderNodeValToRGB x1, ShaderNodeVectorMath x1, ShaderNodeVectorRotate x1
+
+| node | type | label | frame | settings (non-default) | input values (non-default, unlinked) | note |
+|---|---|---|---|---|---|---|
+| Group Output | NodeGroupOutput |  |  |  |  |  |
+| Group Input.001 | NodeGroupInput |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Texture Coordinate | ShaderNodeTexCoord |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Attribute | ShaderNodeAttribute | UV | Coordinates: object metres, or UVMap x Tile Size on a seamless  | attribute_name=UVMap |  |  |
+| Vector Math | ShaderNodeVectorMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SCALE |  |  |
+| Mix | ShaderNodeMix | P (m) | Coordinates: object metres, or UVMap x Tile Size on a seamless  | data_type=VECTOR |  |  |
+| Separate XYZ | ShaderNodeSeparateXYZ |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Math | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=DIVIDE | Value_001=6.283 |  |
+| Math.001 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY | Value_001=6.283 |  |
+| Math.002 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY | Value_001=6.283 |  |
+| Math.003 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=COSINE |  |  |
+| Math.004 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SINE |  |  |
+| Math.005 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=COSINE |  |  |
+| Math.006 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SINE |  |  |
+| Math.007 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Math.008 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Math.009 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Combine XYZ | ShaderNodeCombineXYZ | torus | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Vector Rotate | ShaderNodeVectorRotate | tilt off the lattice | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  | Axis=(0.53, 0.71, 0.46); Angle=0.83 |  |
+| Math.010 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Mix.001 | ShaderNodeMix |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | data_type=VECTOR |  |  |
+| Mix.002 | ShaderNodeMix |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| glass | ShaderNodeBsdfGlass | glass | Glass BSDF |  |  | A 18:36.5, 20:15.5: Glass BSDF Multiscatter GGX; Roughness <- HSV Color, IOR 1.5 \| Thin Film Thickness 0 / IOR 1.33 = defaults (panel never opened, C) |
+| Group Input.004 | NodeGroupInput |  | Glass BSDF |  |  |  |
+| Group Input | NodeGroupInput |  | Mapping (video): Object coordinates -> Mapping Point, Scale = S |  |  |  |
+| pattern_scale | ShaderNodeMath | pattern_scale | Mapping (video): Object coordinates -> Mapping Point, Scale = S | operation=DIVIDE |  | C: the Mapping Scale = the video's Scale (A) / Pattern Size (library metres, 1 = the video's object space) |
+| mapping | ShaderNodeMapping | mapping | Mapping (video): Object coordinates -> Mapping Point, Scale = S |  |  | A 18:04, 22:07.5: Mapping Point, Location 0, Rotation 0, Scale <- Scale \| Vector = Object coordinates (Use UV 0) or the torus point (Use UV 1, C) |
+| mapping_w | ShaderNodeMath | mapping_w | Mapping (video): Object coordinates -> Mapping Point, Scale = S | operation=MULTIPLY |  | C: the torus' 4th coordinate scaled like the Mapping (0 in object mode) |
+| Group Input.002 | NodeGroupInput |  | Relief: Voronoi Distance to Edge -> Map Range -> Bump (inverted |  |  |  |
+| voronoi_3d | ShaderNodeTexVoronoi | voronoi (object 3D) | Relief: Voronoi Distance to Edge -> Map Range -> Bump (inverted | feature=DISTANCE_TO_EDGE |  | A 18:17.5, 18:24.5, 20:15.5: Voronoi 3D Distance to Edge Euclidean, Normalize off, Lacunarity 2; Scale 30 / Detail 0 / Roughness 0.5 / Randomness 1 from the group \| object mode (Use UV 0): the video's 3D texture |
+| voronoi_4d | ShaderNodeTexVoronoi | voronoi (UV 4D) | Relief: Voronoi Distance to Edge -> Map Range -> Bump (inverted | voronoi_dimensions=4D; feature=DISTANCE_TO_EDGE |  | A 18:17.5, 18:24.5, 20:15.5: Voronoi 3D Distance to Edge Euclidean, Normalize off, Lacunarity 2; Scale 30 / Detail 0 / Roughness 0.5 / Randomness 1 from the group \| UV mode (Use UV 1): 4D twin on the seamless torus (C) |
+| voronoi_mode | ShaderNodeMix | voronoi: object 3D \| UV 4D | Relief: Voronoi Distance to Edge -> Map Range -> Bump (inverted |  |  | C: Use UV picks the video's 3D texture (0) or its 4D torus twin (1) |
+| map_range | ShaderNodeMapRange | map_range | Relief: Voronoi Distance to Edge -> Map Range -> Bump (inverted |  | From Min=0.02 | A 19:04.5, 19:20.5, 22:07.5: Map Range Float Linear Clamp, From Min 0.02, From Max 1, To 0..1 |
+| bump_distance | ShaderNodeMath | bump_distance | Relief: Voronoi Distance to Edge -> Map Range -> Bump (inverted | operation=MULTIPLY | Value=0.003 | C: Bump Distance = the video's 0.003 m (A) x Pattern Size |
+| bump | ShaderNodeBump | bump | Relief: Voronoi Distance to Edge -> Map Range -> Bump (inverted | invert=true |  | A 18:44.5, 18:48.5, 20:15.5: Bump Invert on, Distance 0.003, Filter Width 0.1 |
+| Group Input.003 | NodeGroupInput |  | Roughness: Noise -> Color Ramp -> Hue/Saturation/Value (Glass R |  |  |  |
+| noise_3d | ShaderNodeTexNoise | noise (object 3D) | Roughness: Noise -> Color Ramp -> Hue/Saturation/Value (Glass R |  |  | A 19:37.5, 20:15.5: Noise 3D fBM Normalize, Lacunarity 2, Distortion 0; Scale 20 / Detail 15 / Roughness 1 from the group; Factor -> ramp \| object mode (Use UV 0): the video's 3D texture |
+| noise_4d | ShaderNodeTexNoise | noise (UV 4D) | Roughness: Noise -> Color Ramp -> Hue/Saturation/Value (Glass R | noise_dimensions=4D |  | A 19:37.5, 20:15.5: Noise 3D fBM Normalize, Lacunarity 2, Distortion 0; Scale 20 / Detail 15 / Roughness 1 from the group; Factor -> ramp \| UV mode (Use UV 1): 4D twin on the seamless torus (C) |
+| noise_mode | ShaderNodeMix | noise: object 3D \| UV 4D | Roughness: Noise -> Color Ramp -> Hue/Saturation/Value (Glass R |  |  | C: Use UV picks the video's 3D texture (0) or its 4D torus twin (1) |
+| color_ramp | ShaderNodeValToRGB | color_ramp | Roughness: Noise -> Color Ramp -> Hue/Saturation/Value (Glass R | ramp[LINEAR]=0:(0, 0, 0, 1), 1:(0.392, 0.392, 0.392, 1) |  | A 19:52.5-19:57.85: Color Ramp RGB Linear, black @ 0, #A8A8A8 (Perceptual V 0.659, A) @ 1 = linear 0.3918 (C) |
+| hsv | ShaderNodeHueSaturation | hsv | Roughness: Noise -> Color Ramp -> Hue/Saturation/Value (Glass R |  |  | A 20:11.5, 21:00: Hue/Saturation/Value Hue 0.5, Saturation 1, Factor 1, Value <- Glass Roughness |
+
+### Connections (76)
+
+| from | to |
+|---|---|
+| glass.BSDF | Group Output.BSDF |
+| Group Input.004.Glass Color | Group Output.Albedo |
+| Group Input.Scale | pattern_scale.Value |
+| Group Input.Pattern Size | pattern_scale.Value_001 |
+| pattern_scale.Value | mapping.Scale |
+| Mix.001.Result | mapping.Vector |
+| Group Input.001.Tile Size | Vector Math.Scale |
+| Attribute.Vector | Vector Math.Vector |
+| Texture Coordinate.Object | Mix.A |
+| Vector Math.Vector | Mix.B |
+| Group Input.001.Use UV | Mix.Factor |
+| Attribute.Vector | Separate XYZ.Vector |
+| Group Input.001.Tile Size | Math.Value |
+| Separate XYZ.X | Math.001.Value |
+| Separate XYZ.Y | Math.002.Value |
+| Math.001.Value | Math.003.Value |
+| Math.001.Value | Math.004.Value |
+| Math.002.Value | Math.005.Value |
+| Math.002.Value | Math.006.Value |
+| Math.003.Value | Math.007.Value |
+| Math.Value | Math.007.Value_001 |
+| Math.004.Value | Math.008.Value |
+| Math.Value | Math.008.Value_001 |
+| Math.005.Value | Math.009.Value |
+| Math.Value | Math.009.Value_001 |
+| Math.007.Value | Combine XYZ.X |
+| Math.008.Value | Combine XYZ.Y |
+| Math.009.Value | Combine XYZ.Z |
+| Combine XYZ.Vector | Vector Rotate.Vector |
+| Math.006.Value | Math.010.Value |
+| Math.Value | Math.010.Value_001 |
+| Texture Coordinate.Object | Mix.001.A |
+| Vector Rotate.Vector | Mix.001.B |
+| Group Input.001.Use UV | Mix.001.Factor |
+| Math.010.Value | Mix.002.B |
+| Group Input.001.Use UV | Mix.002.Factor |
+| Mix.002.Result | mapping_w.Value |
+| pattern_scale.Value | mapping_w.Value_001 |
+| Group Input.002.Voronoi Detail | voronoi_3d.Detail |
+| Group Input.002.Voronoi Randomness | voronoi_3d.Randomness |
+| Group Input.002.Voronoi Roughness | voronoi_3d.Roughness |
+| Group Input.002.Voronoi Scale | voronoi_3d.Scale |
+| mapping.Vector | voronoi_3d.Vector |
+| Group Input.002.Voronoi Detail | voronoi_4d.Detail |
+| Group Input.002.Voronoi Randomness | voronoi_4d.Randomness |
+| Group Input.002.Voronoi Roughness | voronoi_4d.Roughness |
+| Group Input.002.Voronoi Scale | voronoi_4d.Scale |
+| mapping.Vector | voronoi_4d.Vector |
+| mapping_w.Value | voronoi_4d.W |
+| voronoi_3d.Distance | voronoi_mode.A |
+| voronoi_4d.Distance | voronoi_mode.B |
+| Group Input.001.Use UV | voronoi_mode.Factor |
+| voronoi_mode.Result | map_range.Value |
+| Group Input.002.Pattern Size | bump_distance.Value_001 |
+| bump_distance.Value | bump.Distance |
+| map_range.Result | bump.Height |
+| Group Input.002.Bump Strength | bump.Strength |
+| Group Input.003.Noise Roughness Detail 1 | noise_3d.Detail |
+| Group Input.003.Noise Roughness Detail 2 | noise_3d.Roughness |
+| Group Input.003.Noise Roughness Scale | noise_3d.Scale |
+| mapping.Vector | noise_3d.Vector |
+| Group Input.003.Noise Roughness Detail 1 | noise_4d.Detail |
+| Group Input.003.Noise Roughness Detail 2 | noise_4d.Roughness |
+| Group Input.003.Noise Roughness Scale | noise_4d.Scale |
+| mapping.Vector | noise_4d.Vector |
+| mapping_w.Value | noise_4d.W |
+| noise_3d.Factor | noise_mode.A |
+| noise_4d.Factor | noise_mode.B |
+| Group Input.001.Use UV | noise_mode.Factor |
+| noise_mode.Result | color_ramp.Factor |
+| color_ramp.Color | hsv.Color |
+| Group Input.003.Glass Roughness | hsv.Value |
+| Group Input.004.Glass Color | glass.Color |
+| Group Input.004.Glass IOR | glass.IOR |
+| bump.Normal | glass.Normal |
+| hsv.Color | glass.Roughness |
+
+
+# Material PM_GlassWavy
+
+- displacement_method: BUMP
+- surface_render_method: DITHERED
+- use_backface_culling: false
+- diffuse_color: (0.8, 0.85, 0.87, 0.35)
+- roughness: 0.2
+- metallic: 0
+- procmat group: PM_GlassWavy
+
+## Material tree
+
+### Nodes (2; frames 0)
+
+Types: ShaderNodeGroup x1, ShaderNodeOutputMaterial x1
+
+| node | type | label | frame | settings (non-default) | input values (non-default, unlinked) | note |
+|---|---|---|---|---|---|---|
+| MRS | ShaderNodeGroup | PM_GlassWavy |  | node_tree=PM_GlassWavy |  |  |
+| Material Output | ShaderNodeOutputMaterial |  |  |  |  |  |
+
+### Connections (1)
+
+| from | to |
+|---|---|
+| MRS.BSDF | Material Output.Surface |
+
+## Group PM_GlassWavy
+
+### Interface
+
+| socket | in/out | type | default | min | max | panel | description |
+|---|---|---|---|---|---|---|---|
+| Scale | input | Float | 1 |  |  |  | The video's Mapping Scale: multiplies the object coordinates (metres); 2 = every feature half the size |
+| Glass Color | input | Color | (1, 1, 1, 1) |  |  |  | Glass BSDF colour: the tint (white = clear; the video demos #CCEDFF) |
+| Glass Roughness | input | Float | 0.2 | 0 | 1 |  | Glass BSDF roughness: 0 = clear, higher = frosted |
+| Glass IOR | input | Float | 1.5 | 0 | 1000 |  | Index of refraction (1.5 = window glass; 1 = no refraction) |
+| Gabor Frequency | input | Float | 5 | 0 |  |  | Gabor Frequency: waves per Gabor cell (12 cells/m: 5 = ~2.1 cm streaks on a vertical X-Z pane) |
+| Bump Strength | input | Float | 1 | 0 | 1 |  | Bump strength: 0 = flat glass, 1 = the full relief |
+| Rotation | input | Vector | (0, 0, 0) |  |  |  | Mapping Rotation: turns the wave direction (rotating Y turns the streaks in a vertical X-Z pane) |
+| Pattern Size | input | Float | 1 | 0.01 | 100 | Mapping | Metres per unit of the video's object space (its panes have applied scale: 1 unit = 1 m). 1 = the video's sizes; 2 = every feature and the relief depth twice as large (library control, C) |
+| Use UV | input | Float | 0 | 0 | 1 | Mapping | 0 = object space in metres; 1 = UVMap x Tile Size, every 4D texture sampled on a seamless torus (baked tiles repeat) |
+| Tile Size | input | Float | 4 | 0.05 | 1000 | Mapping | Metres covered by UV 0..1 in UV mode: the repeat length of a baked tile |
+| BSDF | output | Shader |  |  |  |  |  |
+| Albedo | output | Color | (0, 0, 0, 1) |  |  |  |  |
+
+### Nodes (110; frames 5)
+
+Types: ShaderNodeMath x42, ShaderNodeMix x16, ShaderNodeVectorMath x13, ShaderNodeCombineXYZ x9, ShaderNodeSeparateXYZ x7, NodeGroupInput x4, ShaderNodeMapRange x4, ShaderNodeMapping x4, ShaderNodeTexGabor x4, ShaderNodeTexCoord x2, NodeGroupOutput x1, ShaderNodeAttribute x1, ShaderNodeBsdfGlass x1, ShaderNodeBump x1, ShaderNodeVectorRotate x1
+
+| node | type | label | frame | settings (non-default) | input values (non-default, unlinked) | note |
+|---|---|---|---|---|---|---|
+| Group Output | NodeGroupOutput |  |  |  |  |  |
+| Group Input.001 | NodeGroupInput |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Texture Coordinate | ShaderNodeTexCoord |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Attribute | ShaderNodeAttribute | UV | Coordinates: object metres, or UVMap x Tile Size on a seamless  | attribute_name=UVMap |  |  |
+| Vector Math.007 | ShaderNodeVectorMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SCALE |  |  |
+| Mix | ShaderNodeMix | P (m) | Coordinates: object metres, or UVMap x Tile Size on a seamless  | data_type=VECTOR |  |  |
+| Separate XYZ | ShaderNodeSeparateXYZ |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Math | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=DIVIDE | Value_001=6.283 |  |
+| Math.001 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY | Value_001=6.283 |  |
+| Math.002 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY | Value_001=6.283 |  |
+| Math.003 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=COSINE |  |  |
+| Math.004 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SINE |  |  |
+| Math.005 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=COSINE |  |  |
+| Math.006 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SINE |  |  |
+| Math.007 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Math.008 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Math.009 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Combine XYZ | ShaderNodeCombineXYZ | torus | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Vector Rotate | ShaderNodeVectorRotate | tilt off the lattice | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  | Axis=(0.53, 0.71, 0.46); Angle=0.83 |  |
+| Math.010 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Mix.001 | ShaderNodeMix |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | data_type=VECTOR |  |  |
+| Mix.002 | ShaderNodeMix |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Separate XYZ.001 | ShaderNodeSeparateXYZ |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Math.011 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=FRACT |  |  |
+| Math.012 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=FRACT |  |  |
+| Math.013 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Math.014 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Combine XYZ.001 | ShaderNodeCombineXYZ |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Mix.003 | ShaderNodeMix | P wrapped | Coordinates: object metres, or UVMap x Tile Size on a seamless  | data_type=VECTOR |  |  |
+| Map Range | ShaderNodeMapRange |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | interpolation_type=SMOOTHSTEP | From Min=0.85 |  |
+| Math.015 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Map Range.001 | ShaderNodeMapRange |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | interpolation_type=SMOOTHSTEP | From Min=0.85 |  |
+| Math.016 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Math.017 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY | Value_001=1 |  |
+| Math.018 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY | Value_001=0 |  |
+| Combine XYZ.002 | ShaderNodeCombineXYZ |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Vector Math.008 | ShaderNodeVectorMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SUBTRACT |  |  |
+| Math.019 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY | Value_001=0 |  |
+| Math.020 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY | Value_001=1 |  |
+| Combine XYZ.003 | ShaderNodeCombineXYZ |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Vector Math.009 | ShaderNodeVectorMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SUBTRACT |  |  |
+| Math.021 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY | Value_001=1 |  |
+| Math.022 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY | Value_001=1 |  |
+| Combine XYZ.004 | ShaderNodeCombineXYZ |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Vector Math.010 | ShaderNodeVectorMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SUBTRACT |  |  |
+| Mix.012 | ShaderNodeMix |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Mix.013 | ShaderNodeMix |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| gabor_seamless | ShaderNodeMix | gabor_seamless | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  | C (D5): object mode = gabor (the video's field); UV mode = smoothstep cross-fade of four samples over the last 0.15 of the tile, so the tile repeats exactly |
+| Group Input.003 | NodeGroupInput |  | Glass BSDF |  |  |  |
+| glass | ShaderNodeBsdfGlass | glass | Glass BSDF |  |  | A 23:21-23:48: Glass BSDF Multiscatter GGX; Roughness 0.2, IOR 1.5 \| Thin Film Thickness 0 / IOR 1.33 = defaults (panel never opened, C) |
+| Group Input | NodeGroupInput |  | Mapping (video): Object coordinates -> Mapping Point, Scale = S |  |  |  |
+| pattern_scale | ShaderNodeMath | pattern_scale | Mapping (video): Object coordinates -> Mapping Point, Scale = S | operation=DIVIDE |  | C: the Mapping Scale = the video's Scale (A) / Pattern Size (library metres, 1 = the video's object space) |
+| Separate XYZ.002 | ShaderNodeSeparateXYZ |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  |  |
+| Mix.004 | ShaderNodeMix |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  |  |
+| Mix.005 | ShaderNodeMix |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  |  |
+| pane_plane | ShaderNodeCombineXYZ | pane_plane | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  | C: object mode keeps (x, y, z); UV mode puts UV u on X and UV v on Z (the video's vertical X-Z pane), so the streaks run along v |
+| mapping | ShaderNodeMapping | mapping | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  | A 22:47-22:50, 25:15-25:17: Mapping Point, Location 0, Rotation <- Rotation (Euler), Scale <- Scale |
+| Group Input.002 | NodeGroupInput |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  |  |
+| gabor | ShaderNodeTexGabor | gabor | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | gabor_type=3D | Scale=12 | A 22:52-23:11, 23:48: Gabor 3D, Scale 12, Frequency <- Gabor Frequency (5), Anisotropy 1; Orientation 3D (0.797, 0.604, 0) measured from the direction ball (C), applied relative to the surface (orientation node, GL-1); Value -> Bump |
+| Separate XYZ.003 | ShaderNodeSeparateXYZ |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  |  |
+| Mix.006 | ShaderNodeMix |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  |  |
+| Mix.007 | ShaderNodeMix |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  |  |
+| pane_plane_seam1 | ShaderNodeCombineXYZ | pane_plane_seam1 | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  | C: object mode keeps (x, y, z); UV mode puts UV u on X and UV v on Z (the video's vertical X-Z pane), so the streaks run along v |
+| mapping_seam1 | ShaderNodeMapping | mapping_seam1 | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  | A 22:47-22:50, 25:15-25:17: Mapping Point, Location 0, Rotation <- Rotation (Euler), Scale <- Scale |
+| gabor_seam1 | ShaderNodeTexGabor | gabor_seam1 | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | gabor_type=3D | Scale=12 | A 22:52-23:11, 23:48: Gabor 3D, Scale 12, Frequency <- Gabor Frequency (5), Anisotropy 1; Orientation 3D (0.797, 0.604, 0) measured from the direction ball (C), applied relative to the surface (orientation node, GL-1); Value -> Bump \| UV-mode cross-fade sample 1 (C, D5) |
+| Separate XYZ.004 | ShaderNodeSeparateXYZ |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  |  |
+| Mix.008 | ShaderNodeMix |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  |  |
+| Mix.009 | ShaderNodeMix |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  |  |
+| pane_plane_seam2 | ShaderNodeCombineXYZ | pane_plane_seam2 | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  | C: object mode keeps (x, y, z); UV mode puts UV u on X and UV v on Z (the video's vertical X-Z pane), so the streaks run along v |
+| mapping_seam2 | ShaderNodeMapping | mapping_seam2 | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  | A 22:47-22:50, 25:15-25:17: Mapping Point, Location 0, Rotation <- Rotation (Euler), Scale <- Scale |
+| gabor_seam2 | ShaderNodeTexGabor | gabor_seam2 | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | gabor_type=3D | Scale=12 | A 22:52-23:11, 23:48: Gabor 3D, Scale 12, Frequency <- Gabor Frequency (5), Anisotropy 1; Orientation 3D (0.797, 0.604, 0) measured from the direction ball (C), applied relative to the surface (orientation node, GL-1); Value -> Bump \| UV-mode cross-fade sample 2 (C, D5) |
+| Separate XYZ.005 | ShaderNodeSeparateXYZ |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  |  |
+| Mix.010 | ShaderNodeMix |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  |  |
+| Mix.011 | ShaderNodeMix |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  |  |
+| pane_plane_seam3 | ShaderNodeCombineXYZ | pane_plane_seam3 | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  | C: object mode keeps (x, y, z); UV mode puts UV u on X and UV v on Z (the video's vertical X-Z pane), so the streaks run along v |
+| mapping_seam3 | ShaderNodeMapping | mapping_seam3 | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  | A 22:47-22:50, 25:15-25:17: Mapping Point, Location 0, Rotation <- Rotation (Euler), Scale <- Scale |
+| gabor_seam3 | ShaderNodeTexGabor | gabor_seam3 | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | gabor_type=3D | Scale=12 | A 22:52-23:11, 23:48: Gabor 3D, Scale 12, Frequency <- Gabor Frequency (5), Anisotropy 1; Orientation 3D (0.797, 0.604, 0) measured from the direction ball (C), applied relative to the surface (orientation node, GL-1); Value -> Bump \| UV-mode cross-fade sample 3 (C, D5) |
+| Separate XYZ.006 | ShaderNodeSeparateXYZ |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  |  |
+| Math.023 | ShaderNodeMath |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | operation=FRACT |  |  |
+| Map Range.002 | ShaderNodeMapRange |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | interpolation_type=SMOOTHSTEP | From Min=0.85 |  |
+| Math.024 | ShaderNodeMath |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | operation=MULTIPLY |  |  |
+| Math.025 | ShaderNodeMath |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | operation=FRACT |  |  |
+| Map Range.003 | ShaderNodeMapRange |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | interpolation_type=SMOOTHSTEP | From Min=0.85 |  |
+| Math.026 | ShaderNodeMath |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | operation=MULTIPLY |  |  |
+| Math.027 | ShaderNodeMath |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | operation=SUBTRACT | Value=1 |  |
+| Math.028 | ShaderNodeMath |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | operation=POWER | Value_001=2 |  |
+| Math.029 | ShaderNodeMath |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | operation=POWER | Value_001=2 |  |
+| Math.030 | ShaderNodeMath |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  |  |
+| Math.031 | ShaderNodeMath |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | operation=SUBTRACT | Value=1 |  |
+| Math.032 | ShaderNodeMath |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | operation=POWER | Value_001=2 |  |
+| Math.033 | ShaderNodeMath |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | operation=POWER | Value_001=2 |  |
+| Math.034 | ShaderNodeMath |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  |  |
+| Math.035 | ShaderNodeMath |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | operation=MULTIPLY |  |  |
+| seam_gain | ShaderNodeMath | seam_gain | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | operation=INVERSE_SQRT |  | C (GL-2): 1 / sqrt(((1-wu)^2 + wu^2)((1-wv)^2 + wv^2)), the variance-preserving gain of the four-sample cross-fade (1 outside the band and in object mode) |
+| Math.036 | ShaderNodeMath |  | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | operation=SUBTRACT |  |  |
+| gabor_relief | ShaderNodeMath | gabor_relief | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | operation=MULTIPLY_ADD |  | C (GL-2): mean 0.5 + (cross-faded value - mean) x seam_gain -> Bump |
+| bump_distance | ShaderNodeMath | bump_distance | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam | operation=MULTIPLY | Value=0.0007 | C: Bump Distance = the video's 0.0007 m (A) x Pattern Size |
+| bump | ShaderNodeBump | bump | Relief: Gabor 3D -> Bump (0.7 mm); UV mode cross-fades four sam |  |  | A 23:24-23:38, 23:48: Bump Invert off, Distance typed 0.0007 (displays 0.001), Filter Width 0.1 |
+| surface_normal | ShaderNodeTexCoord | surface_normal | Wave direction relative to the surface (object mode): the video |  |  | C (GL-1): Texture Coordinate Normal = the object-space shading normal |
+| Vector Math | ShaderNodeVectorMath |  | Wave direction relative to the surface (object mode): the video | operation=NORMALIZE |  |  |
+| Vector Math.001 | ShaderNodeVectorMath |  | Wave direction relative to the surface (object mode): the video | operation=DOT_PRODUCT | Vector_001=(0.1, -1, 0.05) |  |
+| normal_side | ShaderNodeMath | normal_side | Wave direction relative to the surface (object mode): the video | operation=SIGN |  | C (GL-1): the normal's sign made independent of the side seen (back faces flip the shading normal): N . (0.1, -1.0, 0.05) > 0 picks the side, so -Y on the video's pane |
+| Vector Math.002 | ShaderNodeVectorMath |  | Wave direction relative to the surface (object mode): the video | operation=SCALE |  |  |
+| Vector Math.003 | ShaderNodeVectorMath |  | Wave direction relative to the surface (object mode): the video | operation=CROSS_PRODUCT | Vector=(0, 0, 1) |  |
+| Vector Math.004 | ShaderNodeVectorMath |  | Wave direction relative to the surface (object mode): the video |  | Vector_001=(0.001, 0, 0) |  |
+| pane_horizontal | ShaderNodeVectorMath | pane_horizontal | Wave direction relative to the surface (object mode): the video | operation=NORMALIZE |  | C (GL-1): horizontal in-plane tangent = Z x N (X on the video's pane; X on horizontal faces) |
+| Vector Math.005 | ShaderNodeVectorMath |  | Wave direction relative to the surface (object mode): the video | operation=SCALE | Scale=0.797 |  |
+| Vector Math.006 | ShaderNodeVectorMath |  | Wave direction relative to the surface (object mode): the video | operation=SCALE | Scale=0.604 |  |
+| orientation_surface | ShaderNodeVectorMath | orientation_surface | Wave direction relative to the surface (object mode): the video | operation=SUBTRACT |  | C (GL-1): 0.797 x horizontal tangent - 0.604 x N = the video's vector expressed in the pane's frame |
+| orientation | ShaderNodeMix | orientation | Wave direction relative to the surface (object mode): the video | data_type=VECTOR | B=(0.797, 0.604, 0) | C (GL-1): object mode = surface-relative orientation; UV mode = the video's constant (UV is laid on the video's X-Z pane plane) |
+
+### Connections (190)
+
+| from | to |
+|---|---|
+| glass.BSDF | Group Output.BSDF |
+| Group Input.003.Glass Color | Group Output.Albedo |
+| Group Input.Scale | pattern_scale.Value |
+| Group Input.Pattern Size | pattern_scale.Value_001 |
+| surface_normal.Normal | Vector Math.Vector |
+| Vector Math.Vector | Vector Math.001.Vector |
+| Vector Math.001.Value | normal_side.Value |
+| normal_side.Value | Vector Math.002.Scale |
+| Vector Math.Vector | Vector Math.002.Vector |
+| Vector Math.002.Vector | Vector Math.003.Vector_001 |
+| Vector Math.003.Vector | Vector Math.004.Vector |
+| Vector Math.004.Vector | pane_horizontal.Vector |
+| pane_horizontal.Vector | Vector Math.005.Vector |
+| Vector Math.002.Vector | Vector Math.006.Vector |
+| Vector Math.005.Vector | orientation_surface.Vector |
+| Vector Math.006.Vector | orientation_surface.Vector_001 |
+| Group Input.001.Tile Size | Vector Math.007.Scale |
+| Attribute.Vector | Vector Math.007.Vector |
+| Texture Coordinate.Object | Mix.A |
+| Vector Math.007.Vector | Mix.B |
+| Group Input.001.Use UV | Mix.Factor |
+| Attribute.Vector | Separate XYZ.Vector |
+| Group Input.001.Tile Size | Math.Value |
+| Separate XYZ.X | Math.001.Value |
+| Separate XYZ.Y | Math.002.Value |
+| Math.001.Value | Math.003.Value |
+| Math.001.Value | Math.004.Value |
+| Math.002.Value | Math.005.Value |
+| Math.002.Value | Math.006.Value |
+| Math.003.Value | Math.007.Value |
+| Math.Value | Math.007.Value_001 |
+| Math.004.Value | Math.008.Value |
+| Math.Value | Math.008.Value_001 |
+| Math.005.Value | Math.009.Value |
+| Math.Value | Math.009.Value_001 |
+| Math.007.Value | Combine XYZ.X |
+| Math.008.Value | Combine XYZ.Y |
+| Math.009.Value | Combine XYZ.Z |
+| Combine XYZ.Vector | Vector Rotate.Vector |
+| Math.006.Value | Math.010.Value |
+| Math.Value | Math.010.Value_001 |
+| Texture Coordinate.Object | Mix.001.A |
+| Vector Rotate.Vector | Mix.001.B |
+| Group Input.001.Use UV | Mix.001.Factor |
+| Math.010.Value | Mix.002.B |
+| Group Input.001.Use UV | Mix.002.Factor |
+| orientation_surface.Vector | orientation.A |
+| Group Input.001.Use UV | orientation.Factor |
+| Attribute.Vector | Separate XYZ.001.Vector |
+| Separate XYZ.001.X | Math.011.Value |
+| Separate XYZ.001.Y | Math.012.Value |
+| Math.011.Value | Math.013.Value |
+| Group Input.001.Tile Size | Math.013.Value_001 |
+| Math.012.Value | Math.014.Value |
+| Group Input.001.Tile Size | Math.014.Value_001 |
+| Math.013.Value | Combine XYZ.001.X |
+| Math.014.Value | Combine XYZ.001.Y |
+| Texture Coordinate.Object | Mix.003.A |
+| Combine XYZ.001.Vector | Mix.003.B |
+| Group Input.001.Use UV | Mix.003.Factor |
+| Math.011.Value | Map Range.Value |
+| Group Input.001.Use UV | Math.015.Value |
+| Map Range.Result | Math.015.Value_001 |
+| Math.012.Value | Map Range.001.Value |
+| Group Input.001.Use UV | Math.016.Value |
+| Map Range.001.Result | Math.016.Value_001 |
+| Group Input.001.Tile Size | Math.017.Value |
+| Group Input.001.Tile Size | Math.018.Value |
+| Math.017.Value | Combine XYZ.002.X |
+| Math.018.Value | Combine XYZ.002.Y |
+| Mix.003.Result | Vector Math.008.Vector |
+| Combine XYZ.002.Vector | Vector Math.008.Vector_001 |
+| Group Input.001.Tile Size | Math.019.Value |
+| Group Input.001.Tile Size | Math.020.Value |
+| Math.019.Value | Combine XYZ.003.X |
+| Math.020.Value | Combine XYZ.003.Y |
+| Mix.003.Result | Vector Math.009.Vector |
+| Combine XYZ.003.Vector | Vector Math.009.Vector_001 |
+| Group Input.001.Tile Size | Math.021.Value |
+| Group Input.001.Tile Size | Math.022.Value |
+| Math.021.Value | Combine XYZ.004.X |
+| Math.022.Value | Combine XYZ.004.Y |
+| Mix.003.Result | Vector Math.010.Vector |
+| Combine XYZ.004.Vector | Vector Math.010.Vector_001 |
+| Mix.003.Result | Separate XYZ.002.Vector |
+| Separate XYZ.002.Y | Mix.004.A |
+| Separate XYZ.002.Z | Mix.004.B |
+| Group Input.001.Use UV | Mix.004.Factor |
+| Separate XYZ.002.Z | Mix.005.A |
+| Separate XYZ.002.Y | Mix.005.B |
+| Group Input.001.Use UV | Mix.005.Factor |
+| Separate XYZ.002.X | pane_plane.X |
+| Mix.004.Result | pane_plane.Y |
+| Mix.005.Result | pane_plane.Z |
+| Group Input.002.Rotation | mapping.Rotation |
+| pattern_scale.Value | mapping.Scale |
+| pane_plane.Vector | mapping.Vector |
+| Group Input.002.Gabor Frequency | gabor.Frequency |
+| orientation.Result | gabor.Orientation |
+| mapping.Vector | gabor.Vector |
+| Vector Math.008.Vector | Separate XYZ.003.Vector |
+| Separate XYZ.003.Y | Mix.006.A |
+| Separate XYZ.003.Z | Mix.006.B |
+| Group Input.001.Use UV | Mix.006.Factor |
+| Separate XYZ.003.Z | Mix.007.A |
+| Separate XYZ.003.Y | Mix.007.B |
+| Group Input.001.Use UV | Mix.007.Factor |
+| Separate XYZ.003.X | pane_plane_seam1.X |
+| Mix.006.Result | pane_plane_seam1.Y |
+| Mix.007.Result | pane_plane_seam1.Z |
+| Group Input.002.Rotation | mapping_seam1.Rotation |
+| pattern_scale.Value | mapping_seam1.Scale |
+| pane_plane_seam1.Vector | mapping_seam1.Vector |
+| Group Input.002.Gabor Frequency | gabor_seam1.Frequency |
+| orientation.Result | gabor_seam1.Orientation |
+| mapping_seam1.Vector | gabor_seam1.Vector |
+| Vector Math.009.Vector | Separate XYZ.004.Vector |
+| Separate XYZ.004.Y | Mix.008.A |
+| Separate XYZ.004.Z | Mix.008.B |
+| Group Input.001.Use UV | Mix.008.Factor |
+| Separate XYZ.004.Z | Mix.009.A |
+| Separate XYZ.004.Y | Mix.009.B |
+| Group Input.001.Use UV | Mix.009.Factor |
+| Separate XYZ.004.X | pane_plane_seam2.X |
+| Mix.008.Result | pane_plane_seam2.Y |
+| Mix.009.Result | pane_plane_seam2.Z |
+| Group Input.002.Rotation | mapping_seam2.Rotation |
+| pattern_scale.Value | mapping_seam2.Scale |
+| pane_plane_seam2.Vector | mapping_seam2.Vector |
+| Group Input.002.Gabor Frequency | gabor_seam2.Frequency |
+| orientation.Result | gabor_seam2.Orientation |
+| mapping_seam2.Vector | gabor_seam2.Vector |
+| Vector Math.010.Vector | Separate XYZ.005.Vector |
+| Separate XYZ.005.Y | Mix.010.A |
+| Separate XYZ.005.Z | Mix.010.B |
+| Group Input.001.Use UV | Mix.010.Factor |
+| Separate XYZ.005.Z | Mix.011.A |
+| Separate XYZ.005.Y | Mix.011.B |
+| Group Input.001.Use UV | Mix.011.Factor |
+| Separate XYZ.005.X | pane_plane_seam3.X |
+| Mix.010.Result | pane_plane_seam3.Y |
+| Mix.011.Result | pane_plane_seam3.Z |
+| Group Input.002.Rotation | mapping_seam3.Rotation |
+| pattern_scale.Value | mapping_seam3.Scale |
+| pane_plane_seam3.Vector | mapping_seam3.Vector |
+| Group Input.002.Gabor Frequency | gabor_seam3.Frequency |
+| orientation.Result | gabor_seam3.Orientation |
+| mapping_seam3.Vector | gabor_seam3.Vector |
+| gabor.Value | Mix.012.A |
+| gabor_seam1.Value | Mix.012.B |
+| Math.015.Value | Mix.012.Factor |
+| gabor_seam2.Value | Mix.013.A |
+| gabor_seam3.Value | Mix.013.B |
+| Math.015.Value | Mix.013.Factor |
+| Mix.012.Result | gabor_seamless.A |
+| Mix.013.Result | gabor_seamless.B |
+| Math.016.Value | gabor_seamless.Factor |
+| Attribute.Vector | Separate XYZ.006.Vector |
+| Separate XYZ.006.X | Math.023.Value |
+| Math.023.Value | Map Range.002.Value |
+| Group Input.001.Use UV | Math.024.Value |
+| Map Range.002.Result | Math.024.Value_001 |
+| Separate XYZ.006.Y | Math.025.Value |
+| Math.025.Value | Map Range.003.Value |
+| Group Input.001.Use UV | Math.026.Value |
+| Map Range.003.Result | Math.026.Value_001 |
+| Math.024.Value | Math.027.Value_001 |
+| Math.027.Value | Math.028.Value |
+| Math.024.Value | Math.029.Value |
+| Math.028.Value | Math.030.Value |
+| Math.029.Value | Math.030.Value_001 |
+| Math.026.Value | Math.031.Value_001 |
+| Math.031.Value | Math.032.Value |
+| Math.026.Value | Math.033.Value |
+| Math.032.Value | Math.034.Value |
+| Math.033.Value | Math.034.Value_001 |
+| Math.030.Value | Math.035.Value |
+| Math.034.Value | Math.035.Value_001 |
+| Math.035.Value | seam_gain.Value |
+| gabor_seamless.Result | Math.036.Value |
+| Math.036.Value | gabor_relief.Value |
+| seam_gain.Value | gabor_relief.Value_001 |
+| Group Input.002.Pattern Size | bump_distance.Value_001 |
+| bump_distance.Value | bump.Distance |
+| gabor_relief.Value | bump.Height |
+| Group Input.002.Bump Strength | bump.Strength |
+| Group Input.003.Glass Color | glass.Color |
+| Group Input.003.Glass IOR | glass.IOR |
+| bump.Normal | glass.Normal |
+| Group Input.003.Glass Roughness | glass.Roughness |
+
+
+# Material PM_GlassBlobby
+
+- displacement_method: BUMP
+- surface_render_method: DITHERED
+- use_backface_culling: false
+- diffuse_color: (0.8, 0.85, 0.87, 0.45)
+- roughness: 0.22
+- metallic: 0
+- procmat group: PM_GlassBlobby
+
+## Material tree
+
+### Nodes (2; frames 0)
+
+Types: ShaderNodeGroup x1, ShaderNodeOutputMaterial x1
+
+| node | type | label | frame | settings (non-default) | input values (non-default, unlinked) | note |
+|---|---|---|---|---|---|---|
+| MRS | ShaderNodeGroup | PM_GlassBlobby |  | node_tree=PM_GlassBlobby |  |  |
+| Material Output | ShaderNodeOutputMaterial |  |  |  |  |  |
+
+### Connections (1)
+
+| from | to |
+|---|---|
+| MRS.BSDF | Material Output.Surface |
+
+## Group PM_GlassBlobby
+
+### Interface
+
+| socket | in/out | type | default | min | max | panel | description |
+|---|---|---|---|---|---|---|---|
+| Scale | input | Float | 1 |  |  |  | The video's Mapping Scale: multiplies the object coordinates (metres); 2 = every feature half the size |
+| Glass Color | input | Color | (1, 1, 1, 1) |  |  |  | Glass BSDF colour: the tint (white = clear; the video demos #CCEDFF) |
+| Glass Roughness | input | Float | 1 | 0 | 2 |  | Multiplies the noise-varied roughness (Hue/Saturation/Value Value): 0 = clear, 2 = twice as frosted |
+| Glass IOR | input | Float | 1.5 | 0 | 1000 |  | Index of refraction (1.5 = window glass; 1 = no refraction) |
+| Voronoi Scale | input | Float | 10 | -1000 | 1000 |  | Blobs per metre (10 = 10 cm blobs) |
+| Voronoi Detail | input | Float | 2.6 | 0 | 15 |  | Voronoi Detail: smaller blobs inside the blobs (limits C) |
+| Voronoi Smoothness | input | Float | 0.1 | 0 | 1 |  | Smooth F1 smoothness of the blob edges |
+| Noise Roughness Scale | input | Float | 20 | -1000 | 1000 |  | Noise Scale per metre of the frost / roughness variation (20 = ~5 cm grain) |
+| Noise Roughness Detail 1 | input | Float | 15 | 0 | 15 |  | Noise Detail: octaves of the frost grain |
+| Noise Roughness Detail 2 | input | Float | 1 | 0 | 1 |  | Noise Roughness: weight of the finer octaves ("second layer of detail") |
+| Bump Strength | input | Float | 1 | 0 | 1 |  | Bump strength: 0 = flat glass, 1 = the full relief |
+| Pattern Size | input | Float | 1 | 0.01 | 100 | Mapping | Metres per unit of the video's object space (its panes have applied scale: 1 unit = 1 m). 1 = the video's sizes; 2 = every feature and the relief depth twice as large (library control, C) |
+| Use UV | input | Float | 0 | 0 | 1 | Mapping | 0 = object space in metres; 1 = UVMap x Tile Size, every 4D texture sampled on a seamless torus (baked tiles repeat) |
+| Tile Size | input | Float | 4 | 0.05 | 1000 | Mapping | Metres covered by UV 0..1 in UV mode: the repeat length of a baked tile |
+| BSDF | output | Shader |  |  |  |  |  |
+| Albedo | output | Color | (0, 0, 0, 1) |  |  |  |  |
+
+### Nodes (40; frames 5)
+
+Types: ShaderNodeMath x14, NodeGroupInput x5, ShaderNodeMix x5, ShaderNodeTexNoise x2, ShaderNodeTexVoronoi x2, NodeGroupOutput x1, ShaderNodeAttribute x1, ShaderNodeBsdfGlass x1, ShaderNodeBump x1, ShaderNodeCombineXYZ x1, ShaderNodeHueSaturation x1, ShaderNodeMapping x1, ShaderNodeSeparateXYZ x1, ShaderNodeTexCoord x1, ShaderNodeValToRGB x1, ShaderNodeVectorMath x1, ShaderNodeVectorRotate x1
+
+| node | type | label | frame | settings (non-default) | input values (non-default, unlinked) | note |
+|---|---|---|---|---|---|---|
+| Group Output | NodeGroupOutput |  |  |  |  |  |
+| Group Input.001 | NodeGroupInput |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Texture Coordinate | ShaderNodeTexCoord |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Attribute | ShaderNodeAttribute | UV | Coordinates: object metres, or UVMap x Tile Size on a seamless  | attribute_name=UVMap |  |  |
+| Vector Math | ShaderNodeVectorMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SCALE |  |  |
+| Mix | ShaderNodeMix | P (m) | Coordinates: object metres, or UVMap x Tile Size on a seamless  | data_type=VECTOR |  |  |
+| Separate XYZ | ShaderNodeSeparateXYZ |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Math | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=DIVIDE | Value_001=6.283 |  |
+| Math.001 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY | Value_001=6.283 |  |
+| Math.002 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY | Value_001=6.283 |  |
+| Math.003 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=COSINE |  |  |
+| Math.004 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SINE |  |  |
+| Math.005 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=COSINE |  |  |
+| Math.006 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SINE |  |  |
+| Math.007 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Math.008 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Math.009 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Combine XYZ | ShaderNodeCombineXYZ | torus | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Vector Rotate | ShaderNodeVectorRotate | tilt off the lattice | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  | Axis=(0.53, 0.71, 0.46); Angle=0.83 |  |
+| Math.010 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Mix.001 | ShaderNodeMix |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | data_type=VECTOR |  |  |
+| Mix.002 | ShaderNodeMix |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| glass | ShaderNodeBsdfGlass | glass | Glass BSDF |  |  | A 26:06-26:11, 27:42: Glass BSDF Multiscatter GGX; Roughness <- HSV Color, IOR 1.5 \| Thin Film Thickness 0 / IOR 1.33 = defaults (panel never opened, C) |
+| Group Input.004 | NodeGroupInput |  | Glass BSDF |  |  |  |
+| Group Input | NodeGroupInput |  | Mapping (video): Object coordinates -> Mapping Point, Scale = S |  |  |  |
+| pattern_scale | ShaderNodeMath | pattern_scale | Mapping (video): Object coordinates -> Mapping Point, Scale = S | operation=DIVIDE |  | C: the Mapping Scale = the video's Scale (A) / Pattern Size (library metres, 1 = the video's object space) |
+| mapping | ShaderNodeMapping | mapping | Mapping (video): Object coordinates -> Mapping Point, Scale = S |  |  | A 25:45, 27:42, 29:33: Mapping Point, Location 0, Rotation 0, Scale <- Scale \| Vector = Object coordinates (Use UV 0) or the torus point (Use UV 1, C) |
+| mapping_w | ShaderNodeMath | mapping_w | Mapping (video): Object coordinates -> Mapping Point, Scale = S | operation=MULTIPLY |  | C: the torus' 4th coordinate scaled like the Mapping (0 in object mode) |
+| Group Input.003 | NodeGroupInput |  | Relief: Voronoi Smooth F1 -> Bump (4 mm) |  |  |  |
+| voronoi_3d | ShaderNodeTexVoronoi | voronoi (object 3D) | Relief: Voronoi Smooth F1 -> Bump (4 mm) | feature=SMOOTH_F1 |  | A 26:57-27:22, 27:42: Voronoi 3D Smooth F1 Euclidean, Normalize off, Roughness 0.5, Lacunarity 2, Randomness 1; Scale 10 / Detail 2.6 / Smoothness 0.1 from the group \| object mode (Use UV 0): the video's 3D texture |
+| voronoi_4d | ShaderNodeTexVoronoi | voronoi (UV 4D) | Relief: Voronoi Smooth F1 -> Bump (4 mm) | voronoi_dimensions=4D; feature=SMOOTH_F1 |  | A 26:57-27:22, 27:42: Voronoi 3D Smooth F1 Euclidean, Normalize off, Roughness 0.5, Lacunarity 2, Randomness 1; Scale 10 / Detail 2.6 / Smoothness 0.1 from the group \| UV mode (Use UV 1): 4D twin on the seamless torus (C) |
+| voronoi_mode | ShaderNodeMix | voronoi: object 3D \| UV 4D | Relief: Voronoi Smooth F1 -> Bump (4 mm) |  |  | C: Use UV picks the video's 3D texture (0) or its 4D torus twin (1) |
+| bump_distance | ShaderNodeMath | bump_distance | Relief: Voronoi Smooth F1 -> Bump (4 mm) | operation=MULTIPLY | Value=0.004 | C: Bump Distance = the video's 0.004 m (A) x Pattern Size |
+| bump | ShaderNodeBump | bump | Relief: Voronoi Smooth F1 -> Bump (4 mm) |  |  | A 27:24-27:39, 27:42: Bump Invert off, Distance 0.004, Filter Width 0.1, Height <- Voronoi Distance |
+| Group Input.002 | NodeGroupInput |  | Roughness: Noise -> Color Ramp -> Hue/Saturation/Value (Glass R |  |  |  |
+| noise_3d | ShaderNodeTexNoise | noise (object 3D) | Roughness: Noise -> Color Ramp -> Hue/Saturation/Value (Glass R |  |  | A 25:42-25:58, 27:42: Noise 3D fBM Normalize, Lacunarity 2, Distortion 0; Scale 20 / Detail 15 / Roughness 1 from the group; Factor -> ramp \| object mode (Use UV 0): the video's 3D texture |
+| noise_4d | ShaderNodeTexNoise | noise (UV 4D) | Roughness: Noise -> Color Ramp -> Hue/Saturation/Value (Glass R | noise_dimensions=4D |  | A 25:42-25:58, 27:42: Noise 3D fBM Normalize, Lacunarity 2, Distortion 0; Scale 20 / Detail 15 / Roughness 1 from the group; Factor -> ramp \| UV mode (Use UV 1): 4D twin on the seamless torus (C) |
+| noise_mode | ShaderNodeMix | noise: object 3D \| UV 4D | Roughness: Noise -> Color Ramp -> Hue/Saturation/Value (Glass R |  |  | C: Use UV picks the video's 3D texture (0) or its 4D torus twin (1) |
+| color_ramp | ShaderNodeValToRGB | color_ramp | Roughness: Noise -> Color Ramp -> Hue/Saturation/Value (Glass R | ramp[LINEAR]=0:(0, 0, 0, 1), 1:(0.448, 0.448, 0.448, 1) |  | A 26:18-26:34: Color Ramp RGB Linear, black @ 0, #B2B2B2 (Perceptual V 0.700, A) @ 1 = linear 0.4480 (C) |
+| hsv | ShaderNodeHueSaturation | hsv | Roughness: Noise -> Color Ramp -> Hue/Saturation/Value (Glass R |  |  | A 26:42-26:50, 28:28: Hue/Saturation/Value Hue 0.5, Saturation 1, Factor 1, Value <- Glass Roughness |
+
+### Connections (73)
+
+| from | to |
+|---|---|
+| glass.BSDF | Group Output.BSDF |
+| Group Input.004.Glass Color | Group Output.Albedo |
+| Group Input.Scale | pattern_scale.Value |
+| Group Input.Pattern Size | pattern_scale.Value_001 |
+| pattern_scale.Value | mapping.Scale |
+| Mix.001.Result | mapping.Vector |
+| Group Input.001.Tile Size | Vector Math.Scale |
+| Attribute.Vector | Vector Math.Vector |
+| Texture Coordinate.Object | Mix.A |
+| Vector Math.Vector | Mix.B |
+| Group Input.001.Use UV | Mix.Factor |
+| Attribute.Vector | Separate XYZ.Vector |
+| Group Input.001.Tile Size | Math.Value |
+| Separate XYZ.X | Math.001.Value |
+| Separate XYZ.Y | Math.002.Value |
+| Math.001.Value | Math.003.Value |
+| Math.001.Value | Math.004.Value |
+| Math.002.Value | Math.005.Value |
+| Math.002.Value | Math.006.Value |
+| Math.003.Value | Math.007.Value |
+| Math.Value | Math.007.Value_001 |
+| Math.004.Value | Math.008.Value |
+| Math.Value | Math.008.Value_001 |
+| Math.005.Value | Math.009.Value |
+| Math.Value | Math.009.Value_001 |
+| Math.007.Value | Combine XYZ.X |
+| Math.008.Value | Combine XYZ.Y |
+| Math.009.Value | Combine XYZ.Z |
+| Combine XYZ.Vector | Vector Rotate.Vector |
+| Math.006.Value | Math.010.Value |
+| Math.Value | Math.010.Value_001 |
+| Texture Coordinate.Object | Mix.001.A |
+| Vector Rotate.Vector | Mix.001.B |
+| Group Input.001.Use UV | Mix.001.Factor |
+| Math.010.Value | Mix.002.B |
+| Group Input.001.Use UV | Mix.002.Factor |
+| Mix.002.Result | mapping_w.Value |
+| pattern_scale.Value | mapping_w.Value_001 |
+| Group Input.002.Noise Roughness Detail 1 | noise_3d.Detail |
+| Group Input.002.Noise Roughness Detail 2 | noise_3d.Roughness |
+| Group Input.002.Noise Roughness Scale | noise_3d.Scale |
+| mapping.Vector | noise_3d.Vector |
+| Group Input.002.Noise Roughness Detail 1 | noise_4d.Detail |
+| Group Input.002.Noise Roughness Detail 2 | noise_4d.Roughness |
+| Group Input.002.Noise Roughness Scale | noise_4d.Scale |
+| mapping.Vector | noise_4d.Vector |
+| mapping_w.Value | noise_4d.W |
+| noise_3d.Factor | noise_mode.A |
+| noise_4d.Factor | noise_mode.B |
+| Group Input.001.Use UV | noise_mode.Factor |
+| noise_mode.Result | color_ramp.Factor |
+| color_ramp.Color | hsv.Color |
+| Group Input.002.Glass Roughness | hsv.Value |
+| Group Input.003.Voronoi Detail | voronoi_3d.Detail |
+| Group Input.003.Voronoi Scale | voronoi_3d.Scale |
+| Group Input.003.Voronoi Smoothness | voronoi_3d.Smoothness |
+| mapping.Vector | voronoi_3d.Vector |
+| Group Input.003.Voronoi Detail | voronoi_4d.Detail |
+| Group Input.003.Voronoi Scale | voronoi_4d.Scale |
+| Group Input.003.Voronoi Smoothness | voronoi_4d.Smoothness |
+| mapping.Vector | voronoi_4d.Vector |
+| mapping_w.Value | voronoi_4d.W |
+| voronoi_3d.Distance | voronoi_mode.A |
+| voronoi_4d.Distance | voronoi_mode.B |
+| Group Input.001.Use UV | voronoi_mode.Factor |
+| Group Input.003.Pattern Size | bump_distance.Value_001 |
+| bump_distance.Value | bump.Distance |
+| voronoi_mode.Result | bump.Height |
+| Group Input.003.Bump Strength | bump.Strength |
+| Group Input.004.Glass Color | glass.Color |
+| Group Input.004.Glass IOR | glass.IOR |
+| bump.Normal | glass.Normal |
+| hsv.Color | glass.Roughness |
+
+
+# Material PM_GlassFrosted
+
+- displacement_method: BUMP
+- surface_render_method: DITHERED
+- use_backface_culling: false
+- diffuse_color: (0.8, 0.85, 0.87, 0.6)
+- roughness: 0.29
+- metallic: 0
+- procmat group: PM_GlassFrosted
+
+## Material tree
+
+### Nodes (2; frames 0)
+
+Types: ShaderNodeGroup x1, ShaderNodeOutputMaterial x1
+
+| node | type | label | frame | settings (non-default) | input values (non-default, unlinked) | note |
+|---|---|---|---|---|---|---|
+| MRS | ShaderNodeGroup | PM_GlassFrosted |  | node_tree=PM_GlassFrosted |  |  |
+| Material Output | ShaderNodeOutputMaterial |  |  |  |  |  |
+
+### Connections (1)
+
+| from | to |
+|---|---|
+| MRS.BSDF | Material Output.Surface |
+
+## Group PM_GlassFrosted
+
+### Interface
+
+| socket | in/out | type | default | min | max | panel | description |
+|---|---|---|---|---|---|---|---|
+| Scale | input | Float | 1 |  |  |  | The video's Mapping Scale: multiplies the object coordinates (metres); 2 = every feature half the size |
+| Glass Color | input | Color | (1, 1, 1, 1) |  |  |  | Glass BSDF colour: the tint (white = clear; the video demos #CCEDFF) |
+| Frosted Amount | input | Float | 1 | 0 | 2 |  | Multiplies the noise-varied roughness (Hue/Saturation/Value Value): 0 = clear, 2 = twice as frosted |
+| Glass IOR | input | Float | 1.5 | 0 | 1000 |  | Index of refraction (1.5 = window glass; 1 = no refraction) |
+| Frosted Scale | input | Float | 20 | -1000 | 1000 |  | Noise Scale per metre of the frost / roughness variation (20 = ~5 cm grain) |
+| Frosted Detail 1 | input | Float | 15 | 0 | 15 |  | Noise Detail: octaves of the frost grain |
+| Frosted Detail 2 | input | Float | 1 | 0 | 1 |  | Noise Roughness: weight of the finer octaves ("second layer of detail") (limits C) |
+| Pattern Size | input | Float | 1 | 0.01 | 100 | Mapping | Metres per unit of the video's object space (its panes have applied scale: 1 unit = 1 m). 1 = the video's sizes; 2 = every feature and the relief depth twice as large (library control, C) |
+| Use UV | input | Float | 0 | 0 | 1 | Mapping | 0 = object space in metres; 1 = UVMap x Tile Size, every 4D texture sampled on a seamless torus (baked tiles repeat) |
+| Tile Size | input | Float | 4 | 0.05 | 1000 | Mapping | Metres covered by UV 0..1 in UV mode: the repeat length of a baked tile |
+| BSDF | output | Shader |  |  |  |  |  |
+| Albedo | output | Color | (0, 0, 0, 1) |  |  |  |  |
+
+### Nodes (34; frames 4)
+
+Types: ShaderNodeMath x13, NodeGroupInput x4, ShaderNodeMix x4, ShaderNodeTexNoise x2, NodeGroupOutput x1, ShaderNodeAttribute x1, ShaderNodeBsdfGlass x1, ShaderNodeCombineXYZ x1, ShaderNodeHueSaturation x1, ShaderNodeMapping x1, ShaderNodeSeparateXYZ x1, ShaderNodeTexCoord x1, ShaderNodeValToRGB x1, ShaderNodeVectorMath x1, ShaderNodeVectorRotate x1
+
+| node | type | label | frame | settings (non-default) | input values (non-default, unlinked) | note |
+|---|---|---|---|---|---|---|
+| Group Output | NodeGroupOutput |  |  |  |  |  |
+| Group Input.001 | NodeGroupInput |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Texture Coordinate | ShaderNodeTexCoord |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Attribute | ShaderNodeAttribute | UV | Coordinates: object metres, or UVMap x Tile Size on a seamless  | attribute_name=UVMap |  |  |
+| Vector Math | ShaderNodeVectorMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SCALE |  |  |
+| Mix | ShaderNodeMix | P (m) | Coordinates: object metres, or UVMap x Tile Size on a seamless  | data_type=VECTOR |  |  |
+| Separate XYZ | ShaderNodeSeparateXYZ |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Math | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=DIVIDE | Value_001=6.283 |  |
+| Math.001 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY | Value_001=6.283 |  |
+| Math.002 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY | Value_001=6.283 |  |
+| Math.003 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=COSINE |  |  |
+| Math.004 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SINE |  |  |
+| Math.005 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=COSINE |  |  |
+| Math.006 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=SINE |  |  |
+| Math.007 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Math.008 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Math.009 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Combine XYZ | ShaderNodeCombineXYZ | torus | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| Vector Rotate | ShaderNodeVectorRotate | tilt off the lattice | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  | Axis=(0.53, 0.71, 0.46); Angle=0.83 |  |
+| Math.010 | ShaderNodeMath |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | operation=MULTIPLY |  |  |
+| Mix.001 | ShaderNodeMix |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  | data_type=VECTOR |  |  |
+| Mix.002 | ShaderNodeMix |  | Coordinates: object metres, or UVMap x Tile Size on a seamless  |  |  |  |
+| glass | ShaderNodeBsdfGlass | glass | Glass BSDF |  |  | A 30:22-30:28, 31:16: Glass BSDF Multiscatter GGX; Normal unconnected (no bump), IOR 1.5 \| Thin Film Thickness 0 / IOR 1.33 = defaults (panel never opened, C) |
+| Group Input.003 | NodeGroupInput |  | Glass BSDF |  |  |  |
+| Group Input | NodeGroupInput |  | Mapping (video): Object coordinates -> Mapping Point, Scale = S |  |  |  |
+| pattern_scale | ShaderNodeMath | pattern_scale | Mapping (video): Object coordinates -> Mapping Point, Scale = S | operation=DIVIDE |  | C: the Mapping Scale = the video's Scale (A) / Pattern Size (library metres, 1 = the video's object space) |
+| mapping | ShaderNodeMapping | mapping | Mapping (video): Object coordinates -> Mapping Point, Scale = S |  |  | A 30:07, 31:16, 32:58: Mapping Point, Location 0, Rotation 0, Scale <- Scale \| Vector = Object coordinates (Use UV 0) or the torus point (Use UV 1, C) |
+| mapping_w | ShaderNodeMath | mapping_w | Mapping (video): Object coordinates -> Mapping Point, Scale = S | operation=MULTIPLY |  | C: the torus' 4th coordinate scaled like the Mapping (0 in object mode) |
+| Group Input.002 | NodeGroupInput |  | Roughness: Noise -> Color Ramp -> Hue/Saturation/Value (Frosted |  |  |  |
+| noise_3d | ShaderNodeTexNoise | noise (object 3D) | Roughness: Noise -> Color Ramp -> Hue/Saturation/Value (Frosted |  |  | A 30:03-30:19, 31:16: Noise 3D fBM Normalize, Lacunarity 2, Distortion 0; Scale 20 / Detail 15 / Roughness 1 from the group; Factor -> ramp \| object mode (Use UV 0): the video's 3D texture |
+| noise_4d | ShaderNodeTexNoise | noise (UV 4D) | Roughness: Noise -> Color Ramp -> Hue/Saturation/Value (Frosted | noise_dimensions=4D |  | A 30:03-30:19, 31:16: Noise 3D fBM Normalize, Lacunarity 2, Distortion 0; Scale 20 / Detail 15 / Roughness 1 from the group; Factor -> ramp \| UV mode (Use UV 1): 4D twin on the seamless torus (C) |
+| noise_mode | ShaderNodeMix | noise: object 3D \| UV 4D | Roughness: Noise -> Color Ramp -> Hue/Saturation/Value (Frosted |  |  | C: Use UV picks the video's 3D texture (0) or its 4D torus twin (1) |
+| color_ramp | ShaderNodeValToRGB | color_ramp | Roughness: Noise -> Color Ramp -> Hue/Saturation/Value (Frosted | ramp[LINEAR]=0:(0.096, 0.096, 0.096, 1), 1:(0.476, 0.476, 0.476, 1) |  | A 30:35-30:56: Color Ramp RGB Linear, #575757 (V 0.342) @ 0 = linear 0.0958, #B7B7B7 (V 0.719) @ 1 = linear 0.4755 (A readouts, C conversion) |
+| hsv | ShaderNodeHueSaturation | hsv | Roughness: Noise -> Color Ramp -> Hue/Saturation/Value (Frosted |  |  | A 31:01-31:12, 32:01: Hue/Saturation/Value Hue 0.5, Saturation 1, Factor 1, Value <- Frosted Amount |
+
+### Connections (56)
+
+| from | to |
+|---|---|
+| glass.BSDF | Group Output.BSDF |
+| Group Input.003.Glass Color | Group Output.Albedo |
+| Group Input.Scale | pattern_scale.Value |
+| Group Input.Pattern Size | pattern_scale.Value_001 |
+| pattern_scale.Value | mapping.Scale |
+| Mix.001.Result | mapping.Vector |
+| Group Input.001.Tile Size | Vector Math.Scale |
+| Attribute.Vector | Vector Math.Vector |
+| Texture Coordinate.Object | Mix.A |
+| Vector Math.Vector | Mix.B |
+| Group Input.001.Use UV | Mix.Factor |
+| Attribute.Vector | Separate XYZ.Vector |
+| Group Input.001.Tile Size | Math.Value |
+| Separate XYZ.X | Math.001.Value |
+| Separate XYZ.Y | Math.002.Value |
+| Math.001.Value | Math.003.Value |
+| Math.001.Value | Math.004.Value |
+| Math.002.Value | Math.005.Value |
+| Math.002.Value | Math.006.Value |
+| Math.003.Value | Math.007.Value |
+| Math.Value | Math.007.Value_001 |
+| Math.004.Value | Math.008.Value |
+| Math.Value | Math.008.Value_001 |
+| Math.005.Value | Math.009.Value |
+| Math.Value | Math.009.Value_001 |
+| Math.007.Value | Combine XYZ.X |
+| Math.008.Value | Combine XYZ.Y |
+| Math.009.Value | Combine XYZ.Z |
+| Combine XYZ.Vector | Vector Rotate.Vector |
+| Math.006.Value | Math.010.Value |
+| Math.Value | Math.010.Value_001 |
+| Texture Coordinate.Object | Mix.001.A |
+| Vector Rotate.Vector | Mix.001.B |
+| Group Input.001.Use UV | Mix.001.Factor |
+| Math.010.Value | Mix.002.B |
+| Group Input.001.Use UV | Mix.002.Factor |
+| Mix.002.Result | mapping_w.Value |
+| pattern_scale.Value | mapping_w.Value_001 |
+| Group Input.002.Frosted Detail 1 | noise_3d.Detail |
+| Group Input.002.Frosted Detail 2 | noise_3d.Roughness |
+| Group Input.002.Frosted Scale | noise_3d.Scale |
+| mapping.Vector | noise_3d.Vector |
+| Group Input.002.Frosted Detail 1 | noise_4d.Detail |
+| Group Input.002.Frosted Detail 2 | noise_4d.Roughness |
+| Group Input.002.Frosted Scale | noise_4d.Scale |
+| mapping.Vector | noise_4d.Vector |
+| mapping_w.Value | noise_4d.W |
+| noise_3d.Factor | noise_mode.A |
+| noise_4d.Factor | noise_mode.B |
+| Group Input.001.Use UV | noise_mode.Factor |
+| noise_mode.Result | color_ramp.Factor |
+| color_ramp.Color | hsv.Color |
+| Group Input.002.Frosted Amount | hsv.Value |
+| Group Input.003.Glass Color | glass.Color |
+| Group Input.003.Glass IOR | glass.IOR |
+| hsv.Color | glass.Roughness |
